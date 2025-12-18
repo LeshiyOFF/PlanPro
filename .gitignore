@@ -1,3 +1,4 @@
+# === Java/Existing Project ===
 .DS_Store
 .class
 */bin/*
@@ -6,7 +7,56 @@ projectlibre_build/build/
 projectlibre_build/dist/
 projectlibre_build/packages/
 projectlibre_contrib/build/
-projectlibre_contrib/openproj-contrib.jar
-projectlibre_contrib/openproj-reports.jar
-projectlibre_contrib/openproj-script.jar
-projectlibre_jcontrib/tmp/
+projectlibre_contrib/*.jar
+projectlibre_contrib/tmp/
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# === Electron ===
+dist/
+build/
+out/
+release/
+*.p12
+*.key
+*.pem
+
+# === Package Managers ===
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# === Runtime ===
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS ===
+Thumbs.db
+.DS_Store?
+ehthumbs.db
+Desktop.ini
+
+# === Logs ===
+logs/
+*.log
+
+# === Dependencies ===
+.ant/
+.m2/
+.gradle/
