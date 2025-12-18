@@ -3063,7 +3063,7 @@ protected boolean loadLocalDocument(String fileName,boolean merge){ //uses serve
 					@Override
 					public void openFiles(OpenFilesEvent e){
 						if (e.getFiles()!=null && !e.getFiles().isEmpty()) {
-							openFile(e.getFiles().getFirst().getPath());
+							openFile(e.getFiles().get(0).getPath());
 						}
 					}
 				});
