@@ -116,7 +116,7 @@ public class LafManagerImpl implements LafManager {
 						int os=Environment.getOs();
 						if (os==Environment.LINUX/*||os==Environment.MAC*/) //$NON-NLS-1$ //$NON-NLS-2$
 								UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel"); //$NON-NLS-1$
-								//UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+								//UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
 						else {
 							UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 							plaf = UIManager.getLookAndFeel();
@@ -255,7 +255,7 @@ public class LafManagerImpl implements LafManager {
 	}
 
 	public static boolean isWindowsLAF() {
-		return "com.sun.java.swing.plaf.windows.WindowsLookAndFeel".equals(UIManager.getLookAndFeel().getClass().getName());
+		return "javax.swing.plaf.windows.WindowsLookAndFeel".equals(UIManager.getLookAndFeel().getClass().getName());
 	}
 	public boolean isToolbarOpaque() {
 		return Environment.isNewLaf() || isWindowsLAF();
