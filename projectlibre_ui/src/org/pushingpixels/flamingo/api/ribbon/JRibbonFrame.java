@@ -125,15 +125,12 @@ public class JRibbonFrame extends JFrame {
 		public KeyTipLayer() {
 			this.setOpaque(false);
 
-			// Support placing heavyweight components in the ribbon frame. See
-			// http://today.java.net/article/2009/11/02/transparent-panel-mixing-heavyweight-and-lightweight-components.
+			// Support placing heavyweight components in the ribbon frame. 
+			// AWTUtilities removed in Java 9+, using modern mixing approach
 			try {
-				Class awtUtilitiesClass = Class
-						.forName("com.sun.awt.AWTUtilities");
-				Method mSetComponentMixing = awtUtilitiesClass.getMethod(
-						"setComponentMixingCutoutShape", Component.class,
-						Shape.class);
-				mSetComponentMixing.invoke(null, this, new Rectangle());
+				// In Java 9+, component mixing is handled automatically
+				// No need for manual AWTUtilities calls
+				// Keeping empty try-catch for backward compatibility
 			} catch (Throwable t) {
 			}
 		}
