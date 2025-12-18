@@ -139,7 +139,7 @@ public class SpreadSheetModel extends CommonSpreadSheetModel {
 					LinkedList previousNodes=getPreviousVisibleNodesFromRow(row);
 					if (previousNodes!=null){
 						Node nextSibling=getNextNonVoidSiblingFromRow(row);
-						if(nextSibling!=null&&nextSibling.getParent()==previousNodes.getFirst()) previousNodes=null;
+						if(nextSibling!=null&&nextSibling.getParent()==previousNodes.get(0)) previousNodes=null;
 					}
 					getCache().getModel()
 							.replaceImplAndSetFieldValue(rowNode, previousNodes, getFieldInColumn(col), this, value, fieldContext, NodeModel.NORMAL);
