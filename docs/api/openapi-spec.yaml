@@ -1,0 +1,1007 @@
+openapi: 3.0.3
+info:
+  title: ProjectLibre API
+  description: REST API для ProjectLibre Electron wrapper
+  version: 1.0.0
+  contact:
+    name: ProjectLibre Development Team
+    email: dev@projectlibre.com
+  license:
+    name: CPAL-1.0
+    url: http://www.projectlibre.com/license
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: http://localhost:8081/api/v1
+    description: Test server
+
+paths:
+  /projects:
+    get:
+      summary: Получить все проекты
+      description: Возвращает список всех проектов пользователя
+      tags:
+        - Projects
+      responses:
+        '200':
+          description: Успешное получение списка проектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Создать новый проект
+      description: Создает новый проект с указанными параметрами
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Проект успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}:
+    get:
+      summary: Получить проект по ID
+      description: Возвращает детали проекта по его уникальному идентификатору
+      tags:
+        - Projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Проект найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Обновить проект
+      description: Обновляет существующий проект
+      tags:
+        - Projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Проект успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Удалить проект
+      description: Удаляет проект и все связанные с ним данные
+      tags:
+        - Projects
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Проект успешно удален
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/tasks:
+    get:
+      summary: Получить задачи проекта
+      description: Возвращает все задачи указанного проекта
+      tags:
+        - Tasks
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Задачи успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Создать задачу
+      description: Создает новую задачу в указанном проекте
+      tags:
+        - Tasks
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Задача успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Неверные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tasks/{taskId}:
+    get:
+      summary: Получить задачу по ID
+      description: Возвращает детали задачи по её идентификатору
+      tags:
+        - Tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Уникальный идентификатор задачи
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Задача найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Обновить задачу
+      description: Обновляет существующую задачу
+      tags:
+        - Tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Уникальный идентификатор задачи
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Задача успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Неверные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Удалить задачу
+      description: Удаляет задачу из проекта
+      tags:
+        - Tasks
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          description: Уникальный идентификатор задачи
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Задача успешно удалена
+        '404':
+          description: Задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/resources:
+    get:
+      summary: Получить ресурсы проекта
+      description: Возвращает все ресурсы указанного проекта
+      tags:
+        - Resources
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ресурсы успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Добавить ресурс
+      description: Создает новый ресурс в указанном проекте
+      tags:
+        - Resources
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResourceRequest'
+      responses:
+        '201':
+          description: Ресурс успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resource'
+        '400':
+          description: Неверные входные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /import:
+    post:
+      summary: Импорт файла проекта
+      description: Импортирует проект из файлов .pod, .mpp, .xml форматов
+      tags:
+        - Import/Export
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Файл проекта для импорта
+                format:
+                  type: string
+                  enum: [pod, mpp, xml]
+                  description: Формат файла
+      responses:
+        '200':
+          description: Проект успешно импортирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportResult'
+        '400':
+          description: Неверный формат файла или данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ошибка при импорте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /projects/{projectId}/export:
+    get:
+      summary: Экспортировать проект
+      description: Экспортирует проект в указанном формате
+      tags:
+        - Import/Export
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          description: Уникальный идентификатор проекта
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          required: true
+          description: Формат экспорта
+          schema:
+            type: string
+            enum: [pod, mpp, xml, pdf, xlsx]
+      responses:
+        '200':
+          description: Проект успешно экспортирован
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                description: Файл проекта
+        '404':
+          description: Проект не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Ошибка при экспорте
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Project:
+      type: object
+      required:
+        - id
+        - name
+        - startDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор проекта
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: Название проекта
+          example: "Website Redesign"
+        description:
+          type: string
+          description: Описание проекта
+          example: "Complete redesign of company website"
+        startDate:
+          type: string
+          format: date-time
+          description: Дата начала проекта
+          example: "2025-01-15T09:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          description: Дата окончания проекта
+          example: "2025-06-30T18:00:00Z"
+        status:
+          type: string
+          enum: [PLANNING, ACTIVE, COMPLETED, ON_HOLD, CANCELLED]
+          description: Статус проекта
+          example: "ACTIVE"
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Прогресс выполнения проекта в процентах
+          example: 45
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания проекта
+          example: "2025-01-10T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления
+          example: "2025-01-20T14:15:30Z"
+
+    CreateProjectRequest:
+      type: object
+      required:
+        - name
+        - startDate
+      properties:
+        name:
+          type: string
+          description: Название проекта
+          example: "Mobile App Development"
+        description:
+          type: string
+          description: Описание проекта
+          example: "Development of mobile application"
+        startDate:
+          type: string
+          format: date-time
+          description: Планируемая дата начала
+          example: "2025-02-01T09:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          description: Планируемая дата окончания
+          example: "2025-08-31T18:00:00Z"
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название проекта
+          example: "Updated Project Name"
+        description:
+          type: string
+          description: Описание проекта
+          example: "Updated project description"
+        endDate:
+          type: string
+          format: date-time
+          description: Новая дата окончания
+          example: "2025-09-30T18:00:00Z"
+        status:
+          type: string
+          enum: [PLANNING, ACTIVE, COMPLETED, ON_HOLD, CANCELLED]
+          description: Новый статус проекта
+          example: "COMPLETED"
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Обновленный прогресс
+          example: 75
+
+    Task:
+      type: object
+      required:
+        - id
+        - projectId
+        - name
+        - duration
+        - startDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор задачи
+          example: "550e8400-e29b-41d4-a716-446655440001"
+        projectId:
+          type: string
+          format: uuid
+          description: ID проекта задачи
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: Название задачи
+          example: "Design UI Mockups"
+        description:
+          type: string
+          description: Описание задачи
+          example: "Create initial UI designs for mobile app"
+        duration:
+          type: number
+          format: duration
+          description: Продолжительность задачи в часах
+          example: 40
+        startDate:
+          type: string
+          format: date-time
+          description: Дата начала задачи
+          example: "2025-02-01T09:00:00Z"
+        endDate:
+          type: string
+          format: date-time
+          description: Дата окончания задачи
+          example: "2025-02-07T18:00:00Z"
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Прогресс выполнения задачи в процентах
+          example: 60
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+          description: Приоритет задачи
+          example: "HIGH"
+        status:
+          type: string
+          enum: [NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED]
+          description: Статус задачи
+          example: "IN_PROGRESS"
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Список ID задач, от которых зависит текущая задача
+          example: ["550e8400-e29b-41d4-a716-446655440002"]
+        assigneeId:
+          type: string
+          format: uuid
+          description: ID назначенного ресурса
+          example: "550e8400-e29b-41d4-a716-446655440100"
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания задачи
+          example: "2025-01-25T11:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления
+          example: "2025-01-30T16:45:00Z"
+
+    CreateTaskRequest:
+      type: object
+      required:
+        - name
+        - duration
+        - startDate
+      properties:
+        name:
+          type: string
+          description: Название задачи
+          example: "Implement Login Screen"
+        description:
+          type: string
+          description: Описание задачи
+          example: "Create login screen with validation"
+        duration:
+          type: number
+          format: duration
+          description: Планируемая продолжительность в часах
+          example: 24
+        startDate:
+          type: string
+          format: date-time
+          description: Планируемая дата начала
+          example: "2025-02-15T09:00:00Z"
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+          description: Приоритет задачи
+          example: "MEDIUM"
+        assigneeId:
+          type: string
+          format: uuid
+          description: ID назначенного ресурса
+          example: "550e8400-e29b-41d4-a716-446655440100"
+        dependencies:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Зависимости от других задач
+          example: ["550e8400-e29b-41d4-a716-446655440002"]
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Новое название задачи
+          example: "Updated Task Name"
+        description:
+          type: string
+          description: Новое описание задачи
+          example: "Updated task description"
+        duration:
+          type: number
+          format: duration
+          description: Новая продолжительность в часах
+          example: 32
+        endDate:
+          type: string
+          format: date-time
+          description: Новая дата окончания
+          example: "2025-02-20T18:00:00Z"
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: Новый прогресс
+          example: 85
+        priority:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+          description: Новый приоритет
+          example: "CRITICAL"
+        status:
+          type: string
+          enum: [NOT_STARTED, IN_PROGRESS, COMPLETED, ON_HOLD, CANCELLED]
+          description: Новый статус
+          example: "COMPLETED"
+        assigneeId:
+          type: string
+          format: uuid
+          description: Новый назначенный ресурс
+          example: "550e8400-e29b-41d4-a716-446655440101"
+
+    Resource:
+      type: object
+      required:
+        - id
+        - name
+        - type
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор ресурса
+          example: "550e8400-e29b-41d4-a716-446655440100"
+        projectId:
+          type: string
+          format: uuid
+          description: ID проекта ресурса
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          description: Имя ресурса
+          example: "John Doe"
+        type:
+          type: string
+          enum: [HUMAN, MATERIAL, EQUIPMENT, FACILITY]
+          description: Тип ресурса
+          example: "HUMAN"
+        email:
+          type: string
+          format: email
+          description: Email для ресурсов типа HUMAN
+          example: "john.doe@company.com"
+        capacity:
+          type: number
+          format: float
+          description: Максимальная загрузка ресурса (часы/день)
+          example: 8.0
+        cost:
+          type: number
+          format: float
+          description: Стоимость ресурса (в час)
+          example: 75.50
+        availability:
+          type: object
+          description: График доступности ресурса
+          properties:
+            monday:
+              type: boolean
+              example: true
+            tuesday:
+              type: boolean
+              example: true
+            wednesday:
+              type: boolean
+              example: true
+            thursday:
+              type: boolean
+              example: true
+            friday:
+              type: boolean
+              example: true
+            saturday:
+              type: boolean
+              example: false
+            sunday:
+              type: boolean
+              example: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания ресурса
+          example: "2025-01-20T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления
+          example: "2025-01-25T15:30:00Z"
+
+    CreateResourceRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          description: Имя ресурса
+          example: "Jane Smith"
+        type:
+          type: string
+          enum: [HUMAN, MATERIAL, EQUIPMENT, FACILITY]
+          description: Тип ресурса
+          example: "HUMAN"
+        email:
+          type: string
+          format: email
+          description: Email для ресурсов типа HUMAN
+          example: "jane.smith@company.com"
+        capacity:
+          type: number
+          format: float
+          description: Максимальная загрузка (часы/день)
+          example: 8.0
+        cost:
+          type: number
+          format: float
+          description: Стоимость (в час)
+          example: 85.00
+        availability:
+          type: object
+          description: График доступности
+          properties:
+            monday:
+              type: boolean
+              example: true
+            tuesday:
+              type: boolean
+              example: true
+            wednesday:
+              type: boolean
+              example: true
+            thursday:
+              type: boolean
+              example: true
+            friday:
+              type: boolean
+              example: true
+            saturday:
+              type: boolean
+              example: false
+            sunday:
+              type: boolean
+              example: false
+
+    ImportResult:
+      type: object
+      required:
+        - success
+        - projectId
+      properties:
+        success:
+          type: boolean
+          description: Успешность импорта
+          example: true
+        projectId:
+          type: string
+          format: uuid
+          description: ID созданного проекта
+          example: "550e8400-e29b-41d4-a716-446655440200"
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Предупреждения при импорте
+          example: ["Some tasks could not be imported due to missing dependencies"]
+        errors:
+          type: array
+          items:
+            type: string
+          description: Ошибки при импорте
+          example: []
+        importedTasksCount:
+          type: integer
+          description: Количество импортированных задач
+          example: 45
+        importedResourcesCount:
+          type: integer
+          description: Количество импортированных ресурсов
+          example: 8
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Код ошибки
+          example: "PROJECT_NOT_FOUND"
+        message:
+          type: string
+          description: Человекочитаемое сообщение об ошибке
+          example: "Project with specified ID not found"
+        details:
+          type: object
+          description: Дополнительные детали ошибки
+          example:
+            field: "projectId"
+            value: "invalid-uuid"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен для аутентификации
+
+tags:
+  - name: Projects
+    description: Управление проектами
+  - name: Tasks
+    description: Управление задачами
+  - name: Resources
+    description: Управление ресурсами
+  - name: Import/Export
+    description: Импорт и экспорт проектов

@@ -98,8 +98,8 @@
 					classpathref="compile.class.path"
 					debug="off"
 					nowarn="on"
-					source="21"
-					target="21">
+					source="17"
+					target="17">
 						<src path="${src_core}" />
 						<src path="${src_ui}" />
 						<src path="${src_reports}" />
@@ -115,8 +115,8 @@
 					classpathref="compile-no_contrib_built.class.path"
 					debug="off"
 					nowarn="on"
-					source="21"
-					target="21">
+					source="17"
+					target="17">
 						<src path="${src_core}" />
 						<src path="${src_ui}" />
 						<src path="${src_reports}" />

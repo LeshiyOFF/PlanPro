@@ -1,0 +1,44 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist-electron",
+    "noEmit": false,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "sourceMap": true,
+    "composite": true,
+    
+    // Electron специфичные настройки
+    "lib": ["ES2020"],
+    "types": ["node"],
+    
+    // Строгие настройки для main process
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    
+    // Пути
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@services/*": ["electron/services/*"]
+    }
+  },
+  "include": [
+    "electron/**/*"
+  ],
+  "exclude": [
+    "src/**/*",
+    "node_modules",
+    "dist",
+    "dist-electron",
+    "release"
+  ]
+}

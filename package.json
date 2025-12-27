@@ -1,0 +1,155 @@
+{
+  "name": "projectlibre-electron",
+  "version": "1.0.0",
+  "description": "ProjectLibre - Open Source Project Management Software with Electron wrapper",
+  "main": "dist-electron/main.js",
+  "homepage": "./",
+  "author": {
+    "name": "ProjectLibre Team",
+    "email": "info@projectlibre.com"
+  },
+  "license": "CPAL-1.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev:vite": "vite",
+    "dev:electron": "wait-on http://localhost:5173 && electron .",
+    "build": "npm run build:frontend && npm run build:electron",
+    "build:frontend": "vite build",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build:java": "cd projectlibre_build && ..\\projectlibre_build\\apache-ant-1.10.15\\bin\\ant.bat -f build.xml",
+    "prepare-jre": "node scripts/prepare-jre.js",
+    "dist": "npm run build && npm run build:java && electron-builder",
+    "dist:win": "echo 'Preparing VS Code configuration...' && node scripts/force-unlock.js && npm run build && npm run build:java && electron-builder --win",
+    "dist:linux": "npm run build && npm run build:java && electron-builder --linux",
+    "dist:mac": "npm run build && npm run build:java && electron-builder --mac",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint:fix": "eslint src --ext ts,tsx --fix",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview",
+    "test:java": "node scripts/test-java-launch.js",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-dropdown-menu": "^2.0.6",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "axios": "^1.6.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.8.1",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7",
+    "zustand": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.0",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.15",
+    "concurrently": "^8.2.0",
+    "electron": "^26.0.0",
+    "electron-builder": "^23.6.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "postcss": "^8.4.28",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.projectlibre.app",
+    "productName": "ProjectLibre",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "forceCodeSigning": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "compression": "store",
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "node_modules/**/*",
+      "package.json",
+      "projectlibre_build/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/jre",
+        "to": "jre",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "projectlibre_build/dist",
+        "to": "java",
+        "filter": [
+          "projectlibre.jar",
+          "lib/*.jar"
+        ]
+      }
+    ],
+    "extraMetadata": {
+      "main": "dist-electron/main.js"
+    }
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true
+  },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "category": "Office"
+  },
+  "mac": {
+    "target": [
+      {
+        "target": "dmg",
+        "arch": [
+          "x64",
+          "arm64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.icns",
+    "category": "public.app-category.productivity"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
