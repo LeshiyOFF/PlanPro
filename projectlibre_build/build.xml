@@ -98,6 +98,7 @@
 					classpathref="compile.class.path"
 					debug="off"
 					nowarn="on"
+					encoding="UTF-8"
 					source="17"
 					target="17">
 						<src path="${src_core}" />
@@ -115,6 +116,7 @@
 					classpathref="compile-no_contrib_built.class.path"
 					debug="off"
 					nowarn="on"
+					encoding="UTF-8"
 					source="17"
 					target="17">
 						<src path="${src_core}" />
