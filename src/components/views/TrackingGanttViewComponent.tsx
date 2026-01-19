@@ -13,3 +13,4 @@ export const TrackingGanttViewComponent: React.FC<{ viewType: ViewType; settings
   return <TrackingGanttView />;
 };
 
+

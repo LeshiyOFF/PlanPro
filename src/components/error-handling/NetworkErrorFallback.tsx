@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface NetworkErrorFallbackProps {
   error: Error;
@@ -73,3 +73,4 @@ export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
     </div>
   );
 };
+

@@ -24,3 +24,4 @@ export interface GanttInterval {
   isWeekend: boolean
   isToday: boolean
 }
+

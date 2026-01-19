@@ -60,3 +60,4 @@ export interface ProjectStore {
   setDirty: (dirty: boolean) => void;
   markClean: () => void;
 }
+

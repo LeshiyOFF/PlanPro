@@ -117,3 +117,4 @@ export class ThemeApplier {
       .getPropertyValue('--primary-hex').trim() || '#1F1F1F';
   }
 }
+

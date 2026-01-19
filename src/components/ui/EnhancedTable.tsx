@@ -259,3 +259,4 @@ const EditableCell: React.FC<EditableCellProps> = ({ value, onChange }) => {
     </div>
   );
 };
+

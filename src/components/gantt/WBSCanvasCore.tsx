@@ -192,3 +192,4 @@ export const WBSCanvasCore: React.FC<WBSCanvasCoreProps> = ({
     </div>
   );
 };
+

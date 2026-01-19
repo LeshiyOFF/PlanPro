@@ -23,3 +23,4 @@ export const Label: React.FC<LabelProps> = ({ htmlFor, className, children }) =>
     </label>
   );
 };
+

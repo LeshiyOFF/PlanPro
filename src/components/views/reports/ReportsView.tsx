@@ -7,7 +7,7 @@ import { ReportType } from '@/domain/reporting/interfaces/IReport';
 import { useProjectStore } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { ReportViewer } from './ReportViewer';
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { BarChart3, ListTodo, Users, Milestone, DollarSign, FileText, ArrowLeft, Printer, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -155,3 +155,4 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
     </div>
   );
 };
+

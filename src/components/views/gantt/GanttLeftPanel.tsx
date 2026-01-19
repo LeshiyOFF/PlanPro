@@ -52,3 +52,4 @@ export const GanttLeftPanel: React.FC<GanttLeftPanelProps> = ({
     </div>
   );
 };
+

@@ -98,3 +98,4 @@ export const FileRibbonTab: React.FC<FileRibbonTabProps> = ({ className = '' }) 
 };
 
 export default FileRibbonTab;
+

@@ -98,3 +98,4 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
     </ProjectContext.Provider>
   )
 }
+

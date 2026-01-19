@@ -47,3 +47,4 @@ export class TaskJavaService extends BaseJavaService {
     return await this.executeApiCommand('assignment.listByTask', [taskId]);
   }
 }
+

@@ -80,3 +80,4 @@ export class TaskDataConverter {
     return tasks.map(task => TaskDataConverter.frontendTaskToSync(task));
   }
 }
+

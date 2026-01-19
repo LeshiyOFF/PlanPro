@@ -215,3 +215,4 @@ export class PerformanceMonitor {
     this.metrics = [];
   }
 }
+

@@ -33,3 +33,4 @@ export const GanttRightPanel: React.FC<GanttRightPanelProps> = ({
     </div>
   );
 };
+

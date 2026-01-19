@@ -136,3 +136,4 @@ export class GanttCanvasEngine {
     logger.debug('Gantt canvas destroyed', {}, 'GanttCanvasEngine');
   }
 }
+

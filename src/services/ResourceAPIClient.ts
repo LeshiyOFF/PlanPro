@@ -248,3 +248,4 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     return new Error(`${context}: Unknown error occurred`);
   }
 }
+

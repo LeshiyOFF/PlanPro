@@ -115,3 +115,4 @@ export interface RuleConfig {
   message?: string;
   severity?: 'critical' | 'error' | 'warning';
 }
+

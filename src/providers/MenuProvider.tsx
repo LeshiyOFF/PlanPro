@@ -119,3 +119,4 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </MenuContext.Provider>
   );
 };
+

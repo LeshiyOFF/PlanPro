@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 interface GeneralErrorFallbackProps {
   error: Error;
@@ -90,3 +90,4 @@ export const GeneralErrorFallback: React.FC<GeneralErrorFallbackProps> = ({
     </div>
   );
 };
+

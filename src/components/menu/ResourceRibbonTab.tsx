@@ -70,3 +70,4 @@ export const ResourceRibbonTab: React.FC<ResourceRibbonTabProps> = ({ className 
 };
 
 export default ResourceRibbonTab;
+

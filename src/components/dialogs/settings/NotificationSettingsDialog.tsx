@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -689,3 +689,4 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
     </BaseDialog>
   );
 };
+

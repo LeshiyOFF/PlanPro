@@ -249,3 +249,4 @@ const SimpleStoreDemo: React.FC = () => {
 };
 
 export default SimpleStoreDemo;
+

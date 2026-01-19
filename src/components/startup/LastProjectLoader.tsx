@@ -14,3 +14,4 @@ export const LastProjectLoader: React.FC = () => {
   // Компонент невидим
   return null;
 };
+

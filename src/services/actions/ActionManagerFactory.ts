@@ -89,3 +89,4 @@ class ActionManagerComposite implements IActionManager {
     return this.base.getStats();
   };
 }
+

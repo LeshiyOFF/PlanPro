@@ -43,3 +43,4 @@ export const StorybookStateOptions = {
 } as const;
 
 export type StorybookStateOption = typeof StorybookStateOptions[keyof typeof StorybookStateOptions];
+

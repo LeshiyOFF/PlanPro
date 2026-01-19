@@ -211,3 +211,4 @@ export class CanvasEventHandler {
     this.handlers.onWheel(event.deltaY);
   }
 }
+

@@ -198,3 +198,4 @@ export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
     </BaseDialog>
   );
 };
+

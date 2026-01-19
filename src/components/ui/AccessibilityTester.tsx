@@ -197,3 +197,4 @@ export const AccessibilityTester: React.FC<AccessibilityTesterProps> = ({
 };
 
 export default AccessibilityTester;
+

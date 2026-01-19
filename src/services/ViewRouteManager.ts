@@ -323,3 +323,4 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
     localStorage.setItem(`view-settings-${viewType}`, JSON.stringify(settings));
   }
 }
+

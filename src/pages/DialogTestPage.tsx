@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import DialogService from '@/services/DialogService';
 import { ProjectDialog, TaskInformationDialog, ResourceInformationDialog } from '@/components/dialogs';
 
@@ -222,3 +222,4 @@ export const DialogTestPage: React.FC = () => {
     </div>
   );
 };
+

@@ -234,3 +234,4 @@ export class EventDispatcher implements IEventDispatcher {
 
 // Экспорт синглтона
 export const eventDispatcher = EventDispatcher.getInstance();
+

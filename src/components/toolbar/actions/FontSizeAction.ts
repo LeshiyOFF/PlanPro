@@ -63,3 +63,4 @@ export class FontSizeAction extends ToolbarAction {
     };
   }
 }
+

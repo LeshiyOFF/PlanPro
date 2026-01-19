@@ -9,3 +9,4 @@ export * from './GanttCanvasController';
 export * from './GanttLayout';
 export * from './WBSCanvasCore';
 export * from './NetworkDiagramCore';
+

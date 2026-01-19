@@ -53,3 +53,4 @@ export const selectSelectedResourcesCount = (state: ExtendedAppState): number =>
 
 export const selectHasActiveNotifications = (state: ExtendedAppState): boolean =>
   state.ui.notifications.length > 0;
+

@@ -9,7 +9,7 @@ import { ProjectProvider } from '@/providers/ProjectProvider'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { AppStoreProvider } from '@/providers/AppStoreProvider'
 import { Toaster } from '@/components/ui/toaster'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { logger } from '@/utils/logger'
 import SimpleStoreDemo from '@/components/store/SimpleStoreDemo'
 import { ErrorBoundary, RetryErrorBoundary, GeneralErrorFallback, StoreErrorFallback, NetworkErrorFallback } from '@/components/error-handling'
@@ -115,3 +115,4 @@ const App: React.FC = () => {
 }
 
 export default App
+

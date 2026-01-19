@@ -133,3 +133,4 @@ export class TimelineHeaderLayer implements CanvasLayer {
     }
   }
 }
+

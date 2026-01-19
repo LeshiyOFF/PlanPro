@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/Input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
 
 export interface ExtendedDependency {
   id: string;
@@ -315,3 +315,4 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
     </BaseDialog>
   );
 };
+

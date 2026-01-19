@@ -6,3 +6,4 @@
 export * from './interfaces/GanttCanvas';
 export * from './services';
 export * from './layers/GanttLayers';
+

@@ -227,3 +227,4 @@ export class ReactProfilerService {
     return this.enabled;
   }
 }
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -90,3 +90,4 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({ sett
     </div>
   );
 };
+

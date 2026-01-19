@@ -438,3 +438,4 @@ class HotkeyService {
 }
 
 export const hotkeyService = HotkeyService.getInstance();
+

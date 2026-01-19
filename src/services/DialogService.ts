@@ -289,3 +289,4 @@ export const dialogService = DialogService.getInstance();
 
 // Экспорт singleton по умолчанию для удобного импорта
 export default DialogService.getInstance();
+

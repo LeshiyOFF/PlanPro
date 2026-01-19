@@ -36,3 +36,4 @@ export interface IActionManager {
     disabledActions: number;
   };
 }
+

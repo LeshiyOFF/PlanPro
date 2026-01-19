@@ -185,3 +185,4 @@ export const GanttView: React.FC = () => {
     </div>
   );
 };
+

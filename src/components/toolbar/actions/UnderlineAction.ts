@@ -49,3 +49,4 @@ export class UnderlineAction extends ToolbarAction {
     };
   }
 }
+

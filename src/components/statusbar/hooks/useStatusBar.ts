@@ -92,3 +92,4 @@ export const useStatusBarState = (): IStatusBarState => {
 
   return state;
 };
+

@@ -222,3 +222,4 @@ export const DataTable = <T extends Record<string, any>>({
     </div>
   );
 };
+

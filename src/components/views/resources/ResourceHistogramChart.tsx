@@ -93,3 +93,4 @@ export const ResourceHistogramChart: React.FC<ResourceHistogramChartProps> = ({
   );
 };
 
+

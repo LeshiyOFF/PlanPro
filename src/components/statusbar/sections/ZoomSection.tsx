@@ -54,3 +54,4 @@ export const ZoomSection: React.FC<ZoomSectionProps> = ({ zoom, onZoomChange }) 
     </div>
   );
 };
+

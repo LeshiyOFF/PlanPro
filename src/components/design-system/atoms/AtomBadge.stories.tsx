@@ -60,3 +60,4 @@ export const Soft: Story = {
     children: 'Soft Badge',
   },
 };
+

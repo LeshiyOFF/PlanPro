@@ -168,3 +168,4 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
     return new Error(`${context}: Unknown file operation error`);
   }
 }
+

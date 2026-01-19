@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Search, User, Briefcase, Folder } from 'lucide-react';
 import { SearchResult } from '@/services/SearchService';
 
@@ -130,3 +130,4 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     </div>
   );
 };
+

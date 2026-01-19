@@ -174,3 +174,4 @@ export const useStatusMonitor = (refreshInterval: number = 5000) => {
     isHealthy: detailedStatus?.running && isApiAvailable && monitoringErrors.length === 0
   };
 };
+

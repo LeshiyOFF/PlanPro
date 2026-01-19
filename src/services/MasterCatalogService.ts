@@ -129,3 +129,4 @@ export class BaseHttpClient {
 
 // Создание экземпляра клиента по умолчанию
 export const baseHttpClient = new BaseHttpClient()
+

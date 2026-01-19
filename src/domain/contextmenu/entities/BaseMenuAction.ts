@@ -23,3 +23,4 @@ export abstract class BaseMenuAction {
     return this.shortcut;
   }
 }
+

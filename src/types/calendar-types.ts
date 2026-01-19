@@ -20,3 +20,4 @@ export interface CalendarException {
   to?: number
   name?: string
 }
+

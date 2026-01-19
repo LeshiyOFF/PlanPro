@@ -95,3 +95,4 @@ export const CalendarPreferences: React.FC = () => {
     </PreferencesSection>
   );
 };
+

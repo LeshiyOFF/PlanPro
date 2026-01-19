@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
 import { useDialogManager } from './DialogManager';
 import { 
   FileText, 
@@ -344,3 +344,4 @@ export const DialogDemo: React.FC = () => {
     </div>
   );
 };
+

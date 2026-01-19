@@ -124,3 +124,4 @@ export class PasteAction extends BaseAction {
     this.appStore.clipboard.paste();
   }
 }
+

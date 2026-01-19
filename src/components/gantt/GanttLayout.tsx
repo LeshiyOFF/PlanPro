@@ -86,3 +86,4 @@ export const GanttLayout: React.FC<GanttLayoutProps> = ({
     </div>
   );
 };
+

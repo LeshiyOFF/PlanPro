@@ -120,3 +120,4 @@ export interface ViewRoute {
   settings: Partial<ViewSettings>;
   permissions?: string[];
 }
+

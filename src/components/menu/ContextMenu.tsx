@@ -100,3 +100,4 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ config, onHide }) => {
 };
 
 export default ContextMenu;
+

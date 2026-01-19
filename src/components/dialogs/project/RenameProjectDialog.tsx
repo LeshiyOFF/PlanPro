@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -122,3 +122,4 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
     </BaseDialog>
   );
 };
+

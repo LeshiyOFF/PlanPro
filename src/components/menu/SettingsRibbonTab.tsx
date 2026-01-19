@@ -27,3 +27,4 @@ export const SettingsRibbonTab: React.FC = () => {
     </div>
   );
 };
+

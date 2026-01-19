@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/progress';
 import { 
   ResourceInformationData, 
@@ -306,3 +306,4 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
 };
 
 export default ResourceInformationDialog;
+

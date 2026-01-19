@@ -128,3 +128,4 @@ export class PrintAction extends BaseAction {
     logger.info('Print functionality requested');
   }
 }
+

@@ -25,3 +25,4 @@ export const OptionsDialog: React.FC<SettingsDialogData> = (data) => {
     </BaseDialog>
   );
 };
+

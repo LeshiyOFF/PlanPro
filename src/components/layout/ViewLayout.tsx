@@ -57,3 +57,4 @@ export const ViewLayout: React.FC<MainLayoutProps> = ({
     </MainWindowInitializer>
   );
 };
+

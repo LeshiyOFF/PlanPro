@@ -25,3 +25,4 @@ export class SearchAction extends BaseAction {
     logger.info('Search functionality requested');
   }
 }
+

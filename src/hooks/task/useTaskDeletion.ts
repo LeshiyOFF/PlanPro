@@ -37,3 +37,4 @@ export const useTaskDeletion = () => {
     shouldConfirm: deletionService.shouldConfirmDeletion(preferences)
   };
 };
+

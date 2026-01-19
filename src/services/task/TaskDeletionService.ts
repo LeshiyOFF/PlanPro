@@ -25,3 +25,4 @@ export class TaskDeletionService {
     return preferences.editing?.confirmDeletions ?? true;
   }
 }
+

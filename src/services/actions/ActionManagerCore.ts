@@ -105,3 +105,4 @@ export class ActionManagerCore {
     logger.info('All actions cleared');
   }
 }
+

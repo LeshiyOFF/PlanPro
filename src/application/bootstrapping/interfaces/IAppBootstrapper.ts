@@ -9,3 +9,4 @@ export interface IAppBootstrapper {
    */
   getInitialRoute(): Promise<string>;
 }
+

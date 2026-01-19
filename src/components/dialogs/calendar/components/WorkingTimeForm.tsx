@@ -1,5 +1,5 @@
 import React from 'react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -83,3 +83,4 @@ export const WorkingTimeForm: React.FC<WorkingTimeFormProps> = ({
     </div>
   );
 };
+

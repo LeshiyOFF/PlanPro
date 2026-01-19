@@ -135,3 +135,4 @@ export class TaskBarsLayer implements CanvasLayer {
     }
   }
 }
+

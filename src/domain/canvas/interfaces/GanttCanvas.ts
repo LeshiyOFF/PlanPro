@@ -164,3 +164,4 @@ export interface GanttCanvasData {
   hoveredTask?: string;
   layers: CanvasLayer[];
 }
+

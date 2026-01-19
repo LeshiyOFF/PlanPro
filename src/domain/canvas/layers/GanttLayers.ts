@@ -13,3 +13,4 @@ export * from './SummaryTaskRenderer';
 export * from './CriticalPathRenderer';
 export * from './ProgressRenderer';
 export * from './TrackingBarsLayer';
+

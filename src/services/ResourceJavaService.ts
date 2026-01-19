@@ -52,3 +52,4 @@ export class ResourceJavaService extends BaseJavaService {
     return await this.executeApiCommand('report.generate', [projectId, type]);
   }
 }
+

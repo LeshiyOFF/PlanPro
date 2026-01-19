@@ -116,3 +116,4 @@ export const Empty: Story = {
     emptyMessage: 'No users found',
   },
 };
+

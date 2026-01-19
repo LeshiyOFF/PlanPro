@@ -2,11 +2,11 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/Input';
+import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 
 export interface Resource {
   id: string;
@@ -334,3 +334,4 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
     </BaseDialog>
   );
 };
+

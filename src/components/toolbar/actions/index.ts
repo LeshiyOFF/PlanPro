@@ -19,3 +19,4 @@ export { ItalicAction } from './ItalicAction';
 export { UnderlineAction } from './UnderlineAction';
 export { FontSizeAction } from './FontSizeAction';
 export { FontFamilyAction } from './FontFamilyAction';
+

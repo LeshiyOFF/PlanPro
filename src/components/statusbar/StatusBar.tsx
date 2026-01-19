@@ -21,3 +21,4 @@ export const StatusBar: React.FC<IStatusBarProps> = (props) => {
 };
 
 export default StatusBar;
+

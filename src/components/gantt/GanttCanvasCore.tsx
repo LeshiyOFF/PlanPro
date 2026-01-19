@@ -206,3 +206,4 @@ export const GanttCanvasCore: React.FC<GanttCanvasCoreProps> = ({
     </div>
   );
 };
+

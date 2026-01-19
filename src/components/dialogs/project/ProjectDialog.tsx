@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -328,3 +328,4 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
 };
 
 export default ProjectDialog;
+

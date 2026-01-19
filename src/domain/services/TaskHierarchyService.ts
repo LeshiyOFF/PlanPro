@@ -52,3 +52,4 @@ export class TaskHierarchyService {
     return indices;
   }
 }
+

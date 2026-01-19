@@ -146,3 +146,4 @@ export const SecurityPreferences: React.FC = () => {
     </PreferencesSection>
   );
 };
+

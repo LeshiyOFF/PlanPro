@@ -73,3 +73,4 @@ export interface TwoTierHeaderProps extends ViewHeaderProps {
   /** Настройки для Action Bar */
   actionBar?: ActionBarProps;
 }
+

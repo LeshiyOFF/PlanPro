@@ -364,3 +364,4 @@ export const DialogManager: React.FC<DialogManagerProps> = ({ children }) => {
 
 // Hook for using dialog manager - now just exports the context hook
 export const useDialogManager = useDialogContext;
+

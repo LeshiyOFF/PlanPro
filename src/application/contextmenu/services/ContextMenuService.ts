@@ -121,3 +121,4 @@ export class ContextMenuService implements IContextMenuService {
     return `context-menu-${++this.menuIdCounter}-${Date.now()}`;
   }
 }
+

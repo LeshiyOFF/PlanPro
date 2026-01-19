@@ -72,3 +72,4 @@ export class PreferencesValidator {
     return !!(settings.trustedLocations !== undefined);
   }
 }
+

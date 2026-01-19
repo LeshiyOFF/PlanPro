@@ -110,3 +110,4 @@ export const SimpleBaseDialog: React.FC<SimpleBaseDialogProps> = ({
 // Алиас для обратной совместимости
 export const BaseDialog = SimpleBaseDialog;
 export type BaseDialogProps = SimpleBaseDialogProps;
+

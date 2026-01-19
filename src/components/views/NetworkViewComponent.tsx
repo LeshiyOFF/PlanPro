@@ -13,3 +13,4 @@ export const NetworkViewComponent: React.FC<{ viewType: ViewType; settings?: Par
   // Делегируем отрисовку новому компоненту NetworkView
   return <NetworkView />;
 };
+

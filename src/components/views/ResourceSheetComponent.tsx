@@ -88,3 +88,4 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
     </div>
   );
 };
+

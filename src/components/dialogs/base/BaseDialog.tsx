@@ -292,3 +292,4 @@ export const BaseDialog = <T extends IDialogData>({
 };
 
 export default BaseDialog;
+

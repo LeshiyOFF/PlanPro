@@ -80,3 +80,4 @@ export interface IJavaApiService {
   getVersion(): Promise<string>;
   getApiStatus(): Promise<DataResponse<ApiStatusResponse>>;
 }
+

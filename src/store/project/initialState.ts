@@ -57,3 +57,4 @@ export const emptyProjectState = {
   currentFilePath: undefined as string | undefined,
   isDirty: false
 };
+

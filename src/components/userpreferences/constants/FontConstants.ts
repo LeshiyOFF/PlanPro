@@ -44,3 +44,4 @@ export const APP_FONTS: IFontOption[] = [
     stack: "Georgia, serif"
   }
 ];
+

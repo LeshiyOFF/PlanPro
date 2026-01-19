@@ -266,3 +266,4 @@ export interface FrontendTaskData {
   notes: string
   color: string
 }
+

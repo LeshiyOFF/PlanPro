@@ -54,3 +54,4 @@ export interface ElectronAPI {
   onJavaError: (callback: (error: Error) => void) => void
   removeAllListeners: (channel: string) => void
 }
+

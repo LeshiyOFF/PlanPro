@@ -73,3 +73,4 @@ export const BaseView: React.FC<BaseViewProps> = ({
 };
 
 export default BaseView;
+

@@ -72,3 +72,4 @@ export const AboutDialog: React.FC<AboutDialogProps> = ({ isOpen, onClose }) => 
     </BaseDialog>
   );
 };
+

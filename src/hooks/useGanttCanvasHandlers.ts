@@ -86,3 +86,4 @@ export const useGanttCanvasHandlers = (
   return eventHandlers;
 };
 
+

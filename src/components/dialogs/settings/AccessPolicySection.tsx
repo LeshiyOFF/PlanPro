@@ -2,7 +2,7 @@ import React from 'react';
 import { FormField } from '../components/FormField';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -133,3 +133,4 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
     </div>
   );
 };
+

@@ -2,10 +2,10 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/Badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 
 export interface ProjectStats {
   id: string;
@@ -393,3 +393,4 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
     </BaseDialog>
   );
 };
+

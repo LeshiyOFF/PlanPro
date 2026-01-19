@@ -55,3 +55,4 @@ export const MessageSection: React.FC<MessageSectionProps> = ({ message }) => {
     </div>
   );
 };
+

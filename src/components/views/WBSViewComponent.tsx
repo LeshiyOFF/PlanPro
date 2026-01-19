@@ -12,3 +12,4 @@ export const WBSViewComponent: React.FC<{ viewType: ViewType; settings?: Partial
   return <WBSView />;
 };
 
+

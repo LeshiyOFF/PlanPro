@@ -1,11 +1,11 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
 
 export interface Project {
   id: string;
@@ -152,3 +152,4 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
     </BaseDialog>
   );
 };
+

@@ -48,3 +48,4 @@ export class DeleteAction extends BaseMenuAction {
     return 'элемент';
   }
 }
+

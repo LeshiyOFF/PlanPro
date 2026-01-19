@@ -280,3 +280,4 @@ class SearchService {
 
 export { SearchService };
 export const searchService = SearchService.getInstance();
+

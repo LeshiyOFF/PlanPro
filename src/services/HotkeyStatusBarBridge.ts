@@ -176,3 +176,4 @@ class HotkeyStatusBarBridge {
 }
 
 export const hotkeyStatusBarBridge = HotkeyStatusBarBridge.getInstance();
+

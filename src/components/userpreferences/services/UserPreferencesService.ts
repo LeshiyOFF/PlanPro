@@ -184,3 +184,4 @@ export class UserPreferencesService {
 
   public exportPreferences(): string { return JSON.stringify(this.preferences, null, 2); }
 }
+

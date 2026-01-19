@@ -160,3 +160,4 @@ export const CalculationPreferences: React.FC = () => {
     </PreferencesSection>
   );
 };
+

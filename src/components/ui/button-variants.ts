@@ -40,3 +40,4 @@ export const BUTTON_SIZES = {
 // Типы вариантов и размеров
 export type ButtonVariant = keyof typeof BUTTON_VARIANTS
 export type ButtonSize = keyof typeof BUTTON_SIZES
+

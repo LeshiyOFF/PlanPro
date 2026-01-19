@@ -183,3 +183,4 @@ export const ProfessionalGantt: React.FC<ProfessionalGanttProps> = ({
     </div>
   );
 };
+

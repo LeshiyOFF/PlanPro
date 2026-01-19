@@ -42,3 +42,4 @@ export class ResourceFactory {
     return value;
   }
 }
+

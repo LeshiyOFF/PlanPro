@@ -78,3 +78,4 @@ export const useInitializeAppStore = (initialState?: Partial<AppState>) => {
 
 // Export types for external usage
 export type { AppStoreProviderProps };
+

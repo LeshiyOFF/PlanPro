@@ -119,3 +119,4 @@ class UndoRedoService extends BaseJavaService {
 
 export const undoRedoService = UndoRedoService.getInstance();
 export default UndoRedoService;
+

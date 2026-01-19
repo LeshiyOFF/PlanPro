@@ -271,3 +271,4 @@ export const createStorePerformanceMonitor = () => {
   
   return { startTiming, getAverageTime, getStats };
 };
+

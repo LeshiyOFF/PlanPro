@@ -104,3 +104,4 @@ export function validateProjectName(name: string): ValidationResult {
 
   return ValidationService.validateWithConfig('project', { name }, rules);
 }
+

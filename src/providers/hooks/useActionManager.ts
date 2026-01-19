@@ -8,3 +8,4 @@ import { getActionManager, IActionManager } from '@/services/actions/ActionManag
 export const useActionManager = (): IActionManager => {
   return getActionManager();
 };
+

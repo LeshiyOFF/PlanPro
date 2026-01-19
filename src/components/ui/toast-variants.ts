@@ -60,3 +60,4 @@ export const TOAST_CLOSE_CLASSES =
 
 // Типы вариантов
 export type ToastVariant = keyof typeof TOAST_VARIANTS
+

@@ -307,3 +307,4 @@ export const GeneralPreferences: React.FC = () => {
     </PreferencesSection>
   );
 };
+

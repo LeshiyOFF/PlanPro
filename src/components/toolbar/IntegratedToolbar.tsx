@@ -135,3 +135,4 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
 };
 
 export default IntegratedToolbar;
+

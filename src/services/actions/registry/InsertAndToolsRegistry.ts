@@ -47,3 +47,4 @@ export class ToolsActionRegistry extends BaseActionRegistry {
     logger.info(`Registered ${toolsActions.length} tools actions`);
   }
 }
+

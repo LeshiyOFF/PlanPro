@@ -31,3 +31,4 @@ export interface ViewSettings {
   showResources: boolean
   zoom: number
 }
+

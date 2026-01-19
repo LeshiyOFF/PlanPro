@@ -227,3 +227,4 @@ export interface DialogEvent {
  * Обработчик событий диалога
  */
 export type DialogEventHandler = (event: DialogEvent) => void;
+

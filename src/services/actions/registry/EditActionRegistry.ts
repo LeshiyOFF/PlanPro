@@ -32,3 +32,4 @@ export class EditActionRegistry extends BaseActionRegistry {
     logger.info(`Registered ${editActions.length} edit actions`);
   }
 }
+

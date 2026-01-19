@@ -48,3 +48,4 @@ export class AppBootstrapper implements IAppBootstrapper {
     return '/gantt';
   }
 }
+

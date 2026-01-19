@@ -116,3 +116,4 @@ export const useProfiler = () => {
 // Экспортируем класс для использования в других компонентах
 export { ReactProfilerService };
 export { PerformanceMetricsCollector } from '@/services/PerformanceMetricsCollector';
+

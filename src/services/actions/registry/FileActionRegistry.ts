@@ -32,3 +32,4 @@ export class FileActionRegistry extends BaseActionRegistry {
     logger.info(`Registered ${fileActions.length} file actions`);
   }
 }
+

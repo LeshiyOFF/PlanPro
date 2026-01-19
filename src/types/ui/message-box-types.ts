@@ -133,3 +133,4 @@ export interface UIError {
   recoverable?: boolean
   userAction?: string
 }
+

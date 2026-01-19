@@ -202,3 +202,4 @@ export const analyticsMiddleware = <T extends AppState>(
     return config(analyticsSet, get, api);
   };
 };
+

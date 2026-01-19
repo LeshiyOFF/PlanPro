@@ -124,3 +124,4 @@ export const StatusBarContainer: React.FC<IStatusBarProps> = ({
     </footer>
   );
 };
+

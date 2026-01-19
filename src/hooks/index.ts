@@ -38,3 +38,4 @@ export { useAccessibilityTesting } from './useAccessibilityTesting'
 
 // Хуки для Canvas
 export { useGanttCanvasHandlers } from './useGanttCanvasHandlers'
+

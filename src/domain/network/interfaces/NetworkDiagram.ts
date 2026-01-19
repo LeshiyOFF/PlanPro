@@ -66,3 +66,4 @@ export interface NetworkLayoutStrategy {
   calculateLayout(nodes: NetworkNode[], connections: NetworkConnection[]): NetworkNode[];
 }
 
+

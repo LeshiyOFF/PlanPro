@@ -43,3 +43,4 @@ export class PropertiesAction extends BaseMenuAction {
     return JSON.stringify(this.target, null, 2);
   }
 }
+

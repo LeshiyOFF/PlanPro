@@ -59,3 +59,4 @@ export class TaskLinkService {
     return !checkCycle(potentialPredId, new Set());
   }
 }
+

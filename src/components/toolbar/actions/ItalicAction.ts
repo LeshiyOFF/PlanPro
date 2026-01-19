@@ -49,3 +49,4 @@ export class ItalicAction extends ToolbarAction {
     };
   }
 }
+

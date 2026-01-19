@@ -52,3 +52,4 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
 
   return <>{children}</>;
 };
+

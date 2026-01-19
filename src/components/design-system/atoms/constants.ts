@@ -47,3 +47,4 @@ export const STATES = {
 } as const;
 
 export type StateType = typeof STATES[keyof typeof STATES];
+

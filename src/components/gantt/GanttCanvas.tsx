@@ -35,3 +35,4 @@ export const GanttCanvas: React.FC<GanttCanvasProps> = ({
     />
   );
 };
+

@@ -46,3 +46,4 @@ export class RedoAction extends ToolbarAction {
     };
   }
 }
+

@@ -59,3 +59,4 @@ export const UnsavedChangesGuard: React.FC = () => {
   // Компонент невидим
   return null;
 };
+

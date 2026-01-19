@@ -23,3 +23,4 @@ export type StateVariant = 'default' | 'hover' | 'active' | 'disabled' | 'loadin
 
 // Варианты отображения
 export type VariantType = 'solid' | 'outline' | 'ghost' | 'soft';
+

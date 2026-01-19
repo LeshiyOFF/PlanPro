@@ -194,3 +194,4 @@ export const TrackingGanttView: React.FC = () => {
     </>
   );
 };
+

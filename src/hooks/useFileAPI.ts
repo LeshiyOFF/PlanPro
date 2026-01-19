@@ -8,3 +8,4 @@ import type { APIClientConfig } from '@/types';
 export const useFileAPI = (config?: APIClientConfig) => {
   return useMemo(() => new FileAPIClient(config), [config]);
 };
+

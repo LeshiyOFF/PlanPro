@@ -214,3 +214,4 @@ export class SentryService {
     return this.initialized;
   }
 }
+

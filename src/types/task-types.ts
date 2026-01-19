@@ -59,3 +59,4 @@ export interface TableColumn<T = unknown> {
   resizable: boolean
   formatter?: (value: unknown, row: T) => React.ReactNode
 }
+

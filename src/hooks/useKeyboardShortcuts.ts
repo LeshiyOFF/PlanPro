@@ -114,3 +114,4 @@ export const DEFAULT_SHORTCUTS: Record<string, string> = {
   'ASSIGN_RESOURCES': 'Alt+F10',
   'RESOURCE_INFO': 'F10'
 };
+

@@ -45,3 +45,4 @@ export class OpenAction extends ToolbarAction {
     };
   }
 }
+

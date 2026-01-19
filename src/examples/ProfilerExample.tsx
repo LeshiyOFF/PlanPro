@@ -70,3 +70,4 @@ export const useComponentProfiler = (componentName: string) => {
 
   return { startProfile, endProfile };
 };
+

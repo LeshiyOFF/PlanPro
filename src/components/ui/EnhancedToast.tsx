@@ -37,3 +37,4 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
     </div>
   );
 };
+

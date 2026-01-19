@@ -42,3 +42,4 @@ export class GanttTaskTypeValidator {
            task.criticalPath === true;
   }
 }
+

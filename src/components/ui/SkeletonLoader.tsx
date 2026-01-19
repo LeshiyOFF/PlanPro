@@ -138,3 +138,4 @@ export const ResourceCardSkeleton: React.FC = () => (
     </div>
   </div>
 );
+

@@ -15,3 +15,4 @@ export const useActionStateUpdater = (updateActionStates: () => void, intervalMs
     };
   }, [updateActionStates, intervalMs]);
 };
+

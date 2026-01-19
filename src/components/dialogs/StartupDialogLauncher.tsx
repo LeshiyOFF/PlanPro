@@ -35,3 +35,4 @@ export const StartupDialogLauncher: React.FC = () => {
 
   return null; // Визуально ничего не рендерит
 };
+

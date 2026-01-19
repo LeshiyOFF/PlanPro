@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { formatDate as centralizedFormatDate } from '@/utils/formatUtils';
@@ -367,3 +367,4 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
 };
 
 export default ProjectInformationDialog;
+

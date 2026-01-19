@@ -143,3 +143,4 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
     </div>
   );
 };
+

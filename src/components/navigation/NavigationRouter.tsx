@@ -163,3 +163,4 @@ const getViewTypeFromPath = (path: string): ViewType => {
 
   return pathToViewMap[path] || ViewType.GANTT;
 };
+

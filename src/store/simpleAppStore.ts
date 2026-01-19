@@ -184,3 +184,4 @@ export const useSimpleAppStore = create<SimpleAppStore>()(
     { name: 'simple-app-store' }
   )
 );
+

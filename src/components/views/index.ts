@@ -9,3 +9,4 @@ export { WBSViewComponent } from './WBSViewComponent';
 export { TrackingGanttViewComponent } from './TrackingGanttViewComponent';
 export { CalendarView } from './calendar/CalendarView';
 export { ReportsView } from './reports/ReportsView';
+

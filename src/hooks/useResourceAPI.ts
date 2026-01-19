@@ -101,3 +101,4 @@ export const useResourceAPI = (config?: APIClientConfig) => {
     }
   }), [apiClient, handleError]);
 }
+

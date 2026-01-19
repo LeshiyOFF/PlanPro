@@ -215,3 +215,4 @@ export class StatusBarService implements IStatusBarService {
     this.listeners.clear();
   }
 }
+

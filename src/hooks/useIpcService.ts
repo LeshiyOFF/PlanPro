@@ -226,3 +226,4 @@ export const useIpcService = () => {
 };
 
 export type UseIpcServiceReturn = ReturnType<typeof useIpcService>;
+

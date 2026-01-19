@@ -92,3 +92,4 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
     ];
   }
 }
+

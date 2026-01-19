@@ -47,3 +47,4 @@ export const useProjectOperations = (execute: ReturnType<typeof useAsyncOperatio
     project,
   }
 }
+

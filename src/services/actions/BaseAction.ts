@@ -60,3 +60,4 @@ export abstract class BaseAction implements IAction {
     logger.info(`Action executed: ${this.name}`, event);
   }
 }
+

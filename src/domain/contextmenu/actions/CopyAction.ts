@@ -29,3 +29,4 @@ export class CopyAction extends BaseMenuAction {
     return this.target !== null && this.target !== undefined;
   }
 }
+

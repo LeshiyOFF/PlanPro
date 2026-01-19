@@ -39,3 +39,4 @@ export class SwitchViewAction extends BaseAction {
     this.navigationProvider.navigateToView(this.viewType);
   }
 }
+

@@ -49,3 +49,4 @@ export const useMainWindowRegistry = () => {
 
   return registry;
 };
+

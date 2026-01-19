@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { logger } from '@/utils/logger';
 import { 
   CalendarDialogData, 
@@ -278,3 +278,4 @@ export const ChangeWorkingTimeDialog: React.FC<CalendarDialogData> = (data) => {
     </BaseDialog>
   );
 };
+

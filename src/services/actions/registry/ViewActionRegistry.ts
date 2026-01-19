@@ -42,3 +42,4 @@ export class ViewActionRegistry extends BaseActionRegistry {
     }));
   }
 }
+

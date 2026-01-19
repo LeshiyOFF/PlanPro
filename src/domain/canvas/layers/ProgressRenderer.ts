@@ -37,3 +37,4 @@ export class ProgressRenderer {
     return task.progress !== undefined && task.progress > 0;
   }
 }
+

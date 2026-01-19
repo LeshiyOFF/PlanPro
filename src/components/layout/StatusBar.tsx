@@ -34,3 +34,4 @@ export const StatusBar: React.FC = () => {
 };
 
 export default StatusBar;
+

@@ -15,3 +15,4 @@ export const TooltipProvider: React.FC<TooltipProviderProps> = ({ children }) =>
     </RadixTooltipProvider>
   );
 };
+

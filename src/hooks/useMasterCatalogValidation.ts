@@ -169,3 +169,4 @@ export const useMasterCatalogValidation = () => {
     validateResource
   }), [validateProject, validateTask, validateResource])
 }
+

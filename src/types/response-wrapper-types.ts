@@ -28,3 +28,4 @@ export interface JavaServiceConfig {
   timeout?: number
   retries?: number
 }
+

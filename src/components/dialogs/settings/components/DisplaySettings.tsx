@@ -88,3 +88,4 @@ export const DisplaySettings: React.FC<DisplaySettingsProps> = ({ settings, onSe
     </div>
   );
 };
+

@@ -258,3 +258,4 @@ export const useFileHotkeys = () => {
     logger.dialog('Exit', {}, 'File');
   });
 };
+

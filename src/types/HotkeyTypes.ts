@@ -154,3 +154,4 @@ export const hotkeyEquals = (a: Hotkey, b: Hotkey): boolean => {
     a.shift === b.shift &&
     a.meta === b.meta;
 };
+

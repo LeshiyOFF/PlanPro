@@ -119,3 +119,4 @@ export const MainWindow: React.FC<MainWindowProps> = ({
 };
 
 export default MainWindow;
+

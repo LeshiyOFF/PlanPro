@@ -550,3 +550,4 @@ export const ResourceManager: React.FC = () => {
     </div>
   );
 };
+

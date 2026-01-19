@@ -206,3 +206,4 @@ export class WBSCanvasEngine {
     this.ctx.fillText(line, x, currentY);
   }
 }
+

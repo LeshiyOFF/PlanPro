@@ -77,3 +77,4 @@ export const useDialogValidation = (rules: ValidationRules = {}) => {
     isValid: Object.keys(errors).every(key => !errors[key])
   };
 };
+

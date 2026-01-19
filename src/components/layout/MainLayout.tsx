@@ -1,5 +1,5 @@
 import React from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Plus, Save, FolderOpen, FileText } from 'lucide-react'
 
 /**
@@ -58,3 +58,4 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     </div>
   )
 }
+

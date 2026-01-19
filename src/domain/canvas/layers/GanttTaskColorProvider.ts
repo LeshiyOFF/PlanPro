@@ -67,3 +67,4 @@ export class GanttTaskColorProvider {
     return color;
   }
 }
+

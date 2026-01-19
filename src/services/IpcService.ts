@@ -206,3 +206,4 @@ export class IpcService implements IIpcService {
 
 // Экспорт единственного экземпляра сервиса
 export const ipcService = new IpcService();
+

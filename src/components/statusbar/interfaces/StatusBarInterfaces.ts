@@ -124,3 +124,4 @@ export interface IStatusBarSectionConfig {
   visible?: boolean;
   className?: string;
 }
+

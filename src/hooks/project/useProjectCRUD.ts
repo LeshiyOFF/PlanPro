@@ -50,3 +50,4 @@ export const useProjectCRUD = (execute: ReturnType<typeof useAsyncOperation>['ex
     project,
   }
 }
+

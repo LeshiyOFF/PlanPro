@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 
 export interface BaselineDialogProps extends Omit<BaseDialogProps, 'children'> {
   hasTasksSelected?: boolean;
@@ -207,3 +207,4 @@ export const BaselineDialog: React.FC<BaselineDialogProps> = ({
     </BaseDialog>
   );
 };
+

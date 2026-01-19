@@ -202,3 +202,4 @@ export interface IPreferencesValidator {
   validateSchedule(preferences: ISchedulePreferences): boolean;
   validateCalendar(preferences: ICalendarPreferences): boolean;
 }
+

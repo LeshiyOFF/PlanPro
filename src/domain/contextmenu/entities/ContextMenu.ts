@@ -66,3 +66,4 @@ export interface IContextMenuContext {
   }>;
   readonly metadata?: Record<string, any>;
 }
+

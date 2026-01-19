@@ -32,3 +32,4 @@ export interface ResourceFilter {
   group?: string
   searchText?: string
 }
+

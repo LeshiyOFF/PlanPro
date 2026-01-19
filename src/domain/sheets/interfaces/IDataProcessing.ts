@@ -46,3 +46,4 @@ export interface IDataProcessorResult<T> {
   activeFilterRules: IFilterRule[];
 }
 
+

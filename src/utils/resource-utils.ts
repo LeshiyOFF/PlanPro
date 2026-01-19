@@ -55,3 +55,4 @@ export class ResourceUtils {
     return totalCapacity > 0 ? Math.round((usedCapacity / totalCapacity) * 100) : 0
   }
 }
+

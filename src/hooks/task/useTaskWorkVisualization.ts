@@ -31,3 +31,4 @@ export const useTaskWorkVisualization = (mode: 'standard' | 'tracking' = 'standa
     baselineStyles: visualizationService.getBaselineStyles([], showBaseline)
   };
 };
+

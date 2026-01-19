@@ -10,3 +10,4 @@ export const GANTT_CONSTANTS = {
   INDENT_SIZE: 20
 };
 
+

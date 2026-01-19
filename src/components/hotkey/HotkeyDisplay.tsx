@@ -1,6 +1,6 @@
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
 import { SafeTooltip } from '@/components/ui/Tooltip';
 import { hotkeyToString } from '@/types/HotkeyTypes';
 import type { Hotkey, HotkeyConfig } from '@/types/HotkeyTypes';
@@ -202,3 +202,4 @@ export const HotkeyTooltip: React.FC<HotkeyTooltipProps> = ({
     </SafeTooltip>
   );
 };
+

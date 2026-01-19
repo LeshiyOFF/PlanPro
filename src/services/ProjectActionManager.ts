@@ -335,3 +335,4 @@ export class ProjectActionManager {
 
 // Экспорт синглтона
 export const projectActionManager = ProjectActionManager.getInstance();
+

@@ -51,3 +51,4 @@ export interface IMenuFactory {
    */
   canHandle(context: IContextMenuContext): boolean;
 }
+

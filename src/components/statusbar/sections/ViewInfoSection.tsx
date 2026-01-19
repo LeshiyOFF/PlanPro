@@ -20,3 +20,4 @@ export const ViewInfoSection: React.FC = () => {
     </div>
   );
 };
+

@@ -56,3 +56,4 @@ export class NewResourceAction extends BaseAction {
     logger.info('New resource creation requested');
   }
 }
+

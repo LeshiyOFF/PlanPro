@@ -34,3 +34,4 @@ export class SummaryTaskRenderer {
     ctx.restore();
   }
 }
+

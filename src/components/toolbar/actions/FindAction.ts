@@ -38,3 +38,4 @@ export class FindAction extends ToolbarAction {
     };
   }
 }
+

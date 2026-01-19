@@ -56,3 +56,4 @@ export class TaskUtils {
     return Math.round(Math.random() * 100) // mock: случайный прогресс
   }
 }
+

@@ -65,3 +65,4 @@ export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({
     </div>
   );
 };
+
