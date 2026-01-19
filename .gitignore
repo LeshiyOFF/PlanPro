@@ -35,7 +35,12 @@ pnpm-lock.yaml
 # === Runtime ===
 tools/
 dist-app/
+build-scripts/electron-runtime/
+build-scripts/*.zip
 resources/jre/
+resources/**/*.jar
+resources/**/*.exe
+resources/**/*.dll
 .env
 .env.local
 .env.development.local
