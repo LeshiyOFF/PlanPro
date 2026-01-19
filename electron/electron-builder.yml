@@ -1,0 +1,42 @@
+appId: com.projectlibre.app
+productName: ProjectLibre
+directories:
+  output: release
+win:
+  forceCodeSigning: false
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: assets/icon.ico
+compression: maximum
+asar: true
+asarUnpack:
+  - "**/*.jar"
+  - "resources/jre/**/*"
+  - "resources/*.dll"
+  - "resources/*.exe"
+files:
+  - "dist-app/**/*"
+  - "resources/**/*"
+  - "package.json"
+extraResources:
+  - from: resources/jre
+    to: jre
+    filter:
+      - "**/*"
+  - from: projectlibre_build/dist
+    to: java/lib-runtime
+    filter:
+      - projectlibre.jar
+  - from: projectlibre_build/dist
+    to: java/lib
+    filter:
+      - "**/*.jar"
+extraMetadata:
+  main: dist-app/electron/main.js
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
