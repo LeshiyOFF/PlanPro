@@ -1,5 +1,5 @@
 import { ChildProcess } from 'child_process';
-import { JavaLaunchOptions } from './interfaces/IJavaLauncher';
+import { JavaLaunchOptions } from './JavaLauncher';
 // import { JreManager } from './JreManager'; // TODO: Use for enhanced validation
 import { JavaExecutableValidator } from './validators/JavaExecutableValidator';
 import { JarFileValidator } from './validators/JarFileValidator';
@@ -25,7 +25,7 @@ export class JavaProcessValidator {
    */
   async validateLaunchConfig(
     jarPath: string,
-    options: JavaLaunchOptions = {},
+    options: Partial<JavaLaunchOptions> = {},
     validationOptions: ValidationOptions = {}
   ): Promise<ValidationResult> {
     try {
@@ -72,7 +72,7 @@ export class JavaProcessValidator {
 
       // Валидация JAR файла
       if (validationOptions.checkJar !== false) {
-        const jarValidation = this.jarValidator.validateJarFile(jarPath);
+        const jarValidation = await this.jarValidator.validateJarFile(jarPath);
         details.jarValid = jarValidation.isValid;
         if (!jarValidation.isValid) {
           return {
@@ -87,23 +87,6 @@ export class JavaProcessValidator {
         }
       } else {
         details.jarValid = true;
-      }
-
-      // Валидация памяти
-      if (validationOptions.checkMemory !== false && options.memory) {
-        const memoryValidation = this.jarValidator.validateMemoryOptions(options.memory);
-        details.memorySufficient = memoryValidation.isValid;
-        if (!memoryValidation.isValid) {
-          return {
-            isValid: false,
-            errorMessage: memoryValidation.errorMessage,
-            warnings,
-            details
-          };
-        }
-        if (memoryValidation.warnings) {
-          warnings.push(...memoryValidation.warnings);
-        }
       }
 
       // Валидация порта
@@ -226,7 +209,7 @@ export class JavaProcessValidator {
   /**
    * Извлекает порт из опций
    */
-  private extractPortFromArgs(options: JavaLaunchOptions): number | null {
+  private extractPortFromArgs(options: Partial<JavaLaunchOptions>): number | null {
     if (options.jvmOptions) {
       for (const option of options.jvmOptions) {
         const match = option.match(/-D(?:server\.)?port(?:=)?(\d+)/);

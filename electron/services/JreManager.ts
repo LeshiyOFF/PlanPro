@@ -1,13 +1,16 @@
-import { IJreManager, JreInfo, JreType, JreSearchResult } from './interfaces/IJreManager';
+/// <reference path="../types/index.d.ts" />
+
+import { ConfigService } from './ConfigService';
 import { SystemJreDetector } from './SystemJreDetector';
 import { EmbeddedJreService } from './EmbeddedJreService';
+import { IJreManager, JreType, JreSearchResult } from './interfaces/CommonTypes';
 
 /**
  * Основной сервис управления JRE (Java Runtime Environment)
  * Реализует интерфейс IJreManager согласно принципам Clean Architecture
  * Следует принципу Dependency Inversion из SOLID
  */
-export class JreManager implements IJreManager {
+export class JreManager {
   private readonly systemJreDetector: SystemJreDetector;
   private readonly embeddedJreService: EmbeddedJreService;
   private readonly minJavaVersion: string = '11';
@@ -47,8 +50,8 @@ export class JreManager implements IJreManager {
       const isInPath = await this.systemJreDetector.isJavaInPath();
       if (isInPath) {
         const pathFromEnv = await this.systemJreDetector.getJavaFromPath();
-        if (pathFromEnv && await this.validateJre(pathFromEnv)) {
-          return pathFromEnv;
+        if (pathFromEnv && await this.validateJre(pathFromEnv.executablePath || pathFromEnv.path)) {
+          return pathFromEnv.executablePath || pathFromEnv.path;
         }
       }
       
@@ -150,7 +153,7 @@ export class JreManager implements IJreManager {
       // Проверяем embedded JRE
       const embeddedPath = await this.embeddedJreService.getEmbeddedJavaPath();
       if (embeddedPath && embeddedPath === pathToValidate) {
-        return await this.embeddedJreService.validateEmbeddedJre(pathToValidate);
+        return await this.embeddedJreService.checkEmbeddedJreIntegrity();
       }
       
       // Проверяем системную Java
@@ -204,7 +207,11 @@ export class JreManager implements IJreManager {
       
       // Добавляем системные JRE
       const systemInstallations = await this.systemJreDetector.findSystemJavaInstallations();
-      jreList.push(...systemInstallations);
+      systemInstallations.forEach(installation => {
+        if (installation.executablePath || installation.path) {
+          jreList.push(installation);
+        }
+      });
       
       // Если рекомендуемый не выбран, выбираем лучшую системную версию
       if (!recommendedJre) {
@@ -221,16 +228,17 @@ export class JreManager implements IJreManager {
       }
       
       return {
-        jreList,
-        recommendedJre,
-        success: jreList.length > 0
+        systemJre: systemInstallations,
+        embeddedJre: null,
+        customJre: [],
+        recommendedJre
       };
     } catch (error) {
       return {
-        jreList: [],
-        recommendedJre: null,
-        success: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        systemJre: [],
+        embeddedJre: null,
+        customJre: [],
+        recommendedJre: null
       };
     }
   }
@@ -278,25 +286,27 @@ export class JreManager implements IJreManager {
   /**
    * Нормализует версию для сравнения
    */
-  private normalizeVersion(version: string): number[] {
+  private normalizeVersion(version: string): string {
     try {
-      // Удаляем нечисловые символы и преобразуем в массив чисел
+      // Удаляем нечисловые символы и возвращаем строку
       const cleanVersion = version.replace(/[^\d.]/g, '');
-      return cleanVersion.split('.').map(part => parseInt(part, 10)).filter(part => !isNaN(part));
+      return cleanVersion;
     } catch {
-      return [0];
+      return '0';
     }
   }
 
   /**
    * Сравнивает версии
    */
-  private compareVersions(version1: number[], version2: number[]): number {
-    const maxLength = Math.max(version1.length, version2.length);
+  private compareVersions(version1: string, version2: string): number {
+    const v1Parts = version1.split('.').map(part => parseInt(part, 10)).filter(part => !isNaN(part));
+    const v2Parts = version2.split('.').map(part => parseInt(part, 10)).filter(part => !isNaN(part));
+    const maxLength = Math.max(v1Parts.length, v2Parts.length);
     
     for (let i = 0; i < maxLength; i++) {
-      const v1 = version1[i] || 0;
-      const v2 = version2[i] || 0;
+      const v1 = v1Parts[i] || 0;
+      const v2 = v2Parts[i] || 0;
       
       if (v1 !== v2) {
         return v1 - v2;

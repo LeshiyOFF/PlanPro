@@ -1,0 +1,192 @@
+/* Стили для UserPreferences Container */
+.user-preferences-container {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.preferences-header {
+  padding: 1.5rem 2rem 1rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.1);
+  background: var(--card);
+}
+
+.preferences-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--foreground);
+}
+
+.preferences-description {
+  color: var(--muted-foreground);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.preferences-content {
+  padding: 1.5rem 2rem;
+  height: calc(100% - 120px);
+  overflow-y: auto;
+  background: white;
+  margin: 1.5rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border) / 0.25);
+  box-shadow: 0 10px 40px -15px rgba(0, 0, 0, 0.1);
+}
+
+.preferences-section {
+  margin-bottom: 1rem;
+}
+
+.preferences-section .grid {
+  gap: 1rem;
+}
+
+.preferences-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.preferences-dialog {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  min-width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.preferences-dialog h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.preferences-dialog p {
+  margin: 0 0 1.5rem 0;
+  color: var(--muted-foreground);
+}
+
+.preferences-file-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid hsl(var(--border) / 0.25);
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  transition: all 0.2s ease;
+}
+
+.preferences-file-input:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  outline: none;
+}
+
+.preferences-dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Анимации и переходы */
+.preferences-section {
+  transition: all 0.15s ease-in-out;
+}
+
+.preferences-section:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .preferences-header {
+    padding: 1rem 1rem 0.75rem;
+  }
+  
+  .preferences-content {
+    padding: 1rem;
+    height: calc(100% - 100px);
+  }
+  
+  .preferences-dialog {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .preferences-section .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Тёмная тема */
+@media (prefers-color-scheme: dark) {
+  .preferences-dialog {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  
+  .preferences-dialog p {
+    color: var(--muted-foreground);
+  }
+  
+  .preferences-file-input {
+    background: var(--muted);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+}
+
+/* Высокая контрастность */
+@media (prefers-contrast: high) {
+  .preferences-section {
+    border: 2px solid var(--border);
+  }
+  
+  .preferences-dialog {
+    border: 2px solid var(--foreground);
+  }
+}
+
+/* Фокус доступности */
+.preferences-section:focus-within {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.preferences-file-input:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Состояния форм */
+.preferences-section input:invalid {
+  border-color: var(--destructive);
+}
+
+.preferences-section input:focus:invalid {
+  box-shadow: 0 0 0 2px var(--destructive);
+}
+
+/* Уведомления об ошибках */
+.preferences-error {
+  color: var(--destructive);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.preferences-success {
+  color: var(--primary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}

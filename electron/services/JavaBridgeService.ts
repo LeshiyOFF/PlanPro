@@ -1,22 +1,28 @@
-import { EventEmitter } from 'events'
-import { ConfigService } from './ConfigService'
-import { JavaProcessManager } from './JavaProcessManager'
-import { JavaApiClient } from './JavaApiClient'
+
+
+import { EventEmitter } from 'events';
+import { ConfigService } from './ConfigService';
+import { JavaLauncher, IJavaLauncher, JavaLaunchOptions, ProcessInfo } from './JavaLauncher';
+import { JavaProcessManager } from './JavaProcessManager';
+import { JavaApiClient } from './JavaApiClient';
 
 /**
  * Сервис для взаимодействия с Java backend
  * Управляет интеграцией между процессами и API клиентом
  */
 export class JavaBridgeService extends EventEmitter {
-  private readonly processManager: JavaProcessManager
-  private readonly apiClient: JavaApiClient
+  private eventEmitter = new EventEmitter();
+  private readonly processManager: JavaProcessManager;
+  private apiClient: JavaApiClient;
+  private readonly config: ConfigService;
 
   constructor(config: ConfigService) {
-    super()
-    this.processManager = new JavaProcessManager(config)
-    this.apiClient = new JavaApiClient(config.getJavaApiPort())
+    super();
+    this.config = config;
+    this.processManager = new JavaProcessManager(config);
+    this.apiClient = new JavaApiClient(config.getJavaApiPort());
     
-    this.setupProcessListeners()
+    this.setupProcessListeners();
   }
 
   /**
@@ -24,79 +30,147 @@ export class JavaBridgeService extends EventEmitter {
    */
   public async initialize(): Promise<void> {
     try {
-      console.log('Initializing Java Bridge Service...')
-      await this.processManager.start()
-      console.log('Java Bridge Service initialized successfully')
+      console.log('[JavaBridgeService] Initializing Java Bridge Service...');
+      
+      // После start() порт может измениться, обновляем API клиент
+      await this.processManager.start();
+      
+      const actualPort = this.config.getJavaApiPort();
+      this.apiClient = new JavaApiClient(actualPort);
+      console.log(`[JavaBridgeService] API client reconfigured for port ${actualPort}`);
+      
+      console.log('[JavaBridgeService] Java Bridge Service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Java Bridge Service:', error)
-      throw error
+      console.error('[JavaBridgeService] Failed to initialize Java Bridge Service:', error);
+      throw error;
     }
   }
 
   /**
-   * Перезапуск Java процесса
+   * Остановка сервиса и всех связанных ресурсов.
+   * Гарантирует завершение Java-процесса перед выходом.
    */
-  public async restart(): Promise<void> {
-    await this.cleanup()
-    await this.initialize()
-  }
-
-  /**
-   * Остановка Java процесса
-   */
-  public async stop(): Promise<void> {
-    await this.processManager.stop()
-  }
-
-  /**
-   * Очистка ресурсов
-   */
-  public async cleanup(): Promise<void> {
+  public async shutdown(timeoutMs: number = 5000): Promise<void> {
     try {
-      await this.processManager.stop()
-      console.log('Java Bridge Service cleaned up successfully')
+      console.log('[JavaBridgeService] Shutting down Java Bridge Service...');
+      await this.processManager.stop(timeoutMs);
+      console.log('[JavaBridgeService] Java Bridge Service shut down successfully');
     } catch (error) {
-      console.error('Failed to cleanup Java Bridge Service:', error)
+      console.error('[JavaBridgeService] Failed to shutdown Java Bridge Service:', error);
+      throw error;
     }
   }
 
   /**
-   * Получение статуса Java процесса
+   * Настройка слушателей событий процесса
    */
-  public getStatus(): any {
-    return this.processManager.getStatus()
+  private setupProcessListeners(): void {
+    this.eventEmitter.on('started', () => {
+      try {
+        this.emit('javaProcessStarted', {
+          timestamp: new Date().toISOString(),
+          status: this.processManager.getStatus()
+        });
+      } catch (error) {
+        console.error('Failed to emit javaProcessStarted event:', error);
+      }
+    });
+
+    this.eventEmitter.on('stopped', () => {
+      try {
+        this.emit('javaProcessStopped', {
+          timestamp: new Date().toISOString(),
+          status: this.processManager.getStatus()
+        });
+      } catch (error) {
+        console.error('Failed to emit javaProcessStopped event:', error);
+      }
+    });
+
+    this.eventEmitter.on('status', (status) => {
+      try {
+        this.emit('statusChange', {
+          ...status,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Failed to emit statusChange event:', error);
+      }
+    });
+
+    this.eventEmitter.on('launchError', (errorData) => {
+      try {
+        this.emit('javaProcessError', {
+          ...errorData,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Failed to emit javaProcessError event:', error);
+      }
+    });
+
+    this.eventEmitter.on('errorDetails', (errorData) => {
+      try {
+        this.emit('javaErrorDetails', {
+          ...errorData,
+          timestamp: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error('Failed to emit javaErrorDetails event:', error);
+      }
+    });
+  }
+
+  public on(event: string, listener: (...args: any[]) => void): this {
+    this.eventEmitter.on(event, listener);
+    return this;
+  }
+
+  public emit(event: string, ...args: any[]): boolean {
+    return this.eventEmitter.emit(event, ...args);
   }
 
   /**
-   * Проверка здоровья Java процесса
+   * Получение текущего статуса
    */
-  public async checkHealth(): Promise<boolean> {
-    return await this.processManager.checkHealth()
+  public getStatus(): string {
+    return this.processManager.getStatus();
+  }
+
+  /**
+   * Проверка запущен ли процесс
+   */
+  public isRunning(): boolean {
+    return this.processManager.isRunning();
   }
 
   /**
    * Получение API клиента
    */
   public getApiClient(): JavaApiClient {
-    return this.apiClient
+    return this.apiClient;
   }
 
   /**
-   * Настройка слушателей событий
+   * Выполнение команды через Java API
    */
-  private setupProcessListeners(): void {
-    this.processManager.on('started', () => {
-      console.log('Java process started event received')
-      this.emit('javaProcessStarted')
-    })
+  public async executeCommand(command: string, args: any[] = []): Promise<any> {
+    try {
+      return await this.apiClient.makeRequest(command, args);
+    } catch (error) {
+      console.error('Command execution failed:', {
+        command,
+        args,
+        error: (error as Error).message
+      });
+      throw error;
+    }
+  }
 
-    this.processManager.on('stopped', () => {
-      console.log('Java process stopped event received')
-      this.emit('javaProcessStopped')
-    })
-
-    this.processManager.on('status', (status) => {
-      this.emit('statusChange', status)
-    })
+  /**
+   * Получение менеджера процессов для прямого доступа
+   */
+  public getProcessManager(): JavaProcessManager {
+    return this.processManager;
   }
 }

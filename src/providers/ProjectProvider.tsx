@@ -5,7 +5,24 @@ import { useResourceActions } from '../hooks/useResourceActions'
 import { useAssignmentActions } from '../hooks/useAssignmentActions'
 import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import { useProjectState } from '../hooks/useProjectState'
-import type { ProjectContextType, ProjectProviderProps } from '@/types/context-types'
+import { useProjectLibreAPI } from '../hooks/useProjectLibreAPI'
+
+// Master Functionality Catalog типы
+import type { 
+  ProjectContextType, 
+  ProjectProviderProps,
+  ProjectState,
+  TaskState,
+  ResourceState,
+  AssignmentState,
+  AppState,
+  Project,
+  Task,
+  Resource,
+  Assignment,
+  UIEvent,
+  ValidationResult
+} from '@/types'
 import { apiLogger } from '@/utils/logger'
 
 const ProjectContext = createContext<ProjectContextType | null>(null)

@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import { JreManager } from '../JreManager';
 import { ValidationResult } from '../interfaces/ValidationInterfaces';
 
@@ -26,7 +27,7 @@ export class JavaExecutableValidator {
         };
       }
 
-      const fs = require('fs');
+      // fs already imported at top
       if (!fs.existsSync(javaPath)) {
         return {
           isValid: false,

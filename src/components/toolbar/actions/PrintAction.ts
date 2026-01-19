@@ -1,0 +1,41 @@
+import { ToolbarAction } from './ToolbarAction';
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
+
+/**
+ * Действие для печати проекта
+ * Стандартная кнопка тулбара TB004
+ */
+export class PrintAction extends ToolbarAction {
+  constructor() {
+    super('TB004', 'Печать', '🖨️', 'Печать проекта (Ctrl+P)', 'Ctrl+P');
+  }
+
+  /**
+   * Выполняет печать проекта
+   */
+  execute(): void {
+    console.log('Печать проекта');
+    // TODO: Интеграция с системой печати
+    // Нужно подключить к PrintManager
+  }
+
+  /**
+   * Создаёт экземпляр кнопки для тулбара
+   */
+  createButton(): IToolbarButton {
+    return {
+      id: this.id,
+      label: this.label,
+      icon: this.icon,
+      tooltip: this.tooltip,
+      disabled: this.disabled,
+      onClick: () => this.execute(),
+      onKeyDown: (event: KeyboardEvent) => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+          event.preventDefault();
+          this.execute();
+        }
+      }
+    };
+  }
+}

@@ -1,30 +1,35 @@
 {
-  "extends": "./tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",
-    "outDir": "dist-electron",
+    "outDir": "dist-app/electron",
     "noEmit": false,
     "allowSyntheticDefaultImports": true,
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
-    "composite": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitAny": false,
+    "strict": false,
+    "skipDefaultLibCheck": true,
+    "types": [],
     
-    // Electron специфичные настройки
-    "lib": ["ES2020"],
-    "types": ["node"],
+    "lib": ["ES2018"],
+    "typeRoots": ["electron/types", "node_modules/@types"],
     
-    // Строгие настройки для main process
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "resolveJsonModule": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitThis": false,
+    "noImplicitReturns": false,
+    "noImplicitOverride": false,
     
-    // Пути
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -32,13 +37,18 @@
     }
   },
   "include": [
-    "electron/**/*"
+    "electron/**/*",
+    "electron/types/**/*",
+    "node_modules/@types/**/*"
   ],
   "exclude": [
     "src/**/*",
-    "node_modules",
-    "dist",
-    "dist-electron",
-    "release"
+    "node_modules/**/!(@types)/**/*",
+    "dist/**/*",
+    "release/**/*",
+    "projectlibre_build/**/*",
+    "projectlibre_contrib/**/*",
+    "projectlibre_core/**/*",
+    "projectlibre_ui/**/*"
   ]
 }

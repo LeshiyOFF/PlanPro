@@ -68,59 +68,77 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.projectlibre1.strings.Messages;
+import com.projectlibre1.ui.UIServiceAdapter;
 
 /**
  *
  */
 public class Alert {
 	public static void warn(Object errorObject) {
-		if (allowPopups())
-			warn(errorObject,getFrame());
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			warn(errorObject, null);
+		} else if (allowPopups()) {
+			warn(errorObject, getFrame());
+		}
 	}
 	public static void warn(Object errorObject, Component parent) {
 		System.out.println("warning message " + errorObject);
-
-		if (allowPopups())
-			JOptionPane.showMessageDialog(parent,errorObject, Messages.getContextString("Title.ProjectLibreWarning"),JOptionPane.WARNING_MESSAGE);
+		
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			UIServiceAdapter.getInstance().warn(errorObject);
+		} else if (allowPopups()) {
+			JOptionPane.showMessageDialog(parent, errorObject, 
+				Messages.getContextString("Title.ProjectLibreWarning"), JOptionPane.WARNING_MESSAGE);
+		}
 	}
 
 	public static void error(Object errorObject) {
-		if (allowPopups())
-			error(errorObject,getFrame());
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			error(errorObject, null);
+		} else if (allowPopups()) {
+			error(errorObject, getFrame());
+		}
 	}
 	public static void error(Object errorObject, Component parent) {
 		System.out.println("error message " + errorObject);
-
-		if (allowPopups())
-			JOptionPane.showMessageDialog(parent,errorObject, Messages.getContextString("Title.ProjectLibreError"),JOptionPane.ERROR_MESSAGE);
+		
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			UIServiceAdapter.getInstance().error(errorObject);
+		} else if (allowPopups()) {
+			JOptionPane.showMessageDialog(parent, errorObject, 
+				Messages.getContextString("Title.ProjectLibreError"), JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	public static int confirmYesNo(Object messageObject) {
-		if (!allowPopups())
-			return JOptionPane.NO_OPTION;
-		return JOptionPane.showConfirmDialog(getFrame(),
-		        messageObject,
-		        Messages.getContextString("Text.ApplicationTitle"),
-	            JOptionPane.YES_NO_OPTION);
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			return UIServiceAdapter.getInstance().confirm(messageObject, JOptionPane.YES_NO_OPTION);
+		} else if (allowPopups()) {
+			return JOptionPane.showConfirmDialog(getFrame(), messageObject,
+				Messages.getContextString("Text.ApplicationTitle"), JOptionPane.YES_NO_OPTION);
+		}
+		return JOptionPane.NO_OPTION;
 	}
 	public static int confirm(Object messageObject) {
-		if (!allowPopups())
-			return JOptionPane.NO_OPTION;
-		int result = JOptionPane.showConfirmDialog(getFrame(),
-		        messageObject,
-		        Messages.getContextString("Text.ApplicationTitle"),
-	            JOptionPane.YES_NO_CANCEL_OPTION);
-		if (result == JOptionPane.CLOSED_OPTION)
-			result = JOptionPane.CANCEL_OPTION;
-		return result;
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			return UIServiceAdapter.getInstance().confirm(messageObject, JOptionPane.YES_NO_CANCEL_OPTION);
+		} else if (allowPopups()) {
+			int result = JOptionPane.showConfirmDialog(getFrame(), messageObject,
+				Messages.getContextString("Text.ApplicationTitle"), JOptionPane.YES_NO_CANCEL_OPTION);
+			if (result == JOptionPane.CLOSED_OPTION)
+				result = JOptionPane.CANCEL_OPTION;
+			return result;
+		}
+		return JOptionPane.NO_OPTION;
 	}
 	public static boolean okCancel(Object messageObject) {
-		if (!allowPopups())
-			return true;
-
-		return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(getFrame(),
-		        messageObject,
-		        Messages.getContextString("Text.ApplicationTitle"),
-	            JOptionPane.OK_CANCEL_OPTION);
+		if (UIServiceAdapter.getInstance().hasDelegate()) {
+			int result = UIServiceAdapter.getInstance().confirm(messageObject, JOptionPane.OK_CANCEL_OPTION);
+			return result == JOptionPane.OK_OPTION;
+		} else if (allowPopups()) {
+			return JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(getFrame(), messageObject,
+				Messages.getContextString("Text.ApplicationTitle"), JOptionPane.OK_CANCEL_OPTION);
+		}
+		return true;
 	}
 
 	public static String renameProject(final String name,Set projectNames,boolean saveAs){
@@ -167,6 +185,10 @@ public class Alert {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static interface Method {
+		public Object execute(Object[] args);
 	}
 
 	public static void warnWithOnceOption(Object object,String preference) {

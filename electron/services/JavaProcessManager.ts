@@ -1,263 +1,274 @@
-import { EventEmitter } from 'events'
-import { ConfigService } from './ConfigService'
-import { JavaLauncher } from './JavaLauncher'
-import { JavaProcessValidator } from './JavaProcessValidator'
-import { CommandLineTester } from './CommandLineTester'
-import { ProcessEventHandler } from './interfaces/IJavaLauncher'
+/// <reference path="../types/index.d.ts" />
+
+import { EventEmitter } from 'events';
+import { JavaLauncher, IJavaLauncher, JavaLaunchOptions, ProcessInfo } from './JavaLauncher';
+import { JavaLauncherError } from './JavaLauncherError';
+import { ConfigService } from './ConfigService';
+import { IConfigService } from './interfaces/IConfigService';
+import { JavaProcessValidator } from './JavaProcessValidator';
+import { JreInfo, ISystemJreDetector } from './interfaces/CommonTypes';
+import { ProcessStatus, ConfigurationInfo, ProcessStatusInfo } from './types/JavaProcessManagerTypes';
+import { JreDetectorFactory } from './factories/JreDetectorFactory';
+import { LaunchParameterValidator } from './validators/LaunchParameterValidator';
+import { ProcessErrorHandler } from './handlers/ProcessErrorHandler';
 
 /**
  * Менеджер Java процесса
  * Следует принципу Single Responsibility из SOLID
- * Использует новые сервисы для управления Java процессами
  */
 export class JavaProcessManager extends EventEmitter {
-  private javaLauncher: JavaLauncher
-  private validator: JavaProcessValidator
-  private commandLineTester: CommandLineTester
-  private config: ConfigService
-  private status = {
-    running: false,
-    port: 8080,
-    pid: null as number | null,
-    isStarting: false,
-    isStopping: false,
-    error: null as Error | null
-  }
+  private eventEmitter = new EventEmitter();
+  private readonly javaLauncher: IJavaLauncher;
+  private readonly config: IConfigService;
+  private readonly systemJreDetector: ISystemJreDetector;
+  private status: ProcessStatus;
 
-  constructor(config: ConfigService) {
-    super()
-    this.config = config
-    this.javaLauncher = new JavaLauncher()
-    this.validator = new JavaProcessValidator()
-    this.commandLineTester = new CommandLineTester()
-    this.status.port = this.config.getJavaApiPort()
+  constructor(config: IConfigService, systemJreDetector?: ISystemJreDetector) {
+    super();
+    this.config = config;
+    this.javaLauncher = new JavaLauncher(config as ConfigService);
+    this.systemJreDetector = systemJreDetector || JreDetectorFactory.createDefaultJreDetector();
+    this.status = {
+      running: false,
+      port: this.config.getJavaApiPort(),
+      pid: null,
+      isStarting: false,
+      isStopping: false,
+      error: null
+    };
   }
 
   /**
    * Запуск Java процесса
    */
-  async start(): Promise<void> {
-    try {
-      console.log('Starting Java process...')
-      
-      const jarPath = this.config.getProjectLibreJarPath()
-      console.log('JAR path:', jarPath)
-      
-      // Валидация конфигурации запуска
-      const validation = await this.validator.validateLaunchConfig(jarPath, {
-        memory: { min: 512, max: 1024 },
-        timeout: 30000,
-        env: {
-          PROJECTLIBRE_MODE: 'electron',
-          SPRING_PROFILES_ACTIVE: 'electron'
-        }
-      })
-      
-      if (!validation.isValid) {
-        throw new Error(validation.errorMessage || 'Java launch validation failed')
-      }
-      
-      const launchOptions = {
-        memory: { min: 512, max: 1024 },
-        timeout: 30000,
-        redirectOutput: true,
-        env: {
-          PROJECTLIBRE_MODE: 'electron',
-          SPRING_PROFILES_ACTIVE: 'electron'
-        },
-        jvmOptions: [
-          `-Dserver.port=${this.status.port}`,
-          '-Dspring.profiles.active=electron'
-        ]
-      }
-      
-      this.status.isStarting = true
-      this.emit('status', this.status)
-      
-      const result = await this.javaLauncher.launchJar(jarPath, [
-        '--server.port=' + this.status.port,
-        '--spring.profiles.active=electron'
-      ], launchOptions)
-      
-      if (!result.success || !result.process) {
-        this.status.isStarting = false
-        this.status.error = new Error(result.errorMessage || 'Failed to start Java process')
-        this.emit('status', this.status)
-        throw new Error(result.errorMessage || 'Failed to start Java process')
-      }
-      
-      this.status.pid = result.pid || null
-      this.setupProcessHandlers(result.process)
-      
-      console.log('Java process started successfully with PID:', result.pid)
-    } catch (error) {
-      this.status.isStarting = false
-      this.status.error = error instanceof Error ? error : new Error('Unknown error')
-      this.emit('status', this.status)
-      throw error
+  public async start(): Promise<void> {
+    if (this.status.running) {
+      throw new Error('Java process is already running');
     }
-  }
 
-  /**
-   * Остановка Java процесса
-   */
-  async stop(): Promise<void> {
-    if (!this.status.pid) {
-      return
-    }
-    
-    this.status.isStopping = true
-    this.emit('status', this.status)
-    
+    this.status.isStarting = true;
+    this.eventEmitter.emit('status', this.status);
+
     try {
-      // Получаем информацию о процессе для остановки
-      const processes = this.javaLauncher.getActiveProcesses()
-      const currentProcess = processes.find(p => p.pid === this.status.pid)
-      
-      if (currentProcess) {
-        // Создаем моковый процесс для остановки (в реальной реализации нужно хранить ссылки)
-        const mockProcess = { 
-          pid: this.status.pid, 
-          kill: () => {} 
-        } as any
-        
-        const stopped = await this.javaLauncher.stopProcess(mockProcess, 10000)
-        
-        if (stopped) {
-          this.status.running = false
-          this.status.isStopping = false
-          this.status.pid = null
-          this.emit('stopped')
-          this.emit('status', this.status)
-        } else {
-          throw new Error('Failed to stop Java process gracefully')
+      // КРИТИЧНО: Резервируем свободный порт перед запуском Java
+      console.log('[JavaProcessManager] Resolving available ports...');
+      await (this.config as any).resolveAvailablePorts();
+      this.status.port = this.config.getJavaApiPort();
+      console.log(`[JavaProcessManager] Using port: ${this.status.port}`);
+
+      // Валидация Java файлов перед запуском
+      const validation = this.config.validateJavaFiles();
+      if (!validation.valid) {
+        const error = new Error(validation.error || 'Java files validation failed');
+        throw error;
+      }
+
+      // Формируем опции запуска в зависимости от режима (dev vs production)
+      const launchOptions: JavaLaunchOptions = {
+        port: this.status.port,
+        // ВАЖНО: Не передаем jvmOptions здесь, так как JavaLauncher.launch()
+        // сам добавляет дефолтные аргументы из ConfigService.
+        // Передаем только специфичные для этого процесса опции, если они есть.
+        jvmOptions: []
+      };
+
+      // Проверяем режим через ConfigService
+      const configService = this.config as any;
+      if (configService.isExecutableJarMode && configService.isExecutableJarMode()) {
+        // Production: используем executable JAR
+        const jarPath = configService.getExecutableJarPath();
+        if (!jarPath) {
+          throw new Error('Executable JAR mode enabled but JAR path is null');
         }
+        launchOptions.executableJarPath = jarPath;
+        console.log(`[JavaProcessManager] Using executable JAR mode: ${jarPath}`);
+      } else {
+        // Development: используем classpath
+        const classpath = this.config.getClasspath();
+        const mainClass = this.config.getMainClass();
+        
+        if (!classpath || !mainClass) {
+          throw new Error('Classpath mode requires both classpath and mainClass');
+        }
+        
+        // Валидация реальных путей и классов (только для classpath режима)
+        LaunchParameterValidator.validateLaunchParameters(classpath, mainClass);
+        
+        launchOptions.classpath = classpath;
+        launchOptions.mainClass = mainClass;
+        console.log(`[JavaProcessManager] Using classpath mode`);
+      }
+      
+      LaunchParameterValidator.validatePorts(this.config.getJavaApiPort(), this.config.getJavaPort());
+
+      const processInfo = await this.javaLauncher.launch(launchOptions);
+
+      this.status.running = true;
+      this.status.pid = processInfo.pid;
+      this.status.isStarting = false;
+      
+      this.eventEmitter.emit('started');
+      this.eventEmitter.emit('status', this.status);
+      
+      console.log(`✅ Java process started with PID: ${processInfo.pid}`);
+      if (launchOptions.executableJarPath) {
+        console.log(`📦 Using executable JAR: ${launchOptions.executableJarPath}`);
+      } else {
+        console.log(`📋 Using main class: ${launchOptions.mainClass}`);
+        console.log(`📁 Using classpath: ${launchOptions.classpath}`);
       }
     } catch (error) {
-      this.status.error = error instanceof Error ? error : new Error('Stop failed')
-      this.emit('status', this.status)
-      throw error
+      this.handleLaunchError(error as Error);
     }
   }
 
   /**
-   * Получение статуса
+   * Получение JVM опций через ConfigService
    */
-  getStatus(): any {
-    return { ...this.status }
+  private getJvmOptions(): string[] {
+    return (this.config as ConfigService).getDefaultJvmArgs();
   }
 
   /**
-   * Проверка доступности Java процесса
+   * Обработка ошибок запуска с использованием JavaLauncherError
    */
-  async checkHealth(): Promise<boolean> {
-    return this.status.running && this.status.pid !== null
+  private handleLaunchError(error: Error): void {
+    this.status.isStarting = false;
+    this.status.error = error;
+    
+    this.eventEmitter.emit('status', this.status);
+    
+    // Расширенная обработка ошибок на основе JavaLauncherError
+    ProcessErrorHandler.logLaunchError(error, {
+      classpath: this.config.getClasspath(),
+      mainClass: this.config.getMainClass()
+    });
+    
+    ProcessErrorHandler.emitEnhancedErrorEvents(error, this.eventEmitter, {
+      classpath: this.config.getClasspath(),
+      mainClass: this.config.getMainClass()
+    });
+    
+    throw error;
+  }
+
+  /**
+   * Остановка Java процесса с поддержкой таймаута и гарантированного завершения.
+   */
+  public async stop(timeoutMs: number = 5000): Promise<void> {
+    if (!this.status.running) {
+      return;
+    }
+
+    this.status.isStopping = true;
+    this.emit('status', this.status);
+
+    try {
+      if (this.status.pid) {
+        await this.javaLauncher.stop(this.status.pid, timeoutMs);
+      }
+      
+      this.status.running = false;
+      this.status.pid = null;
+      this.status.isStopping = false;
+      this.status.error = null;
+      
+      this.eventEmitter.emit('stopped');
+      this.eventEmitter.emit('status', this.status);
+      
+      console.log(`[JavaProcessManager] Java process (PID: ${this.status.pid}) stopped successfully.`);
+    } catch (error) {
+      this.status.isStopping = false;
+      this.status.error = error as Error;
+      
+      this.eventEmitter.emit('status', this.status);
+      console.error('[JavaProcessManager] Error during process stop:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Получение текущего статуса
+   */
+  public getStatus(): string {
+    if (this.status.isStarting) return 'Starting';
+    if (this.status.isStopping) return 'Stopping';
+    if (this.status.running) return 'Running';
+    if (this.status.error) return 'Error';
+    return 'Stopped';
+  }
+
+  /**
+   * Проверка запущен ли процесс
+   */
+  public isRunning(): boolean {
+    return this.status.running;
+  }
+
+  /**
+   * Получение PID процесса
+   */
+  public getPid(): number | null {
+    return this.status.pid;
   }
 
   /**
    * Получение порта
    */
-  getPort(): number {
-    return this.status.port
+  public getPort(): number {
+    return this.status.port;
   }
 
   /**
-   * Проверка, запущен ли процесс
+   * Получение детальной информации о конфигурации
    */
-  isRunning(): boolean {
-    return this.status.running
+  public getConfigurationInfo(): ConfigurationInfo {
+    return {
+      apiPort: this.config.getJavaApiPort(),
+      managementPort: this.config.getJavaPort(),
+      isDevelopment: this.config.isDevelopment(),
+      classpath: this.config.getClasspath(),
+      mainClass: this.config.getMainClass(),
+      resourcesPath: this.config.getResourcesPath()
+    };
   }
 
   /**
-   * Настройка обработчиков событий процесса
+   * Получение информации о запущенном процессе
    */
-  private setupProcessHandlers(process: any): void {
-    if (!process) {
-      return
-    }
-
-    const eventHandlers: ProcessEventHandler = {
-      onStart: (proc) => {
-        console.log('Java process started with PID:', proc.pid)
-        this.status.running = true
-        this.status.isStarting = false
-        this.emit('started')
-        this.emit('status', this.status)
-      },
-      onStop: (code, signal) => {
-        console.log(`Java process stopped with code ${code}, signal ${signal}`)
-        this.status.running = false
-        this.status.isStarting = false
-        this.status.isStopping = false
-        this.status.pid = null
-        this.emit('stopped')
-        this.emit('status', this.status)
-      },
-      onError: (error) => {
-        console.error('Java process error:', error)
-        this.status.isStarting = false
-        this.status.error = error
-        this.emit('status', this.status)
-      },
-      onOutput: (data, type) => {
-        if (type === 'stdout') {
-          console.log(`Java stdout: ${data}`)
-        } else {
-          console.log(`Java stderr: ${data}`)
-        }
-      }
-    }
-
-    // Устанавливаем обработчики через JavaLauncher
-    this.javaLauncher.launchWithConfig({
-      javaPath: '', // Будет определен в JavaLauncher
-      jarPath: this.config.getProjectLibreJarPath()
-    }, eventHandlers)
+  public getProcessInfo(): ProcessStatusInfo {
+    return {
+      status: this.getStatus(),
+      pid: this.getPid(),
+      port: this.getPort(),
+      running: this.isRunning(),
+      error: this.status.error?.message || null,
+      configuration: this.getConfigurationInfo()
+    };
   }
 
   /**
-   * Запуск командной строки тестирования
+   * Получение информации об ошибке
    */
-  async runCommandLineTest(): Promise<void> {
-    try {
-      console.log('Running command line Java test...')
-      
-      const testResult = await this.commandLineTester.runFullCommandLineTest({
-        jarPath: this.config.getProjectLibreJarPath(),
-        testSystemJava: true,
-        testEmbeddedJre: true,
-        verbose: true,
-        testTimeout: 15000
-      })
-      
-      console.log('Command line test completed:', testResult)
-      
-      if (testResult.success) {
-        this.emit('test-completed', testResult)
-      } else {
-        this.emit('test-failed', testResult)
-      }
-      
-      const report = this.commandLineTester.generateTestReport(testResult)
-      console.log('Test Report:\n', report)
-      
-    } catch (error) {
-      console.error('Command line test failed:', error)
-      this.emit('test-failed', error)
-    }
+  public getError(): Error | null {
+    return this.status.error;
   }
 
   /**
-   * Получение информации о JRE
+   * Перезапуск процесса
    */
-  async getJreInfo(): Promise<any> {
-    return await this.config.getJreInfo()
+  public async restart(): Promise<void> {
+    await this.stop();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await this.start();
   }
 
-  /**
-   * Проверка доступности JRE
-   */
-  async isJreAvailable(): Promise<boolean> {
-    return await this.config.isJreAvailable()
+  public on(event: string, listener: (...args: any[]) => void): this {
+    this.eventEmitter.on(event, listener);
+    return this;
+  }
+
+  public emit(event: string, ...args: any[]): boolean {
+    return this.eventEmitter.emit(event, ...args);
   }
 }

@@ -1,0 +1,33 @@
+# ProjectLibre API Test Environment Dockerfile
+FROM openjdk:17-jdk-slim
+
+LABEL maintainer="ProjectLibre Team"
+LABEL version="1.0.0"
+LABEL description="Test environment for ProjectLibre API with observability"
+
+# Set working directory
+WORKDIR /app
+
+# Create application directory
+RUN mkdir -p /app/logs
+
+# Copy compiled application
+COPY target/projectlibre-api-*.jar app.jar
+
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && chmod 755 /app/logs
+
+# Environment variables for testing
+ENV SPRING_PROFILES_ACTIVE=test
+ENV JAVA_OPTS="-Xmx512m -Xms256m"
+ENV LOG_LEVEL=INFO
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/api/health || exit 1
+
+# Expose port
+EXPOSE 8080
+
+# Run the application
+CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=test"]

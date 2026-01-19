@@ -210,14 +210,28 @@
 		<if>
  			<equals arg1="${build_contrib}" arg2="true" />
  			<then>
- 			 	<mkdir dir="${dist}/lib"/>
+ 		 	<mkdir dir="${dist}/lib"/>
  				  <copy todir="${dist}/lib">
  				    <fileset dir="../projectlibre_contrib/">
  				    	<include name="*.jar" />
  				  	</fileset>
  				  </copy>
+				  
+				  <!-- Create runtime JARs -->
+				  <copy todir="${dist}/lib-runtime">
+					  <fileset dir="${dist}">
+						  <include name="*.jar" />
+					  </fileset>
+				  </copy>
+				  
+				  <!-- Copy runtime JARs to release directory -->
+				  <copy todir="../release/java/lib" failonerror="false">
+					  <fileset dir="${dist}/lib-runtime">
+						  <include name="*.jar" />
+					  </fileset>
+				  </copy>
 			</then>
-  		</if>
+ 		</if>
 	</target>
 
 	<target name="fatjar"  depends="dist">

@@ -55,6 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.pm.task;
 
+import java.awt.GraphicsEnvironment;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -277,7 +278,10 @@ public class ProjectFactory {
 		}else recover=false;
 
 		if (job==null) job=session.getLoadProjectJob(opt);
-		job.addSwingRunnable(new JobRunnable("Local: addProject"){
+		
+		// Headless mode: use regular runnable (no EDT dependency)
+		// GUI mode: use SwingRunnable for thread safety with Swing components
+		JobRunnable addProjectRunnable = new JobRunnable("Local: addProject"){
 			public Object run() throws Exception{
 				Project project=(Project)getPreviousResult();
 				if (!recover){
@@ -296,12 +300,27 @@ public class ProjectFactory {
 				}
 				return project;
 			}
-		},false);
+		};
+		
+		if (GraphicsEnvironment.isHeadless()) {
+			System.out.println("[ProjectFactory] Headless mode: using regular runnable for addProject");
+			job.addRunnable(addProjectRunnable, false);
+		} else {
+			job.addSwingRunnable(addProjectRunnable, false);
+		}
+		
 		if (opt.isSync()) job.addSync();
 		session.schedule(job);
 		try {
 			return (opt.isSync())?(Project)job.waitResult():null;
-		} catch (Exception e) {//Forward exception + Alert
+		} catch (Exception e) {
+			// Log exception with details before returning null
+			System.err.println("❌ ERROR in ProjectFactory.openProject:");
+			System.err.println("   File: " + (opt.getFileName() != null ? opt.getFileName() : "null"));
+			System.err.println("   Sync: " + opt.isSync());
+			System.err.println("   Importer: " + (opt.getImporter() != null ? opt.getImporter() : "null"));
+			System.err.println("   Exception: " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		}
 	}

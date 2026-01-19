@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Created-By: ProjectLibre Build System
+Implementation-Title: ProjectLibre Core
+Implementation-Version: 1.0.0
+Implementation-Vendor: ProjectLibre Team

@@ -1,0 +1,227 @@
+/* Стили для Toolbar Container */
+.toolbar-container {
+  display: flex;
+  flex-direction: column;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 4px;
+  gap: 4px;
+  user-select: none;
+}
+
+/* Группа кнопок тулбара */
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.toolbar-group:not(:last-child) {
+  border-right: 1px solid #dee2e6;
+  margin-right: 8px;
+  padding-right: 8px;
+}
+
+/* Кнопка тулбара */
+.toolbar-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #495057;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  gap: 4px;
+}
+
+.toolbar-button:hover {
+  background: #e9ecef;
+  border-color: #ced4da;
+}
+
+.toolbar-button:focus {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 1px;
+}
+
+.toolbar-button:active {
+  background: #dee2e6;
+  transform: translateY(1px);
+}
+
+.toolbar-button-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toolbar-button-disabled:hover {
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+}
+
+/* Активное состояние кнопки */
+.toolbar-button-active {
+  background: hsl(var(--primary));
+  color: white;
+  border-color: rgba(31, 31, 31, 0.9);
+}
+
+.toolbar-button-active:hover {
+  background: rgba(31, 31, 31, 0.9);
+}
+
+/* Иконка кнопки */
+.toolbar-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  min-width: 16px;
+}
+
+/* Метка кнопки */
+.toolbar-button-label {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Dropdown контейнер */
+.toolbar-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Стрелка dropdown */
+.toolbar-dropdown-arrow {
+  font-size: 8px;
+  margin-left: 2px;
+  opacity: 0.7;
+}
+
+/* Меню dropdown */
+.toolbar-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 160px;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: none;
+}
+
+.toolbar-dropdown:hover .toolbar-dropdown-menu {
+  display: block;
+}
+
+/* Элемент dropdown меню */
+.toolbar-dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  gap: 8px;
+  font-size: 12px;
+  color: #495057;
+}
+
+.toolbar-dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.toolbar-dropdown-item:first-child {
+  border-radius: 4px 4px 0 0;
+}
+
+.toolbar-dropdown-item:last-child {
+  border-radius: 0 0 4px 4px;
+}
+
+/* Иконка элемента dropdown */
+.toolbar-dropdown-icon {
+  font-size: 12px;
+  min-width: 16px;
+  text-align: center;
+}
+
+/* Метка элемента dropdown */
+.toolbar-dropdown-label {
+  flex: 1;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .toolbar-container {
+    padding: 2px;
+    gap: 2px;
+  }
+  
+  .toolbar-button {
+    min-width: 28px;
+    height: 28px;
+    padding: 2px 6px;
+    font-size: 11px;
+  }
+  
+  .toolbar-button-label {
+    display: none;
+  }
+  
+  .toolbar-group {
+    gap: 1px;
+    padding: 1px;
+  }
+}
+
+/* Тёмная тема (если понадобится) */
+@media (prefers-color-scheme: dark) {
+  .toolbar-container {
+    background: #343a40;
+    border-bottom-color: #495057;
+  }
+  
+  .toolbar-group {
+    background: rgba(52, 58, 64, 0.8);
+    border-right-color: #495057;
+  }
+  
+  .toolbar-button {
+    color: #f8f9fa;
+  }
+  
+  .toolbar-button:hover {
+    background: #495057;
+    border-color: #6c757d;
+  }
+  
+  .toolbar-dropdown-menu {
+    background: #343a40;
+    border-color: #6c757d;
+  }
+  
+  .toolbar-dropdown-item {
+    color: #f8f9fa;
+  }
+  
+  .toolbar-dropdown-item:hover {
+    background: #495057;
+  }
+}

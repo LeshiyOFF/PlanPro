@@ -59,6 +59,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -73,7 +75,7 @@ import com.projectlibre1.session.FileHelper;
 
 public class ConfigurationFile {
 	   
-	private static final String[] OPENPROJ_CONF_DIRS={".projectlibre","ProjectLibre"};
+	private static final String[] OPENPROJ_CONF_DIRS={".planpro",".projectlibre","ПланПро","ProjectLibre"};
 	private static File confFile;
 	public static File getConfDir(){
 		if (confFile==null){
@@ -88,12 +90,20 @@ public class ConfigurationFile {
 	        			return f;
 	        		}
 	    		}
+	    		// Пытаемся также искать в стандартном месте Linux (~/.config/planpro)
+	    		if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+	    			f = new File(home + File.separator + ".config" + File.separator + "planpro");
+	    			if (f.isDirectory()) {
+	    				confFile = f;
+	    				return f;
+	    			}
+	    		}
 	     	}
 		}
     	return confFile;
 	}
 	
-	private static final String OPENPROJ_CONF_FILE="projectlibre.conf";
+	private static final String OPENPROJ_CONF_FILE="planpro.conf";
 	private static Properties confProps;
 	public static String getProperty(String key){
 		if ("locale".equals(key)) {
@@ -108,10 +118,8 @@ public class ConfigurationFile {
 			File f=new File(confDir,OPENPROJ_CONF_FILE);
 			if (!f.exists()) return null;
 			confProps=new Properties();
-			try {
-				FileInputStream in=new FileInputStream(f);
-				confProps.load(in);
-				in.close();
+			try (InputStreamReader reader = new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8)) {
+				confProps.load(reader);
 			} catch (Exception e) {}
 		}
 		return confProps.getProperty(key);

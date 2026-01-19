@@ -20,6 +20,16 @@ export interface Task {
   wbs?: string
   level: number
   position: number
+  baselineStart?: Date
+  baselineFinish?: Date;
+  finishVariance?: number; // в миллисекундах или днях
+  estimated?: boolean; // Флаг оценочного срока
+  segments?: TaskSegment[];
+}
+
+export interface TaskSegment {
+  start: Date;
+  finish: Date;
 }
 
 export interface Dependency {

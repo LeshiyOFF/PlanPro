@@ -1538,7 +1538,7 @@ public class Serializer {
 
     protected File tmpDir=null;
     protected void initTmpDir() throws IOException{
-    	tmpDir=new File(System.getProperty("user.home"),"projectlibre_tmp");
+    	tmpDir=new File(System.getProperty("user.home"),"planpro_tmp");
     	if (tmpDir.isDirectory()){
     		File[] files=tmpDir.listFiles();
     		if (files!=null) for (int i=0;i<files.length;i++) files[i].delete();

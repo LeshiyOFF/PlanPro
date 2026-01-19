@@ -353,7 +353,7 @@ public final class MPD9DatabaseReader extends MPD9AbstractReader
          {
             String fileName = subProjectFileName;
             int offset = 0x01000000 + (subprojectIndex * 0x00400000);
-            int index = subProjectFileName.lastIndexOf('\\');
+            int index = Math.max(subProjectFileName.lastIndexOf('\\'), subProjectFileName.lastIndexOf('/'));
             if (index != -1)
             {
                fileName = subProjectFileName.substring(index + 1);

@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Implementation-Title: ProjectLibre REST API
+Implementation-Version: 1.0.0
+Implementation-Vendor: ProjectLibre Team
+Built-By: System
+Built-On: Windows
+Main-Class: com.projectlibre.api.ProjectLibreApiApplication
+Class-Path: .

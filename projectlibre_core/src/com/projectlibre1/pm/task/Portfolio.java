@@ -55,6 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.pm.task;
 
+import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -154,13 +155,23 @@ public class Portfolio implements Document, NodeModelDataFactory {
 		}
 
 	   	Job addProjectJob=new Job(SessionFactory.getInstance().getSession(project.isLocal()).getJobQueue(),"addProject","Adding project...",false);
-	   	addProjectJob.addSwingRunnable(new JobRunnable("Local: addProject",1.0f){
+	   	
+	   	// Headless mode: use regular runnable (no EDT dependency)
+	   	// GUI mode: use SwingRunnable for thread safety with Swing components
+	   	JobRunnable portfolioAddRunnable = new JobRunnable("Local: addProject",1.0f){
     		public Object run() throws Exception{
     			_addProject(project);
     			setProgress(1.0f);
     			return null;
     		}
-    	});
+    	};
+    	
+    	if (GraphicsEnvironment.isHeadless()) {
+    		System.out.println("[Portfolio] Headless mode: using regular runnable for addProject");
+    		addProjectJob.addRunnable(portfolioAddRunnable);
+    	} else {
+    		addProjectJob.addSwingRunnable(portfolioAddRunnable);
+    	}
 //    	job.addExceptionRunnable(new JobRunnable("Local: exception"){
 //    		public Object run() throws Exception{
 //    			Alert.error(Messages.getString("Message.serverError"));

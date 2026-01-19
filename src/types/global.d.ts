@@ -1,7 +1,0 @@
-import { ElectronAPI } from './api-types'
-
-declare global {
-  interface Window {
-    electronAPI?: ElectronAPI
-  }
-}

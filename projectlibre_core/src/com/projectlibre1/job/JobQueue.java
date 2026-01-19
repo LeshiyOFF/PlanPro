@@ -57,6 +57,7 @@ package com.projectlibre1.job;
 
 import java.awt.Component;
 import java.awt.Frame;
+import java.awt.GraphicsEnvironment;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.HashSet;
@@ -68,6 +69,9 @@ import javax.swing.event.EventListenerList;
 import org.apache.commons.collections.Closure;
 
 import com.projectlibre1.util.Environment;
+import com.projectlibre1.progress.IProgressMonitor;
+import com.projectlibre1.progress.SilentProgressMonitor;
+import com.projectlibre1.progress.SwingProgressMonitor;
 
 
 /**
@@ -118,6 +122,10 @@ public class JobQueue extends ThreadGroup{
 
 
 	public ExtendedProgressMonitor getProgressMonitor(String name,Component component){
+		if (GraphicsEnvironment.isHeadless()) {
+			return null;
+		}
+		
 		if (component==null) component=getComponent();
 		if (component==null)
 			return null;
@@ -128,8 +136,29 @@ public class JobQueue extends ThreadGroup{
 
 	    progressMonitor.setMillisToPopup(0);
 	    progressMonitor.setMillisToDecideToPopup(0);
-	    //progressMonitor.setMillisToDecideToPopup(2000);
 	    return progressMonitor;
+	}
+	
+	public IProgressMonitor getProgressMonitorInterface(String name, Component component) {
+		if (GraphicsEnvironment.isHeadless()) {
+			System.out.println("[JobQueue] Headless mode: using SilentProgressMonitor for: " + name);
+			return new SilentProgressMonitor(name, true);
+		}
+		
+		if (component == null) component = getComponent();
+		if (component == null) {
+			System.out.println("[JobQueue] No component available: using SilentProgressMonitor for: " + name);
+			return new SilentProgressMonitor(name, true);
+		}
+		
+		ExtendedProgressMonitor extendedMonitor = new ExtendedProgressMonitor(
+			component, name, "", 0, MAX_PROGRESS
+		);
+		extendedMonitor.setProgress(0);
+		extendedMonitor.setMillisToPopup(0);
+		extendedMonitor.setMillisToDecideToPopup(0);
+		
+		return new SwingProgressMonitor(extendedMonitor);
 	}
 
 	protected void enableComponent(boolean enabled){

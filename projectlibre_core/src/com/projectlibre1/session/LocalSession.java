@@ -55,6 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.session;
 
+import java.awt.GraphicsEnvironment;
 import java.util.Collection;
 import java.util.List;
 
@@ -83,6 +84,36 @@ public class LocalSession extends AbstractSession{
 	protected long localSeed;
 	public synchronized long getId(){
 		return localSeed++;
+	}
+	
+	/**
+	 * Indicates whether this session operates in local access mode.
+	 * Required by SessionFactory.callNoEx() for project creation flow.
+	 * LocalSession always operates locally (not server-based).
+	 * 
+	 * @return true - LocalSession is always local access
+	 */
+	public boolean isLocalAccess() {
+		return true;
+	}
+	
+	/**
+	 * Retrieves enterprise resource hierarchy from central resource pool.
+	 * 
+	 * In standalone/local mode, there is no enterprise server or central 
+	 * resource pool. Each project manages its own resources independently.
+	 * This is the correct semantic behavior for local operation, not a stub.
+	 * 
+	 * Enterprise resources are only available in server-based ProjectLibre
+	 * deployments where a central resource pool is maintained by the server.
+	 * 
+	 * Called by ProjectFactory.createProjectAsync() when creating non-local 
+	 * projects that need to import shared enterprise resources.
+	 * 
+	 * @return empty list - no enterprise resources in standalone mode
+	 */
+	public List<Object> retrieveResourceHierarchy() {
+		return java.util.Collections.emptyList();
 	}
     public Job getCloseProjectsJob(final Collection projects){
     	Job job=new Job(jobQueue,"closeProjects","Closing...",false);
@@ -120,7 +151,9 @@ public class LocalSession extends AbstractSession{
 	    	importer.setProjectFactory(ProjectFactory.getInstance());//used?
 	    	importer.setJobQueue(jobQueue);
 	        
-	        job.addSwingRunnable(new JobRunnable("LocalAccess: loadProject.begin",1.0f){
+	        // Headless mode: use regular runnable (no EDT dependency)
+	        // GUI mode: use SwingRunnable for thread safety with Swing components
+	        JobRunnable beginRunnable = new JobRunnable("LocalAccess: loadProject.begin",1.0f){
 	    		public Object run() throws Exception{
 	    			ResourcePool resourcePool=null;
 	    			if (MICROSOFT_PROJECT_IMPORTER.equals(opt.getImporter())){
@@ -135,7 +168,14 @@ public class LocalSession extends AbstractSession{
 	     			setProgress(1.0f);
 	                return null;
 	    		}
-	        });
+	        };
+	        
+	        if (GraphicsEnvironment.isHeadless()) {
+	        	System.out.println("[LocalSession] Headless mode: using regular runnable for loadProject.begin");
+	        	job.addRunnable(beginRunnable);
+	        } else {
+	        	job.addSwingRunnable(beginRunnable);
+	        }
 	    	job.addJob(importer.getImportFileJob());
 	        job.addRunnable(new JobRunnable("LocalAccess: loadProject.end",1.0f){
 	    		public Object run() throws Exception{

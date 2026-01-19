@@ -66,8 +66,10 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -76,7 +78,6 @@ import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -645,7 +646,7 @@ public final class LocaleDialog extends AbstractDialog {
             
             String text=getFileContent(in, "ISO-8859-1",true);
             File target = new File(generatedDir,file+".txt");
-            FileWriter out = new FileWriter(target);
+            OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(target), StandardCharsets.UTF_8);
             out.write(text);
             out.close();            	   
         } catch (IOException e) {

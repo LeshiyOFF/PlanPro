@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import type { Project, ProjectStatus } from '@/types/project-types'
 import { logger } from '@/utils/logger'
+import { useAppStore } from '@/store/appStore'
 
 /**
  * Управление базовыми данными проекта
@@ -8,6 +9,19 @@ import { logger } from '@/utils/logger'
  */
 export const useProjectCore = () => {
   const [project, setProject] = useState<Project | null>(null)
+  const setProjectState = useAppStore((state) => state.setProjectState)
+  const setCurrentProject = useAppStore((state) => state.setCurrentProject)
+
+  /**
+   * Установка проекта с синхронизацией в глобальный стор
+   */
+  const handleSetProject = useCallback((newProject: Project | null) => {
+    setProject(newProject)
+    setCurrentProject(newProject as any)
+    if (newProject) {
+      setProjectState({ lastModified: new Date() })
+    }
+  }, [setCurrentProject, setProjectState])
 
   /**
    * Обновление метаданных проекта
@@ -22,15 +36,23 @@ export const useProjectCore = () => {
     }
 
     setProject(updatedProject)
+    setCurrentProject(updatedProject as any)
+    
+    // Синхронизация с глобальным стором для автосохранения
+    setProjectState({ 
+      unsavedChanges: true,
+      lastModified: new Date()
+    })
+
     logger.info('Метаданные проекта обновлены', {
       projectId: project.id,
       updates: Object.keys(updates),
     })
-  }, [project])
+  }, [project, setProjectState, setCurrentProject])
 
   return {
     project,
-    setProject,
+    setProject: handleSetProject,
     updateProjectMetadata,
   }
 }

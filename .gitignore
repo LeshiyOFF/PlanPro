@@ -28,11 +28,14 @@ release/
 *.pem
 
 # === Package Managers ===
-package-lock.json
+# package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
 # === Runtime ===
+tools/
+dist-app/
+resources/jre/
 .env
 .env.local
 .env.development.local

@@ -78,6 +78,46 @@ public class GeneralOption {
 	private double defaultOvertimeRate = 0.0D;
 	private boolean startWithBlankProject = false;
 	private boolean confirmDeletes = false;
+	private String userName = "";
+	private String companyName = "";
+	private String currency = "USD";
+
+	/**
+	 * @return Returns the userName.
+	 */
+	public String getUserName() {
+		return userName;
+	}
+	/**
+	 * @param userName The userName to set.
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	/**
+	 * @return Returns the companyName.
+	 */
+	public String getCompanyName() {
+		return companyName;
+	}
+	/**
+	 * @param companyName The companyName to set.
+	 */
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+	/**
+	 * @return Returns the currency.
+	 */
+	public String getCurrency() {
+		return currency;
+	}
+	/**
+	 * @param currency The currency to set.
+	 */
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
 
 	/**
 	 * @return Returns the automaticallyAddNewResourcesAndTasks.

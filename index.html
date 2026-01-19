@@ -2,18 +2,22 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="ProjectLibre - Open Source Project Management Software" />
   <meta name="author" content="ProjectLibre Team" />
   <title>ProjectLibre</title>
+  
+  <!-- Fonts: Inter and Roboto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   
   <!-- Предотвращение мерцания при загрузке -->
   <style>
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: hsl(var(--background));
       color: hsl(var(--foreground));
       overflow: hidden;
@@ -61,8 +65,8 @@
       --card-foreground: 222.2 84% 4.9%;
       --popover: 0 0% 100%;
       --popover-foreground: 222.2 84% 4.9%;
-      --primary: 221.2 83.2% 53.3%;
-      --primary-foreground: 210 40% 98%;
+      --primary: 0 0% 12%;
+      --primary-foreground: 0 0% 98%;
       --secondary: 210 40% 96%;
       --secondary-foreground: 222.2 84% 4.9%;
       --muted: 210 40% 96%;
@@ -73,7 +77,7 @@
       --destructive-foreground: 210 40% 98%;
       --border: 214.3 31.8% 91.4%;
       --input: 214.3 31.8% 91.4%;
-      --ring: 221.2 83.2% 53.3%;
+      --ring: 0 0% 12%;
       --radius: 0.5rem;
     }
     
@@ -84,8 +88,8 @@
       --card-foreground: 210 40% 98%;
       --popover: 222.2 84% 4.9%;
       --popover-foreground: 210 40% 98%;
-      --primary: 217.2 91.2% 59.8%;
-      --primary-foreground: 222.2 84% 4.9%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 0 0% 12%;
       --secondary: 217.2 32.6% 17.5%;
       --secondary-foreground: 210 40% 98%;
       --muted: 217.2 32.6% 17.5%;
@@ -96,7 +100,7 @@
       --destructive-foreground: 210 40% 98%;
       --border: 217.2 32.6% 17.5%;
       --input: 217.2 32.6% 17.5%;
-      --ring: 224.3 76.3% 94.1%;
+      --ring: 0 0% 98%;
     }
   </style>
 </head>

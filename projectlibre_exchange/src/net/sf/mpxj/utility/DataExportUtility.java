@@ -23,8 +23,10 @@
 
 package net.sf.mpxj.utility;
 
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -114,7 +116,7 @@ public final class DataExportUtility
          "TABLE"
       };
 
-      FileWriter fw = new FileWriter(directory);
+      OutputStreamWriter fw = new OutputStreamWriter(new FileOutputStream(directory), StandardCharsets.UTF_8);
       PrintWriter pw = new PrintWriter(fw);
 
       pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

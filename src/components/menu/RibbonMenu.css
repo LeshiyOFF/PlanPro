@@ -1,0 +1,162 @@
+/* Ribbon Menu Styles */
+
+.ribbon-menu {
+  display: flex;
+  flex-direction: column;
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  min-height: 48px;
+}
+
+.ribbon-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ribbon-tab {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px 8px 0 0;
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ribbon-tab:hover {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+}
+
+.ribbon-tab.active,
+.ribbon-tab.isActive {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-bottom: 2px solid hsl(var(--primary));
+}
+
+.ribbon-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  gap: 16px;
+}
+
+/* Ribbon Group Styles */
+.ribbon-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ribbon-group-title {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ribbon-group-buttons {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Ribbon Button Styles */
+.ribbon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 4px;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.ribbon-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 2;
+  color: currentColor;
+}
+
+.ribbon-button:hover {
+  background-color: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  transform: translateY(-1px);
+}
+
+.ribbon-button:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 2px hsl(var(--primary));
+}
+
+.ribbon-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Specific Ribbon Tab Styles */
+.file-ribbon-tab,
+.task-ribbon-tab,
+.resource-ribbon-tab,
+.view-ribbon-tab {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ribbon-menu {
+    min-height: auto;
+  }
+  
+  .ribbon-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+  
+  .ribbon-content {
+    padding: 8px;
+    gap: 12px;
+  }
+  
+  .ribbon-group {
+    min-width: 0;
+  }
+  
+  .ribbon-button {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+
+/* Accessibility */
+.ribbon-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.ribbon-tab:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}

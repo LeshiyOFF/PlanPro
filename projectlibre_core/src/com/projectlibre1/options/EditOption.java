@@ -86,6 +86,10 @@ public class EditOption {
 	}
 	
 	private boolean addSpaceBeforeLabel = true;
+	private boolean autoCalculate = true;
+	private boolean autoLinkTasks = true;
+	private boolean splitTasksEnabled = true;
+	private boolean allowTaskDeletion = true;
 	
 	/**
 	 * @return Returns the addSpaceBeforeLabel.
@@ -98,6 +102,31 @@ public class EditOption {
 	 */
 	public void setAddSpaceBeforeLabel(boolean addSpaceBeforeLabel) {
 		this.addSpaceBeforeLabel = addSpaceBeforeLabel;
+	}
+
+	public boolean isAutoCalculate() {
+		return autoCalculate;
+	}
+	public void setAutoCalculate(boolean autoCalculate) {
+		this.autoCalculate = autoCalculate;
+	}
+	public boolean isAutoLinkTasks() {
+		return autoLinkTasks;
+	}
+	public void setAutoLinkTasks(boolean autoLinkTasks) {
+		this.autoLinkTasks = autoLinkTasks;
+	}
+	public boolean isSplitTasksEnabled() {
+		return splitTasksEnabled;
+	}
+	public void setSplitTasksEnabled(boolean splitTasksEnabled) {
+		this.splitTasksEnabled = splitTasksEnabled;
+	}
+	public boolean isAllowTaskDeletion() {
+		return allowTaskDeletion;
+	}
+	public void setAllowTaskDeletion(boolean allowTaskDeletion) {
+		this.allowTaskDeletion = allowTaskDeletion;
 	}
 	
 	private int[] viewAs = new int[]{2,2,2,2,2,2,2}; // index into resource string of types array.  See DurationFormat

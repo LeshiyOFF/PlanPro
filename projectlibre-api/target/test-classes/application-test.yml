@@ -1,0 +1,98 @@
+# Test Environment Configuration
+spring:
+  profiles:
+    active: test
+  
+  # Test database configuration
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        
+  # Logging configuration
+  output:
+    ansi:
+      enabled: true
+      
+logging:
+  level:
+    com.projectlibre.api: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    com.projectlibre.api.observability: INFO
+  file:
+    name: logs/projectlibre-api-test.log
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+# Observability Configuration
+observability:
+  enabled: true
+  error-tracking:
+    sentry:
+      enabled: false  # Enable for production
+      dsn: ${SENTRY_DSN:}
+      environment: test
+      sample-rate: 1.0
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        enabled: true
+        endpoint: /api/actuator/prometheus
+  health-checks:
+    enabled: true
+    cache:
+      ttl: 60s
+      
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  error:
+    include-message: always
+    include-binding-errors: always
+    
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        
+# Test-specific configuration
+test:
+  environment: true
+  mock-external-services: true
+  performance-monitoring: true
+  load-testing:
+    enabled: true
+    threads: 20
+    requests-per-thread: 50

@@ -67,6 +67,7 @@ import javax.swing.UIManager;
 
 import com.projectlibre1.strings.Messages;
 import com.projectlibre1.util.Environment;
+import com.projectlibre1.ui.UIServiceAdapter;
 
 public class FileHelper {
 	public static final String DEFAULT_FILE_EXTENSION ="pod";
@@ -86,13 +87,19 @@ public class FileHelper {
     	if (!Environment.getStandAlone()&&save&&selectedFileName!=null&&selectedFileName.endsWith("."+DEFAULT_FILE_EXTENSION)){
     		selectedFileName=changeFileExtension(selectedFileName,save?"xml":"mpp");
     	}
+    	
+    	String result = UIServiceAdapter.getInstance().chooseFileName(save, selectedFileName);
+    	if (result != null) {
+    		return result;
+    	}
+    	
 	JFileChooser fileChooser = getFileChooser();
 	fileChooser=setUpdateUI(fileChooser);
     	fileChooser.setDialogType(save?JFileChooser.SAVE_DIALOG:JFileChooser.OPEN_DIALOG);
     	fileChooser.resetChoosableFileFilters();
     	if (selectedFileName==null){
     		try {
-    			String initialDirName=Preferences.userNodeForPackage(FileHelper.class).get("lastDirectory",System.getProperty("user.home")+File.separator+"ProjectLibre");
+    			String initialDirName=Preferences.userNodeForPackage(FileHelper.class).get("lastDirectory",System.getProperty("user.home")+File.separator+"ПланПро");
 				fileChooser.setCurrentDirectory(new File(initialDirName));
 			} catch (Exception e) {
 			}

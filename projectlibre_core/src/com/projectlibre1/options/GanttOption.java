@@ -66,12 +66,34 @@ public class GanttOption {
 	// when there are multiple assignments, it is possible that the % complete falls on a non working time. 
 	// if completionIsContiguous=true, then the bar is drawn on all off times. Otherwise it may be hidden.
 	private boolean completionIsContiguous = false;
+	private boolean showEstimatedDurations = true;
+	private boolean showActualWork = true;
+	private boolean showBaselineWork = true;
 
 	/**
 	 * 
 	 */
 	public GanttOption() {
 		super();
+	}
+
+	public boolean isShowEstimatedDurations() {
+		return showEstimatedDurations;
+	}
+	public void setShowEstimatedDurations(boolean showEstimatedDurations) {
+		this.showEstimatedDurations = showEstimatedDurations;
+	}
+	public boolean isShowActualWork() {
+		return showActualWork;
+	}
+	public void setShowActualWork(boolean showActualWork) {
+		this.showActualWork = showActualWork;
+	}
+	public boolean isShowBaselineWork() {
+		return showBaselineWork;
+	}
+	public void setShowBaselineWork(boolean showBaselineWork) {
+		this.showBaselineWork = showBaselineWork;
 	}
 
 	public final boolean isCompletionIsContiguous() {

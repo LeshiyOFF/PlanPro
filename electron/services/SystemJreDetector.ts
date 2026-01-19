@@ -1,207 +1,156 @@
 import { spawn, execFile } from 'child_process';
-import { promisify } from 'util';
 import * as path from 'path';
 import * as fs from 'fs';
-import { JreInfo, JreType } from './interfaces/IJreManager';
-
-const execFileAsync = promisify(execFile);
+import * as os from 'os';
 
 /**
- * Детектор системной Java Runtime Environment
- * Следует принципу Single Responsibility из SOLID
+ * Интерфейс для детектора JRE
  */
-export class SystemJreDetector {
+export interface ISystemJreDetector {
+  detectSystemJre(): Promise<JreInfo | null>;
+  isJavaInPath(): Promise<boolean>;
+  getJavaFromPath(): Promise<JreInfo | null>;
+  findSystemJavaInstallations(): Promise<JreInfo[]>;
+  getJreInfo(path: string): Promise<JreInfo | null>;
+  validateJavaExecutable?(path: string): Promise<boolean>;
+  validatePortAvailability?(port: number): Promise<boolean>;
+}
+
+/**
+ * Информация о JRE
+ */
+export interface JreInfo {
+  version: string;
+  path: string;
+  vendor: string;
+  architecture: string;
+  executablePath?: string;
+  type?: string;
+  homePath?: string;
+  isValid?: boolean;
+}
+
+/**
+ * Детектор системной JRE
+ */
+export class SystemJreDetector implements ISystemJreDetector {
   private readonly platform: NodeJS.Platform;
-  private readonly javaExecutableNames: string[];
-  
+
   constructor() {
-    this.platform = process.platform;
-    this.javaExecutableNames = this.getJavaExecutableNames();
+    this.platform = process.platform as NodeJS.Platform;
   }
 
   /**
-   * Получает имена исполняемых файлов Java для текущей платформы
+   * Поиск JRE в системе
    */
-  private getJavaExecutableNames(): string[] {
-    switch (this.platform) {
-      case 'win32':
-        return ['java.exe', 'java.bat', 'java.cmd'];
-      case 'darwin':
-      case 'linux':
-        return ['java'];
-      default:
-        return ['java'];
-    }
-  }
-
-  /**
-   * Ищет системные установки Java
-   */
-  async findSystemJavaInstallations(): Promise<JreInfo[]> {
-    const searchPaths = this.getSystemJavaSearchPaths();
-    const results: JreInfo[] = [];
-    
-    for (const searchPath of searchPaths) {
-      const installations = await this.searchJavaInPath(searchPath);
-      results.push(...installations);
-    }
-    
-    return this.deduplicateJreList(results);
-  }
-
-  /**
-   * Проверяет доступность Java в PATH
-   */
-  async isJavaInPath(): Promise<boolean> {
+  public async detectSystemJre(): Promise<JreInfo | null> {
     try {
-      await execFileAsync('java', ['-version'], { 
-        windowsHide: true,
-        timeout: 5000 
-      });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Получает путь к Java из PATH
-   */
-  async getJavaFromPath(): Promise<string | null> {
-    try {
-      if (this.platform === 'win32') {
-        const { stdout } = await execFileAsync('where', ['java'], { timeout: 5000 });
-        return stdout ? stdout.split('\n')[0]?.trim() || null : null;
-      } else {
-        const { stdout } = await execFileAsync('which', ['java'], { timeout: 5000 });
-        return stdout.trim();
+      // Поиск JAVA_HOME
+      const javaHome = this.findJavaHome();
+      if (javaHome) {
+        return await this.getJreInfo?.(javaHome) || null;
       }
-    } catch {
+
+      // Поиск в PATH
+      const pathJre = await this.getJavaFromPath();
+      if (pathJre) {
+        return pathJre;
+      }
+
+      // Поиск стандартных расположений
+      const defaultJre = await this.searchDefaultLocations();
+      return defaultJre;
+    } catch (error) {
+      console.error('JRE detection failed:', error);
       return null;
     }
   }
 
   /**
-   * Получает информацию о JRE по пути к исполняемому файлу
+   * Поиск JAVA_HOME
    */
-  async getJreInfo(javaPath: string): Promise<JreInfo | null> {
-    try {
-      const version = await this.getJavaVersion(javaPath);
-      const homePath = await this.getJavaHome(javaPath);
-      const architecture = await this.getJavaArchitecture(javaPath);
-      
-      return {
-        executablePath: javaPath,
-        version: version || 'unknown',
-        type: JreType.SYSTEM,
-        homePath: homePath || path.dirname(javaPath),
-        architecture: architecture || 'unknown',
-        isValid: await this.validateJavaExecutable(javaPath)
-      };
-    } catch {
-      return null;
-    }
+  private findJavaHome(): string | null {
+    const javaHome = process.env['JAVA_HOME'] || process.env['JDK_HOME'] || process.env['JRE_HOME'];
+    return javaHome || null;
   }
 
   /**
-   * Получает версию Java
+   * Поиск в PATH
    */
-  async getJavaVersion(javaPath: string): Promise<string | null> {
+  public async isJavaInPath(): Promise<boolean> {
     return new Promise((resolve) => {
-      const child = spawn(javaPath, ['-version'], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-        windowsHide: true,
-        timeout: 5000
-      });
-      
-      let output = '';
-      child.stderr.on('data', (data) => {
-        output += data.toString();
-      });
-      
-      child.on('close', (code) => {
-        if (code === 0) {
-          const match = output.match(/version "([^"]+)"/);
-          if (match) {
-            resolve(match[1] || null);
-            return;
-          }
-        }
-        resolve(null);
-      });
-      
-      child.on('error', () => {
-        resolve(null);
+      execFile('java', ['-version'], (error) => {
+        resolve(!error);
       });
     });
   }
 
   /**
-   * Получает архитектуру Java
+   * Получение из PATH
    */
-  async getJavaArchitecture(javaPath: string): Promise<string | null> {
-    try {
-      const { stdout } = await execFileAsync(javaPath, ['-XshowSettings:properties', '-version'], {
-        windowsHide: true,
-        timeout: 5000
+  public async getJavaFromPath(): Promise<JreInfo | null> {
+    return new Promise((resolve) => {
+      execFile('java', ['-version'], (error, stdout) => {
+        if (error) {
+          resolve(null);
+          return;
+        }
+
+        resolve({
+          version: this.parseJavaVersion(stdout),
+          path: this.findJavaExecutable(),
+          vendor: 'Unknown',
+          architecture: os.arch()
+        });
       });
-      
-      const osArchMatch = stdout.match(/os\.arch\s*=\s*(.+)/i);
-      return osArchMatch && osArchMatch[1] ? osArchMatch[1].trim() : null;
-    } catch {
-      return null;
-    }
+    });
   }
 
   /**
-   * Валидирует исполняемый файл Java
+   * Поиск стандартных расположений
    */
-  async validateJavaExecutable(javaPath: string): Promise<boolean> {
-    try {
-      await execFileAsync(javaPath, ['-version'], { 
-        windowsHide: true,
-        timeout: 5000 
-      });
-      return true;
-    } catch {
-      return false;
+  private async searchDefaultLocations(): Promise<JreInfo | null> {
+    const commonPaths = this.getCommonJrePaths();
+    
+    for (const jrePath of commonPaths) {
+      if (fs.existsSync(jrePath)) {
+        return await this.getJreInfo?.(jrePath) || null;
+      }
     }
+    
+    return null;
   }
 
   /**
-   * Получает пути поиска системной Java
+   * Получение стандартных путей JRE
    */
-  private getSystemJavaSearchPaths(): string[] {
+  private getCommonJrePaths(): string[] {
     const paths: string[] = [];
     
-    if (this.platform === 'win32') {
-      // Windows пути
+    if (process.platform === 'win32') {
       const programFiles = process.env['PROGRAMFILES'] || 'C:\\Program Files';
       const programFilesX86 = process.env['PROGRAMFILES(X86)'] || 'C:\\Program Files (x86)';
       
       paths.push(
         path.join(programFiles, 'Java'),
+        path.join(programFiles, 'Java', 'jre'),
         path.join(programFilesX86, 'Java'),
-        'C:\\Java',
-        'C:\\Program Files\\AdoptOpenJDK',
-        'C:\\Program Files\\Eclipse Adoptium'
+        path.join('C:\\', 'Program Files', 'Java', 'jre')
       );
-    } else if (this.platform === 'darwin') {
-      // macOS пути
+    } else if (process.platform === 'darwin') {
       paths.push(
         '/Library/Java/JavaVirtualMachines',
-        '/System/Library/Java/JavaVirtualMachines',
-        '/usr/local/opt/openjdk',
-        '/opt/homebrew/opt/openjdk'
+        '/Library/Java/Home',
+        '/usr/libexec/java_home',
+        '/System/Library/Frameworks/JavaVM.framework/Versions/Current'
       );
     } else {
-      // Linux пути
       paths.push(
         '/usr/lib/jvm',
-        '/usr/lib64/jvm',
-        '/usr/local/java',
-        '/opt/java',
-        '/usr/lib/jvm/default-java'
+        '/usr/lib/jvm/java',
+        '/usr/lib/java',
+        '/usr/lib/jvm-default-java',
+        '/usr/java/default'
       );
     }
     
@@ -209,97 +158,103 @@ export class SystemJreDetector {
   }
 
   /**
-   * Ищет Java в указанном пути
+   * Валидация JRE
    */
-  private async searchJavaInPath(searchPath: string): Promise<JreInfo[]> {
-    const results: JreInfo[] = [];
-    
+  public async getJreInfo(jrePath: string): Promise<JreInfo | null> {
     try {
-      if (!fs.existsSync(searchPath)) {
-        return results;
+      const javaExe = this.findJavaExecutableInPath(jrePath);
+      if (!fs.existsSync(javaExe)) {
+        return null;
       }
-      
-      const entries = fs.readdirSync(searchPath, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const fullPath = path.join(searchPath, entry.name);
-          
-          // Проверяем наличие Java в поддиректориях
-          const javaPath = await this.findJavaExecutable(fullPath);
-          if (javaPath) {
-            const jreInfo = await this.getJreInfo(javaPath);
-            if (jreInfo) {
-              results.push(jreInfo);
-            }
-          }
-          
-          // Рекурсивный поиск
-          const subResults = await this.searchJavaInPath(fullPath);
-          results.push(...subResults);
-        }
-      }
-    } catch {
-      // Игнорируем ошибки доступа
-    }
-    
-    return results;
-  }
 
-  /**
-   * Ищет исполняемый файл Java в директории
-   */
-  private async findJavaExecutable(directory: string): Promise<string | null> {
-    const binDir = path.join(directory, 'bin');
-    
-    if (!fs.existsSync(binDir)) {
+      return new Promise((resolve) => {
+        execFile(javaExe, ['-version'], (error, stdout) => {
+          if (error) {
+            resolve(null);
+            return;
+          }
+
+          resolve({
+            version: this.parseJavaVersion(stdout),
+            path: jrePath,
+            vendor: 'Unknown',
+            architecture: os.arch(),
+            executablePath: this.findJavaExecutableInPath(jrePath),
+            type: 'system',
+            homePath: jrePath,
+            isValid: true
+          });
+        });
+      });
+    } catch (error) {
       return null;
     }
-    
-    for (const executableName of this.javaExecutableNames) {
-      const executablePath = path.join(binDir, executableName);
-      
-      if (fs.existsSync(executablePath) && fs.statSync(executablePath).isFile()) {
-        return executablePath;
-      }
-    }
-    
-    return null;
   }
 
   /**
-   * Получает JAVA_HOME из переменных окружения
+   * Поиск Java executable
    */
-  private async getJavaHome(javaPath: string): Promise<string | null> {
-    // Сначала проверяем переменные окружения
-    const javaHome = process.env['JAVA_HOME'] || process.env['JDK_HOME'] || process.env['JRE_HOME'];
-    if (javaHome && fs.existsSync(javaHome)) {
-      return javaHome;
-    }
-    
-    // Определяем из пути к исполняемому файлу
-    const binDir = path.dirname(javaPath);
-    const potentialHome = path.dirname(binDir);
-    
-    if (fs.existsSync(path.join(potentialHome, 'bin', this.javaExecutableNames[0] || 'java'))) {
-      return potentialHome;
-    }
-    
-    return null;
+  private findJavaExecutable(): string {
+    const executableName = process.platform === 'win32' ? 'java.exe' : 'java';
+    return path.join('java', 'bin', executableName);
   }
 
   /**
-   * Удаляет дубликаты из списка JRE
+   * Поиск Java executable в пути
    */
-  private deduplicateJreList(jreList: JreInfo[]): JreInfo[] {
-    const seen = new Set<string>();
-    return jreList.filter(jre => {
-      const key = `${jre.executablePath}-${jre.version}`;
-      if (seen.has(key)) {
-        return false;
+  private findJavaExecutableInPath(jrePath: string): string {
+    const executableName = process.platform === 'win32' ? 'java.exe' : 'java';
+    
+    if (process.platform === 'win32') {
+      return path.join(jrePath, 'bin', executableName);
+    } else {
+      return path.join(jrePath, 'bin', executableName);
+    }
+  }
+
+  /**
+   * Парсинг версии Java
+   */
+  private parseJavaVersion(versionOutput: string): string {
+    const match = versionOutput.match(/version "(.+?)"/);
+    return match ? match[1] : versionOutput.trim();
+  }
+
+  /**
+   * Поиск системных установок Java
+   */
+  public async findSystemJavaInstallations(): Promise<JreInfo[]> {
+    const paths = this.getCommonJrePaths();
+    const validPaths = paths.filter(path => fs.existsSync(path));
+    const jreInfos: JreInfo[] = [];
+    
+    for (const path of validPaths) {
+      const jreInfo = await this.getJreInfo(path);
+      if (jreInfo) {
+        jreInfos.push(jreInfo);
       }
-      seen.add(key);
-      return true;
+    }
+    
+    return jreInfos;
+  }
+
+  /**
+   * Валидация Java executable
+   */
+  public async validateJavaExecutable(pathToValidate: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      fs.access(pathToValidate, fs.constants.F_OK, (error) => {
+        resolve(!error);
+      });
+    });
+  }
+
+  /**
+   * Валидация доступности порта
+   */
+  public async validatePortAvailability(port: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      resolve(port > 0 && port < 65535);
     });
   }
 }

@@ -33,7 +33,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -110,12 +110,12 @@ public class MapFileGenerator
     */
    private void writeMapFile(String mapFileName, File jarFile, boolean mapClassMethods) throws IOException, XMLStreamException, ClassNotFoundException, IntrospectionException
    {
-      FileWriter fw = new FileWriter(mapFileName);
       XMLOutputFactory xof = XMLOutputFactory.newInstance();
-      XMLStreamWriter writer = xof.createXMLStreamWriter(fw);
+      FileOutputStream fos = new FileOutputStream(mapFileName);
+      XMLStreamWriter writer = xof.createXMLStreamWriter(fos, "UTF-8");
       //XMLStreamWriter writer = new IndentingXMLStreamWriter(xof.createXMLStreamWriter(fw));
 
-      writer.writeStartDocument();
+      writer.writeStartDocument("UTF-8", "1.0");
       writer.writeStartElement("root");
       writer.writeStartElement("assembly");
 
@@ -127,8 +127,8 @@ public class MapFileGenerator
       writer.flush();
       writer.close();
 
-      fw.flush();
-      fw.close();
+      fos.flush();
+      fos.close();
    }
 
    /**

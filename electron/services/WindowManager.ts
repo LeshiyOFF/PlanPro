@@ -1,136 +1,131 @@
-import { BrowserWindow, screen } from 'electron';
-import { join } from 'path';
-import { ConfigService } from './ConfigService';
+import { BrowserWindow, shell, app } from 'electron'
+import { join } from 'path'
+import * as fs from 'fs'
+import { IWindowManager } from './interfaces/IWindowManager'
+import { IConfigService } from './interfaces/IConfigService'
+import { ContentLoaderService } from './ContentLoaderService'
+import { UIErrorHandler } from './UIErrorHandler'
+import { SplashManager } from './SplashManager'
+import * as process from 'process'
 
 /**
- * Менеджер окон приложения
- * Управляет созданием и конфигурацией окон
+ * Менеджер окон Electron приложения.
+ * Реализует логику создания и управления главным окном.
  */
-export class WindowManager {
-  private mainWindow: BrowserWindow | null = null;
-  private readonly config: ConfigService;
+export class WindowManager implements IWindowManager {
+  private mainWindow: BrowserWindow | null = null
+  private splashManager: SplashManager | null = null
+  private readonly configService: IConfigService
+  private readonly contentLoader: ContentLoaderService
 
-  constructor(config: ConfigService) {
-    this.config = config;
+  constructor(configService: IConfigService) {
+    this.configService = configService
+    this.contentLoader = new ContentLoaderService(configService)
+    this.splashManager = new SplashManager(configService)
   }
 
   /**
-   * Создание главного окна приложения
+   * Создание главного окна приложения.
    */
-  public createMainWindow(): BrowserWindow {
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    
-    const mainWindowConfig: Electron.BrowserWindowConstructorOptions = {
-      width: Math.min(1400, width - 100),
-      height: Math.min(900, height - 100),
-      minWidth: 1024,
-      minHeight: 768,
-      show: false,
-      autoHideMenuBar: true,
+  public createMainWindow(): void {
+    if (this.mainWindow) {
+      this.mainWindow.focus()
+      return
+    }
+
+    // 1. Создаем заставку
+    this.splashManager?.createSplash()
+
+    // 2. Создаем основное окно (скрытым)
+    this.mainWindow = new BrowserWindow({
+      ...this.getWindowOptions(),
+      show: false 
+    })
+
+    // 3. Настраиваем защиту от ошибок
+    UIErrorHandler.monitor(this.mainWindow)
+
+    this.configureWindowEvents()
+    this.loadContent()
+
+    // 4. Показываем окно после полной готовности
+    this.mainWindow.once('ready-to-show', () => {
+      this.splashManager?.destroySplash()
+      this.mainWindow?.show()
+      
+      // Всегда открываем консоль для диагностики
+      this.mainWindow?.webContents.openDevTools({ mode: 'detach' });
+    })
+  }
+
+  /**
+   * Получение экземпляра главного окна.
+   */
+  public getMainWindow(): BrowserWindow | null {
+    return this.mainWindow
+  }
+
+  /**
+   * Формирование настроек окна.
+   */
+  private getWindowOptions(): Electron.BrowserWindowConstructorOptions {
+    // Определяем путь к preload.js более надежным способом
+    const preloadPath = app.isPackaged 
+      ? join(app.getAppPath(), 'dist-app/electron/preload.js')
+      : join(__dirname, '../preload.js');
+
+    console.log(`[WindowManager] Using preload path: ${preloadPath}`);
+
+    return {
+      width: 1200,
+      height: 800,
+      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+      icon: this.getAppIcon(),
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
-        preload: join(__dirname, '../preload.js'),
-        webSecurity: true
-      },
-      icon: this.getAppIconPath(),
-      titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default'
-    };
-
-    this.mainWindow = new BrowserWindow(mainWindowConfig);
-    
-    this.setupMainWindowEvents();
-    this.loadMainWindowContent();
-
-    return this.mainWindow;
-  }
-
-  /**
-   * Настройка событий главного окна
-   */
-  private setupMainWindowEvents(): void {
-    if (!this.mainWindow) return;
-
-    this.mainWindow.once('ready-to-show', () => {
-      this.mainWindow?.show();
-      this.mainWindow?.focus();
-      
-      if (this.config.isDevelopmentMode()) {
-        this.mainWindow?.webContents.openDevTools();
+        preload: preloadPath
       }
-    });
-
-    this.mainWindow.on('closed', () => {
-      this.mainWindow = null;
-    });
-
-    this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-      require('electron').shell.openExternal(url);
-      return { action: 'deny' };
-    });
-  }
-
-  /**
-   * Загрузка содержимого главного окна
-   */
-  private loadMainWindowContent(): void {
-    if (!this.mainWindow) return;
-
-    if (this.config.isDevelopmentMode()) {
-      this.mainWindow.loadURL(this.config.getDevServerUrl());
-    } else {
-      this.mainWindow.loadFile(join(__dirname, '../dist/index.html'));
     }
   }
 
   /**
-   * Получение пути к иконке приложения
+   * Настройка обработчиков событий окна.
    */
-  private getAppIconPath(): string | undefined {
-    const iconFormats = {
+  private configureWindowEvents(): void {
+    if (!this.mainWindow) return
+
+    this.mainWindow.on('closed', () => {
+      this.mainWindow = null
+    })
+
+    this.mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url)
+      return { action: 'deny' }
+    })
+  }
+
+  /**
+   * Загрузка контента (Vite Dev Server или статический файл).
+   */
+  private loadContent(): void {
+    if (!this.mainWindow) return
+    this.contentLoader.loadContent(this.mainWindow)
+  }
+
+  /**
+   * Получение пути к иконке приложения.
+   */
+  private getAppIcon(): string | undefined {
+    const iconFormats: Record<string, string> = {
       win32: 'icon.ico',
       darwin: 'icon.icns',
       linux: 'icon.png'
-    };
-
-    const iconFile = iconFormats[process.platform as keyof typeof iconFormats];
-    if (!iconFile) return undefined;
-
-    return join(__dirname, '../../assets', iconFile);
-  }
-
-  /**
-   * Получение главного окна
-   */
-  public getMainWindow(): BrowserWindow | null {
-    return this.mainWindow;
-  }
-
-  /**
-   * Проверка наличия главного окна
-   */
-  public hasMainWindow(): boolean {
-    return this.mainWindow !== null && !this.mainWindow.isDestroyed();
-  }
-
-  /**
-   * Закрытие главного окна
-   */
-  public closeMainWindow(): void {
-    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-      this.mainWindow.close();
     }
-  }
 
-  /**
-   * Фокусировка на главном окне
-   */
-  public focusMainWindow(): void {
-    if (this.mainWindow && !this.mainWindow.isDestroyed()) {
-      if (this.mainWindow.isMinimized()) {
-        this.mainWindow.restore();
-      }
-      this.mainWindow.focus();
-    }
+    const iconFile = iconFormats[process.platform] || 'icon.png'
+    const iconPath = join(this.configService.getResourcesPath(), '../assets', iconFile)
+
+    return fs.existsSync(iconPath) ? iconPath : undefined
   }
 }

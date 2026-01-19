@@ -57,16 +57,22 @@ package com.projectlibre1.options;
 
 import com.projectlibre1.datatype.TimeUnit;
 import com.projectlibre1.pm.scheduling.SchedulingType;
+import java.io.Serializable;
 
 /**
  * Corresponds to Schedule tab on options dialog in MSProject
  */
-public class ScheduleOption {
+public class ScheduleOption implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private static ScheduleOption instance = null;
 	public static ScheduleOption getInstance() {
 		if (instance == null)
 			instance = new ScheduleOption();
 		return instance;
+	}
+	
+	public static final void setInstance(ScheduleOption instance) {
+		ScheduleOption.instance = instance;
 	}
 	
 	int schedulingRule = SchedulingType.FIXED_UNITS;

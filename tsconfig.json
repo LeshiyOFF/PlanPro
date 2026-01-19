@@ -27,7 +27,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": false,
 
-    // Пути для чистых импортов
+    // Пути для чистых импортов с Master Functionality Catalog
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -37,7 +37,8 @@
       "@types/*": ["src/types/*"],
       "@hooks/*": ["src/hooks/*"],
       "@store/*": ["src/store/*"],
-      "@assets/*": ["src/assets/*"]
+      "@assets/*": ["src/assets/*"],
+      "@master-catalog/*": ["src/types/Master_Functionality_Catalog.ts"]
     },
 
     // Дополнительные опции

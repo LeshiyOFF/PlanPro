@@ -26,7 +26,7 @@ export class HelpMenuTemplate {
         },
         { type: 'separator' },
         {
-          label: 'О ProjectLibre',
+          label: 'О ПланПро',
           click: () => this.handleMenuAction('about')
         }
       ]

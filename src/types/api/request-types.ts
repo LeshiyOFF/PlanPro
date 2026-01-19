@@ -13,15 +13,25 @@ export interface BaseRequest {
 export interface ProjectCreateRequest extends BaseRequest {
   name: string
   description?: string
+  status?: string
+  priority?: string
+  progress?: number
   startDate?: Date
   endDate?: Date
+  manager?: string
+  department?: string
 }
 
 export interface ProjectUpdateRequest extends BaseRequest {
   name?: string
   description?: string
+  status?: string
+  priority?: string
+  progress?: number
   startDate?: Date
   endDate?: Date
+  manager?: string
+  department?: string
 }
 
 export interface ProjectOpenRequest extends BaseRequest {
@@ -39,22 +49,42 @@ export interface TaskCreateRequest extends BaseRequest {
   name: string
   projectId: string
   parentId?: string
+  description?: string
+  status?: string
+  priority?: string
+  type?: string
   duration?: number
   startDate?: Date
   endDate?: Date
-  priority?: 'low' | 'medium' | 'high'
+  dueDate?: Date
   percentComplete?: number
+  estimatedHours?: number
+  actualHours?: number
+  assignee?: string
+  assigneeId?: string
+  tags?: string
+  notes?: string
 }
 
 export interface TaskUpdateRequest extends BaseRequest {
   id: string
   name?: string
+  description?: string
+  status?: string
+  priority?: string
+  type?: string
   duration?: number
   startDate?: Date
   endDate?: Date
-  priority?: 'low' | 'medium' | 'high'
+  dueDate?: Date
   percentComplete?: number
+  estimatedHours?: number
+  actualHours?: number
   parentId?: string
+  assignee?: string
+  assigneeId?: string
+  tags?: string
+  notes?: string
 }
 
 export interface TaskDeleteRequest extends BaseRequest {
@@ -65,18 +95,34 @@ export interface TaskDeleteRequest extends BaseRequest {
 // Запросы ресурсов
 export interface ResourceCreateRequest extends BaseRequest {
   name: string
-  type: 'work' | 'material' | 'cost'
+  type: string
+  description?: string
+  email?: string
+  department?: string
+  phone?: string
+  location?: string
   maxUnits?: number
   standardRate?: number
   overtimeRate?: number
+  costPerHour?: number
+  available?: boolean
+  notes?: string
 }
 
 export interface ResourceUpdateRequest extends BaseRequest {
   id: string
   name?: string
+  description?: string
+  email?: string
+  department?: string
+  phone?: string
+  location?: string
   maxUnits?: number
   standardRate?: number
   overtimeRate?: number
+  costPerHour?: number
+  available?: boolean
+  notes?: string
 }
 
 export interface ResourceDeleteRequest extends BaseRequest {
@@ -125,4 +171,98 @@ export interface CalendarUpdateRequest extends BaseRequest {
     isWorking: boolean
     hours?: number
   }[]
+}
+
+// Запросы конфигурации
+export interface ConfigurationUpdateRequest extends BaseRequest {
+  general?: {
+    dateFormat?: string
+    timeFormat?: string
+    currency?: string
+    language?: string
+  }
+  calculation?: {
+    autoRecalculate?: boolean
+    taskMode?: 'auto' | 'manual'
+    calendarType?: 'standard' | 'custom'
+  }
+  display?: {
+    showCriticalPath?: boolean
+    showSlack?: boolean
+    theme?: 'light' | 'dark' | 'system'
+  }
+  editing?: {
+    autoSave?: boolean
+    autoSaveInterval?: number
+    undoLevels?: number
+  }
+}
+
+// Запросы отчётов
+export interface ReportGenerateRequest extends BaseRequest {
+  projectId: string
+  reportType: 'gantt' | 'resource-usage' | 'cost-summary' | 'timeline' | 'custom'
+  format?: 'pdf' | 'html' | 'excel' | 'xml'
+  filters?: Record<string, unknown>
+  parameters?: Record<string, unknown>
+}
+
+// Запросы RPC команд (для Electron bridge)
+export interface RpcCommandRequest extends BaseRequest {
+  command: string
+  args?: unknown[]
+}
+
+// Запросы файловых операций
+export interface FileDialogRequest extends BaseRequest {
+  mode: 'open' | 'save'
+  title?: string
+  defaultPath?: string
+  filters?: {
+    name: string
+    extensions: string[]
+  }[]
+  multiSelect?: boolean
+}
+
+// Запросы Undo/Redo
+export interface UndoRedoOperationRequest extends BaseRequest {
+  projectId?: string
+}
+
+// Запросы для нативного .pod хранилища
+export interface FileSaveRequest extends BaseRequest {
+  projectId: number
+  filePath?: string
+  format?: 'pod' | 'mpp' | 'xml'
+  createBackup?: boolean
+}
+
+export interface FileLoadRequest extends BaseRequest {
+  filePath: string
+  readOnly?: boolean
+}
+
+// Запрос синхронизации задач с Core
+export interface TaskSyncRequest extends BaseRequest {
+  projectId: number
+  tasks: FrontendTaskData[]
+}
+
+// Данные задачи для синхронизации
+export interface FrontendTaskData {
+  id: string
+  name: string
+  startDate: number    // timestamp в миллисекундах
+  endDate: number      // timestamp в миллисекундах
+  progress: number     // 0-100
+  level: number
+  summary: boolean
+  milestone: boolean
+  type: string
+  predecessors: string[]
+  children: string[]
+  resourceIds: string[]
+  notes: string
+  color: string
 }

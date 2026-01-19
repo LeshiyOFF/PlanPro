@@ -25,9 +25,11 @@ package net.sf.mpxj.fasttrack;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -369,7 +371,7 @@ class FastTrackData
    {
       if (m_logFile != null)
       {
-         m_log = new PrintWriter(new FileWriter(m_logFile));
+         m_log = new PrintWriter(new OutputStreamWriter(new FileOutputStream(m_logFile), StandardCharsets.UTF_8));
       }
    }
 

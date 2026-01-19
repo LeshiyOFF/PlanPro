@@ -1,132 +1,120 @@
-/**
- * Система логирования для ProjectLibre
- * Заменяет console.log для production и development
- */
-
 export enum LogLevel {
-  DEBUG = 0,
-  INFO = 1,
-  WARN = 2,
-  ERROR = 3,
+  ERROR = 'ERROR',
+  WARNING = 'WARNING',
+  INFO = 'INFO',
+  DEBUG = 'DEBUG'
 }
 
-export interface LogEntry {
-  level: LogLevel
-  message: string
-  timestamp: Date
-  context?: string
-  data?: unknown
+interface LogEntry {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  data?: any;
+  component?: string;
 }
 
 class Logger {
-  private context: string
-  private minLevel: LogLevel
+  private static instance: Logger;
+  private logs: LogEntry[] = [];
+  private maxLogs = 1000;
 
-  constructor(context: string = 'App', minLevel: LogLevel = LogLevel.INFO) {
-    this.context = context
-    this.minLevel = minLevel
-  }
+  private constructor() {}
 
-  /**
-   * Создание экземпляра логера с контекстом
-   */
-  static create(context: string, minLevel: LogLevel = LogLevel.INFO): Logger {
-    return new Logger(context, minLevel)
-  }
-
-  /**
-   * Логирование уровня DEBUG
-   */
-  debug(message: string, data?: unknown): void {
-    this.log(LogLevel.DEBUG, message, data)
-  }
-
-  /**
-   * Логирование уровня INFO
-   */
-  info(message: string, data?: unknown): void {
-    this.log(LogLevel.INFO, message, data)
-  }
-
-  /**
-   * Логирование уровня WARN
-   */
-  warn(message: string, data?: unknown): void {
-    this.log(LogLevel.WARN, message, data)
-  }
-
-  /**
-   * Логирование уровня ERROR
-   */
-  error(message: string, error?: Error | unknown): void {
-    this.log(LogLevel.ERROR, message, error)
-  }
-
-  /**
-   * Основной метод логирования
-   */
-  private log(level: LogLevel, message: string, data?: unknown): void {
-    if (level < this.minLevel) {
-      return
+  static getInstance(): Logger {
+    if (!Logger.instance) {
+      Logger.instance = new Logger();
     }
+    return Logger.instance;
+  }
 
-    const entry: LogEntry = {
+  private createLogEntry(level: LogLevel, message: string, data?: any, component?: string): LogEntry {
+    return {
+      timestamp: new Date().toISOString(),
       level,
       message,
-      timestamp: new Date(),
-      context: this.context,
       data,
-    }
-
-    this.output(entry)
+      component
+    };
   }
 
-  /**
-   * Вывод лога в консоль
-   */
-  private output(entry: LogEntry): void {
-    const levelName = LogLevel[entry.level]
-    const timestamp = entry.timestamp.toISOString()
-    const prefix = `[${timestamp}] [${levelName}] [${entry.context}]`
-
-    switch (entry.level) {
-      case LogLevel.DEBUG:
-        console.log(prefix, entry.message, entry.data || '')
-        break
-      case LogLevel.INFO:
-        console.log(prefix, entry.message, entry.data || '')
-        break
-      case LogLevel.WARN:
-        console.warn(prefix, entry.message, entry.data || '')
-        break
-      case LogLevel.ERROR:
-        console.error(prefix, entry.message, entry.data || '')
-        break
+  private addLog(entry: LogEntry): void {
+    this.logs.push(entry);
+    
+    // Keep only last maxLogs entries
+    if (this.logs.length > this.maxLogs) {
+      this.logs = this.logs.slice(-this.maxLogs);
     }
-  }
 
-  /**
-   * Получение уровня логирования из environment
-   */
-  static getLogLevel(): LogLevel {
-    if (typeof process !== 'undefined' && process.env?.NODE_ENV) {
-      switch (process.env.NODE_ENV) {
-        case 'development':
-          return LogLevel.DEBUG
-        case 'production':
-          return LogLevel.WARN
-        default:
-          return LogLevel.INFO
+    // Console output in development
+    if (process.env.NODE_ENV === 'development') {
+      const { timestamp, level, message, data, component } = entry;
+      const componentPrefix = component ? `[${component}]` : '';
+      
+      switch (level) {
+        case LogLevel.ERROR:
+          console.error(`${timestamp} ${componentPrefix} ERROR: ${message}`, data);
+          break;
+        case LogLevel.WARNING:
+          console.warn(`${timestamp} ${componentPrefix} WARNING: ${message}`, data);
+          break;
+        case LogLevel.INFO:
+          console.info(`${timestamp} ${componentPrefix} INFO: ${message}`, data);
+          break;
+        case LogLevel.DEBUG:
+          console.debug(`${timestamp} ${componentPrefix} DEBUG: ${message}`, data);
+          break;
       }
     }
-    return LogLevel.INFO
+  }
+
+  error(message: string, data?: any, component?: string): void {
+    const entry = this.createLogEntry(LogLevel.ERROR, message, data, component);
+    this.addLog(entry);
+  }
+
+  warning(message: string, data?: any, component?: string): void {
+    const entry = this.createLogEntry(LogLevel.WARNING, message, data, component);
+    this.addLog(entry);
+  }
+
+  info(message: string, data?: any, component?: string): void {
+    const entry = this.createLogEntry(LogLevel.INFO, message, data, component);
+    this.addLog(entry);
+  }
+
+  debug(message: string, data?: any, component?: string): void {
+    const entry = this.createLogEntry(LogLevel.DEBUG, message, data, component);
+    this.addLog(entry);
+  }
+
+  dialog(message: string, data?: any, dialogName?: string): void {
+    this.info(message, data, dialogName ? `Dialog:${dialogName}` : 'Dialog');
+  }
+
+  dialogError(message: string, data?: any, dialogName?: string): void {
+    this.error(message, data, dialogName ? `Dialog:${dialogName}` : 'Dialog');
+  }
+
+  api(message: string, data?: any): void {
+    this.info(message, data, 'API');
+  }
+
+  apiError(message: string, data?: any): void {
+    this.error(message, data, 'API');
+  }
+
+  getLogs(): LogEntry[] {
+    return [...this.logs];
+  }
+
+  clearLogs(): void {
+    this.logs = [];
+  }
+
+  exportLogs(): string {
+    return JSON.stringify(this.logs, null, 2);
   }
 }
 
-// Глобальные экземпляры логера
-export const logger = Logger.create('ProjectLibre', Logger.getLogLevel())
-export const apiLogger = Logger.create('API')
-export const uiLogger = Logger.create('UI')
-export const perfLogger = Logger.create('Performance')
-
-export { Logger }
+export const logger = Logger.getInstance();
+export const apiLogger = logger;

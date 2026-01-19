@@ -1,0 +1,67 @@
+@media print {
+  /* Скрываем все элементы UI кроме контента отчета */
+  header, 
+  nav, 
+  footer:not(.report-paper footer),
+  aside,
+  .no-print,
+  button,
+  .sheet-toolbar,
+  .view-content-wrapper header {
+    display: none !important;
+  }
+
+  /* Сбрасываем фоны и отступы для печати */
+  body, html {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Контейнер отчета на весь экран при печати */
+  .report-paper {
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+
+  /* Разрывы страниц для секций */
+  section {
+    page-break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Стили для визуализации листа бумаги в UI */
+.report-paper {
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+  color: #1a1a1a;
+}
+
+.report-paper h1, 
+.report-paper h2, 
+.report-paper h3 {
+  color: #000;
+}
+
+.report-paper table {
+  border-collapse: collapse;
+}
+
+.report-paper th {
+  background-color: #1a1a1a !important;
+  color: white !important;
+  -webkit-print-color-adjust: exact;
+}
+
+.report-paper .bg-slate-50 {
+  background-color: #f8fafc !important;
+  -webkit-print-color-adjust: exact;
+}
+

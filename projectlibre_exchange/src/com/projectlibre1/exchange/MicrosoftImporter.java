@@ -372,8 +372,9 @@ public class MicrosoftImporter extends ServerFileImporter{
 		setProgress(0.9f);
 				
 		log.info("about to initialize");		 //$NON-NLS-1$
-			if (project.getName() == null)
-				project.setName("error - name not set on import"); //$NON-NLS-1$
+			// ✅ IMPROVED: Check for both null AND empty string
+			if (project.getName() == null || project.getName().trim().isEmpty())
+				project.setName("Imported Project"); //$NON-NLS-1$
 
 //			CalendarService.getInstance().renameImportedBaseCalendars(project.getName());
 			try {

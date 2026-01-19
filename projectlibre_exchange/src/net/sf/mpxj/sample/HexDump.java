@@ -24,8 +24,10 @@
 package net.sf.mpxj.sample;
 
 import java.io.FileInputStream;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 
 import net.sf.mpxj.mpp.MPPUtility;
 
@@ -75,7 +77,7 @@ public class HexDump
    private static void process(String input, String output) throws Exception
    {
       FileInputStream is = new FileInputStream(input);
-      PrintWriter pw = new PrintWriter(new FileWriter(output));
+      PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(output), StandardCharsets.UTF_8));
 
       byte[] buffer = new byte[is.available()];
       is.read(buffer);

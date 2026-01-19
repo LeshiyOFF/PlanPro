@@ -3010,6 +3010,27 @@ protected boolean loadLocalDocument(String fileName,boolean merge){ //uses serve
 		getDocumentFrameInstance().getGanttView().getSpreadSheet().setFieldArrayWithWidths((SpreadSheetFieldArray)fieldArray);
 	}
 
+	private static com.projectlibre1.util.Alert.Method getPrefsMethod = null;
+	private static com.projectlibre1.util.Alert.Method applyPrefsMethod = null;
+
+	public static void setGetProjectPreferencesJson(Object method) {
+		getPrefsMethod = (com.projectlibre1.util.Alert.Method) method;
+	}
+
+	public static void setApplyProjectPreferencesJson(Object method) {
+		applyPrefsMethod = (com.projectlibre1.util.Alert.Method) method;
+	}
+
+	public static Object getProjectPreferencesJson() {
+		return getPrefsMethod != null ? getPrefsMethod.execute(null) : null;
+	}
+
+	public static void applyProjectPreferencesJson(Object json) {
+		if (applyPrefsMethod != null) {
+			applyPrefsMethod.execute(new Object[]{json});
+		}
+	}
+
 	public static UndoController getUndoController(){
 		DocumentFrame frame=GraphicManager.getDocumentFrameInstance();
 		if (frame==null) return null;

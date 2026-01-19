@@ -71,10 +71,11 @@
 	<target name="build" depends="prepare">
 		<javac destdir="${build}"
 			classpathref="compile.class.path"
+			includeantruntime="false"
 			debug="off"
 			nowarn="on"
-			source="21"
-			target="21">
+			source="17"
+			target="17">
 				<src path="${src}" />
 				<include name="**/*" />
 				<exclude name="**/version.properties" />

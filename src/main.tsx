@@ -1,12 +1,22 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
+import './i18n/config' // Импорт конфигурации i18n
 import App from './App'
 import './index.css'
+import { EnvironmentConfig } from './config/EnvironmentConfig'
+
+/**
+ * Инициализация порта API из параметров URL (передаются из Electron)
+ */
+const params = new URLSearchParams(window.location.search);
+const apiPort = params.get('apiPort');
+if (apiPort) {
+  EnvironmentConfig.setApiPort(parseInt(apiPort, 10));
+}
 
 /**
  * Инициализация React приложения
- * Монтирует корневой компонент в DOM
  */
 const rootElement = document.getElementById('root')
 if (!rootElement) {
@@ -15,8 +25,8 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <App />
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
 )

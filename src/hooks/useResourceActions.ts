@@ -4,12 +4,15 @@ import { useProjectState } from './useProjectState'
 import { useAsyncOperation } from './useAsyncOperation'
 import { ResourceUtils } from '@/utils/resource-utils'
 import { logger } from '@/utils/logger'
+import { useAppStore } from '@/store/appStore'
+import { ResourceFactory } from '@/domain/resources/ResourceFactory'
 
 /**
  * Хук для действий с ресурсами
  */
 export const useResourceActions = (execute: ReturnType<typeof useAsyncOperation>['execute']) => {
   const { addResourceUpdater, updateResourceUpdater, deleteResourceUpdater } = useProjectState()
+  const preferences = useAppStore((state) => state.preferences)
 
   const addResource = addResourceUpdater()
   const updateResource = updateResourceUpdater()
@@ -26,10 +29,7 @@ export const useResourceActions = (execute: ReturnType<typeof useAsyncOperation>
       throw new Error(validateResult)
     }
 
-    const newResource: Resource = {
-      ...resourceData,
-      id: Date.now().toString(),
-    }
+    const newResource = ResourceFactory.createResource(resourceData, preferences)
 
     await execute(
       async () => {
@@ -44,7 +44,7 @@ export const useResourceActions = (execute: ReturnType<typeof useAsyncOperation>
     )
 
     return newResource
-  }, [addResource, execute])
+  }, [addResource, execute, preferences])
 
   /**
    * Обновление ресурса

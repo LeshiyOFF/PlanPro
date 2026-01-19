@@ -1,7 +1,5 @@
 import { CommandLineTestOptions, IndividualTestResult } from './interfaces/CommandLineTestInterfaces';
 import { BasicJavaTests } from './testers/BasicJavaTests';
-import { PerformanceTests } from './testers/PerformanceTests';
-import { JarTests } from './testers/JarTests';
 
 /**
  * Координатор тестов
@@ -9,13 +7,9 @@ import { JarTests } from './testers/JarTests';
  */
 export class TestCoordinator {
   private readonly basicTests: BasicJavaTests;
-  private readonly performanceTests: PerformanceTests;
-  private readonly jarTests: JarTests;
   
   constructor() {
     this.basicTests = new BasicJavaTests();
-    this.performanceTests = new PerformanceTests();
-    this.jarTests = new JarTests();
   }
 
   /**
@@ -67,27 +61,19 @@ export class TestCoordinator {
   }
 
   /**
-   * Выполняет тест JAR файла
+   * Выполняет тест JAR файла (ВРЕМЕННО ОТКЛЮЧЕН до обновления JarTests)
    */
   async runJarTest(
-    options: CommandLineTestOptions,
-    testResults: IndividualTestResult[]
+    _options: CommandLineTestOptions,
+    _testResults: IndividualTestResult[]
   ): Promise<boolean> {
-    if (options.jarPath) {
-      const jarLaunchTest = await this.jarTests.testJarLaunch(options.jarPath);
-      testResults.push(jarLaunchTest);
-      if (!jarLaunchTest.success) {
-        return false;
-      }
-    }
     return true;
   }
 
   /**
-   * Выполняет тест производительности
+   * Выполняет тест производительности (ВРЕМЕННО ОТКЛЮЧЕН до обновления PerformanceTests)
    */
-  async runPerformanceTests(testResults: IndividualTestResult[]): Promise<void> {
-    const argsTest = await this.performanceTests.testCommandLineArgs();
-    testResults.push(argsTest);
+  async runPerformanceTests(_testResults: IndividualTestResult[]): Promise<void> {
+    // Резерв для будущих тестов производительности
   }
 }

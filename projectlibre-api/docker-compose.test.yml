@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  projectlibre-api-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: projectlibre-api-test
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=test
+      - JAVA_OPTS=-Xmx512m -Xms256m
+      - LOG_LEVEL=INFO
+      - OBSERVABILITY_ENABLED=true
+    volumes:
+      - ./logs:/app/logs
+      - ./test-data:/app/test-data
+    networks:
+      - projectlibre-test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - mock-database
+
+  mock-database:
+    image: postgres:15-alpine
+    container_name: projectlibre-test-db
+    environment:
+      - POSTGRES_DB=projectlibre_test
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-test-data:/var/lib/postgresql/data
+      - ./test-scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - projectlibre-test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d projectlibre_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  observability-test:
+    image: prom/prometheus:latest
+    container_name: projectlibre-test-observability
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus-test.yml:/etc/prometheus/prometheus.yml
+      - prometheus-test-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - projectlibre-test
+
+  grafana-test:
+    image: grafana/grafana:latest
+    container_name: projectlibre-test-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-test-data:/var/lib/grafana
+      - ./grafana-test-dashboards:/etc/grafana/provisioning/dashboards
+    networks:
+      - projectlibre-test
+    depends_on:
+      - observability-test
+
+networks:
+  projectlibre-test:
+    driver: bridge
+
+volumes:
+  postgres-test-data:
+    driver: local
+  prometheus-test-data:
+    driver: local
+  grafana-test-data:
+    driver: local

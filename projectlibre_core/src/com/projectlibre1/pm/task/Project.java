@@ -114,6 +114,7 @@ import com.projectlibre1.grouping.core.model.NodeModelDataFactory;
 import com.projectlibre1.grouping.core.model.NodeModelFactory;
 import com.projectlibre1.grouping.core.transform.filtering.NotAssignmentFilter;
 import com.projectlibre1.options.CalendarOption;
+import com.projectlibre1.options.ScheduleOption;
 import com.projectlibre1.options.TimesheetOption;
 import com.projectlibre1.pm.assignment.Assignment;
 import com.projectlibre1.pm.assignment.HasTimeDistributedData;
@@ -1550,6 +1551,7 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 	    hasKey=HasKeyImpl.deserialize(s,this);
 	    //initUndo();
 	    tasks = new LinkedList();
+	    resourcePool = null; // Явная инициализация transient-поля
 		objectEventManager = new ObjectEventManager();
 		objectSelectionEventManager = new ObjectSelectionEventManager();
 		scheduleEventManager = new ScheduleEventManager();
@@ -2572,12 +2574,15 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		HashMap fieldAliasMap;
 		PrintSettings printSettings;
 		CalendarOption calendarOption;
+		ScheduleOption scheduleOption;
+		String preferencesJson;
 
 	}
 	public transient SpreadSheetFieldArray fieldArray = null;
 	public transient PrintSettings printSettings = null;
 	public transient PrintSettings tmpSettings = null;
 	public transient CalendarOption calendarOption = null;
+	public transient ScheduleOption scheduleOption = null;
 
 	public PrintSettings getPrintSettings(int context) {
 		return context==SavableToWorkspace.PERSIST?printSettings:tmpSettings;
@@ -2632,6 +2637,14 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 			calendarOption = ws.calendarOption;
 			CalendarOption.setInstance(calendarOption);
 		}
+		if (ws.scheduleOption != null) {
+			scheduleOption = ws.scheduleOption;
+			ScheduleOption.setInstance(scheduleOption);
+		}
+
+		if (ws.preferencesJson != null) {
+			Alert.setGraphicManagerMethod("applyProjectPreferencesJson", ws.preferencesJson);
+		}
 
 		//	Alert.setGraphicManagerMethod("setCurrentFieldArray",f);
 	}
@@ -2647,6 +2660,14 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 			}
 			if (calendarOption != null)
 				ws.calendarOption = calendarOption;
+			if (scheduleOption != null)
+				ws.scheduleOption = scheduleOption;
+			
+			// Сохраняем дополнительные настройки через механизм алертов (Callback в API слой)
+			Object prefs = Alert.getGraphicManagerMethod("getProjectPreferencesJson");
+			if (prefs instanceof String) {
+				ws.preferencesJson = (String) prefs;
+			}
 		}
 		ws.fieldAliasMap = FieldDictionary.getAliasMap();
 		return ws;

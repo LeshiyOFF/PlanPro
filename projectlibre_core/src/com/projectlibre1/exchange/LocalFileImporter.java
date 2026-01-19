@@ -55,6 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.exchange;
 
+import java.awt.GraphicsEnvironment;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -107,44 +108,114 @@ public class LocalFileImporter extends FileImporter {
 	public void importFile() throws Exception{
 		File f=new File(getFileName());
 		FileInputStream fin=new FileInputStream(f);
+		BufferedInputStream bis=new BufferedInputStream(fin);
 		Exception ex=null;
 		
-		if (/*findString(fin, OLD_FILE)*/false) {
-			System.out.println("Old file: ignoring binary content");
-			project=null;
-		}else {
+		// ✅ DETECT POD FORMAT FIRST (XML-only, Binary, Corrupted)
+		PodFormatDetector detector = new PodFormatDetector();
+		PodFormatDetector.PodFormat format = detector.detect(bis);
+		
+		System.out.println("Loading "+getFileName()+"..."); //$NON-NLS-1$ //$NON-NLS-2$
+		System.out.println("Detected format: " + format.name() + " - " + format.getDescription());
+		
+		if (format == PodFormatDetector.PodFormat.CORRUPTED) {
+			System.err.println("❌ File is corrupted or not a valid POD");
+			throw new IOException("File is corrupted or not a valid POD format");
+		}
+		
+		if (format == PodFormatDetector.PodFormat.XML_ONLY) {
+			System.out.println("⚠️ XML-only format detected, skipping binary deserialization");
+			project = null; // Will trigger XML recovery below
+		} else {
+			// BINARY_WITH_XML or LEGACY_BINARY format
 	        try {
 				DataUtil serializer=new DataUtil();
-				System.out.println("Loading "+getFileName()+"..."); //$NON-NLS-1$ //$NON-NLS-2$
-
 				long t1=System.currentTimeMillis();
-				ObjectInputStream in=new ObjectInputStream(fin);
+				ObjectInputStream in=new ObjectInputStream(bis);
 				Object obj=in.readObject();
-				if (obj instanceof String) obj=in.readObject(); //check version in the future
-				DocumentData projectData=(DocumentData)obj;
-				projectData.setMaster(true);
-				projectData.setLocal(true);
+				String version = null;
+				
+				// Read version string if present
+				if (obj instanceof String) {
+					version = (String)obj;
+					System.out.println("POD file version: " + version);
+					obj=in.readObject();
+				}
+				
 				long t2=System.currentTimeMillis();
 				System.out.println("Loading...Done in "+(t2-t1)+" ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
-
-				System.out.println("Deserializing..."); //$NON-NLS-1$
-				t1=System.currentTimeMillis();
-//	        project=serializer.deserializeProject(projectData,false,true,resourceMap);
-				setProject(serializer.deserializeLocalDocument(projectData));
-				t2=System.currentTimeMillis();
-				System.out.println("Deserializing...Done in "+(t2-t1)+" ms"); //$NON-NLS-1$ //$NON-NLS-2$
+				// Support both legacy (direct Project) and new (DocumentData) formats
+				if (obj instanceof DocumentData) {
+					// NEW FORMAT: DocumentData wrapper (standard path)
+					System.out.println("Detected NEW format (DocumentData)");
+					DocumentData projectData=(DocumentData)obj;
+					projectData.setMaster(true);
+					projectData.setLocal(true);
+					
+					System.out.println("Deserializing..."); //$NON-NLS-1$
+					t1=System.currentTimeMillis();
+					setProject(serializer.deserializeLocalDocument(projectData));
+					t2=System.currentTimeMillis();
+					System.out.println("Deserializing...Done in "+(t2-t1)+" ms"); //$NON-NLS-1$ //$NON-NLS-2$
+					
+				} else if (obj instanceof Project) {
+					// LEGACY FORMAT: Direct Project object (older POD files)
+					System.out.println("Detected LEGACY format (direct Project object)");
+					System.out.println("Post-deserializing legacy project...");
+					
+					t1=System.currentTimeMillis();
+					try {
+						project = (Project)obj;
+						
+						// CRITICAL: Initialize transient fields (30+ fields need initialization!)
+						project.postDeserialization();
+						
+						// Set properties
+						project.setMaster(true);
+						project.setLocal(true);
+						
+						t2=System.currentTimeMillis();
+						System.out.println("✅ Legacy project loaded: " + project.getName() + 
+							" (post-deserialization in " + (t2-t1) + " ms)");
+						
+						// CRITICAL FIX: Legacy format has transient 'tasks' field
+						// After deserialization tasks list is empty, need XML fallback
+						if (project.getTasks() == null || project.getTasks().isEmpty()) {
+							System.out.println("⚠️ Legacy project has 0 tasks after postDeserialization");
+							System.out.println("   Binary deserialization cannot restore transient fields");
+							System.out.println("   Switching to XML fallback for full data recovery...");
+							project = null; // Triggers XML fallback below
+						}
+					} catch (Exception postDeserEx) {
+						System.err.println("❌ ERROR in postDeserialization for legacy format:");
+						postDeserEx.printStackTrace();
+						// Fall through to XML recovery if postDeserialization fails
+						project = null;
+						throw postDeserEx;
+					}
+					
+				} else {
+					// UNKNOWN FORMAT: Neither DocumentData nor Project
+					String errorMsg = "❌ UNKNOWN POD format: " + 
+						(obj != null ? obj.getClass().getName() : "null") +
+						" (version: " + (version != null ? version : "unknown") + ")";
+					System.err.println(errorMsg);
+					throw new IOException(errorMsg);
+				}
+				
 			} catch (Exception e) {
+				System.err.println("❌ Exception during POD deserialization: " + e.getMessage());
+				e.printStackTrace();
 				ex=e;
 				project=null;
 			}finally{
 				try {
-					fin.close();
+					bis.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			
 		}
         
         if (project==null){
@@ -221,33 +292,26 @@ public class LocalFileImporter extends FileImporter {
 					final LoadOptions opt=new LoadOptions();
 					opt.setFileName(fileName);
 					opt.setLocal(true);
-					opt.setSync(false);
 					opt.setImporter(LocalSession.MICROSOFT_PROJECT_IMPORTER);
 					opt.setFileInputStream(in);
 					
-					SwingUtilities.invokeLater(new Runnable() {
-						
-						@Override
-						public void run() {
-							projectFactory.openProject(opt);
-							
-						}
-					});
-//					project=projectFactory.openProject(opt);
-
-					
-//					FileImporter importer=LocalSession.getImporter("com.projectlibre1.exchange.MicrosoftImporter");
-//					
-//					ResourcePool resourcePool=null;
-//					DataFactoryUndoController undoController=new DataFactoryUndoController();
-//					resourcePool = ResourcePoolFactory.getInstance().createResourcePool("",undoController);
-//					resourcePool.setLocal(true);
-//					project = Project.createProject(resourcePool,undoController);						
-//					((DefaultNodeModel)project.getTaskOutline()).setDataFactory(project);		
-//					importer.setProject(project);
-//					
-//					importer.loadProject(in);
-					System.out.println("Recovered with XML");
+					// Headless mode: synchronous loading with result capture
+					// GUI mode: asynchronous loading via EDT (original behavior)
+					if (GraphicsEnvironment.isHeadless()) {
+						opt.setSync(true);
+						project = projectFactory.openProject(opt);
+						System.out.println("Recovered with XML (headless, sync, project=" + 
+							(project != null ? project.getName() : "null") + ")");
+					} else {
+						opt.setSync(false);
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								projectFactory.openProject(opt);
+							}
+						});
+						System.out.println("Recovered with XML (GUI, async)");
+					}
 				}else{
 					//unable to recover from xml 
 		    		if ( ex!=null &&

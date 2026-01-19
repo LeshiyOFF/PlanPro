@@ -9,6 +9,9 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [react()],
   
+  // Базовый путь для Electron (относительный путь для корректной загрузки ресурсов)
+  base: './',
+  
   // Настройка путей для(alias) для чистых импортов
   resolve: {
     alias: {
@@ -33,7 +36,7 @@ export default defineConfig({
 
   // Настройки сборки
   build: {
-    outDir: 'dist',
+    outDir: process.env.VITE_OUT_DIR || 'dist-app',
     emptyOutDir: true,
     sourcemap: true,
     
@@ -73,14 +76,16 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     
     // Target для Electron
-    target: 'esnext',
+    target: 'es2022',
     minify: 'esbuild'
   },
 
   // Определения глобальных переменных
   define: {
     __IS_DEV__: JSON.stringify(process.env.NODE_ENV === 'development'),
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version)
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+      'process.env.VITE_BUILD_TARGET': JSON.stringify(process.env.VITE_BUILD_TARGET || 'web'),
+      global: 'globalThis'
   },
 
   // CSS конфигурация

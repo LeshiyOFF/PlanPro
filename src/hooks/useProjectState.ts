@@ -41,6 +41,36 @@ export const useProjectState = () => {
   }, [taskState, projectCore])
 
   /**
+   * Обновитель для изменения задачи
+   */
+  const taskUpdateHandler = useCallback((id: string, updates: Partial<Task>) => {
+    const updatedTask = taskState.updateTask(id, updates)
+    if (projectCore.project && updatedTask) {
+      const updatedProject = {
+        ...projectCore.project,
+        tasks: taskState.tasks.map(t => t.id === id ? { ...t, ...updates } : t),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return updatedTask
+  }, [taskState, projectCore])
+
+  /**
+   * Обновитель для удаления задачи
+   */
+  const taskDeleteHandler = useCallback((id: string) => {
+    const success = taskState.deleteTask(id)
+    if (projectCore.project && success) {
+      const updatedProject = {
+        ...projectCore.project,
+        tasks: taskState.tasks.filter(t => t.id !== id),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return success
+  }, [taskState, projectCore])
+
+  /**
    * Создание обновителя для ресурсов
    */
   const resourceUpdater = useCallback((newResource: Resource) => {
@@ -53,6 +83,36 @@ export const useProjectState = () => {
       }
       projectCore.updateProjectMetadata(updatedProject)
     }
+  }, [resourceState, projectCore])
+
+  /**
+   * Обновитель для изменения ресурса
+   */
+  const resourceUpdateHandler = useCallback((id: string, updates: Partial<Resource>) => {
+    const updatedResource = resourceState.updateResource(id, updates)
+    if (projectCore.project && updatedResource) {
+      const updatedProject = {
+        ...projectCore.project,
+        resources: resourceState.resources.map(r => r.id === id ? { ...r, ...updates } : r),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return updatedResource
+  }, [resourceState, projectCore])
+
+  /**
+   * Обновитель для удаления ресурса
+   */
+  const resourceDeleteHandler = useCallback((id: string) => {
+    const success = resourceState.deleteResource(id)
+    if (projectCore.project && success) {
+      const updatedProject = {
+        ...projectCore.project,
+        resources: resourceState.resources.filter(r => r.id !== id),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return success
   }, [resourceState, projectCore])
 
   /**
@@ -70,6 +130,36 @@ export const useProjectState = () => {
     }
   }, [assignmentState, projectCore])
 
+  /**
+   * Обновитель для изменения назначения
+   */
+  const assignmentUpdateHandler = useCallback((id: string, updates: Partial<Assignment>) => {
+    const updatedAssignment = assignmentState.updateAssignment(id, updates)
+    if (projectCore.project && updatedAssignment) {
+      const updatedProject = {
+        ...projectCore.project,
+        assignments: assignmentState.assignments.map(a => a.id === id ? { ...a, ...updates } : a),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return updatedAssignment
+  }, [assignmentState, projectCore])
+
+  /**
+   * Обновитель для удаления назначения
+   */
+  const assignmentDeleteHandler = useCallback((id: string) => {
+    const success = assignmentState.deleteAssignment(id)
+    if (projectCore.project && success) {
+      const updatedProject = {
+        ...projectCore.project,
+        assignments: assignmentState.assignments.filter(a => a.id !== id),
+      }
+      projectCore.updateProjectMetadata(updatedProject)
+    }
+    return success
+  }, [assignmentState, projectCore])
+
   return {
     // Основное состояние
     project: projectCore.project,
@@ -84,16 +174,16 @@ export const useProjectState = () => {
 
     // Updater функции для Actions
     addTaskUpdater: () => taskUpdater,
-    updateTaskUpdater: () => taskState.updateTask,
-    deleteTaskUpdater: () => taskState.deleteTask,
+    updateTaskUpdater: () => taskUpdateHandler,
+    deleteTaskUpdater: () => taskDeleteHandler,
 
     addResourceUpdater: () => resourceUpdater,
-    updateResourceUpdater: () => resourceState.updateResource,
-    deleteResourceUpdater: () => resourceState.deleteResource,
+    updateResourceUpdater: () => resourceUpdateHandler,
+    deleteResourceUpdater: () => resourceDeleteHandler,
 
     addAssignmentUpdater: () => assignmentUpdater,
-    updateAssignmentUpdater: () => assignmentState.updateAssignment,
-    deleteAssignmentUpdater: () => assignmentState.deleteAssignment,
+    updateAssignmentUpdater: () => assignmentUpdateHandler,
+    deleteAssignmentUpdater: () => assignmentDeleteHandler,
 
     // Обновленные действия
     addTask: taskUpdater,
