@@ -1,0 +1,67 @@
+name: Build/Release
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'liberica'
+
+      - name: Install Build Tools (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ant maven fakeroot rpm
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Prepare JRE
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            node scripts/prepare-jre.js --platform win
+          else
+            node scripts/prepare-jre.js --platform linux
+          fi
+        shell: bash
+
+      - name: Build Java Core & API
+        run: npm run build:java
+        shell: bash
+
+      - name: Build and Publish Electron App
+        run: |
+          if [ "${{ matrix.os }}" = "windows-latest" ]; then
+            npm run build
+            npx electron-builder --win --publish always
+          else
+            npm run build
+            npx electron-builder --linux deb --publish always
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        shell: bash

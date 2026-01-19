@@ -1,27 +1,35 @@
 {
-  "name": "projectlibre-electron",
+  "name": "planpro-electron",
   "version": "1.0.0",
-  "description": "ProjectLibre - Open Source Project Management Software with Electron wrapper",
-  "main": "dist-electron/main.js",
+  "description": "ПланПро - Профессиональное ПО для управления проектами",
+  "main": "dist-app/electron/main.js",
   "homepage": "./",
   "author": {
-    "name": "ProjectLibre Team",
-    "email": "info@projectlibre.com"
+    "name": "ООО Просистемы",
+    "email": "info@prosystems.ru"
   },
   "license": "CPAL-1.0",
   "private": true,
   "scripts": {
     "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "dev:vite": "vite",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
-    "build": "npm run build:frontend && npm run build:electron",
+    "build": "cross-env VITE_OUT_DIR=dist-app npm run build:frontend && npm run build:electron",
     "build:frontend": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
-    "build:java": "cd projectlibre_build && ..\\projectlibre_build\\apache-ant-1.10.15\\bin\\ant.bat -f build.xml",
+    "build:app": "npm run build",
+    "build:java": "npm run build:java-core && npm run build:java-api",
+    "build:java-core": "cd projectlibre_build && ..\\projectlibre_build\\apache-ant-1.10.15\\bin\\ant.bat -f build.xml",
+    "build:java-api": "cd projectlibre-api && apache-maven-3.9.5\\bin\\mvn.cmd clean package -DskipTests && cmd /c \"copy /Y target\\projectlibre-api-1.0.0.jar projectlibre-api-final.jar\" && cmd /c \"copy /Y projectlibre-api-final.jar ..\\resources\\java\\projectlibre-api-final.jar\"",
     "prepare-jre": "node scripts/prepare-jre.js",
-    "dist": "npm run build && npm run build:java && electron-builder",
-    "dist:win": "echo 'Preparing VS Code configuration...' && node scripts/force-unlock.js && npm run build && npm run build:java && electron-builder --win",
-    "dist:linux": "npm run build && npm run build:java && electron-builder --linux",
+    "prepare-jre:win": "node scripts/prepare-jre.js --platform win",
+    "prepare-jre:linux": "node scripts/prepare-jre.js --platform linux",
+    "dist": "npm run build && npm run build:java && electron-builder --config.electron-builder.forge.config.js",
+    "dist:win": "echo 'Preparing VS Code configuration...' && node scripts/force-unlock.js && npm run prepare-jre:win && npm run build && npm run build:java && echo 'Waiting for file system to release JAR files...' && powershell -Command \"Start-Sleep -Seconds 3\" && electron-builder --win",
+    "dist:linux": "npm run prepare-jre:linux && npm run build && npm run build:java && electron-builder --linux",
+    "dist:astra": "npm run prepare-jre:linux && npm run build && npm run build:java && electron-builder --linux deb",
     "dist:mac": "npm run build && npm run build:java && electron-builder --mac",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
@@ -31,27 +39,45 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@axe-core/react": "^4.11.0",
+    "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
     "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-progress": "^1.1.8",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@sentry/browser": "^10.32.1",
+    "@sentry/react": "^10.32.1",
+    "@sentry/tracing": "^7.120.4",
+    "axe-core": "^4.11.0",
     "axios": "^1.6.0",
-    "class-variance-authority": "^0.7.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
+    "framer-motion": "^11.11.17",
+    "gantt-task-react": "^0.3.9",
+    "i18next": "^25.7.4",
+    "i18next-browser-languagedetector": "^8.2.0",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
+    "react-day-picker": "^9.13.0",
     "react-dom": "^18.2.0",
+    "react-i18next": "^16.5.1",
     "react-router-dom": "^6.8.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
-    "zustand": "^4.4.1"
+    "zustand": "^4.5.7"
   },
   "devDependencies": {
-    "@types/node": "^20.5.0",
+    "@storybook/addon-interactions": "^8.6.15",
+    "@storybook/addon-links": "^8.6.15",
+    "@storybook/testing-library": "^0.2.0",
+    "@types/node": "^20.19.27",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
@@ -59,20 +85,30 @@
     "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.15",
     "concurrently": "^8.2.0",
-    "electron": "^26.0.0",
+    "cross-env": "^7.0.3",
+    "electron": "28.0.0",
     "electron-builder": "^23.6.0",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "png-to-ico": "^3.0.1",
     "postcss": "^8.4.28",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
+    "typescript": "^4.9.5",
     "vite": "^4.4.5",
     "wait-on": "^7.0.1"
   },
   "build": {
-    "appId": "com.projectlibre.app",
-    "productName": "ProjectLibre",
+    "appId": "com.prosystems.planpro",
+    "productName": "ПланПро",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "LeshiyOFF",
+        "repo": "PlanPro"
+      }
+    ],
     "directories": {
       "output": "release"
     },
@@ -86,35 +122,48 @@
           ]
         }
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "extraResources": [
+        {
+          "from": "resources/jre/win",
+          "to": "jre",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
     },
-    "compression": "store",
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.jar",
+      "resources/jre/**/*",
+      "resources/*.dll",
+      "resources/*.exe"
+    ],
     "files": [
-      "dist/**/*",
-      "dist-electron/**/*",
-      "node_modules/**/*",
-      "package.json",
-      "projectlibre_build/dist/**/*"
+      "dist-app/**/*",
+      "resources/**/*",
+      "package.json"
     ],
     "extraResources": [
       {
-        "from": "resources/jre",
-        "to": "jre",
+        "from": "projectlibre_build/dist",
+        "to": "java/lib-runtime",
         "filter": [
-          "**/*"
+          "projectlibre.jar"
         ]
       },
       {
         "from": "projectlibre_build/dist",
-        "to": "java",
+        "to": "java/lib",
         "filter": [
-          "projectlibre.jar",
-          "lib/*.jar"
+          "**/*.jar"
         ]
       }
     ],
     "extraMetadata": {
-      "main": "dist-electron/main.js"
+      "main": "dist-app/electron/main.js"
     }
   },
   "nsis": {
@@ -123,17 +172,88 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true
   },
-  "linux": {
-    "target": [
-      {
-        "target": "AppImage",
-        "arch": [
-          "x64"
-        ]
-      }
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "category": "Office",
+      "maintainer": "ООО Просистемы <info@prosystems.ru>",
+      "extraResources": [
+        {
+          "from": "resources/jre/linux",
+          "to": "jre",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ]
+    },
+  "fileAssociations": [
+    {
+      "ext": "pod",
+      "name": "Проект ПланПро",
+      "description": "Файл проекта ПланПро",
+      "mimeType": "application/x-planpro",
+      "role": "Editor"
+    }
+  ],
+  "deb": {
+    "priority": "optional",
+    "depends": [
+      "libasound2",
+      "libnss3",
+      "libatk1.0-0",
+      "libatk-bridge2.0-0",
+      "libc6",
+      "libcairo2",
+      "libcups2",
+      "libdbus-1-3",
+      "libexpat1",
+      "libfontconfig1",
+      "libgbm1",
+      "libgcc1",
+      "libglib2.0-0",
+      "libgtk-3-0",
+      "libnspr4",
+      "libpango-1.0-0",
+      "libpangocairo-1.0-0",
+      "libstdc++6",
+      "libx11-6",
+      "libx11-xcb1",
+      "libxcb1",
+      "libxcomposite1",
+      "libxcursor1",
+      "libxdamage1",
+      "libxext6",
+      "libxfixes3",
+      "libxi6",
+      "libxrandr2",
+      "libxrender1",
+      "libxss1",
+      "libxtst6"
     ],
-    "icon": "assets/icon.png",
-    "category": "Office"
+    "scripts": {
+      "afterInstall": "scripts/linux/after-install.sh"
+    },
+    "desktop": {
+      "Name": "ПланПро",
+      "Comment": "Профессиональное ПО для управления проектами",
+      "Terminal": "false",
+      "Type": "Application",
+      "Categories": "Office;ProjectManagement;"
+    }
   },
   "mac": {
     "target": [
@@ -145,7 +265,6 @@
         ]
       }
     ],
-    "icon": "assets/icon.icns",
     "category": "public.app-category.productivity"
   },
   "engines": {
