@@ -8,6 +8,7 @@ import { IpcChannels } from './types/IpcChannels';
 import { SecurityPolicyManager } from './services/SecurityPolicyManager';
 import { PreferencesIpcHandler } from './handlers/PreferencesIpcHandler';
 import { JavaIpcHandler } from './handlers/JavaIpcHandler';
+import { SystemIpcHandler } from './handlers/SystemIpcHandler';
 
 /**
  * Основной класс приложения ПланПро Electron.
@@ -34,7 +35,7 @@ export class PlanProApp {
   private registerIpcHandlers(): void {
     PreferencesIpcHandler.register();
     JavaIpcHandler.register(this.javaBridge);
-    this.registerSystemIpcHandlers();
+    SystemIpcHandler.register();
   }
 
   private initializeEventHandlers(): void {
@@ -66,20 +67,6 @@ export class PlanProApp {
         app.exit(0);
       }
     }
-  }
-
-  private registerSystemIpcHandlers(): void {
-    ipcMain.handle('get-app-info', () => ({
-      name: app.getName(),
-      version: app.getVersion(),
-      platform: process.platform,
-      arch: process.arch
-    }));
-
-    ipcMain.handle('show-message-box', async (_, opt) => await dialog.showMessageBox(opt));
-    ipcMain.handle('show-open-dialog', async (_, opt) => await dialog.showOpenDialog(opt));
-    ipcMain.handle('show-save-dialog', async (_, opt) => await dialog.showSaveDialog(opt));
-    ipcMain.handle('open-external', (_, url) => shell.openExternal(url));
   }
 
   private setupJavaBridgeEventListeners(): void {

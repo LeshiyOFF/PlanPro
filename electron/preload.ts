@@ -27,6 +27,7 @@ export enum IpcChannels {
   SHOW_MESSAGE_BOX = 'show-message-box',
   SHOW_OPEN_DIALOG = 'show-open-dialog',
   SHOW_SAVE_DIALOG = 'show-save-dialog',
+  SAVE_BINARY_FILE = 'save-binary-file',
   OPEN_EXTERNAL = 'open-external'
 }
 
@@ -50,6 +51,7 @@ export interface ElectronAPI {
   showMessageBox: (options: Electron.MessageBoxOptions) => Promise<Electron.MessageBoxReturnValue>;
   showOpenDialog: (options: Electron.OpenDialogOptions) => Promise<Electron.OpenDialogReturnValue>;
   showSaveDialog: (options: Electron.SaveDialogOptions) => Promise<Electron.SaveDialogReturnValue>;
+  saveBinaryFile: (path: string, data: ArrayBuffer | Uint8Array) => Promise<{ success: boolean; error?: string }>;
   openExternal: (url: string) => Promise<void>;
   
   // События (Строгие имена из логов ошибок)
@@ -107,6 +109,10 @@ const electronAPI: ElectronAPI = {
 
   showSaveDialog: (options: Electron.SaveDialogOptions): Promise<Electron.SaveDialogReturnValue> => {
     return ipcRenderer.invoke(IpcChannels.SHOW_SAVE_DIALOG, options);
+  },
+
+  saveBinaryFile: (path: string, data: ArrayBuffer | Uint8Array): Promise<{ success: boolean; error?: string }> => {
+    return ipcRenderer.invoke(IpcChannels.SAVE_BINARY_FILE, { path, data });
   },
     
   openExternal: (url: string): Promise<void> => {

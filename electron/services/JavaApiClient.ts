@@ -52,7 +52,7 @@ export class JavaApiClient {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
-        body: JSON.stringify({ args }),
+        body: JSON.stringify({ command, args }),
         signal: controller.signal
       })
 
