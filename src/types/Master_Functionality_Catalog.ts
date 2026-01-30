@@ -1273,6 +1273,7 @@ export interface UIState {
   sidebarVisible: boolean;
   toolbarVisible: boolean;
   statusbarVisible: boolean;
+  isPulseActive: boolean;
   isLoading: boolean;
   dialogs: DialogState[];
   notifications: AppNotification[];

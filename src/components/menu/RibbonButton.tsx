@@ -21,11 +21,10 @@ export const RibbonButton: React.FC<RibbonButtonProps> = ({
   className = '',
   disabled = false
 }) => {
-  return (
+  const content = (
     <button
       onClick={onClick}
       disabled={disabled}
-      title={title}
       className={cn(
         "ribbon-button p-2 rounded-md transition-colors",
         "hover:bg-accent hover:text-accent-foreground",
@@ -35,6 +34,12 @@ export const RibbonButton: React.FC<RibbonButtonProps> = ({
     >
       {children}
     </button>
+  );
+
+  return (
+    <SafeTooltip content={title} side="bottom">
+      {content}
+    </SafeTooltip>
   );
 };
 

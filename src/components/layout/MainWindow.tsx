@@ -34,7 +34,6 @@ export const MainWindow: React.FC<MainWindowProps> = ({
 }) => {
   const { navigateToView } = useNavigation();
   const { currentProject } = useProject();
-  const statusBar = useStatusBar();
   
   // Наши живые операции с файлами
   const fileOperations = useFileOperations();
@@ -86,16 +85,13 @@ export const MainWindow: React.FC<MainWindowProps> = ({
     
     if (targetActionId) {
       try {
-        statusBar.showProgress(`Выполнение: ${actionLabel}...`);
         await executeAction(targetActionId);
-        statusBar.showSuccess(`Завершено: ${actionLabel}`);
       } catch (error) {
         console.error(`[MainWindow] Failed to execute action ${targetActionId}:`, error);
-        statusBar.showError(`Ошибка выполнения: ${actionLabel}`);
       }
     } else {
       // Fallback для несмапленных действий
-      statusBar.showMessage(`Выполнение: ${actionLabel}`);
+      console.log(`[MainWindow] Executing action: ${actionLabel}`);
     }
   };
 
@@ -111,9 +107,6 @@ export const MainWindow: React.FC<MainWindowProps> = ({
       <main className="flex-1 overflow-hidden">
         {children}
       </main>
-      
-      {/* Status Bar */}
-      <StatusBar />
     </>
   );
 };

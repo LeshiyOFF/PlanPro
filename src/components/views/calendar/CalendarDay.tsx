@@ -7,6 +7,7 @@ import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent';
 interface CalendarDayProps {
   day: ICalendarCell;
   onEventClick?: (event: ICalendarEvent) => void;
+  onEventContextMenu?: (e: React.MouseEvent, event: ICalendarEvent) => void;
   onDragStart?: (e: React.DragEvent, event: ICalendarEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, date: Date) => void;
@@ -18,6 +19,7 @@ interface CalendarDayProps {
 export const CalendarDay: React.FC<CalendarDayProps> = ({ 
   day, 
   onEventClick,
+  onEventContextMenu,
   onDragStart,
   onDragEnd,
   onDrop
@@ -67,6 +69,7 @@ export const CalendarDay: React.FC<CalendarDayProps> = ({
             key={event.id} 
             event={event} 
             onClick={onEventClick}
+            onContextMenu={onEventContextMenu}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
           />

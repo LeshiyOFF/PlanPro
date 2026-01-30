@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
-import { WBSCanvasCore } from '@/components/gantt/WBSCanvasCore';
+import { WBSCanvasCore, WBSCanvasHandle } from '@/components/gantt/WBSCanvasCore';
 import { WBSNode } from '@/domain/wbs/interfaces/WBS';
 import { WBSCodeService } from '@/domain/wbs/services/WBSCodeService';
 import { useProjectStore } from '@/store/projectStore';
@@ -12,17 +12,11 @@ import {
   Maximize, 
   Share2, 
   Plus, 
-  Trash2,
-  Info,
-  ChevronRight,
-  ChevronLeft,
-  Network
+  Network,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
-import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
-import { ViewType } from '@/types/ViewTypes';
-import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * Work Breakdown Structure (WBS) View - СДР (Структура декомпозиции работ)
@@ -30,16 +24,18 @@ import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
  * Визуализирует иерархическую структуру работ проекта в виде дерева.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  * 
- * @version 8.13
+ * @version 8.15
  */
 export const WBSView: React.FC = () => {
   const { t } = useTranslation();
-  const { tasks, addTask, indentTask, outdentTask } = useProjectStore();
-  const { deleteTask, isDeletionAllowed } = useTaskDeletion();
+  const { tasks, addTask } = useProjectStore();
+  const { toast } = useToast();
   const helpContent = useHelpContent();
   const [zoom, setZoom] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set());
-  const { showMenu } = useContextMenu();
+  
+  const wbsCanvasRef = useRef<WBSCanvasHandle>(null);
 
   /**
    * Расчет длительности для ветви
@@ -119,63 +115,6 @@ export const WBSView: React.FC = () => {
     });
   }, []);
 
-  const handleNodeContextMenu = useCallback((nodeId: string, x: number, y: number) => {
-    const task = tasks.find(n => n.id === nodeId);
-    if (task) {
-      const taskIndex = tasks.findIndex(t => t.id === task.id);
-      
-      let indentParent = null;
-      for (let i = taskIndex - 1; i >= 0; i--) {
-        if (tasks[i].level === task.level) {
-          indentParent = tasks[i];
-          break;
-        } else if (tasks[i].level < task.level) {
-          break;
-        }
-      }
-
-      let outdentParent = null;
-      if (task.level > 1) {
-        for (let i = taskIndex - 1; i >= 0; i--) {
-          if (tasks[i].level === task.level - 2) {
-            outdentParent = tasks[i];
-            break;
-          }
-        }
-      }
-
-      showMenu(ContextMenuType.TASK, {
-        target: task,
-        position: { x, y },
-        actions: [
-          { 
-            label: t('context_menu.task_info'), 
-            onClick: () => { /* Открытие диалога */ },
-            icon: <Info size={14} className="text-primary" />
-          },
-          { divider: true },
-          { 
-            label: indentParent ? t('context_menu.indent_task_to', { taskName: indentParent.name }) : t('context_menu.indent_task'), 
-            onClick: () => indentTask(task.id), 
-            icon: <ChevronRight size={14} /> 
-          },
-          { 
-            label: outdentParent ? t('context_menu.outdent_task_to', { taskName: outdentParent.name }) : t('context_menu.outdent_task'), 
-            onClick: () => outdentTask(task.id), 
-            icon: <ChevronLeft size={14} /> 
-          },
-          { divider: true },
-          { 
-            label: t('context_menu.delete_task'), 
-            onClick: () => deleteTask(task.id), 
-            icon: <Trash2 size={14} className={isDeletionAllowed ? "text-red-500" : "text-gray-400"} />,
-            disabled: !isDeletionAllowed
-          }
-        ]
-      });
-    }
-  }, [tasks, showMenu, indentTask, outdentTask, deleteTask, isDeletionAllowed, t]);
-
   const handleAddTask = () => {
     const newId = `TASK-${String(tasks.length + 1).padStart(3, '0')}`;
     addTask({
@@ -187,6 +126,58 @@ export const WBSView: React.FC = () => {
       color: 'hsl(var(--primary))',
       level: 1
     });
+  };
+
+  /**
+   * Экспорт СДР в изображение через Electron API
+   */
+  const handleExport = async () => {
+    if (!wbsCanvasRef.current || isExporting) return;
+
+    try {
+      setIsExporting(true);
+
+      // 1. Показываем диалог сохранения
+      const result = await window.electronAPI.showSaveDialog({
+        title: t('wbs.export_dialog_title') || 'Экспорт СДР',
+        defaultPath: `WBS_${new Date().toISOString().split('T')[0]}.png`,
+        filters: [
+          { name: 'Images', extensions: ['png'] }
+        ]
+      });
+
+      if (result.canceled || !result.filePath) {
+        setIsExporting(false);
+        return;
+      }
+
+      // 2. Генерируем Blob изображения (масштаб 2x для четкости)
+      const blob = await wbsCanvasRef.current.exportToBlob(2);
+      
+      // 3. Преобразуем Blob в ArrayBuffer для передачи через IPC
+      const arrayBuffer = await blob.arrayBuffer();
+
+      // 4. Сохраняем файл через Electron Main Process
+      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
+
+      if (saveResult.success) {
+        toast({
+          title: t('common.success') || 'Успех',
+          description: t('wbs.export_success_message') || 'СДР успешно экспортирована в файл',
+        });
+      } else {
+        throw new Error(saveResult.error);
+      }
+    } catch (error) {
+      console.error('WBS Export failed:', error);
+      toast({
+        variant: "destructive",
+        title: t('common.error') || 'Ошибка',
+        description: t('wbs.export_error_message') || 'Не удалось экспортировать СДР',
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   // Контролы масштабирования для правой части ActionBar
@@ -238,10 +229,11 @@ export const WBSView: React.FC = () => {
           },
           secondaryActions: [
             {
-              label: t('wbs.export_button'),
-              onClick: () => {/* TODO: implement export */},
-              icon: <Share2 className="w-4 h-4" />,
-              variant: 'outline'
+              label: isExporting ? t('common.exporting') || 'Экспорт...' : t('wbs.export_button'),
+              onClick: handleExport,
+              icon: isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Share2 className="w-4 h-4" />,
+              variant: 'outline',
+              disabled: isExporting
             }
           ],
           controls: zoomControls
@@ -252,11 +244,11 @@ export const WBSView: React.FC = () => {
       <div className="flex-1 overflow-hidden p-6">
         <div className="h-full w-full bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
           <WBSCanvasCore 
+            ref={wbsCanvasRef}
             nodes={visibleNodes}
             zoomLevel={zoom}
             onNodeToggle={handleNodeToggle}
             onNodeSelect={(id) => console.log('Selected:', id)}
-            onNodeContextMenu={handleNodeContextMenu}
           />
         </div>
       </div>

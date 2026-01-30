@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useImperativeHandle, forwardRef } from 'react';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 import { useSheetEditing } from '@/hooks/sheets/useSheetEditing';
 import { useSheetSelection } from '@/hooks/sheets/useSheetSelection';
@@ -9,6 +9,13 @@ import { SheetHeader } from './SheetHeader';
 import { SheetBody } from './SheetBody';
 import { SheetFilterRow } from './SheetFilterRow';
 import { FilterOperator } from '@/domain/sheets/interfaces/IDataProcessing';
+
+/**
+ * Handle для внешнего управления таблицей
+ */
+export interface ProfessionalSheetHandle {
+  exportToCSV: (filename?: string) => Promise<Blob>;
+}
 
 /**
  * Пропсы для универсального движка таблиц
@@ -27,11 +34,30 @@ export interface ProfessionalSheetProps<T> {
 }
 
 /**
- * Professional Sheet - Универсальный движок таблиц.
- * Поддерживает иерархию, in-place редактирование и кастомные колонки.
- * Соответствует SOLID и принципам чистой архитектуры.
+ * Вспомогательная функция для извлечения чистого текста из результата форматера (включая React-элементы).
+ * Игнорирует логические значения (true/false), как это делает React.
  */
-export const ProfessionalSheet = <T extends Record<string, any>>({
+const extractTextFromFormatted = (value: any): string => {
+  if (value === null || value === undefined || typeof value === 'boolean') return '';
+  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  
+  // Если это массив (например, результат React.children)
+  if (Array.isArray(value)) {
+    return value.map(extractTextFromFormatted).join('');
+  }
+
+  // Если это React-элемент (объект с props.children)
+  if (value && typeof value === 'object' && value.props && 'children' in value.props) {
+    return extractTextFromFormatted(value.props.children);
+  }
+
+  return String(value);
+};
+
+/**
+ * Professional Sheet - Универсальный движок таблиц.
+ */
+const ProfessionalSheetRender = <T extends Record<string, any>>({
   data,
   columns,
   rowIdField,
@@ -42,7 +68,7 @@ export const ProfessionalSheet = <T extends Record<string, any>>({
   onDeleteRows,
   disabledRowIds = [],
   className = ''
-}: ProfessionalSheetProps<T>) => {
+}: ProfessionalSheetProps<T>, ref: React.Ref<ProfessionalSheetHandle>) => {
   const validationService = useMemo(() => new SheetValidationService(), []);
   const batchService = useMemo(() => new SheetBatchService(), []);
   
@@ -52,7 +78,49 @@ export const ProfessionalSheet = <T extends Record<string, any>>({
     filterRules,
     toggleSort,
     setFilter
-  } = useSheetDataProcessor(data);
+  } = useSheetDataProcessor(data, columns);
+
+  // Экспорт в CSV
+  useImperativeHandle(ref, () => ({
+    exportToCSV: async () => {
+      const visibleColumns = columns.filter(c => c.visible);
+      
+      // Заголовки
+      const headers = visibleColumns.map(c => `"${String(c.title).replace(/"/g, '""')}"`).join(';');
+      
+      // Данные
+      const rows = processedData.map(row => {
+        return visibleColumns.map(col => {
+          let value = row[col.field as string];
+          
+          // Если есть форматер, используем его для получения вычисленного значения (например, Длительность)
+          if (col.formatter) {
+            try {
+              const formatted = col.formatter(value, row);
+              value = extractTextFromFormatted(formatted);
+            } catch (e) {
+              console.warn(`Export: Failed to format field ${String(col.field)}`, e);
+            }
+          } else {
+            // Базовое форматирование для сырых данных
+            if (value instanceof Date) {
+              value = value.toLocaleDateString();
+            } else if (value === null || value === undefined) {
+              value = '';
+            }
+          }
+          
+          return `"${String(value).replace(/"/g, '""').replace(/[\r\n]+/g, ' ')}"`;
+        }).join(';');
+      });
+
+      const csvContent = [headers, ...rows].join('\r\n');
+      
+      // Добавляем BOM для корректного открытия в Excel (UTF-8)
+      const BOM = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      return new Blob([BOM, csvContent], { type: 'text/csv;charset=utf-8;' });
+    }
+  }));
 
   const allIds = useMemo(() => processedData.map(r => String(r[rowIdField])), [processedData, rowIdField]);
   
@@ -157,5 +225,9 @@ export const ProfessionalSheet = <T extends Record<string, any>>({
     </div>
   );
 };
+
+export const ProfessionalSheet = forwardRef(ProfessionalSheetRender) as <T extends Record<string, any>>(
+  props: ProfessionalSheetProps<T> & { ref?: React.Ref<ProfessionalSheetHandle> }
+) => React.ReactElement;
 
 

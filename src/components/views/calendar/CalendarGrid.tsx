@@ -6,6 +6,7 @@ import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent';
 interface CalendarGridProps {
   days: ICalendarCell[];
   onEventClick?: (event: ICalendarEvent) => void;
+  onEventContextMenu?: (e: React.MouseEvent, event: ICalendarEvent) => void;
   onDragStart?: (e: React.DragEvent, event: ICalendarEvent) => void;
   onDragEnd?: (e: React.DragEvent) => void;
   onDrop?: (e: React.DragEvent, date: Date) => void;
@@ -17,6 +18,7 @@ interface CalendarGridProps {
 export const CalendarGrid: React.FC<CalendarGridProps> = ({ 
   days, 
   onEventClick,
+  onEventContextMenu,
   onDragStart,
   onDragEnd,
   onDrop
@@ -41,6 +43,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
             key={`${day.date.getTime()}-${index}`} 
             day={day} 
             onEventClick={onEventClick}
+            onEventContextMenu={onEventContextMenu}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             onDrop={onDrop}

@@ -144,18 +144,6 @@ export const SidebarNavigation: React.FC = () => {
           );
         })}
       </nav>
-
-      {/* Footer */}
-      <div className="sidebar-footer border-t border-border">
-        <div className="text-xs text-muted-foreground">
-          <div>{t('navigation.current_view')}</div>
-          <div className="font-medium">
-            {navigationSections
-              .flatMap(section => section.items)
-              .find(item => item.type === currentView)?.label || t('navigation.none')}
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };

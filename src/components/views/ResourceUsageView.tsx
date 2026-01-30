@@ -1,161 +1,197 @@
-import React, { useMemo, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ViewType, ViewSettings } from '@/types/ViewTypes';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { ResourceUsageSheet } from '@/components/sheets/table/ResourceUsageSheet';
-import { IResourceUsage } from '@/domain/sheets/entities/IResourceUsage';
+import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalSheet';
 import { useProjectStore } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
-import { Plus, PieChart, BarChart2, Download, Filter } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Plus, PieChart, Download, Loader2 } from 'lucide-react';
 import { ResourceLoadingService } from '@/domain/resources/services/ResourceLoadingService';
 import { ResourceHistogramChart } from './resources/ResourceHistogramChart';
+import { ResourceUsageStatsCard } from './resourceusage/ResourceUsageStatsCard';
+import { useResourceUsageStats } from '@/hooks/resource/useResourceUsageStats';
+import { useResourceUsageData } from '@/hooks/resource/useResourceUsageData';
 
 /**
  * Resource Usage View компонент - Использование ресурсов
- * 
- * Отображает детальную загрузку ресурсов по периодам с гистограммой.
- * Включает статистические карточки и детальную таблицу.
- * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
- * 
- * @version 8.13
+ * Отображает детальную загрузку ресурсов с гистограммой и статистикой.
+ * @version 9.0
  */
 export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, 
-  settings 
+  viewType, settings 
 }) => {
   const { t } = useTranslation();
-  const { resources, tasks, addResource, updateResource } = useProjectStore();
+  const { resources, tasks, addResource, updateResource, deleteResource } = useProjectStore();
   const helpContent = useHelpContent();
+  const { toast } = useToast();
+  
   const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const sheetRef = useRef<ProfessionalSheetHandle>(null);
   const loadingService = useMemo(() => new ResourceLoadingService(), []);
 
-  // Выбор первого ресурса по умолчанию для гистограммы
+  // Статистика с корректной логикой
+  const stats = useResourceUsageStats(resources, tasks);
+  
+  // Данные таблицы с вычисленными значениями
+  const resourceUsageData = useResourceUsageData(resources, tasks);
+
+  // Выбор первого ресурса по умолчанию
   useEffect(() => {
     if (!selectedResourceId && resources.length > 0) {
       setSelectedResourceId(resources[0].id);
     }
   }, [resources, selectedResourceId]);
 
-  // Статистика ресурсов
-  const stats = useMemo(() => ({
-    available: resources.filter(r => r.available).length,
-    busy: resources.filter(r => r.maxUnits > 0).length,
-    overloaded: resources.filter(r => r.maxUnits > 1).length
-  }), [resources]);
+  // Вычисляем диапазон дат на основе реальных задач ресурса
+  const histogramDateRange = useMemo(() => {
+    if (!selectedResourceId || tasks.length === 0) return null;
+    
+    // Находим задачи, назначенные на выбранный ресурс
+    const resourceTasks = tasks.filter(t => 
+      t.resourceAssignments?.some(a => a.resourceId === selectedResourceId) ||
+      t.resourceIds?.includes(selectedResourceId)
+    );
+    
+    if (resourceTasks.length === 0) return null;
+    
+    // Находим минимальную и максимальную даты
+    let minDate = new Date(resourceTasks[0].startDate);
+    let maxDate = new Date(resourceTasks[0].endDate);
+    
+    resourceTasks.forEach(task => {
+      const taskStart = new Date(task.startDate);
+      const taskEnd = new Date(task.endDate);
+      if (taskStart < minDate) minDate = taskStart;
+      if (taskEnd > maxDate) maxDate = taskEnd;
+    });
+    
+    // Добавляем буфер в 3 дня до и после
+    minDate.setDate(minDate.getDate() - 3);
+    maxDate.setDate(maxDate.getDate() + 3);
+    minDate.setHours(0, 0, 0, 0);
+    maxDate.setHours(23, 59, 59, 999);
+    
+    return { start: minDate, end: maxDate };
+  }, [selectedResourceId, tasks]);
 
-  // Маппинг глобальных ресурсов в формат Usage
-  const resourceUsageData: IResourceUsage[] = useMemo(() => resources.map(r => ({
-    id: r.id,
-    resourceName: r.name,
-    assignedPercent: r.maxUnits,
-    availablePercent: 1 - r.maxUnits,
-    status: r.available ? t('sheets.status_available') : t('sheets.status_unavailable'),
-    workload: r.maxUnits > 1 ? t('sheets.workload_overload') : t('sheets.workload_normal')
-  })), [resources, t]);
-
-  // Данные для гистограммы выбранного ресурса
+  // Данные для гистограммы с динамическим диапазоном
   const histogramData = useMemo(() => {
     const resource = resources.find(r => r.id === selectedResourceId);
     if (!resource) return null;
     
-    const start = new Date();
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 30);
+    // Создаём новые Date объекты для избежания мутации
+    let startDate: Date;
+    let endDate: Date;
     
-    return loadingService.calculateHistogram(resource, tasks, start, end);
-  }, [selectedResourceId, resources, tasks, loadingService]);
+    if (histogramDateRange?.start) {
+      startDate = new Date(histogramDateRange.start);
+    } else {
+      startDate = new Date();
+    }
+    
+    if (histogramDateRange?.end) {
+      endDate = new Date(histogramDateRange.end);
+    } else {
+      endDate = new Date();
+      endDate.setDate(endDate.getDate() + 30);
+    }
+    
+    // Нормализуем время начала дня
+    startDate.setHours(0, 0, 0, 0);
+    
+    return loadingService.calculateHistogram(resource, tasks, startDate, endDate);
+  }, [selectedResourceId, resources, tasks, loadingService, histogramDateRange]);
 
-  const handleUpdate = (id: string, field: string, value: unknown) => {
+  const handleUpdate = useCallback((id: string, field: string, value: unknown) => {
     const updates: Record<string, unknown> = {};
     if (field === 'resourceName') updates.name = value;
     if (field === 'assignedPercent') updates.maxUnits = value;
-    
     updateResource(id, updates);
-  };
+  }, [updateResource]);
 
-  const handleRowClick = (row: IResourceUsage) => {
+  const handleRowClick = useCallback((row: { id: string }) => {
     setSelectedResourceId(row.id);
-  };
+  }, []);
 
-  const handleAddResource = () => {
+  const handleDeleteResource = useCallback((resourceId: string) => {
+    deleteResource(resourceId);
+  }, [deleteResource]);
+
+  const handleAddResource = useCallback(() => {
     const newId = `RES-${String(resources.length + 1).padStart(3, '0')}`;
     addResource({
-      id: newId,
-      name: t('sheets.new_resource') || 'Новый ресурс',
-      type: 'Work',
-      maxUnits: 1,
-      standardRate: 0,
-      overtimeRate: 0,
-      costPerUse: 0,
-      available: true
+      id: newId, name: `${t('sheets.new_resource')} ${resources.length + 1}`,
+      type: 'Work', maxUnits: 1, standardRate: 0, overtimeRate: 0, costPerUse: 0, available: true
     });
-  };
+  }, [resources.length, addResource, t]);
 
-  const handleAnalyzeWorkload = () => {
-    console.log("Анализ нагрузки...");
-  };
+  const handleExport = useCallback(async () => {
+    if (!sheetRef.current || isExporting) return;
+    try {
+      setIsExporting(true);
+      const result = await window.electronAPI.showSaveDialog({
+        title: t('common.export'),
+        defaultPath: `ResourceUsage_${new Date().toISOString().split('T')[0]}.csv`,
+        filters: [{ name: 'CSV (Excel)', extensions: ['csv'] }]
+      });
+      if (result.canceled || !result.filePath) return;
+      
+      const blob = await sheetRef.current.exportToCSV();
+      const arrayBuffer = await blob.arrayBuffer();
+      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
+      
+      if (saveResult.success) {
+        toast({ title: t('common.success'), description: t('sheets.export_success') });
+      } else {
+        throw new Error(saveResult.error);
+      }
+    } catch (error) {
+      console.error('ResourceUsage Export failed:', error);
+      toast({ variant: "destructive", title: t('common.error'), description: t('sheets.export_error') });
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting, t, toast]);
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* Two-Tier Header: Заголовок + Панель действий */}
       <TwoTierHeader
         title={t('navigation.resource_usage')}
         description={t('descriptions.resource_usage')}
         icon={<PieChart className="w-6 h-6" />}
         help={helpContent.RESOURCE_USAGE}
         actionBar={{
-          primaryAction: {
-            label: t('sheets.add_resource'),
-            onClick: handleAddResource,
-            icon: <Plus className="w-4 h-4" />
-          },
-          secondaryActions: [
-            {
-              label: t('sheets.analyze_load'),
-              onClick: handleAnalyzeWorkload,
-              icon: <BarChart2 className="w-4 h-4" />,
-              variant: 'outline'
-            },
-            {
-              label: t('common.export'),
-              onClick: () => {/* TODO: implement export */},
-              icon: <Download className="w-4 h-4" />,
-              variant: 'outline'
-            }
-          ]
+          primaryAction: { label: t('sheets.add_resource'), onClick: handleAddResource, icon: <Plus className="w-4 h-4" /> },
+          secondaryActions: [{
+            label: isExporting ? t('common.exporting') : t('common.export'),
+            onClick: handleExport,
+            icon: isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />,
+            variant: 'outline', disabled: isExporting
+          }]
         }}
       />
       
-      {/* Основной контент */}
       <div className="flex-1 overflow-hidden p-4 flex flex-col gap-4">
-        {/* Статистические карточки */}
+        {/* Статистические карточки с tooltips */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-shrink-0">
-          <div className="stat-card border rounded-lg p-4 bg-green-50/30 shadow-sm soft-border">
-            <h3 className="font-medium text-green-700 text-sm">{t('sheets.available_stat')}</h3>
-            <p className="text-2xl font-bold text-green-600">{stats.available}</p>
-          </div>
-          <div className="stat-card border rounded-lg p-4 bg-primary/5 shadow-sm soft-border">
-            <h3 className="font-medium text-primary text-sm">{t('sheets.busy_stat')}</h3>
-            <p className="text-2xl font-bold text-primary">{stats.busy}</p>
-          </div>
-          <div className="stat-card border rounded-lg p-4 bg-red-50/30 shadow-sm soft-border">
-            <h3 className="font-medium text-red-700 text-sm">{t('sheets.overload_stat')}</h3>
-            <p className="text-2xl font-bold text-red-600">{stats.overloaded}</p>
-          </div>
+          <ResourceUsageStatsCard title={t('sheets.available_stat')} value={stats.available}
+            tooltip={t('sheets.available_stat_tooltip')} colorScheme="green" />
+          <ResourceUsageStatsCard title={t('sheets.busy_stat')} value={stats.busy}
+            tooltip={t('sheets.busy_stat_tooltip')} colorScheme="primary" />
+          <ResourceUsageStatsCard title={t('sheets.overload_stat')} value={stats.overloaded}
+            tooltip={t('sheets.overload_stat_tooltip')} colorScheme="red" />
         </div>
         
-        {/* Таблица использования ресурсов */}
-        <div className="flex-1 min-h-[200px] bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
-          <ResourceUsageSheet
-            data={resourceUsageData}
-            onUpdate={handleUpdate}
-            onRowClick={handleRowClick}
-            className="w-full h-full"
-          />
+        {/* Таблица */}
+        <div className="flex-1 min-h-[200px] bg-white rounded-xl shadow-lg border overflow-hidden soft-border">
+          <ResourceUsageSheet ref={sheetRef} data={resourceUsageData} onUpdate={handleUpdate}
+            onRowClick={handleRowClick} onDeleteResource={handleDeleteResource} className="w-full h-full" />
         </div>
 
-        {/* Гистограмма загрузки */}
+        {/* Гистограмма */}
         {histogramData && (
           <div className="flex-shrink-0">
             <ResourceHistogramChart data={histogramData} />
@@ -165,4 +201,3 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
     </div>
   );
 };
-

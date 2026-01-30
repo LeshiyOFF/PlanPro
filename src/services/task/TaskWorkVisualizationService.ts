@@ -35,13 +35,13 @@ export class TaskWorkVisualizationService {
    * 
    * @param task Задача
    * @param preferences Настройки пользователя
-   * @returns number (0-100)
+   * @returns number (0-1)
    */
   public getVisualProgress(task: Task, preferences: IUserPreferences): number {
     if (!this.shouldShowActualWork(preferences)) {
       return 0;
     }
-    return (task.progress || 0) * 100;
+    return task.progress || 0;
   }
 
   /**

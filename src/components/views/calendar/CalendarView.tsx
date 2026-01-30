@@ -6,9 +6,11 @@ import { CalendarService } from '@/domain/calendar/services/CalendarService';
 import { useProjectStore } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { CalendarGrid } from './CalendarGrid';
-import { TaskInformationDialog } from '@/components/dialogs/task/TaskInformationDialog';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
 import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent';
 import { useCalendarDnD } from '@/hooks/calendar/useCalendarDnD';
+import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
+import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,9 +28,10 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
   const { t } = useTranslation();
   const helpContent = useHelpContent();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { tasks, updateTask, addTask } = useProjectStore();
+  const { tasks, updateTask, addTask, deleteTask } = useProjectStore();
   const calendarService = useMemo(() => new CalendarService(), []);
   const { handleDragStart, handleDragEnd, handleDrop } = useCalendarDnD();
+  const { showMenu } = useContextMenu();
   
   // Состояние диалога редактирования
   const [selectedEvent, setSelectedEvent] = useState<ICalendarEvent | null>(null);
@@ -51,12 +54,26 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
     setIsDialogOpen(true);
   };
 
-  const handleDialogClose = (result: any) => {
+  const handleDialogClose = () => {
     setIsDialogOpen(false);
-    if (result && result.success && result.data && selectedEvent) {
-      updateTask(selectedEvent.id, result.data);
-    }
     setSelectedEvent(null);
+  };
+
+  const handleEventContextMenu = (e: React.MouseEvent, event: ICalendarEvent) => {
+    showMenu(ContextMenuType.TASK, {
+      target: {
+        ...event,
+        type: 'task',
+        onShowProperties: async (t: any) => {
+          setSelectedEvent(event);
+          setIsDialogOpen(true);
+        },
+        onDelete: async (t: any) => {
+          deleteTask(t.id);
+        }
+      },
+      position: { x: e.clientX, y: e.clientY }
+    });
   };
 
   const handleAddEvent = () => {
@@ -123,6 +140,7 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
           <CalendarGrid 
             days={days} 
             onEventClick={handleEventClick}
+            onEventContextMenu={handleEventContextMenu}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}
@@ -131,13 +149,10 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
       </div>
 
       {isDialogOpen && selectedEvent && (
-        <TaskInformationDialog
+        <TaskPropertiesDialog
+          taskId={selectedEvent.id}
           isOpen={isDialogOpen}
           onClose={handleDialogClose}
-          data={{
-            ...selectedEvent.originalTask,
-            taskId: selectedEvent.id
-          }}
         />
       )}
     </div>

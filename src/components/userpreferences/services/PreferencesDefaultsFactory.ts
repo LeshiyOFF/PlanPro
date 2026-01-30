@@ -21,6 +21,7 @@ export class PreferencesDefaultsFactory {
       security: this.getSecurityPreferences(),
       schedule: this.getSchedulePreferences(),
       calendar: this.getCalendarPreferences(),
+      gantt: this.getGanttPreferences(),
     };
   }
 
@@ -129,6 +130,25 @@ export class PreferencesDefaultsFactory {
         trustVbaProjects: false,
         trustedLocations: []
       }
+    };
+  }
+
+  /**
+   * Получение настроек Ганта по умолчанию
+   */
+  public static getGanttPreferences() {
+    return {
+      showArrows: true,
+      showGridlines: true,
+      highlightWeekends: true,
+      barHeight: 20,
+      rowHeight: 45,
+      coloringMode: 'single' as const,
+      summaryColoringMode: 'single' as const,
+      labelMode: 'name' as const,
+      accentColor: '#3b82f6',
+      summaryColor: '#1e293b',
+      showDeltasInLabels: false
     };
   }
 }

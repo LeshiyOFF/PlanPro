@@ -1,21 +1,22 @@
 import { useState, useMemo, useCallback } from 'react';
 import { ISortRule, IFilterRule, SortDirection } from '@/domain/sheets/interfaces/IDataProcessing';
 import { SheetDataProcessorService } from '@/domain/sheets/services/SheetDataProcessorService';
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 
 /**
  * Хук для управления обработкой данных (сортировка, фильтрация).
  */
-export const useSheetDataProcessor = <T>(initialData: T[]) => {
+export const useSheetDataProcessor = <T>(initialData: T[], columns: ISheetColumn<T>[]) => {
   const [sortRules, setSortRules] = useState<ISortRule[]>([]);
   const [filterRules, setFilterRules] = useState<IFilterRule[]>([]);
   
   const processor = useMemo(() => new SheetDataProcessorService(), []);
 
   const processedData = useMemo(() => {
-    let result = processor.filter(initialData, filterRules);
-    result = processor.sort(result, sortRules);
+    let result = processor.filter(initialData, filterRules, columns);
+    result = processor.sort(result, sortRules, columns);
     return result;
-  }, [initialData, sortRules, filterRules, processor]);
+  }, [initialData, sortRules, filterRules, processor, columns]);
 
   const toggleSort = useCallback((columnId: string, multiSort: boolean) => {
     setSortRules(prev => {

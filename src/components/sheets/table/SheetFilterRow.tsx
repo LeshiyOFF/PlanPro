@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 import { FilterOperator } from '@/domain/sheets/interfaces/IDataProcessing';
 
@@ -8,9 +8,26 @@ interface SheetFilterRowProps {
 }
 
 /**
- * Строка фильтрации для профессиональной таблицы
+ * Строка фильтрации для профессиональной таблицы с поддержкой debounce.
  */
 export const SheetFilterRow: React.FC<SheetFilterRowProps> = ({ columns, onFilter }) => {
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+
+  const handleFilterChange = (columnId: string, value: string) => {
+    setFilterValues(prev => ({ ...prev, [columnId]: value }));
+  };
+
+  // Эффект для debounce фильтрации
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Object.entries(filterValues).forEach(([id, val]) => {
+        onFilter(id, FilterOperator.CONTAINS, val);
+      });
+    }, 300); // 300мс задержка
+
+    return () => clearTimeout(timer);
+  }, [filterValues, onFilter]);
+
   return (
     <tr className="bg-gray-50/50 border-b border-gray-100">
       {columns.map(column => (
@@ -20,9 +37,10 @@ export const SheetFilterRow: React.FC<SheetFilterRowProps> = ({ columns, onFilte
         >
           <input
             type="text"
+            value={filterValues[column.field as string] || ''}
             placeholder="Фильтр..."
             className="w-full px-2 py-0.5 text-[10px] border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary"
-            onChange={(e) => onFilter(column.id, FilterOperator.CONTAINS, e.target.value)}
+            onChange={(e) => handleFilterChange(column.field as string, e.target.value)}
           />
         </td>
       ))}

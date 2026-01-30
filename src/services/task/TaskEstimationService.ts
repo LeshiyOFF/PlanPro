@@ -15,8 +15,7 @@ export class TaskEstimationService {
    * @returns boolean
    */
   public shouldShowEstimation(task: Task, preferences: IUserPreferences): boolean {
-    // Индикатор показывается только если флаг включен в настройках И у задачи стоит отметка estimated
-    return !!(preferences.calculations?.showEstimatedDurations && task.estimated);
+    return false;
   }
 
   /**

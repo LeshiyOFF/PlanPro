@@ -1,49 +1,40 @@
-import React, { useMemo } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ViewType, ViewSettings } from '@/types/ViewTypes';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { TaskUsageSheet } from '@/components/sheets/table/TaskUsageSheet';
-import { ITaskUsage } from '@/domain/sheets/entities/ITaskUsage';
+import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalSheet';
+import { TaskUsageStatsCard } from './taskusage/TaskUsageStatsCard';
 import { useProjectStore } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
-import { Plus, BarChart3, Download, Filter } from 'lucide-react';
+import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
+import { useTaskUsageStats } from '@/hooks/task/useTaskUsageStats';
+import { useTaskUsageData } from '@/hooks/task/useTaskUsageData';
+import { useToast } from '@/hooks/use-toast';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
+import { Plus, BarChart3, Download, Loader2 } from 'lucide-react';
 
-/**
- * Task Usage View компонент - Использование задач
- * 
- * Отображает анализ распределения работ по времени для каждой задачи.
- * Включает статистические карточки и детальную таблицу.
- * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
- * 
- * @version 8.13
- */
-export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, 
-  settings 
+/** Task Usage View - Использование задач с статистикой, tooltips и экспортом @version 9.0 */
+export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+  viewType, settings
 }) => {
   const { t } = useTranslation();
-  const { tasks, addTask, updateTask } = useProjectStore();
+  const { tasks, resources, addTask, updateTask } = useProjectStore();
+  const { deleteTask } = useTaskDeletion();
   const helpContent = useHelpContent();
+  const { toast } = useToast();
+  
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isPropertiesDialogOpen, setIsPropertiesDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  
+  const sheetRef = useRef<ProfessionalSheetHandle>(null);
 
-  // Статистика задач
-  const stats = useMemo(() => {
-    const active = tasks.filter(t => t.progress > 0 && t.progress < 100).length;
-    const completed = tasks.filter(t => t.progress >= 100).length;
-    const inProgress = tasks.filter(t => t.progress > 0 && t.progress < 100).length;
-    const notStarted = tasks.filter(t => t.progress === 0).length;
-    return { active: tasks.length, completed, inProgress, notStarted };
-  }, [tasks]);
-
-  // Преобразование доменных задач в формат Usage
-  const taskUsageData: ITaskUsage[] = useMemo(() => tasks.map(task => ({
-    id: task.id,
-    taskName: task.name,
-    startDate: task.startDate,
-    endDate: task.endDate,
-    duration: task.duration,
-    percentComplete: task.progress,
-    resources: t('sheets.not_assigned')
-  })), [tasks, t]);
+  // Статистика с корректной логикой (progress 0-1)
+  const stats = useTaskUsageStats(tasks);
+  
+  // Данные для таблицы с вычислённой длительностью и маппингом ресурсов
+  const taskUsageData = useTaskUsageData(tasks, resources);
 
   const handleAddTask = () => {
     const newTask = {
@@ -61,17 +52,67 @@ export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<Vi
 
   const handleUpdate = (id: string, field: string, value: unknown) => {
     const updates: Record<string, unknown> = {};
-    if (field === 'taskName') updates.name = value;
-    if (field === 'percentComplete') updates.progress = value;
-    if (field === 'startDate') updates.startDate = value;
-    if (field === 'endDate') updates.endDate = value;
     
-    updateTask(id, updates);
+    if (field === 'taskName') {
+      updates.name = value;
+    } else if (field === 'percentComplete') {
+      const numValue = Number(value);
+      updates.progress = Math.max(0, Math.min(1, numValue / 100));
+    } else if (field === 'startDate') {
+      updates.startDate = value;
+    } else if (field === 'endDate') {
+      updates.endDate = value;
+    } else if (field === 'resourceAssignments') {
+      updates.resourceAssignments = value;
+    }
+    
+    if (Object.keys(updates).length > 0) {
+      updateTask(id, updates);
+    }
+  };
+
+  const handleExport = async () => {
+    if (!sheetRef.current || isExporting) return;
+
+    try {
+      setIsExporting(true);
+
+      const result = await window.electronAPI.showSaveDialog({
+        title: t('common.export') || 'Экспорт',
+        defaultPath: `TaskUsage_${new Date().toISOString().split('T')[0]}.csv`,
+        filters: [{ name: 'CSV (Excel)', extensions: ['csv'] }]
+      });
+
+      if (result.canceled || !result.filePath) {
+        return;
+      }
+
+      const blob = await sheetRef.current.exportToCSV();
+      const arrayBuffer = await blob.arrayBuffer();
+      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
+
+      if (saveResult.success) {
+        toast({
+          title: t('common.success') || 'Успех',
+          description: t('sheets.export_success') || 'Данные успешно экспортированы',
+        });
+      } else {
+        throw new Error(saveResult.error);
+      }
+    } catch (error) {
+      console.error('TaskUsage Export failed:', error);
+      toast({
+        variant: "destructive",
+        title: t('common.error') || 'Ошибка',
+        description: t('sheets.export_error') || 'Не удалось экспортировать данные',
+      });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* Two-Tier Header: Заголовок + Панель действий */}
       <TwoTierHeader
         title={t('navigation.task_usage')}
         description={t('descriptions.task_usage')}
@@ -85,53 +126,71 @@ export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<Vi
           },
           secondaryActions: [
             {
-              label: t('common.filter'),
-              onClick: () => {/* TODO: implement filter */},
-              icon: <Filter className="w-4 h-4" />,
-              variant: 'outline'
-            },
-            {
-              label: t('sheets.export_data'),
-              onClick: () => {/* TODO: implement export */},
-              icon: <Download className="w-4 h-4" />,
-              variant: 'outline'
+              label: isExporting ? t('common.exporting') || 'Экспорт...' : t('common.export'),
+              onClick: handleExport,
+              icon: isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />,
+              variant: 'outline',
+              disabled: isExporting
             }
           ]
         }}
       />
       
-      {/* Основной контент */}
       <div className="flex-1 overflow-hidden p-4">
-        {/* Статистические карточки */}
+        {/* Статистические карточки с tooltips */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="stat-card border rounded-lg p-4 bg-primary/5 shadow-sm soft-border">
-            <h3 className="font-medium text-primary text-sm">{t('sheets.active_stat')}</h3>
-            <p className="text-2xl font-bold text-primary">{stats.active}</p>
-          </div>
-          <div className="stat-card border rounded-lg p-4 bg-green-50/30 shadow-sm soft-border">
-            <h3 className="font-medium text-green-700 text-sm">{t('sheets.completed_stat')}</h3>
-            <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
-          </div>
-          <div className="stat-card border rounded-lg p-4 bg-amber-50/30 shadow-sm soft-border">
-            <h3 className="font-medium text-amber-700 text-sm">{t('sheets.in_progress_stat')}</h3>
-            <p className="text-2xl font-bold text-amber-600">{stats.inProgress}</p>
-          </div>
-          <div className="stat-card border rounded-lg p-4 bg-slate-50/30 shadow-sm soft-border">
-            <h3 className="font-medium text-slate-700 text-sm">{t('sheets.not_started_stat')}</h3>
-            <p className="text-2xl font-bold text-slate-600">{stats.notStarted}</p>
-          </div>
+          <TaskUsageStatsCard
+            title={t('sheets.active_stat')}
+            value={stats.total}
+            tooltip={t('sheets.active_stat_tooltip')}
+            colorScheme="primary"
+          />
+          <TaskUsageStatsCard
+            title={t('sheets.completed_stat')}
+            value={stats.completed}
+            tooltip={t('sheets.completed_stat_tooltip')}
+            colorScheme="green"
+          />
+          <TaskUsageStatsCard
+            title={t('sheets.in_progress_stat')}
+            value={stats.inProgress}
+            tooltip={t('sheets.in_progress_stat_tooltip')}
+            colorScheme="amber"
+          />
+          <TaskUsageStatsCard
+            title={t('sheets.not_started_stat')}
+            value={stats.notStarted}
+            tooltip={t('sheets.not_started_stat_tooltip')}
+            colorScheme="slate"
+          />
         </div>
         
-        {/* Таблица использования задач */}
-        <div className="h-[calc(100%-140px)] bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
+        <div className="h-[calc(100%-140px)] bg-white rounded-xl shadow-lg border overflow-hidden soft-border">
           <TaskUsageSheet
+            ref={sheetRef}
             data={taskUsageData}
+            resources={resources}
             onUpdate={handleUpdate}
+            onDeleteTask={deleteTask}
+            onShowTaskProperties={(taskId) => {
+              setSelectedTaskId(taskId);
+              setIsPropertiesDialogOpen(true);
+            }}
             className="w-full h-full"
           />
         </div>
       </div>
+
+      {selectedTaskId && (
+        <TaskPropertiesDialog
+          taskId={selectedTaskId}
+          isOpen={isPropertiesDialogOpen}
+          onClose={() => {
+            setIsPropertiesDialogOpen(false);
+            setSelectedTaskId(null);
+          }}
+        />
+      )}
     </div>
   );
 };
-

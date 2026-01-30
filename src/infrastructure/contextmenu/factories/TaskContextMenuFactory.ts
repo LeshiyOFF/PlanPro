@@ -1,13 +1,12 @@
 import { IContextMenu, IContextMenuContext } from '../../../domain/contextmenu/entities/ContextMenu';
 import { ContextMenuType, ContextMenuStatus } from '../../../domain/contextmenu/ContextMenuType';
 import { IMenuFactory } from '../../../domain/contextmenu/services/IContextMenuService';
-import { CopyAction } from '../../../domain/contextmenu/actions/CopyAction';
 import { DeleteAction } from '../../../domain/contextmenu/actions/DeleteAction';
-import { PropertiesAction } from '../../../domain/contextmenu/actions/PropertiesAction';
 import { logger } from '@/utils/logger';
 
 /**
- * Фабрика контекстных меню для задач
+ * Фабрика контекстных меню для задач.
+ * Упрощённая версия: "Информация" и "Удалить".
  */
 export class TaskContextMenuFactory implements IMenuFactory {
   canHandle(context: IContextMenuContext): boolean {
@@ -19,7 +18,7 @@ export class TaskContextMenuFactory implements IMenuFactory {
   }
 
   async createMenu(context: IContextMenuContext): Promise<IContextMenu> {
-    logger.info('Creating task context menu for:', context.target);
+    logger.info('[TaskContextMenuFactory] Creating menu for:', context.target?.id);
 
     const menuId = `task-menu-${Date.now()}`;
     const { target } = context;
@@ -33,22 +32,21 @@ export class TaskContextMenuFactory implements IMenuFactory {
       items: [
         {
           id: 'properties',
-          label: 'Свойства задачи',
+          label: 'Информация о задаче',
           icon: 'ℹ️',
-          shortcut: 'F9',
-          action: new PropertiesAction(target)
-        },
-        {
-          id: 'edit',
-          label: 'Редактировать',
-          icon: '✏️',
-          shortcut: 'Enter',
           action: {
-            execute: async () => logger.info('Edit task:', target),
+            execute: async () => {
+              logger.info('[TaskContextMenuFactory] Properties action for:', target?.id);
+              if (target.onShowProperties) {
+                await target.onShowProperties(target);
+              } else {
+                logger.warning('[TaskContextMenuFactory] No onShowProperties handler');
+              }
+            },
             canExecute: () => true,
-            getLabel: () => 'Редактировать',
-            getIcon: () => '✏️',
-            getShortcut: () => 'Enter'
+            getLabel: () => 'Информация о задаче',
+            getIcon: () => 'ℹ️',
+            getShortcut: () => ''
           }
         },
         {
@@ -56,83 +54,18 @@ export class TaskContextMenuFactory implements IMenuFactory {
           separator: true
         },
         {
-          id: 'copy',
-          label: 'Копировать',
-          icon: '📋',
-          shortcut: 'Ctrl+C',
-          action: new CopyAction(target)
-        },
-        {
-          id: 'cut',
-          label: 'Вырезать',
-          icon: '✂️',
-          shortcut: 'Ctrl+X',
-          action: {
-            execute: async () => logger.info('Cut task:', target),
-            canExecute: () => true,
-            getLabel: () => 'Вырезать',
-            getIcon: () => '✂️',
-            getShortcut: () => 'Ctrl+X'
-          }
-        },
-        {
-          id: 'paste',
-          label: 'Вставить',
-          icon: '📋',
-          shortcut: 'Ctrl+V',
-          action: {
-            execute: async () => logger.info('Paste task'),
-            canExecute: () => true,
-            getLabel: () => 'Вставить',
-            getIcon: () => '📋',
-            getShortcut: () => 'Ctrl+V'
-          }
-        },
-        {
-          id: 'separator2',
-          separator: true
-        },
-        {
           id: 'delete',
           label: 'Удалить задачу',
           icon: '🗑️',
-          shortcut: 'Delete',
-          action: new DeleteAction(target)
-        },
-        {
-          id: 'separator3',
-          separator: true
-        },
-        {
-          id: 'dependencies',
-          label: 'Зависимости',
-          icon: '🔗',
-          submenu: [
-            {
-              id: 'add-predecessor',
-              label: 'Добавить предшественника',
-              icon: '⬅️',
-              action: {
-                execute: async () => logger.info('Add predecessor'),
-                canExecute: () => true,
-                getLabel: () => 'Добавить предшественника',
-                getIcon: () => '⬅️',
-                getShortcut: () => ''
-              }
-            },
-            {
-              id: 'add-successor',
-              label: 'Добавить последователя',
-              icon: '➡️',
-              action: {
-                execute: async () => logger.info('Add successor'),
-                canExecute: () => true,
-                getLabel: () => 'Добавить последователя',
-                getIcon: () => '➡️',
-                getShortcut: () => ''
-              }
+          action: new DeleteAction(target, async (t) => {
+            logger.info('[TaskContextMenuFactory] Delete action triggered for:', t?.id);
+            if (target.onDelete) {
+              await target.onDelete(t);
+              logger.info('[TaskContextMenuFactory] Task deleted successfully');
+            } else {
+              logger.warning('[TaskContextMenuFactory] No onDelete handler provided');
             }
-          ]
+          })
         }
       ]
     };

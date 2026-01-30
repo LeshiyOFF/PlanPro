@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { CurrencyFormatter } from './CurrencyFormatter';
 import { Duration } from '@/types/Master_Functionality_Catalog';
+import { resolveTimeUnitKey } from './TimeUnitMapper';
 import i18next from 'i18next';
 
 /**
@@ -41,8 +42,11 @@ export const formatDuration = (duration: number | Duration | undefined | null, u
     return '0 ' + i18next.t(`units.days`);
   }
   
-  const finalUnit = (typeof duration !== 'number' && typeof duration === 'object' && duration.unit) || unit || 
+  const rawUnit = (typeof duration !== 'number' && typeof duration === 'object' && duration.unit) || unit || 
                     prefs.schedule?.durationEnteredIn || 'days';
+  
+  // Преобразуем числовой код в строку для i18n
+  const finalUnit = resolveTimeUnitKey(rawUnit);
 
   // Интеллектуальное округление (Stage 7.18)
   const roundedValue = Math.abs(value - Math.round(value)) < 0.01 
@@ -82,8 +86,11 @@ export const formatWork = (work: number | Duration | undefined | null, unit?: Du
     return '0 ' + i18next.t(`units.hours`);
   }
   
-  const finalUnit = (typeof work !== 'number' && typeof work === 'object' && work.unit) || unit || 
+  const rawUnit = (typeof work !== 'number' && typeof work === 'object' && work.unit) || unit || 
                     prefs.schedule?.workUnit || 'hours';
+  
+  // Преобразуем числовой код в строку для i18n
+  const finalUnit = resolveTimeUnitKey(rawUnit);
 
   // Интеллектуальное округление (Stage 7.18)
   const roundedValue = Math.abs(value - Math.round(value)) < 0.01 
@@ -96,10 +103,26 @@ export const formatWork = (work: number | Duration | undefined | null, unit?: Du
 /**
  * Форматирование ставки (Rate) с использованием динамических единиц.
  */
-export const formatRate = (amount: number, unit?: Duration['unit']): string => {
+export const formatRate = (amount: number, unit?: Duration['unit'] | number): string => {
   const prefs = UserPreferencesService.getInstance().getPreferences() as any;
-  const finalUnit = unit || prefs.schedule?.workUnit || 'hours';
+  let finalUnit = unit || prefs.schedule?.workUnit || 'hours';
   
+  // Маппинг числовых TimeUnit из Java (Stage 8.14)
+  // Обрабатываем и числа, и строки-числа (Stage 8.15)
+  const unitCode = typeof finalUnit === 'string' ? parseInt(finalUnit, 10) : finalUnit;
+  if (!isNaN(unitCode as number) && typeof unitCode === 'number') {
+    const unitMap: Record<number, string> = {
+      3: 'minutes',
+      4: 'hours',
+      5: 'days',
+      6: 'weeks',
+      7: 'months'
+    };
+    if (unitMap[unitCode]) {
+      finalUnit = unitMap[unitCode];
+    }
+  }
+
   // Для ставок мы обычно используем сокращенную форму "/ед"
   return `${formatCurrency(amount)}/${i18next.t(`units.${finalUnit}`)}`;
 };
@@ -171,12 +194,19 @@ export const formatTime = (date: Date | number | string): string => {
  * @param name - Оригинальное имя календаря
  * @returns Локализованное имя
  */
-export const formatCalendarName = (name: string): string => {
-  if (!name) return '';
+export const formatCalendarName = (name: string | undefined | null): string => {
+  if (!name) return i18next.t('calendars.standard'); // Дефолт если пусто
+  
   // Генерируем ключ: заменяем пробелы на подчеркивания и в нижний регистр
-  const key = name.toLowerCase().replace(/\s+/g, '_');
-  // Пытаемся найти перевод в i18n, если нет - возвращаем оригинал
-  return i18next.t(`calendars.${key}`, { defaultValue: name });
+  const key = String(name).toLowerCase().replace(/\s+/g, '_');
+  
+  // Пытаемся найти перевод в i18n
+  const localized = i18next.t(`calendars.${key}`, { defaultValue: '' });
+  
+  if (localized) return localized;
+  
+  // Если перевода нет, возвращаем оригинал с заглавной буквы
+  return String(name).charAt(0).toUpperCase() + String(name).slice(1);
 };
 
 /**

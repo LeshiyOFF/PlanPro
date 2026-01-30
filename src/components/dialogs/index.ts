@@ -15,7 +15,7 @@ export { DependencyDialog } from './task/DependencyDialog';
 export { XbsDependencyDialog } from './task/XbsDependencyDialog';
 export { DelegateTaskDialog } from './task/DelegateTaskDialog';
 export { UpdateTaskDialog } from './task/UpdateTaskDialog';
-export { TaskInformationDialog } from './task/TaskInformationDialog';
+export { TaskPropertiesDialog } from './TaskPropertiesDialog';
 
 // Resource Dialogs
 export { AssignmentDialog } from './resource/AssignmentDialog';

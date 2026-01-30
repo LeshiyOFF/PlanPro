@@ -76,7 +76,7 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
         }`}
         value={getInputValue(value)}
         onChange={handleChange}
-        onBlur={onCommit}
+        onBlur={() => onCommit()}
         onKeyDown={handleKeyDown}
         onClick={handleClick}
       />

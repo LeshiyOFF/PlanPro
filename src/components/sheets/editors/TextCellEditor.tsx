@@ -30,7 +30,7 @@ export const TextCellEditor: React.FC<ICellEditorProps> = ({
         }`}
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        onBlur={onCommit}
+        onBlur={() => onCommit()}
         onKeyDown={handleKeyDown}
         autoFocus={autoFocus}
       />

@@ -1,8 +1,12 @@
-import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useMemo, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { WBSCanvasEngine } from '@/domain/wbs/services/WBSCanvasEngine';
 import { WBSLayoutStrategy } from '@/domain/wbs/layout/WBSLayoutStrategy';
 import { WBSNode } from '@/domain/wbs/interfaces/WBS';
 import { CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas';
+
+export interface WBSCanvasHandle {
+  exportToBlob: (scale?: number) => Promise<Blob>;
+}
 
 interface WBSCanvasCoreProps {
   nodes: WBSNode[];
@@ -17,7 +21,7 @@ interface WBSCanvasCoreProps {
 /**
  * Enhanced WBS Canvas Core with panning, smart zoom and context menu
  */
-export const WBSCanvasCore: React.FC<WBSCanvasCoreProps> = ({
+export const WBSCanvasCore = forwardRef<WBSCanvasHandle, WBSCanvasCoreProps>(({
   nodes: initialNodes,
   width = 2000,
   height = 1200,
@@ -25,7 +29,7 @@ export const WBSCanvasCore: React.FC<WBSCanvasCoreProps> = ({
   onNodeToggle,
   onNodeSelect,
   onNodeContextMenu
-}) => {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<WBSCanvasEngine | null>(null);
   const layoutStrategy = useMemo(() => new WBSLayoutStrategy(), []);
@@ -37,6 +41,14 @@ export const WBSCanvasCore: React.FC<WBSCanvasCoreProps> = ({
   // Interaction state
   const [isPanning, setIsPanning] = useState(false);
   const [dragStartPoint, setDragStartPoint] = useState<CanvasPoint | null>(null);
+
+  // Expose methods to parent
+  useImperativeHandle(ref, () => ({
+    exportToBlob: async (scale: number = 2) => {
+      if (!engineRef.current) throw new Error('Engine not initialized');
+      return await engineRef.current.exportFullDiagram(scale);
+    }
+  }));
 
   // 1. Initial layout calculation
   useEffect(() => {
@@ -191,5 +203,5 @@ export const WBSCanvasCore: React.FC<WBSCanvasCoreProps> = ({
       />
     </div>
   );
-};
+});
 

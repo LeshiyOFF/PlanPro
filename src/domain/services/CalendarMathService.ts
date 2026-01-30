@@ -1,8 +1,11 @@
 import { Duration, CalendarPreferences } from '@/types/Master_Functionality_Catalog';
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
 
 /**
  * Сервис для выполнения расчетов, связанных с календарем и длительностью.
  * Внедряет параметры hoursPerDay, hoursPerWeek и daysPerMonth в математику планирования.
+ * Stage 8.15: Расширен для работы с IWorkCalendar (индивидуальные графики ресурсов)
  * Следует принципам SOLID (SRP) и Clean Architecture.
  */
 export class CalendarMathService {
@@ -99,6 +102,92 @@ export class CalendarMathService {
       case 'months': return ms / (daysPerMonth * hoursPerDay * hourMs);
       default: return ms;
     }
+  }
+
+  /**
+   * Рассчитывает длительность между двумя датами с учетом конкретного рабочего календаря
+   * Stage 8.15: Точный расчет с учетом рабочих/выходных дней
+   * 
+   * @param startDate Дата начала
+   * @param endDate Дата окончания
+   * @param calendar Рабочий календарь ресурса
+   * @param unit Единица измерения результата
+   * @returns Длительность в рабочих днях/часах
+   */
+  public static calculateDurationWithCalendar(
+    startDate: Date,
+    endDate: Date,
+    calendar: IWorkCalendar,
+    unit: Duration['unit']
+  ): Duration {
+    const templateService = CalendarTemplateService.getInstance();
+    let totalWorkingHours = 0;
+    
+    // Перебираем все дни в диапазоне
+    const current = new Date(startDate);
+    while (current <= endDate) {
+      const hours = templateService.getWorkingHours(calendar, current);
+      totalWorkingHours += hours;
+      current.setDate(current.getDate() + 1);
+    }
+
+    // Преобразуем часы в нужные единицы
+    let value: number;
+    switch (unit) {
+      case 'hours':
+        value = totalWorkingHours;
+        break;
+      case 'days':
+        value = totalWorkingHours / calendar.hoursPerDay;
+        break;
+      case 'weeks':
+        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek);
+        break;
+      case 'months':
+        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek * 4.33); // Среднее кол-во недель в месяце
+        break;
+      default:
+        value = totalWorkingHours;
+    }
+
+    return { value, unit };
+  }
+
+  /**
+   * Рассчитывает дату окончания на основе даты начала, длительности и календаря
+   * Stage 8.15: Точное планирование с пропуском выходных
+   * 
+   * @param startDate Дата начала
+   * @param duration Длительность работы
+   * @param calendar Рабочий календарь
+   * @returns Дата окончания (с учетом только рабочих дней)
+   */
+  public static calculateFinishDateWithCalendar(
+    startDate: Date,
+    duration: Duration,
+    calendar: IWorkCalendar
+  ): Date {
+    const templateService = CalendarTemplateService.getInstance();
+    
+    // Переводим длительность в часы
+    let remainingHours = duration.value;
+    if (duration.unit === 'days') {
+      remainingHours = duration.value * calendar.hoursPerDay;
+    } else if (duration.unit === 'weeks') {
+      remainingHours = duration.value * calendar.hoursPerDay * calendar.workingDaysPerWeek;
+    }
+
+    // Идем вперед по рабочим дням, вычитая часы
+    const current = new Date(startDate);
+    while (remainingHours > 0) {
+      const hours = templateService.getWorkingHours(calendar, current);
+      remainingHours -= hours;
+      if (remainingHours > 0) {
+        current.setDate(current.getDate() + 1);
+      }
+    }
+
+    return current;
   }
 }
 

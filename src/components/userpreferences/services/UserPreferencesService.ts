@@ -7,6 +7,7 @@ import {
   ISecurityPreferences,
   ISchedulePreferences,
   ICalendarPreferences,
+  IGanttPreferences,
   PreferencesCategory,
   IPreferencesChangeEvent 
 } from '../interfaces/UserPreferencesInterfaces';
@@ -51,6 +52,7 @@ export class UserPreferencesService {
   public getSecurityPreferences(): ISecurityPreferences { return { ...this.preferences.security }; }
   public getSchedulePreferences(): ISchedulePreferences { return { ...this.preferences.schedule }; }
   public getCalendarPreferences(): ICalendarPreferences { return { ...this.preferences.calendar }; }
+  public getGanttPreferences(): IGanttPreferences { return { ...this.preferences.gantt }; }
 
   // Методы совместимости для UI компонентов
   public async updateGeneralPreferences(u: Partial<IGeneralPreferences>) { await this.updateCategory('general', u); }
@@ -60,6 +62,7 @@ export class UserPreferencesService {
   public async updateSecurityPreferences(u: Partial<ISecurityPreferences>) { await this.updateCategory('security', u); }
   public async updateSchedulePreferences(u: Partial<ISchedulePreferences>) { await this.updateCategory('schedule', u); }
   public async updateCalendarPreferences(u: Partial<ICalendarPreferences>) { await this.updateCategory('calendar', u); }
+  public async updateGanttPreferences(u: Partial<IGanttPreferences>) { await this.updateCategory('gantt', u); }
 
   /**
    * Универсальный метод обновления настроек любой категории
@@ -149,6 +152,7 @@ export class UserPreferencesService {
       case 'security': return PreferencesValidator.validateSecurity(data);
       case 'schedule': return PreferencesValidator.validateSchedule(data);
       case 'calendar': return PreferencesValidator.validateCalendar(data);
+      case 'gantt': return PreferencesValidator.validateGantt(data);
       default: return true;
     }
   }
@@ -163,6 +167,7 @@ export class UserPreferencesService {
       [PreferencesCategory.SECURITY]: () => this.preferences.security = factory.getSecurityPreferences(),
       [PreferencesCategory.SCHEDULE]: () => this.preferences.schedule = factory.getSchedulePreferences(),
       [PreferencesCategory.CALENDAR]: () => this.preferences.calendar = factory.getCalendarPreferences(),
+      [PreferencesCategory.GANTT]: () => this.preferences.gantt = factory.getGanttPreferences(),
     };
     mapping[cat]?.();
   }

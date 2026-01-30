@@ -1,18 +1,19 @@
 import React from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
+import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
 import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
 import { CellEditorFactory } from '../editors/CellEditorFactory';
+import { toPercent } from '@/utils/ProgressFormatter';
 
 interface SheetCellProps<T> {
   rowId: string;
   column: ISheetColumn<T>;
-  value: any;
+  value: unknown;
   isEditing: boolean;
-  editValue: any;
+  editValue: unknown;
   isValid: boolean;
   errorMessage?: string;
-  onStartEdit: (address: ISheetCellAddress, value: any) => void;
-  onValueChange: (value: any) => void;
+  onStartEdit: (address: ISheetCellAddress, value: unknown) => void;
+  onValueChange: (value: unknown) => void;
   onCommit: () => void;
   onCancel: () => void;
   onContextMenu?: (event: React.MouseEvent, row: T, columnId?: string) => void;
@@ -22,6 +23,7 @@ interface SheetCellProps<T> {
 /**
  * Ячейка профессиональной таблицы.
  * Управляет переключением между режимом просмотра и редактирования.
+ * Stage 8.20: Поддержка onCustomEdit для кастомных редакторов.
  */
 export const SheetCell = <T,>({
   rowId,
@@ -39,13 +41,23 @@ export const SheetCell = <T,>({
   row
 }: SheetCellProps<T>) => {
   const handleDoubleClick = () => {
+    // Stage 8.20: Если задан onCustomEdit, используем его вместо inline-редактирования
+    if (column.onCustomEdit) {
+      column.onCustomEdit(row, column.id);
+      return;
+    }
+
     // Stage 7.19: Поддержка функции-предиката для условного редактирования
     const isEditable = typeof column.editable === 'function' 
       ? column.editable(row) 
       : column.editable;
     
     if (isEditable) {
-      onStartEdit({ rowId, columnId: column.id }, value);
+      // Для PERCENT конвертируем дробь (0.28) в проценты (28)
+      const editableValue = column.type === SheetColumnType.PERCENT 
+        ? String(toPercent(Number(value) || 0))
+        : value;
+      onStartEdit({ rowId, columnId: column.id }, editableValue);
     }
   };
 
@@ -67,6 +79,7 @@ export const SheetCell = <T,>({
           onCancel={onCancel}
           isValid={isValid}
           errorMessage={errorMessage}
+          options={column.options}
         />
       );
     }

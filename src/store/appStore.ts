@@ -95,6 +95,7 @@ const initialState: ExtendedAppState = {
     sidebarVisible: true,
     toolbarVisible: true,
     statusbarVisible: true,
+    isPulseActive: false,
     isLoading: false,
     dialogs: [],
     notifications: []

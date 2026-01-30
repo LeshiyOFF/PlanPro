@@ -7,6 +7,7 @@ import type {
   DataResponse,
   ProjectResponse,
   ProjectsListResponse,
+  ProjectDataResponse,
   ExportResponse,
   ImportResponse,
   OperationResponse
@@ -37,7 +38,7 @@ export class ProjectJavaService extends BaseJavaService {
     return await this.executeApiCommand('project.list');
   }
 
-  public async recalculateProject(id: string): Promise<DataResponse<OperationResponse>> {
+  public async recalculateProject(id: string): Promise<DataResponse<ProjectDataResponse>> {
     return await this.executeApiCommand('project.recalculate', [id]);
   }
 

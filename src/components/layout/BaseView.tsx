@@ -57,7 +57,7 @@ export const BaseView: React.FC<BaseViewProps> = ({
               <ContextHelp 
                 title={help.title} 
                 content={help.content} 
-                side="left" 
+                side="bottom" 
               />
             )}
           </div>

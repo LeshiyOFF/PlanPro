@@ -10,6 +10,7 @@ export interface Resource {
   standardRate: number
   overtimeRate: number
   costPerUse: number
+  materialLabel?: string // Метка для материалов (кг, шт, тонн и т.д.)
   email?: string
   group?: string
   calendarId?: string

@@ -37,9 +37,16 @@ export const useSheetEditing = (
     } : null);
   }, [editState, validate]);
 
-  const commitEditing = useCallback(() => {
+  const commitEditing = useCallback((explicitValue?: any) => {
     if (editState && editState.isValid) {
-      onCommit?.(editState.address.rowId, editState.address.columnId, editState.currentValue);
+      let finalValue = explicitValue !== undefined ? explicitValue : editState.currentValue;
+      
+      // Stage 8.18: Защита от попадания объектов событий (React SyntheticEvent) в данные
+      if (finalValue && typeof finalValue === 'object' && 'nativeEvent' in finalValue) {
+        finalValue = editState.currentValue;
+      }
+
+      onCommit?.(editState.address.rowId, editState.address.columnId, finalValue);
       setEditState(null);
     }
   }, [editState, onCommit]);

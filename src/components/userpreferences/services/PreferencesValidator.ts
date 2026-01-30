@@ -6,6 +6,7 @@ import {
   ISecurityPreferences,
   ISchedulePreferences,
   ICalendarPreferences,
+  IGanttPreferences,
   ITrustCenterSettings 
 } from '../interfaces/UserPreferencesInterfaces';
 
@@ -63,6 +64,13 @@ export class PreferencesValidator {
   public static validateCalendar(preferences: ICalendarPreferences): boolean {
     return preferences.hoursPerDay > 0 && preferences.hoursPerDay <= 24 &&
            preferences.hoursPerWeek > 0 && preferences.hoursPerWeek <= 168;
+  }
+
+  /**
+   * Валидация настроек Ганта
+   */
+  public static validateGantt(preferences: IGanttPreferences): boolean {
+    return preferences.barHeight > 0 && preferences.rowHeight > 0;
   }
 
   /**

@@ -3,9 +3,14 @@ import { Resource } from '@/types/resource-types';
 import { IResourceHistogramData, IResourceWorkloadDay } from '../interfaces/IResourceHistogram';
 
 /**
- * Сервис для расчета загрузки ресурсов
+ * Сервис для расчета загрузки ресурсов.
+ * Использует реальные units из resourceAssignments.
  */
 export class ResourceLoadingService {
+  
+  /** Базовая мощность ресурса = 100% */
+  private static readonly BASE_CAPACITY = 1.0;
+
   /**
    * Рассчитывает данные гистограммы для конкретного ресурса на заданный период
    */
@@ -15,47 +20,87 @@ export class ResourceLoadingService {
     startDate: Date, 
     endDate: Date
   ): IResourceHistogramData {
-    const days: IResourceWorkloadDay[] = [];
-    const current = new Date(startDate);
-    
-    // Проходим по каждому дню периода
-    while (current <= endDate) {
-      const dayStart = new Date(current.setHours(0, 0, 0, 0));
-      const dayEnd = new Date(current.setHours(23, 59, 59, 999));
-      
-      // Находим все задачи ресурса в этот день
-      const dayTasks = tasks.filter(t => 
-        t.resourceIds?.includes(resource.id) && 
-        new Date(t.startDate) <= dayEnd && 
-        new Date(t.endDate) >= dayStart
-      );
-      
-      // Расчет загрузки (упрощенно: каждая задача дает нагрузку 1/N от доступности ресурса)
-      // В реальности здесь должна быть работа с Assignment.units
-      let dailyWorkload = 0;
-      dayTasks.forEach(() => {
-        dailyWorkload += 0.5; // Предположим, каждая задача занимает 50% времени ресурса
-      });
-
-      days.push({
-        date: new Date(current),
-        workloadPercent: dailyWorkload,
-        maxCapacityPercent: resource.maxUnits || 1.0,
-        isOverloaded: dailyWorkload > (resource.maxUnits || 1.0)
-      });
-      
-      current.setDate(current.getDate() + 1);
-    }
-
+    const days = this.buildDaysArray(resource, tasks, startDate, endDate);
     const totalWorkload = days.reduce((sum, d) => sum + d.workloadPercent, 0);
+    const avgWorkload = days.length > 0 ? totalWorkload / days.length : 0;
     
     return {
       resourceId: resource.id,
       resourceName: resource.name,
       days,
       totalWorkload,
-      averageWorkload: totalWorkload / days.length
+      averageWorkload: avgWorkload
     };
+  }
+
+  /**
+   * Строит массив данных по дням
+   */
+  private buildDaysArray(
+    resource: Resource, tasks: Task[], startDate: Date, endDate: Date
+  ): IResourceWorkloadDay[] {
+    const days: IResourceWorkloadDay[] = [];
+    const current = new Date(startDate);
+    current.setHours(0, 0, 0, 0);
+    
+    while (current <= endDate) {
+      const day = this.calculateDayWorkload(resource, tasks, new Date(current));
+      days.push(day);
+      current.setDate(current.getDate() + 1);
+    }
+    
+    return days;
+  }
+
+  /**
+   * Рассчитывает нагрузку для конкретного дня.
+   * Суммирует units из всех назначений, активных в этот день.
+   */
+  private calculateDayWorkload(
+    resource: Resource, tasks: Task[], date: Date
+  ): IResourceWorkloadDay {
+    const dayStart = new Date(date);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(date);
+    dayEnd.setHours(23, 59, 59, 999);
+    
+    const workloadPercent = this.sumUnitsForDay(resource.id, tasks, dayStart, dayEnd);
+    
+    return {
+      date: new Date(date),
+      workloadPercent,
+      maxCapacityPercent: ResourceLoadingService.BASE_CAPACITY,
+      isOverloaded: workloadPercent > ResourceLoadingService.BASE_CAPACITY
+    };
+  }
+
+  /**
+   * Суммирует units всех назначений ресурса, активных в указанный день.
+   * Поддерживает обратную совместимость: если resourceAssignments пуст,
+   * проверяет устаревшее поле resourceIds (с units=1.0 по умолчанию).
+   */
+  private sumUnitsForDay(
+    resourceId: string, tasks: Task[], dayStart: Date, dayEnd: Date
+  ): number {
+    let totalUnits = 0;
+    
+    for (const task of tasks) {
+      const taskStart = new Date(task.startDate);
+      const taskEnd = new Date(task.endDate);
+      
+      if (taskStart <= dayEnd && taskEnd >= dayStart) {
+        // Приоритет: новый формат resourceAssignments
+        const assignment = task.resourceAssignments?.find(a => a.resourceId === resourceId);
+        if (assignment) {
+          totalUnits += assignment.units;
+        } else if (task.resourceIds?.includes(resourceId)) {
+          // Fallback: старый формат resourceIds (100% по умолчанию)
+          totalUnits += ResourceLoadingService.BASE_CAPACITY;
+        }
+      }
+    }
+    
+    return totalUnits;
   }
 }
 

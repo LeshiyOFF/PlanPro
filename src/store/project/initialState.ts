@@ -1,5 +1,6 @@
 import { INITIAL_TASKS } from '../../data/projectData';
 import { Resource } from '@/types/resource-types';
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
 
 export const initialResources: Resource[] = [
   {
@@ -10,7 +11,8 @@ export const initialResources: Resource[] = [
     standardRate: 50,
     overtimeRate: 75,
     costPerUse: 0,
-    available: true
+    available: true,
+    calendarId: 'standard'
   },
   {
     id: '2',
@@ -20,7 +22,8 @@ export const initialResources: Resource[] = [
     standardRate: 45,
     overtimeRate: 65,
     costPerUse: 0,
-    available: true
+    available: true,
+    calendarId: 'standard'
   },
   {
     id: '3',
@@ -30,7 +33,8 @@ export const initialResources: Resource[] = [
     standardRate: 0,
     overtimeRate: 0,
     costPerUse: 0,
-    available: true
+    available: true,
+    materialLabel: 'чел.'
   }
 ];
 
@@ -40,9 +44,13 @@ export const initialResources: Resource[] = [
 export const initialProjectState = {
   tasks: INITIAL_TASKS,
   resources: initialResources,
+  calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
+  baselines: [],
+  activeBaselineId: undefined as string | undefined,
   initialized: true,
   currentProjectId: undefined as number | undefined,
   currentFilePath: undefined as string | undefined,
+  projectManager: undefined as string | undefined,
   isDirty: false
 };
 
@@ -52,9 +60,13 @@ export const initialProjectState = {
 export const emptyProjectState = {
   tasks: [],
   resources: [],
+  calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
+  baselines: [],
+  activeBaselineId: undefined as string | undefined,
   initialized: true,
   currentProjectId: undefined as number | undefined,
   currentFilePath: undefined as string | undefined,
+  projectManager: undefined as string | undefined,
   isDirty: false
 };
 

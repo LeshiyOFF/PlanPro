@@ -322,6 +322,7 @@ export interface CoreTaskData {
   milestone: boolean
   notes?: string
   wbs?: string
+  totalSlack?: number
 }
 
 /**

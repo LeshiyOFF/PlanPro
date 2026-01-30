@@ -20,7 +20,7 @@ export const ContextHelp: React.FC<ContextHelpProps> = ({
   title,
   content,
   className = '',
-  side = 'left'
+  side = 'bottom'
 }) => {
   const { preferences } = useUserPreferences();
   const showTips = preferences.display.showTips;

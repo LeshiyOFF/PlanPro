@@ -32,6 +32,8 @@ export interface ProjectUpdateRequest extends BaseRequest {
   endDate?: Date
   manager?: string
   department?: string
+  tasks?: FrontendTaskData[]
+  resources?: FrontendResourceData[]
 }
 
 export interface ProjectOpenRequest extends BaseRequest {
@@ -249,12 +251,24 @@ export interface TaskSyncRequest extends BaseRequest {
   tasks: FrontendTaskData[]
 }
 
-// Данные задачи для синхронизации
+/**
+ * Назначение ресурса с указанием процента загрузки для синхронизации.
+ */
+export interface FrontendResourceAssignment {
+  resourceId: string
+  units: number  // 0.0-1.0 (0-100%)
+}
+
+/**
+ * Данные задачи для синхронизации
+ * V2.0: startDate/endDate изменены с number на string (ISO-8601)
+ * V3.0: Добавлен resourceAssignments вместо resourceIds
+ */
 export interface FrontendTaskData {
   id: string
   name: string
-  startDate: number    // timestamp в миллисекундах
-  endDate: number      // timestamp в миллисекундах
+  startDate: string    // ISO-8601 (например: "2026-01-28T18:37:19.575Z")
+  endDate: string      // ISO-8601
   progress: number     // 0-100
   level: number
   summary: boolean
@@ -262,8 +276,57 @@ export interface FrontendTaskData {
   type: string
   predecessors: string[]
   children: string[]
-  resourceIds: string[]
+  /** Назначения ресурсов с указанием процента загрузки */
+  resourceAssignments: FrontendResourceAssignment[]
   notes: string
   color: string
+  // critical исключен - вычисляется ядром CPM
 }
+
+/**
+ * Данные календаря для синхронизации с бэкендом.
+ * Соответствует CalendarSyncDto.java на бэкенде.
+ * 
+ * КРИТИЧЕСКОЕ: Передача полных настроек WorkWeek (рабочие дни, часы)
+ * необходима для корректного сохранения кастомных календарей.
+ */
+export interface CalendarSyncData {
+  id: string
+  name: string
+  description?: string
+  workingDays: boolean[]
+  workingHours: { from: number; to: number }[]
+  hoursPerDay: number
+  templateType?: string
+}
+
+// Данные ресурса для синхронизации
+export interface FrontendResourceData {
+  id: string
+  name: string
+  type: string
+  maxUnits: number
+  standardRate: number
+  overtimeRate: number
+  costPerUse: number
+  calendarId?: string
+  /**
+   * Полные данные календаря для синхронизации.
+   * КРИТИЧЕСКОЕ: Если указан calendarData, бэкенд применит настройки WorkWeek.
+   * Это исправляет баг с потерей настроек кастомных календарей.
+   */
+  calendarData?: CalendarSyncData
+  materialLabel?: string
+  email?: string
+  group?: string
+  available?: boolean
+}
+
+// Unified запрос синхронизации проекта (задачи + ресурсы)
+export interface ProjectSyncRequest extends BaseRequest {
+  projectId: number
+  tasks: FrontendTaskData[]
+  resources: FrontendResourceData[]
+}
+
 

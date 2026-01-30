@@ -1,7 +1,7 @@
-import { IContextMenu } from '../../domain/contextmenu/entities/ContextMenu';
-import { IContextMenuContext } from '../../domain/contextmenu/entities/ContextMenu';
-import { ContextMenuType, ContextMenuStatus } from '../../domain/contextmenu/ContextMenuType';
-import { IMenuFactory } from '../../domain/contextmenu/services/IContextMenuService';
+import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu';
+import { IContextMenuContext } from '@/domain/contextmenu/entities/ContextMenu';
+import { ContextMenuType, ContextMenuStatus } from '@/domain/contextmenu/ContextMenuType';
+import { IMenuFactory } from '@/domain/contextmenu/services/IContextMenuService';
 
 /**
  * Use Case для отображения контекстного меню
@@ -33,7 +33,8 @@ export class ShowContextMenuUseCase {
   }
 
   /**
-   * Валидация меню
+   * Валидация меню.
+   * Сепараторы пропускаются - они не требуют label.
    */
   private validateMenu(menu: IContextMenu): void {
     if (!menu.id || menu.id.trim() === '') {
@@ -44,8 +45,13 @@ export class ShowContextMenuUseCase {
       throw new Error('Menu must have at least one item');
     }
 
-    // Валидация пунктов меню
+    // Валидация пунктов меню (сепараторы пропускаем)
     menu.items.forEach((item, index) => {
+      // Сепараторы не требуют валидации label
+      if (item.separator) {
+        return;
+      }
+
       if (!item.id || item.id.trim() === '') {
         throw new Error(`Menu item at index ${index} cannot have empty ID`);
       }

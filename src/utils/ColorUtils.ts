@@ -83,6 +83,18 @@ export class ColorUtils {
   }
 
   /**
+   * Генерирует детерминированный цвет на основе ID
+   */
+  public static generateRainbowColor(seed: string): string {
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const h = Math.abs(hash % 360);
+    return `hsl(${h}, 70%, 50%)`;
+  }
+
+  /**
    * Возвращает наиболее контрастный цвет текста (черный или белый) в формате Tailwind HSL
    * для заданного фонового HEX цвета.
    */

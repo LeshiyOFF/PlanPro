@@ -10,7 +10,8 @@ import {
   PreferencesCategory,
   IPreferencesChangeEvent,
   ISchedulePreferences,
-  ICalendarPreferences
+  ICalendarPreferences,
+  IGanttPreferences
 } from '../interfaces/UserPreferencesInterfaces';
 
 /**
@@ -90,6 +91,11 @@ export const useUserPreferences = () => {
     await service.updateCalendarPreferences(updates);
   }, []);
 
+  const updateGanttPreferences = useCallback(async (updates: Partial<IGanttPreferences>) => {
+    const service = UserPreferencesService.getInstance();
+    await service.updateGanttPreferences(updates);
+  }, []);
+
   const resetToDefaults = useCallback(async (category?: PreferencesCategory) => {
     const service = UserPreferencesService.getInstance();
     await service.resetToDefaults(category);
@@ -120,6 +126,7 @@ export const useUserPreferences = () => {
     updateSecurityPreferences,
     updateSchedulePreferences,
     updateCalendarPreferences,
+    updateGanttPreferences,
     resetToDefaults,
     flush,
     exportPreferences,

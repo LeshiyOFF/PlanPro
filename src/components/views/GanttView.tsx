@@ -5,12 +5,13 @@ import { useHelpContent } from '@/hooks/useHelpContent';
 import { GanttLayout } from '@/components/gantt';
 import { useProjectStore } from '@/store/projectStore';
 import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
-import { TaskInformationDialog } from '@/components/dialogs/task/TaskInformationDialog';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
 import { SplitTaskDialog } from '@/components/dialogs/task/SplitTaskDialog';
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
 import { GanttLeftPanel } from './gantt/GanttLeftPanel';
 import { GanttRightPanel } from './gantt/GanttRightPanel';
 import { useGanttContextMenu } from '@/hooks/task/useGanttContextMenu';
+import { SummaryTaskDialog } from '@/components/dialogs/task/SummaryTaskDialog';
 import { Plus, BarChart, Link2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -33,7 +34,8 @@ export const GanttView: React.FC = () => {
   const [mode, setMode] = useState<'standard' | 'tracking'>('standard');
   const [dialogState, setDialogState] = useState({ 
     infoId: null as string | null, 
-    splitId: null as string | null 
+    splitId: null as string | null,
+    summaryConfirmId: null as string | null
   });
   const [linkingTaskId, setLinkingTaskId] = useState<string | null>(null);
 
@@ -59,7 +61,22 @@ export const GanttView: React.FC = () => {
     onUnlink: store.unlinkTasks,
     onSplit: (id: string) => setDialogState({ ...dialogState, splitId: id }),
     onMerge: store.mergeTask,
-    onIndent: store.indentTask,
+    onIndent: (id: string) => {
+      const taskIndex = store.tasks.findIndex(t => t.id === id);
+      if (taskIndex <= 0) return;
+      
+      const currentTask = store.tasks[taskIndex];
+      // Ищем реального родителя: ближайшая задача выше с уровнем меньше текущего
+      // Но так как мы делаем Indent, родителем станет задача ПРЯМО над ней, 
+      // если её уровень равен текущему.
+      const potentialParent = store.tasks[taskIndex - 1];
+      
+      if (potentialParent && potentialParent.level === currentTask.level && !potentialParent.summary) {
+        setDialogState({ ...dialogState, summaryConfirmId: id });
+      } else {
+        store.indentTask(id);
+      }
+    },
     onOutdent: store.outdentTask,
     onMove: store.moveTask,
     onDelete: deleteTask
@@ -154,16 +171,10 @@ export const GanttView: React.FC = () => {
 
       {/* Диалоги */}
       {dialogState.infoId && (
-        <TaskInformationDialog 
+        <TaskPropertiesDialog 
+          taskId={dialogState.infoId}
           isOpen={!!dialogState.infoId} 
-          onClose={(res) => { 
-            setDialogState({ ...dialogState, infoId: null }); 
-            if (res.success && res.data) store.updateTask(dialogState.infoId!, res.data); 
-          }} 
-          data={{ 
-            ...store.tasks.find(t => t.id === dialogState.infoId)!, 
-            taskId: dialogState.infoId! 
-          }} 
+          onClose={() => setDialogState({ ...dialogState, infoId: null })}
         />
       )}
       
@@ -180,6 +191,18 @@ export const GanttView: React.FC = () => {
             startDate: store.tasks.find(t => t.id === dialogState.splitId!)?.startDate || new Date(), 
             endDate: store.tasks.find(t => t.id === dialogState.splitId!)?.endDate || new Date() 
           }} 
+        />
+      )}
+
+      {dialogState.summaryConfirmId && (
+        <SummaryTaskDialog
+          isOpen={!!dialogState.summaryConfirmId}
+          onClose={(confirm) => {
+            if (confirm) store.indentTask(dialogState.summaryConfirmId!);
+            setDialogState({ ...dialogState, summaryConfirmId: null });
+          }}
+          parentTaskName={store.tasks[store.tasks.findIndex(t => t.id === dialogState.summaryConfirmId!) - 1]?.name || ''}
+          subtaskName={store.tasks.find(t => t.id === dialogState.summaryConfirmId!)?.name || ''}
         />
       )}
     </div>

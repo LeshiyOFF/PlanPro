@@ -3,17 +3,24 @@ import { useProjectStore } from '@/store/projectStore';
 import { useProjectLibreAPI } from './useProjectLibreAPI';
 import { LastProjectService } from '@/services/LastProjectService';
 import { TaskDataConverter } from '@/services/TaskDataConverter';
+import { ResourceDataConverter } from '@/services/ResourceDataConverter';
+import { CalendarDataConverter } from '@/services/CalendarDataConverter';
+import { TaskLinkService } from '@/domain/services/TaskLinkService';
 
 /**
  * Hook for file operations (Open, Save, Save As, New).
  * Connects UI, Electron dialogs and Java backend.
  * 
  * CRITICAL: After loading a .pod file, this hook retrieves full project data
- * (tasks + resources) from the Core model and populates the frontend store.
+ * (tasks + resources + calendars) from the Core model and populates the frontend store.
+ * 
+ * V2.0: Added calendar import support.
+ * V2.1: CRITICAL FIX - исправлен stale closure баг с calendars при повторном открытии файла.
+ *       Теперь используется getState() для получения актуального состояния после reset().
  */
 export const useFileOperations = () => {
   const { file, projects: projectApi } = useProjectLibreAPI();
-  const { tasks, currentProjectId, currentFilePath, setProjectInfo, setTasks, setResources, reset, markClean } = useProjectStore();
+  const { tasks, resources, calendars, currentProjectId, currentFilePath, setProjectInfo, setTasks, setResources, addCalendar, reset, markClean } = useProjectStore();
   
   // Состояние для предотвращения двойных вызовов (Double Trigger protection)
   const [isProcessing, setIsProcessing] = useState(false);
@@ -121,10 +128,17 @@ export const useFileOperations = () => {
       }
 
       console.log(`[useFileOperations] Step 1: Loading ${fileExt} file via Java backend...`);
+      
+      // 🔒 КРИТИЧНО: Отключаем автокоррекцию дат при загрузке файла
+      TaskLinkService.setLoadingMode(true);
+      
       const response = await file.loadProject({ filePath });
       
       if (!response.success || !response.projectId) {
         console.error('[useFileOperations] Load failed:', response.error);
+        // 🔓 Включаем обратно даже при ошибке
+        TaskLinkService.setLoadingMode(false);
+        
         if (window.electronAPI) {
           await window.electronAPI.showMessageBox({
             type: 'error',
@@ -152,7 +166,7 @@ export const useFileOperations = () => {
         
         if (projectData && projectData.tasks && projectData.tasks.length > 0) {
           console.log('[useFileOperations] Step 4: Converting and populating store...');
-          console.log(`[useFileOperations] Tasks: ${projectData.tasks.length}, Resources: ${projectData.resources?.length || 0}`);
+          console.log(`[useFileOperations] Tasks: ${projectData.tasks.length}, Resources: ${projectData.resources?.length || 0}, Calendars: ${projectData.calendars?.length || 0}`);
           
           // Конвертируем задачи
           const frontendTasks = projectData.tasks.map(TaskDataConverter.coreToFrontendTask);
@@ -164,13 +178,37 @@ export const useFileOperations = () => {
             setResources(frontendResources);
           }
           
+          // V2.1: Импортируем кастомные календари из Java
+          // CRITICAL FIX: Используем getState() для получения АКТУАЛЬНОГО состояния после reset()
+          // Без этого фикса calendars содержит stale данные из замыкания, включая
+          // кастомные календари от предыдущей загрузки, что приводит к их фильтрации
+          if (projectData.calendars && projectData.calendars.length > 0) {
+            const currentCalendars = useProjectStore.getState().calendars;
+            const existingIds = currentCalendars.map(c => c.id);
+            const newCalendars = CalendarDataConverter.apiToFrontendCalendars(
+              projectData.calendars,
+              existingIds
+            );
+            
+            if (newCalendars.length > 0) {
+              console.log(`[useFileOperations] 📅 Importing ${newCalendars.length} custom calendars...`);
+              newCalendars.forEach(cal => {
+                console.log(`[useFileOperations]   - ${cal.name} (${cal.id})`);
+                addCalendar(cal);
+              });
+            }
+          }
+          
+          // 🔓 КРИТИЧНО: Включаем автокоррекцию обратно ПОСЛЕ загрузки данных
+          TaskLinkService.setLoadingMode(false);
+          
           console.log('[useFileOperations] ✅ Store populated successfully!');
           
           if (window.electronAPI) {
             await window.electronAPI.showMessageBox({
               type: 'info',
               title: 'Проект загружен',
-              message: `Проект "${response.projectName || projectData.projectName || 'Unknown'}" успешно загружен!\n\nЗадач: ${frontendTasks.length}\nРесурсов: ${projectData.resources?.length || 0}`
+              message: `Проект "${response.projectName || projectData.projectName || 'Unknown'}" успешно загружен!\n\nЗадач: ${frontendTasks.length}\nРесурсов: ${projectData.resources?.length || 0}\nКалендарей: ${projectData.calendars?.length || 0}`
             });
           }
         } else {
@@ -285,11 +323,35 @@ export const useFileOperations = () => {
 
       if (result.canceled || !result.filePath) return;
 
-      // CRITICAL: Синхронизируем задачи из UI в Core перед сохранением
-      if (tasks.length > 0) {
-        console.log('[useFileOperations] Syncing tasks to Core before save...');
-        const syncData = TaskDataConverter.frontendTasksToSync(tasks);
-        await file.syncTasksToCore({ projectId: currentProjectId, tasks: syncData });
+      // CRITICAL: Синхронизируем задачи и ресурсы из UI в Core перед сохранением
+      // V2.0: Передаём calendars для синхронизации полных настроек кастомных календарей
+      if (tasks.length > 0 || resources.length > 0) {
+        console.log('[useFileOperations] Syncing project to Core before save...');
+        const syncTasksData = TaskDataConverter.frontendTasksToSync(tasks);
+        // CRITICAL FIX: Передаём calendars для включения calendarData в синхронизацию
+        const syncResourcesData = ResourceDataConverter.frontendResourcesToSync(resources, calendars);
+        try {
+          await file.syncProjectToCore({ 
+            projectId: currentProjectId, 
+            tasks: syncTasksData,
+            resources: syncResourcesData
+          });
+        } catch (syncError: unknown) {
+          const errorMessage = syncError instanceof Error ? syncError.message : 'Unknown error';
+          console.error('[useFileOperations] Sync failed:', errorMessage);
+          // Если это наша специальная ошибка календаря, показываем её профессионально
+          if (errorMessage.includes('календарь')) {
+            if (window.electronAPI) {
+              await window.electronAPI.showMessageBox({
+                type: 'warning',
+                title: 'Проблема с календарем',
+                message: errorMessage
+              });
+            }
+            return; // Прерываем сохранение, так как данные некорректны
+          }
+          throw syncError; // Прочие ошибки пробрасываем дальше
+        }
       }
 
       const response = await file.saveProject({
@@ -349,11 +411,35 @@ export const useFileOperations = () => {
     try {
       setIsProcessing(true);
       
-      // CRITICAL: Синхронизируем задачи из UI в Core перед сохранением
-      if (tasks.length > 0) {
-        console.log('[useFileOperations] Syncing tasks to Core before save...');
-        const syncData = TaskDataConverter.frontendTasksToSync(tasks);
-        await file.syncTasksToCore({ projectId: currentProjectId, tasks: syncData });
+      // CRITICAL: Синхронизируем задачи и ресурсы из UI в Core перед сохранением
+      // V2.0: Передаём calendars для синхронизации полных настроек кастомных календарей
+      if (tasks.length > 0 || resources.length > 0) {
+        console.log('[useFileOperations] Syncing project to Core before save...');
+        const syncTasksData = TaskDataConverter.frontendTasksToSync(tasks);
+        // CRITICAL FIX: Передаём calendars для включения calendarData в синхронизацию
+        const syncResourcesData = ResourceDataConverter.frontendResourcesToSync(resources, calendars);
+        try {
+          await file.syncProjectToCore({ 
+            projectId: currentProjectId, 
+            tasks: syncTasksData,
+            resources: syncResourcesData
+          });
+        } catch (syncError: unknown) {
+          const errorMessage = syncError instanceof Error ? syncError.message : 'Unknown error';
+          console.error('[useFileOperations] Sync failed:', errorMessage);
+          // Если это наша специальная ошибка календаря, показываем её профессионально
+          if (errorMessage.includes('календарь')) {
+            if (window.electronAPI) {
+              await window.electronAPI.showMessageBox({
+                type: 'warning',
+                title: 'Проблема с календарем',
+                message: errorMessage
+              });
+            }
+            return; // Прерываем сохранение, так как данные некорректны
+          }
+          throw syncError; // Прочие ошибки пробрасываем дальше
+        }
       }
 
       const response = await file.saveProject({

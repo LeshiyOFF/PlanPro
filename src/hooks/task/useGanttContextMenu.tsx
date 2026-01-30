@@ -13,10 +13,28 @@ export const useGanttContextMenu = (
     event.preventDefault();
     const taskIndex = tasks.findIndex(t => t.id === task.id);
     
-    let indentParent = tasks.slice(0, taskIndex).reverse().find(t => t.level === task.level);
-    let outdentParent = task.level > 1 
-      ? tasks.slice(0, taskIndex).reverse().find(t => t.level === task.level - 2)
+    // Логика определения родителей для информативных подписей в меню
+    const prevTask = taskIndex > 0 ? tasks[taskIndex - 1] : null;
+    
+    // Indent: можно сделать подзадачей только если сверху есть кто-то того же уровня или глубже
+    const indentParent = prevTask && prevTask.level >= task.level ? prevTask : null;
+    
+    // Outdent: ищем задачу, которая является текущим родителем (уровень на 1 меньше)
+    const currentParent = task.level > 1 
+      ? tasks.slice(0, taskIndex).reverse().find(t => t.level < task.level)
       : null;
+
+    // Outdent Target: ищем задачу, которая станет НОВЫМ родителем после поднятия уровня
+    // Если уровень станет (task.level - 1), то новым родителем будет ближайшая задача выше с уровнем < (task.level - 1)
+    const outdentTarget = task.level > 2
+      ? tasks.slice(0, taskIndex).reverse().find(t => t.level < task.level - 1)
+      : null;
+
+    const outdentLabel = task.level === 2
+      ? t('help.outdent_root')
+      : outdentTarget
+        ? `${t('help.outdent_to')} "${outdentTarget.name}"`
+        : t('help.outdent');
 
     showMenu(ContextMenuType.TASK, {
       target: task,
@@ -50,13 +68,16 @@ export const useGanttContextMenu = (
         },
         { divider: true },
         { 
-          label: indentParent ? `${t('help.indent_to')} "${indentParent.name}"` : t('help.indent'), 
+          label: indentParent 
+            ? `${t('help.indent_to')} "${indentParent.name}"` 
+            : t('help.indent'), 
           onClick: () => actions.onIndent(task.id), 
           icon: <ChevronRight size={14} className="text-slate-600" />,
-          disabled: !indentParent 
+          disabled: !indentParent,
+          tooltip: !indentParent && taskIndex > 0 ? t('help.hierarchy_restriction') : undefined
         },
         { 
-          label: outdentParent ? `${t('help.outdent_to')} "${outdentParent.name}"` : t('help.outdent'), 
+          label: outdentLabel, 
           onClick: () => actions.onOutdent(task.id), 
           icon: <ChevronLeft size={14} className="text-slate-600" />,
           disabled: task.level <= 1

@@ -20,12 +20,6 @@ interface DatePickerProps {
   disabled?: boolean;
 }
 
-/**
- * Профессиональный компонент выбора даты.
- * Соответствует принципам SOLID:
- * - Single Responsibility: Только выбор и отображение даты.
- * - Interface Segregation: Минимально необходимый набор пропсов.
- */
 export const DatePicker: React.FC<DatePickerProps> = ({
   date,
   onChange,
@@ -58,12 +52,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           {date ? formatDate(date) : <span>{placeholder}</span>}
         </Button>
       </DialogTrigger>
+      {/* 
+        ВАЖНО: Принудительно убираем все стили контейнера Shadcn/Radix, 
+        чтобы календарь был единственным слоем.
+      */}
       <DialogContent 
-        className="p-0 w-auto border-none" 
+        className="p-0 !border-none !bg-transparent !shadow-none !outline-none fixed inset-0 !max-w-none !w-screen !h-screen flex items-center justify-center translate-x-0 translate-y-0 left-0 top-0 z-[100]" 
         hideClose
         aria-describedby={undefined}
       >
-        {/* Невидимый заголовок для соответствия стандартам доступности Radix UI */}
         <DialogTitle className="sr-only">Выбор даты</DialogTitle>
         <Calendar
           mode="single"
@@ -75,4 +72,3 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     </Dialog>
   );
 };
-

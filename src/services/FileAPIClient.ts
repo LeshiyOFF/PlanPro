@@ -147,6 +147,37 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
   }
 
   /**
+   * Unified синхронизация проекта (задачи + ресурсы) в Core Project.
+   * Современный метод, заменяющий syncTasksToCore.
+   * 
+   * @param request - Запрос с projectId, задачами и ресурсами
+   * @returns Результат синхронизации
+   */
+  async syncProjectToCore(request: import('@/types/api/request-types').ProjectSyncRequest): Promise<TaskSyncResponse> {
+    try {
+      console.log('[FileAPIClient] Syncing project to Core:', {
+        projectId: request.projectId,
+        taskCount: request.tasks.length,
+        resourceCount: request.resources.length
+      });
+      
+      const response = await this.post<TaskSyncResponse>('/files/sync-project', request);
+      
+      console.log('[FileAPIClient] Sync response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('[FileAPIClient] Sync error:', error);
+      
+      // Проверяем, есть ли детальное сообщение от бэкенда (например, про календарь)
+      if (error instanceof APIError && error.status === 400 && error.details?.message) {
+        throw new Error(error.details.message);
+      }
+      
+      throw this.handleFileError(error, 'Failed to sync project');
+    }
+  }
+
+  /**
    * Get format version.
    */
   async getVersion(): Promise<string> {

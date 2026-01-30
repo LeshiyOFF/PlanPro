@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import DialogService from '@/services/DialogService';
-import { ProjectDialog, TaskInformationDialog, ResourceInformationDialog } from '@/components/dialogs';
+import { ProjectDialog, TaskPropertiesDialog, ResourceInformationDialog } from '@/components/dialogs';
 
 /**
  * Тестовая страница для проверки диалоговых компонентов
@@ -36,20 +36,20 @@ export const DialogTestPage: React.FC = () => {
 
   const testTaskDialog = async () => {
     try {
-      addResult('🚀 Тестирование TaskInformationDialog...');
+      addResult('🚀 Тестирование TaskPropertiesDialog...');
       
-      const isRegistered = DialogService.getDialog('task-information') !== null;
+      const isRegistered = DialogService.getDialog('task-properties') !== null;
       if (isRegistered) {
-        addResult('✅ TaskInformationDialog успешно зарегистрирован');
-        addResult('📝 Данные задачи: {taskId: "TASK-001", priority: "high"}');
+        addResult('✅ TaskPropertiesDialog успешно зарегистрирован');
+        addResult('📝 Данные задачи: {taskId: "TASK-001", progress: 0.5}');
         addResult('🎯 Категория: task');
-        addResult('📏 Размер: 600x500px');
+        addResult('📏 Размер: 550x auto');
         addResult('🔒 Модальный: true');
       } else {
-        addResult('❌ TaskInformationDialog не зарегистрирован');
+        addResult('❌ TaskPropertiesDialog не зарегистрирован');
       }
     } catch (error) {
-      addResult(`❌ Ошибка в TaskInformationDialog: ${error}`);
+      addResult(`❌ Ошибка в TaskPropertiesDialog: ${error}`);
     }
   };
 
@@ -91,12 +91,12 @@ export const DialogTestPage: React.FC = () => {
       });
       
       DialogService.registerDialog({
-        id: 'task-information',
+        id: 'task-properties',
         category: 'task',
-        component: TaskInformationDialog,
+        component: TaskPropertiesDialog as unknown as React.ComponentType,
         config: {
-          width: 600,
-          height: 500,
+          width: 550,
+          height: 600,
           modal: true,
           resizable: false,
           closable: true
@@ -120,7 +120,7 @@ export const DialogTestPage: React.FC = () => {
       
       // Проверка получения диалогов
       const projectDialog = DialogService.getDialog('project');
-      const taskDialog = DialogService.getDialog('task-information');
+      const taskDialog = DialogService.getDialog('task-properties');
       const resourceDialog = DialogService.getDialog('resource-information');
       
       if (projectDialog && taskDialog && resourceDialog) {
@@ -153,7 +153,7 @@ export const DialogTestPage: React.FC = () => {
             <ul className="text-sm text-slate-900 space-y-1">
               <li>• Регистрация диалогов в DialogService</li>
               <li>• Открытие ProjectDialog с тестовыми данными</li>
-              <li>• Открытие TaskInformationDialog с тестовыми данными</li>
+              <li>• Открытие TaskPropertiesDialog с тестовыми данными</li>
               <li>• Открытие ResourceInformationDialog с тестовыми данными</li>
               <li>• Проверка SOLID архитектуры и типов данных</li>
             </ul>

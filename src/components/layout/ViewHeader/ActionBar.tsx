@@ -2,6 +2,7 @@ import React from 'react';
 import { ActionBarProps } from './ViewHeaderTypes';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { SafeTooltip } from '@/components/ui/Tooltip';
 
 /**
  * ActionBar - Tier 2: Action Bar
@@ -30,37 +31,38 @@ export const ActionBar: React.FC<ActionBarProps> = ({
       <div className="flex items-center gap-2 flex-wrap">
         {/* Primary Action - Главная кнопка с акцентом */}
         {primaryAction && (
-          <Button
-            variant="default"
-            size="sm"
-            onClick={primaryAction.onClick}
-            disabled={primaryAction.disabled}
-            title={primaryAction.title}
-            className="h-9 px-4 font-medium"
-          >
-            {primaryAction.icon && (
-              <span className="mr-2 flex-shrink-0">{primaryAction.icon}</span>
-            )}
-            <span className="whitespace-nowrap">{primaryAction.label}</span>
-          </Button>
+          <SafeTooltip content={primaryAction.title || primaryAction.label} side="bottom">
+            <Button
+              variant="default"
+              size="sm"
+              onClick={primaryAction.onClick}
+              disabled={primaryAction.disabled}
+              className="h-9 px-4 font-medium"
+            >
+              {primaryAction.icon && (
+                <span className="mr-2 flex-shrink-0">{primaryAction.icon}</span>
+              )}
+              <span className="whitespace-nowrap">{primaryAction.label}</span>
+            </Button>
+          </SafeTooltip>
         )}
 
         {/* Secondary Actions - Вторичные кнопки с легким акцентом */}
         {secondaryActions.map((action, idx) => (
-          <Button
-            key={idx}
-            variant={action.variant || 'outline'}
-            size="sm"
-            onClick={action.onClick}
-            disabled={action.disabled}
-            title={action.title}
-            className="h-9 px-3"
-          >
-            {action.icon && (
-              <span className="mr-1.5 flex-shrink-0">{action.icon}</span>
-            )}
-            <span className="whitespace-nowrap">{action.label}</span>
-          </Button>
+          <SafeTooltip key={idx} content={action.title || action.label} side="bottom">
+            <Button
+              variant={action.variant || 'outline'}
+              size="sm"
+              onClick={action.onClick}
+              disabled={action.disabled}
+              className="h-9 px-3"
+            >
+              {action.icon && (
+                <span className="mr-1.5 flex-shrink-0">{action.icon}</span>
+              )}
+              <span className="whitespace-nowrap">{action.label}</span>
+            </Button>
+          </SafeTooltip>
         ))}
       </div>
 

@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { IContextMenu, IContextMenuItem } from '../../../domain/contextmenu/entities/ContextMenu';
 import { IContextMenuContext } from '../../../domain/contextmenu/entities/ContextMenu';
 import { ContextMenuType, ContextMenuStatus } from '../../../domain/contextmenu/ContextMenuType';
 import { ContextMenuComponent } from '../components/ContextMenu';
+import { ContextMenuService } from '@/application/contextmenu/services/ContextMenuService';
+import { ResourceContextMenuFactory } from '@/infrastructure/contextmenu/factories/ResourceContextMenuFactory';
+import { TaskContextMenuFactory } from '@/infrastructure/contextmenu/factories/TaskContextMenuFactory';
 import { logger } from '@/utils/logger';
 
 /**
@@ -31,21 +33,37 @@ export const useContextMenu = (): IContextMenuReactContext => {
 };
 
 /**
- * Provider для контекстных меню
+ * Provider для контекстных меню с интеграцией ContextMenuService
  */
 export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { t } = useTranslation();
   const [currentMenu, setCurrentMenu] = useState<IContextMenu | null>(null);
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
-  const showMenu = useCallback(async (type: ContextMenuType, context: IContextMenuContext) => {
-    try {
-      logger.info(`Requesting context menu: ${type}`);
-      
-      let items: IContextMenuItem[] = [];
+  // Инициализация сервиса и регистрация фабрик
+  const contextMenuService = useMemo(() => {
+    const service = new ContextMenuService();
+    
+    // Регистрируем фабрики для разных типов меню
+    service.registerFactory(ContextMenuType.RESOURCE, new ResourceContextMenuFactory());
+    service.registerFactory(ContextMenuType.TASK, new TaskContextMenuFactory());
+    
+    logger.info('[ContextMenuProvider] Service initialized with factories:', service.getRegisteredTypes());
+    
+    return service;
+  }, []);
 
+  const showMenu = useCallback(async (type: ContextMenuType, context: IContextMenuContext) => {
+    logger.info(`[ContextMenuProvider] showMenu type=${type}`);
+    
+    let menu: IContextMenu | null = null;
+
+    try {
+      // ПРИОРИТЕТ 1: Если переданы actions — использовать их напрямую
+      // Это важно для Gantt, WBS и других компонентов со своим меню
       if (context.actions && context.actions.length > 0) {
-        items = context.actions.map((action, idx) => {
+        logger.info(`[ContextMenuProvider] Using ${context.actions.length} provided actions`);
+        
+        const items: IContextMenuItem[] = context.actions.map((action, idx) => {
           if (action.divider) {
             return {
               id: `divider-${idx}`,
@@ -58,48 +76,51 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
             id: `action-${idx}`,
             label: action.label || '',
             icon: action.icon,
+            disabled: action.disabled,
+            tooltip: action.tooltip,
             action: {
               execute: async () => action.onClick ? action.onClick() : Promise.resolve(),
-              canExecute: () => true,
+              canExecute: () => !action.disabled,
               getLabel: () => action.label || '',
               getIcon: () => action.icon,
               getShortcut: () => ''
             }
           } as IContextMenuItem;
         });
+
+        menu = {
+          id: `menu-${Date.now()}`,
+          type,
+          items,
+          position: context.position,
+          status: ContextMenuStatus.VISIBLE,
+          target: context.target
+        };
       } else {
-        items = [
-              {
-            id: 'delete',
-            label: t('context_menu.delete'),
-            icon: '🗑️',
-                action: {
-              execute: async () => logger.info('Delete requested'),
-                  canExecute: () => true,
-              getLabel: () => t('context_menu.delete'),
-              getIcon: () => '🗑️',
-              getShortcut: () => 'Del'
-                }
-              }
-        ];
+        // ПРИОРИТЕТ 2: Использовать фабрику (для ResourceSheet, TaskUsage и т.д.)
+        try {
+          menu = await contextMenuService.showMenu(type, context);
+          if (menu) {
+            logger.info(`[ContextMenuProvider] Factory menu created with ${menu.items.length} items`);
           }
+        } catch (factoryError: unknown) {
+          const errMsg = factoryError instanceof Error ? factoryError.message : String(factoryError);
+          logger.warning(`[ContextMenuProvider] Factory failed: ${errMsg}`);
+          // Не показываем меню если фабрика не сработала и нет actions
+          return;
+        }
+      }
+      
+      if (menu) {
+        setCurrentMenu(menu);
+        setIsMenuVisible(true);
+      }
 
-      const menu: IContextMenu = {
-        id: `menu-${Date.now()}`,
-        type,
-        items,
-        position: context.position,
-        status: ContextMenuStatus.VISIBLE,
-        target: context.target
-      };
-
-      setCurrentMenu(menu);
-      setIsMenuVisible(true);
-
-    } catch (error) {
-      logger.error(`Failed to show context menu: ${error.message}`);
+    } catch (criticalError: unknown) {
+      const errMsg = criticalError instanceof Error ? criticalError.message : String(criticalError);
+      logger.error(`[ContextMenuProvider] CRITICAL ERROR: ${errMsg}`);
     }
-  }, [t]);
+  }, [contextMenuService]);
 
   const hideMenu = useCallback(() => {
     setIsMenuVisible(false);
@@ -114,13 +135,13 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
 
     try {
-      // TODO: Интеграция с ContextMenuService.executeAction
-      const menuItem = currentMenu.items.find(item => item.id === actionId);
+      const menuItem = currentMenu.items.find((item: IContextMenuItem) => item.id === actionId);
       if (menuItem?.action) {
         await menuItem.action.execute();
       }
-    } catch (error) {
-      logger.error(`Failed to execute menu action: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      logger.error(`Failed to execute menu action: ${errorMessage}`);
     }
   }, [currentMenu]);
 

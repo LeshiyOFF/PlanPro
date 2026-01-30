@@ -1,11 +1,11 @@
-import { IContextMenu, IContextMenuContext } from '../../domain/contextmenu/entities/ContextMenu';
-import { ContextMenuType, ContextMenuStatus } from '../../domain/contextmenu/ContextMenuType';
+import { IContextMenu, IContextMenuContext } from '@/domain/contextmenu/entities/ContextMenu';
+import { ContextMenuType, ContextMenuStatus } from '@/domain/contextmenu/ContextMenuType';
 import { 
   IContextMenuService, 
   IMenuFactory 
-} from '../../domain/contextmenu/services/IContextMenuService';
-import { ShowContextMenuUseCase } from '../usecases/ShowContextMenuUseCase';
-import { ExecuteMenuActionUseCase } from '../usecases/ExecuteMenuActionUseCase';
+} from '@/domain/contextmenu/services/IContextMenuService';
+import { ShowContextMenuUseCase } from '@/application/contextmenu/usecases/ShowContextMenuUseCase';
+import { ExecuteMenuActionUseCase } from '@/application/contextmenu/usecases/ExecuteMenuActionUseCase';
 import { logger } from '@/utils/logger';
 
 /**

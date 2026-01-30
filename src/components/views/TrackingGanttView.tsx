@@ -7,11 +7,10 @@ import { useHelpContent } from '@/hooks/useHelpContent';
 import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
 import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { GanttCanvasController } from '@/components/gantt';
-import { GanttChartOptionsDialog } from '@/components/dialogs/settings/GanttChartOptionsDialog';
 import { useProjectStore } from '@/store/projectStore';
-import { TaskInformationDialog } from '@/components/dialogs/task/TaskInformationDialog';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
 import { ViewType } from '@/types/ViewTypes';
-import { LineChart, RefreshCw, Settings } from 'lucide-react';
+import { LineChart, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -26,7 +25,6 @@ export const TrackingGanttView: React.FC = () => {
   const { t, i18n } = useTranslation();
   const helpContent = useHelpContent();
   const { showMenu } = useContextMenu();
-  const [showSettings, setShowSettings] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Глобальное хранилище задач
@@ -45,19 +43,10 @@ export const TrackingGanttView: React.FC = () => {
     setIsDialogOpen(true);
   }, []);
 
-  const handleDialogClose = useCallback((result: { success?: boolean; data?: Record<string, unknown> }) => {
+  const handleDialogClose = useCallback(() => {
     setIsDialogOpen(false);
-    if (result && result.success && result.data && editingTaskId) {
-      updateTask(editingTaskId, {
-        name: result.data.name as string,
-        progress: result.data.progress as number,
-        startDate: result.data.startDate as Date,
-        endDate: result.data.endDate as Date,
-        notes: result.data.notes as string
-      });
-    }
     setEditingTaskId(null);
-  }, [editingTaskId, updateTask]);
+  }, []);
 
   const handleTaskUpdate = useCallback((taskId: string, updates: { startDate: Date; endDate: Date }) => {
     updateTask(taskId, updates);
@@ -70,22 +59,6 @@ export const TrackingGanttView: React.FC = () => {
       position: { x: event.clientX, y: event.clientY }
     });
   }, [showMenu]);
-
-  // Контролы для ActionBar
-  const trackingControls = (
-    <div className="flex items-center gap-1">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setShowSettings(true)}
-        title={t('gantt.settings')}
-        className="h-9"
-      >
-        <Settings className="w-4 h-4 mr-1" />
-        {t('common.settings')}
-      </Button>
-    </div>
-  );
 
   return (
     <>
@@ -101,8 +74,7 @@ export const TrackingGanttView: React.FC = () => {
               label: t('view_controls.update_progress'),
               onClick: () => {/* TODO: implement update progress */},
               icon: <RefreshCw className="w-4 h-4" />
-            },
-            controls: trackingControls
+            }
           }}
         />
 
@@ -160,7 +132,6 @@ export const TrackingGanttView: React.FC = () => {
                 onTaskSelect={handleTaskSelect}
                 onTaskDoubleClick={handleTaskDoubleClick}
                 onTaskUpdate={handleTaskUpdate}
-                onSettingsClick={() => setShowSettings(true)}
                 mode="tracking"
               />
             </div>
@@ -168,27 +139,12 @@ export const TrackingGanttView: React.FC = () => {
         </div>
       </div>
 
-      {/* Диалог настроек */}
-      {showSettings && (
-        <GanttChartOptionsDialog
-          open={showSettings}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
-
       {/* Диалог редактирования */}
       {isDialogOpen && editingTaskId && (
-        <TaskInformationDialog
+        <TaskPropertiesDialog
+          taskId={editingTaskId}
           isOpen={isDialogOpen}
           onClose={handleDialogClose}
-          data={{
-            name: tasks.find(t => t.id === editingTaskId)?.name || '',
-            progress: tasks.find(t => t.id === editingTaskId)?.progress || 0,
-            startDate: tasks.find(t => t.id === editingTaskId)?.startDate || new Date(),
-            endDate: tasks.find(t => t.id === editingTaskId)?.endDate || new Date(),
-            taskId: editingTaskId,
-            notes: (tasks.find(t => t.id === editingTaskId) as Record<string, unknown>)?.notes as string || ''
-          }}
         />
       )}
     </>

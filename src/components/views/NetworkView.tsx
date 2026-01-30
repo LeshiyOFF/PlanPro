@@ -7,7 +7,8 @@ import { NetworkNode, NetworkNodeType, NetworkConnection } from '@/domain/networ
 import { Plus, Maximize, ZoomIn, ZoomOut, Layout, GitBranch } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useProjectStore } from '@/store/projectStore';
-import { TaskInformationDialog } from '@/components/dialogs/task/TaskInformationDialog';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
+import { SafeTooltip } from '@/components/ui/Tooltip';
 import { cn } from '@/lib/utils';
 
 /**
@@ -102,13 +103,10 @@ export const NetworkView: React.FC = () => {
     setIsDialogOpen(true);
   }, []);
 
-  const handleDialogClose = useCallback((result: any) => {
+  const handleDialogClose = useCallback(() => {
     setIsDialogOpen(false);
-    if (result && result.success && result.data && editingNodeId) {
-      updateTask(editingNodeId, result.data);
-    }
     setEditingNodeId(null);
-  }, [editingNodeId, updateTask]);
+  }, []);
 
   const handleConnectionCreate = useCallback((fromId: string, toId: string) => {
     const targetTask = tasks.find(t => t.id === toId);
@@ -196,26 +194,27 @@ export const NetworkView: React.FC = () => {
             <span><strong>{t('help.tip_bold')}:</strong> {t('help.network_footer_tip')}</span>
           </p>
           <div className="flex gap-4 font-medium">
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-red-500 rounded-sm shadow-sm shadow-red-200"></span> 
-              {t('help.critical_path')}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 bg-primary rounded-sm shadow-sm shadow-[hsl(var(--primary-shadow-light))]"></span> 
-              {t('help.regular_task')}
-            </span>
+            <SafeTooltip content={t('help.critical_path_tip')} side="top">
+              <span className="flex items-center gap-1.5 cursor-help hover:opacity-80 transition-opacity">
+                <span className="w-3 h-3 bg-red-500 rounded-sm shadow-sm shadow-red-200"></span> 
+                {t('help.critical_path')}
+              </span>
+            </SafeTooltip>
+            <SafeTooltip content={t('help.regular_task_tip')} side="top">
+              <span className="flex items-center gap-1.5 cursor-help hover:opacity-80 transition-opacity">
+                <span className="w-3 h-3 bg-primary rounded-sm shadow-sm shadow-[hsl(var(--primary-shadow-light))]"></span> 
+                {t('help.regular_task')}
+              </span>
+            </SafeTooltip>
           </div>
         </div>
       </div>
 
       {isDialogOpen && editingNodeId && (
-        <TaskInformationDialog
+        <TaskPropertiesDialog
+          taskId={editingNodeId}
           isOpen={isDialogOpen}
           onClose={handleDialogClose}
-          data={{
-            ...tasks.find(n => n.id === editingNodeId)!,
-            taskId: editingNodeId
-          }}
         />
       )}
     </div>

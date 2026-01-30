@@ -7,6 +7,23 @@ import { ViewType } from '@/types/ViewTypes';
 import { Duration } from '@/types/project-types';
 
 /**
+ * Настройки диаграммы Ганта
+ */
+export interface IGanttPreferences {
+  showArrows: boolean;
+  showGridlines: boolean;
+  highlightWeekends: boolean;
+  barHeight: number;
+  rowHeight: number;
+  coloringMode: 'single' | 'rainbow' | 'status';
+  summaryColoringMode: 'single' | 'auto';
+  labelMode: 'none' | 'name' | 'resource' | 'dates';
+  accentColor: string;
+  summaryColor: string;
+  showDeltasInLabels: boolean;
+}
+
+/**
  * Основной интерфейс пользовательских настроек
  */
 export interface IUserPreferences {
@@ -17,6 +34,7 @@ export interface IUserPreferences {
   security: ISecurityPreferences;
   schedule: ISchedulePreferences;
   calendar: ICalendarPreferences;
+  gantt: IGanttPreferences;
 }
 
 /**
@@ -138,7 +156,8 @@ export enum PreferencesCategory {
   CALCULATIONS = 'calculations',
   SECURITY = 'security',
   SCHEDULE = 'schedule',
-  CALENDAR = 'calendar'
+  CALENDAR = 'calendar',
+  GANTT = 'gantt'
 }
 
 /**
@@ -171,6 +190,7 @@ export interface IUserPreferencesService {
   updateSecurityPreferences(preferences: Partial<ISecurityPreferences>): Promise<void>;
   updateSchedulePreferences(preferences: Partial<ISchedulePreferences>): Promise<void>;
   updateCalendarPreferences(preferences: Partial<ICalendarPreferences>): Promise<void>;
+  updateGanttPreferences(preferences: Partial<IGanttPreferences>): Promise<void>;
   
   resetToDefaults(category?: PreferencesCategory): Promise<void>;
   exportPreferences(): string;
@@ -201,5 +221,6 @@ export interface IPreferencesValidator {
   validateSecurity(preferences: ISecurityPreferences): boolean;
   validateSchedule(preferences: ISchedulePreferences): boolean;
   validateCalendar(preferences: ICalendarPreferences): boolean;
+  validateGantt(preferences: IGanttPreferences): boolean;
 }
 

@@ -1,5 +1,12 @@
 import React from 'react';
 import { IContextMenuItem } from '../../../domain/contextmenu/entities/ContextMenu';
+import { useAppStore } from '@/store/appStore';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ContextMenuItemProps {
   item: IContextMenuItem;
@@ -15,6 +22,9 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
   onSelect, 
   depth = 0 
 }) => {
+  const { preferences } = useAppStore();
+  const showTips = (preferences as any)?.display?.showTips ?? true;
+
   if (item.separator) {
     return (
       <div 
@@ -37,7 +47,7 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
 
   const hasSubmenu = item.submenu && item.submenu.length > 0;
 
-  return (
+  const content = (
     <div
       className={`
         context-menu-item group
@@ -86,5 +96,22 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
       </div>
     </div>
   );
+
+  if (item.tooltip && showTips) {
+    return (
+      <TooltipProvider>
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            {content}
+          </TooltipTrigger>
+          <TooltipContent side="right" className="bg-slate-800 text-white border-none text-[11px] py-1.5 px-2.5 shadow-xl max-w-[200px]">
+            {item.tooltip}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
+  return content;
 };
 

@@ -30,6 +30,7 @@ export interface IContextMenuItem {
   readonly shortcut?: string;
   readonly disabled?: boolean;
   readonly separator?: boolean;
+  readonly tooltip?: string;
   readonly action?: IMenuAction;
   readonly submenu?: IContextMenuItem[];
 }
@@ -63,6 +64,8 @@ export interface IContextMenuContext {
     onClick?: () => void; 
     icon?: ReactNode;
     divider?: boolean;
+    disabled?: boolean;
+    tooltip?: string;
   }>;
   readonly metadata?: Record<string, any>;
 }

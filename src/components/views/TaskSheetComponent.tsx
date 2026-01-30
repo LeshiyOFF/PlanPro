@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { ViewType, ViewSettings } from '@/types/ViewTypes';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { TaskSheet } from '@/components/sheets/table/TaskSheet';
+import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalSheet';
 import { EventType, TaskEventData } from '@/types/EventFlowTypes';
 import { useEventFlow } from '@/providers/hooks';
 import { useProjectStore } from '@/store/projectStore';
@@ -11,9 +12,11 @@ import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
 import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
 import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { useTranslation } from 'react-i18next';
-import { Trash2, Info, Plus, ClipboardList, Filter, Download } from 'lucide-react';
+import { Plus, ClipboardList, Download, Loader2 } from 'lucide-react';
 import { CalendarMathService } from '@/domain/services/CalendarMathService';
 import { CalendarPreferences } from '@/types/Master_Functionality_Catalog';
+import { useToast } from '@/hooks/use-toast';
+import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
 
 /**
  * Task Sheet компонент - Лист задач
@@ -21,19 +24,25 @@ import { CalendarPreferences } from '@/types/Master_Functionality_Catalog';
  * Отображает все задачи проекта в табличном формате с возможностью редактирования.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  * 
- * @version 8.13
+ * @version 8.16
  */
 export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
   viewType, 
   settings 
 }) => {
   const { t } = useTranslation();
-  const { emitEvent } = useEventFlow();
+  const { dispatch: emitEvent } = useEventFlow();
   const { tasks, updateTask, addTask } = useProjectStore();
   const { deleteTask, isDeletionAllowed } = useTaskDeletion();
   const { preferences } = useUserPreferences();
   const { showMenu } = useContextMenu();
+  const { toast } = useToast();
   const helpContent = useHelpContent();
+  
+  const [isExporting, setIsExporting] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isPropertiesDialogOpen, setIsPropertiesDialogOpen] = useState(false);
+  const sheetRef = useRef<ProfessionalSheetHandle>(null);
 
   // Обработчики событий с Event Flow интеграцией
   const handleAddTask = () => {
@@ -55,7 +64,7 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
 
     const newTask = {
       id: `TASK-${String(tasks.length + 1).padStart(3, '0')}`,
-      name: 'Новая задача',
+      name: t('sheets.new_task') || 'Новая задача',
       startDate: startDate,
       endDate: endDate,
       progress: 0,
@@ -73,25 +82,71 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
     emitEvent(EventType.TASK_CREATED, eventData);
   };
 
+  /**
+   * Экспорт данных таблицы в CSV (Excel)
+   */
+  const handleExport = async () => {
+    if (!sheetRef.current || isExporting) return;
+
+    try {
+      setIsExporting(true);
+
+      // 1. Диалог сохранения
+      const result = await window.electronAPI.showSaveDialog({
+        title: t('common.export') || 'Экспорт',
+        defaultPath: `Tasks_${new Date().toISOString().split('T')[0]}.csv`,
+        filters: [
+          { name: 'CSV (Excel)', extensions: ['csv'] }
+        ]
+      });
+
+      if (result.canceled || !result.filePath) {
+        setIsExporting(false);
+        return;
+      }
+
+      // 2. Генерируем CSV Blob
+      const blob = await sheetRef.current.exportToCSV();
+      
+      // 3. Сохраняем через мост
+      const arrayBuffer = await blob.arrayBuffer();
+      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
+
+      if (saveResult.success) {
+        toast({
+          title: t('common.success') || 'Успех',
+          description: t('sheets.export_success') || 'Данные успешно экспортированы',
+        });
+      } else {
+        throw new Error(saveResult.error);
+      }
+    } catch (error) {
+      console.error('Task Sheet Export failed:', error);
+      toast({
+        variant: "destructive",
+        title: t('common.error') || 'Ошибка',
+        description: t('sheets.export_error') || 'Не удалось экспортировать данные',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleContextMenu = (event: React.MouseEvent, task: any) => {
     event.preventDefault();
     showMenu(ContextMenuType.TASK, {
-      target: task,
-      position: { x: event.clientX, y: event.clientY },
-      actions: [
-        { 
-          label: t('sheets.task_info'), 
-          onClick: () => { /* open dialog */ },
-          icon: <Info size={14} className="text-primary" />
+      target: {
+        ...task,
+        type: 'task',
+        onShowProperties: async (t: any) => {
+          setSelectedTaskId(t.id);
+          setIsPropertiesDialogOpen(true);
         },
-        { divider: true },
-        { 
-          label: t('common.delete'), 
-          onClick: () => deleteTask(task.id), 
-          icon: <Trash2 size={14} className={isDeletionAllowed ? "text-red-500" : "text-gray-400"} />,
-          disabled: !isDeletionAllowed
+        onDelete: async (t: any) => {
+          deleteTask(t.id);
         }
-      ]
+      },
+      position: { x: event.clientX, y: event.clientY }
     });
   };
   
@@ -112,16 +167,11 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
           },
           secondaryActions: [
             {
-              label: t('common.filter'),
-              onClick: () => {/* TODO: implement filter */},
-              icon: <Filter className="w-4 h-4" />,
-              variant: 'outline'
-            },
-            {
-              label: t('common.export'),
-              onClick: () => {/* TODO: implement export */},
-              icon: <Download className="w-4 h-4" />,
-              variant: 'outline'
+              label: isExporting ? t('common.exporting') || 'Экспорт...' : t('common.export'),
+              onClick: handleExport,
+              icon: isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />,
+              variant: 'outline',
+              disabled: isExporting
             }
           ]
         }}
@@ -129,8 +179,9 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
       
       {/* Основной контент: Таблица задач */}
       <div className="flex-1 overflow-hidden p-6">
-        <div className="h-full w-full bg-white rounded-xl shadow-lg border overflow-hidden soft-border">
+        <div className="h-full w-full bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
           <TaskSheet 
+            ref={sheetRef}
             tasks={tasks}
             variant="full"
             onTaskUpdate={updateTask}
@@ -139,6 +190,18 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
           />
         </div>
       </div>
+
+      {/* Диалог свойств задачи */}
+      {selectedTaskId && (
+        <TaskPropertiesDialog
+          taskId={selectedTaskId}
+          isOpen={isPropertiesDialogOpen}
+          onClose={() => {
+            setIsPropertiesDialogOpen(false);
+            setSelectedTaskId(null);
+          }}
+        />
+      )}
     </div>
   );
 };

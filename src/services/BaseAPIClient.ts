@@ -121,18 +121,20 @@ export abstract class BaseAPIClient {
 
       if (!response.ok) {
         // Пытаемся получить тело ответа для диагностики
-        let errorBody;
+        let errorBody: any;
         try {
-          errorBody = await response.text();
-          console.error('[BaseAPIClient] Error response body:', errorBody);
+          const text = await response.text();
+          console.error('[BaseAPIClient] Error response body:', text);
+          errorBody = JSON.parse(text);
         } catch (e) {
-          console.error('[BaseAPIClient] Could not read error response body');
+          console.error('[BaseAPIClient] Could not parse error response body');
         }
         
         throw new APIError(
           `HTTP ${response.status}: ${response.statusText}`,
           response.status,
-          response.statusText
+          response.statusText,
+          errorBody
         );
       }
 

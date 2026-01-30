@@ -2,6 +2,7 @@ import React from 'react';
 import { SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
 import { TextCellEditor } from './TextCellEditor';
 import { DateCellEditor } from './DateCellEditor';
+import { SelectCellEditor } from './SelectCellEditor';
 import { ICellEditorProps } from './ICellEditorProps';
 
 /**
@@ -23,8 +24,8 @@ export class CellEditorFactory {
       case SheetColumnType.DATE:
         return DateCellEditor;
       
-      // Будут добавлены по мере реализации:
-      // case SheetColumnType.SELECT: return SelectCellEditor;
+      case SheetColumnType.SELECT:
+        return SelectCellEditor;
       
       default:
         return TextCellEditor;
