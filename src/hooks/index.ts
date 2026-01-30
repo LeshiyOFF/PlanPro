@@ -33,9 +33,6 @@ export { useFilters } from './useFilters'
 export { useTable } from './useTable'
 export { useDragAndDrop } from './useDragAndDrop'
 
-// Хуки для доступности
-export { useAccessibilityTesting } from './useAccessibilityTesting'
-
 // Хуки для Canvas
 export { useGanttCanvasHandlers } from './useGanttCanvasHandlers'
 

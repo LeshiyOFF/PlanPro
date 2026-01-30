@@ -11,7 +11,6 @@ import { AppStoreProvider } from '@/providers/AppStoreProvider'
 import { Toaster } from '@/components/ui/toaster'
 import { Button } from '@/components/ui/button'
 import { logger } from '@/utils/logger'
-import SimpleStoreDemo from '@/components/store/SimpleStoreDemo'
 import { ErrorBoundary, RetryErrorBoundary, GeneralErrorFallback, StoreErrorFallback, NetworkErrorFallback } from '@/components/error-handling'
 import { hotkeyStatusBarBridge } from '@/services/HotkeyStatusBarBridge'
 import { SentryProvider, useSentry } from '@/providers/SentryProvider'
@@ -23,7 +22,6 @@ import { AnimationProvider } from '@/providers/AnimationProvider'
 import { TooltipProvider } from '@/providers/TooltipProvider'
 import { I18nProvider } from '@/providers/I18nProvider'
 import { useAppInitialization } from '@/hooks/useAppInitialization'
-import { DevToolsProfiler } from '@/components/profiling'
 import { NavigationRouter } from '@/components/navigation'
 import { ContextMenuProvider } from '@/presentation/contextmenu/providers/ContextMenuProvider'
 import { DialogProvider, DialogManager, StartupDialogLauncher } from '@/components/dialogs'
@@ -49,7 +47,8 @@ const App: React.FC = () => {
     // убираем раздражающий showMessageBox при каждом клике
   }, [])
 
-  // Инициализация Hotkey-StatusBar моста
+  // Инициализация Hotkey-StatusBar моста отключена (Statusbar удален)
+  /*
   const initializedRef = useRef(false);
   useEffect(() => {
     if (initializedRef.current) return;
@@ -59,11 +58,12 @@ const App: React.FC = () => {
           try {
             hotkeyStatusBarBridge.initialize();
             initializedRef.current = true;
-          } catch (e) { /* ignore */ }
+          } catch (e) { }
         }
       }, 1000);
     });
   }, [])
+  */
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="projectlibre-ui-theme">
@@ -93,7 +93,6 @@ const App: React.FC = () => {
                                   </div>
                                   <DialogManager>
                                     <Toaster />
-                                    <DevToolsProfiler />
                                   </DialogManager>
                                 </ProjectProvider>
                               </TooltipProvider>
