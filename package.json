@@ -34,12 +34,13 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint src --ext ts,tsx --fix",
     "type-check": "tsc --noEmit",
+    "knip": "knip",
     "preview": "vite preview",
     "test:java": "node scripts/test-java-launch.js",
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "@axe-core/react": "^4.11.0",
+    "@oxc-resolver/binding-win32-x64-msvc": "^11.17.0",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -52,31 +53,35 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@sentry/browser": "^10.32.1",
     "@sentry/react": "^10.32.1",
     "@sentry/tracing": "^7.120.4",
-    "axe-core": "^4.11.0",
-    "axios": "^1.6.0",
+    "@sentry/types": "^10.32.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.0.0",
+    "date-fns": "^3.0.0",
     "framer-motion": "^11.11.17",
     "gantt-task-react": "^0.3.9",
-    "i18next": "^25.7.4",
-    "i18next-browser-languagedetector": "^8.2.0",
+    "html2canvas": "^1.4.1",
+    "i18next": "^23.15.0",
+    "i18next-browser-languagedetector": "^8.0.0",
+    "jspdf": "^4.0.0",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-day-picker": "^9.13.0",
     "react-dom": "^18.2.0",
-    "react-i18next": "^16.5.1",
+    "react-i18next": "^14.1.3",
     "react-router-dom": "^6.8.1",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
     "@storybook/addon-interactions": "^8.6.15",
     "@storybook/addon-links": "^8.6.15",
-    "@storybook/testing-library": "^0.2.0",
+    "@storybook/react": "^8.6.15",
+    "@storybook/react-vite": "^8.6.15",
     "@types/node": "^20.19.27",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
@@ -91,6 +96,8 @@
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
+    "fs-extra": "^11.2.0",
+    "knip": "^5.82.1",
     "png-to-ico": "^3.0.1",
     "postcss": "^8.4.28",
     "sharp": "^0.34.5",
@@ -172,34 +179,34 @@
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true
   },
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "deb",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "icon": "assets/icon.png",
-      "category": "Office",
-      "maintainer": "ООО Просистемы <info@prosystems.ru>",
-      "extraResources": [
-        {
-          "from": "resources/jre/linux",
-          "to": "jre",
-          "filter": [
-            "**/*"
-          ]
-        }
-      ]
-    },
+  "linux": {
+    "target": [
+      {
+        "target": "AppImage",
+        "arch": [
+          "x64"
+        ]
+      },
+      {
+        "target": "deb",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "icon": "assets/icon.png",
+    "category": "Office",
+    "maintainer": "ООО Просистемы <info@prosystems.ru>",
+    "extraResources": [
+      {
+        "from": "resources/jre/linux",
+        "to": "jre",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "fileAssociations": [
     {
       "ext": "pod",

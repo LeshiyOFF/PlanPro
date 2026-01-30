@@ -28,17 +28,14 @@ export * from './gantt-types'
 export * from './button-types'
 
 // Экспорт типов сообщений
-export * from './message-box-types'
+export * from './ui/message-box-types'
 
 // Экспорт типов ответов API
 export * from './response-wrapper-types'
 
 // Экспорт типов запросов API
-export * from './request-types'
+export * from './api/request-types'
 
 // Экспорт типов контекста
 export * from './context-types'
-
-// Экспорт глобальных типов
-export * from './global'
 

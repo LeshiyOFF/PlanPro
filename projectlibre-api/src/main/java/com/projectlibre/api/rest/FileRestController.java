@@ -152,7 +152,8 @@ public class FileRestController {
             );
             
             System.out.println("[FileRestController] ✅ Converted: " + 
-                data.getTaskCount() + " tasks, " + data.getResourceCount() + " resources");
+                data.getTaskCount() + " tasks, " + data.getResourceCount() + " resources, " +
+                data.getCalendarCount() + " calendars");
             
             return ResponseEntity.ok(ApiResponseDto.success("Project data retrieved", data));
             

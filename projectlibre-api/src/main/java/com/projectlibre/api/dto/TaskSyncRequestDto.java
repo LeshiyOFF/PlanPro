@@ -1,5 +1,6 @@
 package com.projectlibre.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
  * @author ProjectLibre Team
  * @version 1.0.0
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TaskSyncRequestDto {
     
     @NotNull(message = "Project ID is required")
@@ -45,11 +47,12 @@ public class TaskSyncRequestDto {
     /**
      * DTO задачи из Frontend (соответствует Zustand Task interface).
      */
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FrontendTaskDto {
         private String id;
         private String name;
-        private long startDate;   // timestamp в миллисекундах
-        private long endDate;     // timestamp в миллисекундах
+        private String startDate;   // ISO-8601 string
+        private String endDate;     // ISO-8601 string
         private double progress;  // 0-100
         private int level;
         private boolean summary;
@@ -60,6 +63,7 @@ public class TaskSyncRequestDto {
         private List<String> resourceIds;
         private String notes;
         private String color;
+        // critical исключен - вычисляется ядром CPM, не должен приходить с frontend
         
         public FrontendTaskDto() {
             this.predecessors = new ArrayList<>();
@@ -74,11 +78,11 @@ public class TaskSyncRequestDto {
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
         
-        public long getStartDate() { return startDate; }
-        public void setStartDate(long startDate) { this.startDate = startDate; }
+        public String getStartDate() { return startDate; }
+        public void setStartDate(String startDate) { this.startDate = startDate; }
         
-        public long getEndDate() { return endDate; }
-        public void setEndDate(long endDate) { this.endDate = endDate; }
+        public String getEndDate() { return endDate; }
+        public void setEndDate(String endDate) { this.endDate = endDate; }
         
         public double getProgress() { return progress; }
         public void setProgress(double progress) { this.progress = progress; }

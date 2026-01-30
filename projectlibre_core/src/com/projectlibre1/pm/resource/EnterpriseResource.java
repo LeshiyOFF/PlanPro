@@ -573,9 +573,9 @@ public class EnterpriseResource implements Resource {
 			if (name != null && name.length() > 0)
 				setInitials(name.substring(0,1));
 		}
-		if (workCalendar != null)
-			workCalendar.setName(name);
-
+		// CRITICAL FIX: НЕ устанавливаем имя календаря равным имени ресурса!
+		// Это приводило к потере оригинального имени календаря при десериализации.
+		// Календарь должен сохранять своё собственное имя независимо от ресурса.
 	}
 	/**
 	 * @param id

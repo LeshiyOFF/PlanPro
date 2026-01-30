@@ -56,16 +56,20 @@
 package com.projectlibre1.server.data;
 
 /**
- *
+ * Данные календаря для сериализации.
+ * Хранит полную информацию о календаре включая fixedId для системных календарей.
  */
-public class CalendarData extends SerializedDataObject{
-	static final long serialVersionUID = 192735738339L;
+public class CalendarData extends SerializedDataObject {
+	static final long serialVersionUID = 192735738340L;
 
     protected CalendarData baseCalendar;
-    protected long baseCalendarId=-1;
+    protected long baseCalendarId = -1;
+    protected int fixedId = 0;
+    protected String calendarName;
+    protected boolean isBaseCalendar = false;
     
-    public static final SerializedDataObjectFactory FACTORY=new SerializedDataObjectFactory(){
-        public SerializedDataObject createSerializedDataObject(){
+    public static final SerializedDataObjectFactory FACTORY = new SerializedDataObjectFactory() {
+        public SerializedDataObject createSerializedDataObject() {
             return new CalendarData();
         }
     };
@@ -73,23 +77,50 @@ public class CalendarData extends SerializedDataObject{
     public CalendarData getBaseCalendar() {
         return baseCalendar;
     }
+    
     public void setBaseCalendar(CalendarData baseCalendar) {
         this.baseCalendar = baseCalendar;
-        setBaseCalendarId((baseCalendar==null)?-1L:baseCalendar.getUniqueId());
+        setBaseCalendarId((baseCalendar == null) ? -1L : baseCalendar.getUniqueId());
     }
     
     public long getBaseCalendarId() {
 		return baseCalendarId;
 	}
+    
 	public void setBaseCalendarId(long baseCalendarId) {
 		this.baseCalendarId = baseCalendarId;
 	}
-	public int getType(){
+	
+	public int getFixedId() {
+		return fixedId;
+	}
+	
+	public void setFixedId(int fixedId) {
+		this.fixedId = fixedId;
+	}
+	
+	public String getCalendarName() {
+		return calendarName;
+	}
+	
+	public void setCalendarName(String calendarName) {
+		this.calendarName = calendarName;
+	}
+	
+	public boolean isBaseCalendar() {
+		return isBaseCalendar;
+	}
+	
+	public void setIsBaseCalendar(boolean isBaseCalendar) {
+		this.isBaseCalendar = isBaseCalendar;
+	}
+	
+	public int getType() {
         return DataObjectConstants.CALENDAR_TYPE;
     }
     
-    public void emtpy(){
-    	baseCalendar=null;
+    public void emtpy() {
+    	baseCalendar = null;
+    	calendarName = null;
     }
-
 }

@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import commonjs from '@rollup/plugin-commonjs';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 /**
  * Конфигурация Vite для ProjectLibre Electron приложения
@@ -42,6 +44,23 @@ export default defineConfig({
     
     // Оптимизация для Electron
     rollupOptions: {
+      // Исключаем optional dependencies jsPDF, которые не используются
+      // canvg - для SVG (мы используем html2canvas)
+      // core-js - полифиллы (Electron уже современный)
+      // dompurify - sanitization (не работаем с HTML напрямую)
+      external: ['canvg', 'core-js', 'dompurify'],
+      
+      plugins: [
+        // Правильная обработка CommonJS модулей из node_modules
+        nodeResolve({
+          preferBuiltins: true,
+          browser: false
+        }),
+        commonjs({
+          include: /node_modules/,
+          transformMixedEsModules: true
+        })
+      ],
       input: {
         main: resolve(__dirname, 'index.html')
       },
@@ -116,7 +135,9 @@ export default defineConfig({
       'tailwind-merge',
       'class-variance-authority',
       'lucide-react'
-    ]
+    ],
+    // Исключаем core-js из оптимизации - он не должен обрабатываться Vite
+    exclude: ['core-js']
   },
 
   // Переменные окружения

@@ -6,7 +6,7 @@ import com.projectlibre.api.dto.TaskSyncResponseDto;
 import com.projectlibre.api.storage.CoreProjectBridge;
 import com.projectlibre.api.concurrent.CoreAccessGuard;
 import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer;
-import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer.SyncResult;
+import com.projectlibre.api.sync.SyncResult;
 import com.projectlibre1.pm.task.Project;
 
 import jakarta.validation.Valid;
@@ -80,10 +80,14 @@ public class TaskSyncRestController {
             }
             
         } catch (Exception e) {
-            System.err.println("[TaskSyncController] ❌ Exception: " + e.getMessage());
+            System.err.println("[TaskSyncController] ❌ CRITICAL ERROR");
+            System.err.println("[TaskSyncController] Error message: " + e.getMessage());
+            System.err.println("[TaskSyncController] Error type: " + e.getClass().getName());
+            System.err.println("[TaskSyncController] Full stack trace:");
             e.printStackTrace();
+            
             return ResponseEntity.internalServerError()
-                .body(ApiResponseDto.error(e.getMessage()));
+                .body(ApiResponseDto.error("Sync error: " + e.getClass().getSimpleName() + ": " + e.getMessage()));
         }
     }
 }

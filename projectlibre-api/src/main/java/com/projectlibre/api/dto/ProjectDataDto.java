@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 /**
- * DTO для передачи полных данных проекта (tasks + resources) на frontend.
+ * DTO для передачи полных данных проекта (tasks + resources + calendars) на frontend.
  * Используется при загрузке .pod файлов для синхронизации Core модели с UI.
  * 
+ * V2.0: Добавлено поле calendars для передачи кастомных календарей.
+ * 
  * @author ProjectLibre Team
- * @version 1.0.0
+ * @version 2.0.0
  */
 public class ProjectDataDto {
     
@@ -16,11 +18,13 @@ public class ProjectDataDto {
     private String projectName;
     private List<TaskDataDto> tasks;
     private List<ResourceDataDto> resources;
+    private List<CalendarDataDto> calendars;
     private String loadedFrom;
     
     public ProjectDataDto() {
         this.tasks = new ArrayList<>();
         this.resources = new ArrayList<>();
+        this.calendars = new ArrayList<>();
     }
     
     public static ProjectDataDto success(Long projectId, String projectName, 
@@ -30,7 +34,19 @@ public class ProjectDataDto {
         dto.setProjectName(projectName);
         dto.setTasks(tasks != null ? tasks : new ArrayList<>());
         dto.setResources(resources != null ? resources : new ArrayList<>());
+        dto.setCalendars(new ArrayList<>());
         dto.setLoadedFrom(loadedFrom);
+        return dto;
+    }
+    
+    /**
+     * Фабричный метод с поддержкой календарей (V2.0).
+     */
+    public static ProjectDataDto successWithCalendars(Long projectId, String projectName, 
+            List<TaskDataDto> tasks, List<ResourceDataDto> resources, 
+            List<CalendarDataDto> calendars, String loadedFrom) {
+        ProjectDataDto dto = success(projectId, projectName, tasks, resources, loadedFrom);
+        dto.setCalendars(calendars != null ? calendars : new ArrayList<>());
         return dto;
     }
     
@@ -50,8 +66,14 @@ public class ProjectDataDto {
     public String getLoadedFrom() { return loadedFrom; }
     public void setLoadedFrom(String loadedFrom) { this.loadedFrom = loadedFrom; }
     
+    public List<CalendarDataDto> getCalendars() { return calendars; }
+    public void setCalendars(List<CalendarDataDto> calendars) { 
+        this.calendars = calendars != null ? calendars : new ArrayList<>(); 
+    }
+    
     public int getTaskCount() { return tasks != null ? tasks.size() : 0; }
     public int getResourceCount() { return resources != null ? resources.size() : 0; }
+    public int getCalendarCount() { return calendars != null ? calendars.size() : 0; }
     
     /**
      * DTO для задачи - соответствует frontend Task interface
@@ -59,8 +81,8 @@ public class ProjectDataDto {
     public static class TaskDataDto {
         private String id;
         private String name;
-        private long startDate;      // timestamp в миллисекундах
-        private long endDate;        // timestamp в миллисекундах
+        private String startDate;      // ISO-8601 string
+        private String endDate;        // ISO-8601 string
         private double progress;     // 0-100
         private String color;
         private int level;           // уровень вложенности (WBS)
@@ -74,7 +96,8 @@ public class ProjectDataDto {
         private boolean estimated;
         private String notes;
         private String wbs;
-        private Double duration;     // длительность в днях (Stage 7.19 - Task Usage Crash Fix)
+        private Double duration;
+        private Double totalSlack;    // запас времени в днях (для CPM)     // длительность в днях (Stage 7.19 - Task Usage Crash Fix)
         
         public TaskDataDto() {
             this.children = new ArrayList<>();
@@ -91,11 +114,11 @@ public class ProjectDataDto {
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
         
-        public long getStartDate() { return startDate; }
-        public void setStartDate(long startDate) { this.startDate = startDate; }
+        public String getStartDate() { return startDate; }
+        public void setStartDate(String startDate) { this.startDate = startDate; }
         
-        public long getEndDate() { return endDate; }
-        public void setEndDate(long endDate) { this.endDate = endDate; }
+        public String getEndDate() { return endDate; }
+        public void setEndDate(String endDate) { this.endDate = endDate; }
         
         public double getProgress() { return progress; }
         public void setProgress(double progress) { this.progress = progress; }
@@ -139,6 +162,10 @@ public class ProjectDataDto {
         // Stage 7.19: Duration getter/setter для Task Usage View
         public Double getDuration() { return duration; }
         public void setDuration(Double duration) { this.duration = duration; }
+        
+        // Total Slack getter/setter для Critical Path Method
+        public Double getTotalSlack() { return totalSlack; }
+        public void setTotalSlack(Double totalSlack) { this.totalSlack = totalSlack; }
     }
     
     /**
@@ -154,6 +181,7 @@ public class ProjectDataDto {
         private double costPerUse;
         private String email;
         private String group;
+        private String calendarId;
         private boolean available;
         
         public ResourceDataDto() {
@@ -189,6 +217,9 @@ public class ProjectDataDto {
         
         public String getGroup() { return group; }
         public void setGroup(String group) { this.group = group; }
+        
+        public String getCalendarId() { return calendarId; }
+        public void setCalendarId(String calendarId) { this.calendarId = calendarId; }
         
         public boolean isAvailable() { return available; }
         public void setAvailable(boolean available) { this.available = available; }

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "electron/main.ts",
+    "electron/preload.ts"
+  ],
+  "project": ["src/**/*.{ts,tsx}", "electron/**/*.ts"],
+  "ignore": ["**/*.test.ts", "**/*.test.tsx", "**/__tests__/**"],
+  "ignoreDependencies": [
+    "concurrently",
+    "wait-on",
+    "cross-env",
+    "electron-builder",
+    "png-to-ico",
+    "sharp",
+    "@storybook/addon-essentials",
+    "@storybook/addon-docs",
+    "@storybook/addon-controls",
+    "@storybook/addon-viewport",
+    "eslint-plugin-storybook"
+  ]
+}

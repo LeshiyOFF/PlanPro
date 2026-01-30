@@ -701,6 +701,9 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 	private void updateEstimatedStatus() {
 		Collection children = getWbsChildrenNodes();
+		if (children == null || children.isEmpty()) {
+			return;
+		}
 		Iterator i = children.iterator();
 		Object current;
 		NormalTask child;
@@ -735,6 +738,9 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 		long computedActualStart = Long.MAX_VALUE;
 		long stop = 0;
 		Collection children = getWbsChildrenNodes();
+		if (children == null || children.isEmpty()) {
+			return;
+		}
 		Iterator i = children.iterator();
 		Task child;
 		long currentActualStart;
@@ -2214,6 +2220,9 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 		Object nodeImpl;
 		if (isWbsParent()) {
 			Collection children = getWbsChildrenNodes();
+			if (children == null || children.isEmpty()) {
+				return stop;
+			}
 			Iterator i = children.iterator();
 			while (i.hasNext()) {
 				Object x = i.next();

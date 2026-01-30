@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useProjectStore } from '@/store/projectStore';
-import { ICalendarEvent } from '../interfaces/ICalendarEvent';
+import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent';
 
 /**
  * Хук для обработки логики Drag-and-drop в календаре

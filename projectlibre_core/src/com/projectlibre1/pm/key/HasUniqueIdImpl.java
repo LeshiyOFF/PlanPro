@@ -75,12 +75,27 @@ public class HasUniqueIdImpl implements Serializable{
 	protected transient boolean local;
 
     /**
-     *
+     * Конструктор с явным uniqueId (используется при десериализации).
+     * 
+     * КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ V5.0:
+     * Добавлено присваивание this.uniqueId = uniqueId.
+     * Без этого uniqueId всегда оставался -1 после десериализации!
+     * 
+     * @param hasUniqueId объект-владелец
+     * @param uniqueId уникальный идентификатор из файла
      */
-    public HasUniqueIdImpl(DataObject hasUniqueId,long uniqueId) {
+    public HasUniqueIdImpl(DataObject hasUniqueId, long uniqueId) {
+    	// КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Присваиваем uniqueId полю!
+    	this.uniqueId = uniqueId;
+    	
     	setLocal(CommonDataObject.isLocal(uniqueId));
-    	//System.out.println((hasUniqueId==null?"null":hasUniqueId.getClass()+"")+" UniqueId "+uniqueId+", local? "+local);
-    	uniqueIds.put(new Long(uniqueId),hasUniqueId);
+    	uniqueIds.put(new Long(uniqueId), hasUniqueId);
+    	
+    	// Диагностическое логирование для отладки
+    	if (uniqueId <= 0) {
+    		System.out.println("[HasUniqueIdImpl] ⚠️ Object created with invalid uniqueId=" + 
+    			uniqueId + ", class=" + (hasUniqueId != null ? hasUniqueId.getClass().getSimpleName() : "null"));
+    	}
     }
     public HasUniqueIdImpl(boolean local,DataObject hasUniqueId) {
     	setLocal(local);

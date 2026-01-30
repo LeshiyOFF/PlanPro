@@ -68,10 +68,22 @@ import com.projectlibre1.strings.Messages;
 import com.projectlibre1.timescale.CalendarUtil;
 
 /**
- * Facade for manipulating calendars via a dialog or web interface
+ * Facade for manipulating calendars via a dialog or web interface.
+ * 
+ * V5.0 ИЗМЕНЕНИЯ:
+ * - Добавлена thread-safety через synchronized блоки
+ * - Улучшена проверка дубликатов с нормализацией имён
+ * - Добавлена приоритизация валидных календарей (uniqueId > 0)
+ * - Улучшена очистка дубликатов
+ * 
+ * @version 5.0.0
  */
 public class CalendarService {
 	private static CalendarService instance = null;
+	
+	// Lock для thread-safe модификаций коллекций
+	private final Object calendarsLock = new Object();
+	
 	ArrayList baseCalendars = new ArrayList();
 	ArrayList derivedCalendars = new ArrayList();
 	ArrayList assignmentCalendars = new ArrayList();
@@ -464,18 +476,81 @@ public class CalendarService {
 //		return (MPXCalendar) exportedCalendarMap.get(cal);
 //	}
 
+	/**
+	 * Добавляет календарь в соответствующую коллекцию.
+	 * V5.0: Thread-safe с нормализацией имён и проверкой дубликатов.
+	 */
 	public void add(WorkingCalendar cal) {
-		if (cal.isBaseCalendar()) {
-			if (!baseCalendars.contains(cal)) {
-				boolean found = findBaseCalendar(cal.getName()) != null;
-				if (found)
-					return;
-				baseCalendars.add(cal);
+		synchronized (calendarsLock) {
+			if (cal.isBaseCalendar()) {
+				addToBase(cal);
+			} else {
+				addToDerived(cal);
 			}
-		} else {
-			if (!baseCalendars.contains(cal))
-				derivedCalendars.add(cal);
 		}
+	}
+	
+	/**
+	 * Добавление в baseCalendars с проверкой дубликатов.
+	 */
+	private void addToBase(WorkingCalendar cal) {
+		if (baseCalendars.contains(cal)) return;
+		
+		// Проверка дубликата по нормализованному имени
+		String normalizedName = normalizeForComparison(cal.getName());
+		for (Object obj : baseCalendars) {
+			if (obj instanceof WorkingCalendar) {
+				WorkingCalendar existing = (WorkingCalendar) obj;
+				if (normalizedName.equals(normalizeForComparison(existing.getName()))) {
+					return; // Дубликат по имени
+				}
+			}
+		}
+		
+		// Проверка дубликата по uniqueId
+		if (cal.getUniqueId() > 0 && findBaseCalendar(cal.getUniqueId()) != null) {
+			return; // Дубликат по ID
+		}
+		
+		baseCalendars.add(cal);
+	}
+	
+	/**
+	 * Добавление в derivedCalendars с проверкой дубликатов.
+	 * V5.0: Учитывает как валидные (uniqueId > 0), так и сломанные календари.
+	 */
+	private void addToDerived(WorkingCalendar cal) {
+		if (derivedCalendars.contains(cal)) return;
+		
+		long newUniqueId = cal.getUniqueId();
+		String newNormalizedName = normalizeForComparison(cal.getName());
+		
+		for (Object obj : derivedCalendars) {
+			if (!(obj instanceof WorkingCalendar)) continue;
+			WorkingCalendar existing = (WorkingCalendar) obj;
+			
+			// Дубликат по uniqueId (оба валидные)
+			if (newUniqueId > 0 && existing.getUniqueId() == newUniqueId) {
+				return;
+			}
+			
+			// Дубликат по имени (оба сломанные с uniqueId <= 0)
+			if (newUniqueId <= 0 && existing.getUniqueId() <= 0) {
+				if (newNormalizedName.equals(normalizeForComparison(existing.getName()))) {
+					return;
+				}
+			}
+		}
+		
+		derivedCalendars.add(cal);
+	}
+	
+	/**
+	 * Нормализация имени для сравнения (case-insensitive, whitespace-collapsed).
+	 */
+	private String normalizeForComparison(String name) {
+		if (name == null) return "";
+		return name.trim().replaceAll("\\s+", " ").toLowerCase();
 	}
 //
 //
@@ -548,6 +623,144 @@ public class CalendarService {
 			if (current.getUniqueId() == id)
 				return current;
 		}
+		return null;
+	}
+	
+	/**
+	 * Поиск календаря в derivedCalendars по имени.
+	 * V5.0: Приоритизирует валидные календари (uniqueId > 0) над сломанными.
+	 * 
+	 * @param name имя календаря
+	 * @return найденный календарь или null
+	 */
+	public WorkCalendar findDerivedCalendar(String name) {
+		if (name == null) return null;
+		
+		String normalizedSearch = normalizeForComparison(name);
+		WorkCalendar validCandidate = null;
+		WorkCalendar invalidCandidate = null;
+		
+		synchronized (calendarsLock) {
+			for (Object obj : derivedCalendars) {
+				if (!(obj instanceof WorkingCalendar)) continue;
+				
+				WorkingCalendar current = (WorkingCalendar) obj;
+				String currentNormalized = normalizeForComparison(current.getName());
+				
+				if (normalizedSearch.equals(currentNormalized)) {
+					if (current.getUniqueId() > 0) {
+						// Нашли валидный — возвращаем сразу (приоритет)
+						return current;
+					} else if (invalidCandidate == null) {
+						// Запоминаем первый сломанный
+						invalidCandidate = current;
+					}
+				}
+			}
+		}
+		
+		// Если валидный не найден — возвращаем сломанный (fallback)
+		return invalidCandidate;
+	}
+	
+	/**
+	 * Поиск календаря в derivedCalendars по uniqueId.
+	 */
+	public WorkCalendar findDerivedCalendar(long uniqueId) {
+		if (uniqueId <= 0)
+			return null;
+		Iterator i = getInstance().getDerivedCalendars().iterator();
+		while (i.hasNext()) {
+			Object obj = i.next();
+			if (obj instanceof WorkingCalendar) {
+				WorkingCalendar current = (WorkingCalendar) obj;
+				if (current.getUniqueId() == uniqueId)
+					return current;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Поиск календаря по fixedId (1=Standard, 2=24Hours, 3=NightShift).
+	 */
+	public WorkCalendar findByFixedId(int fixedId) {
+		Iterator i = getInstance().getBaseCalendars().iterator();
+		while (i.hasNext()) {
+			Object obj = i.next();
+			if (obj instanceof WorkingCalendar) {
+				WorkingCalendar current = (WorkingCalendar) obj;
+				if (current.getFixedId() == fixedId)
+					return current;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Очистка дубликатов из derivedCalendars.
+	 * V5.0: Обрабатывает как валидные (uniqueId > 0), так и сломанные календари.
+	 * Использует filtered коллекцию для атомарной замены.
+	 */
+	public void cleanDerivedDuplicates() {
+		synchronized (calendarsLock) {
+			HashSet<Long> seenIds = new HashSet<Long>();
+			HashSet<String> seenNormalizedNames = new HashSet<String>();
+			List<WorkingCalendar> filtered = new ArrayList<WorkingCalendar>();
+			
+			for (Object obj : derivedCalendars) {
+				if (!(obj instanceof WorkingCalendar)) continue;
+				
+				WorkingCalendar wc = (WorkingCalendar) obj;
+				long id = wc.getUniqueId();
+				String normalizedName = normalizeForComparison(wc.getName());
+				
+				boolean isDuplicate = false;
+				
+				if (id > 0) {
+					// Валидный календарь — проверяем по ID
+					isDuplicate = seenIds.contains(id);
+					if (!isDuplicate) seenIds.add(id);
+				} else {
+					// Сломанный календарь — проверяем по нормализованному имени
+					isDuplicate = seenNormalizedNames.contains(normalizedName);
+					if (!isDuplicate && normalizedName != null && !normalizedName.isEmpty()) {
+						seenNormalizedNames.add(normalizedName);
+					}
+				}
+				
+				if (!isDuplicate) {
+					filtered.add(wc);
+				}
+			}
+			
+			// Атомарная замена коллекции
+			derivedCalendars.clear();
+			derivedCalendars.addAll(filtered);
+		}
+	}
+	
+	/**
+	 * Поиск лучшего календаря по имени и/или uniqueId.
+	 * V5.0: Комбинированный поиск с приоритизацией.
+	 * 
+	 * Приоритет:
+	 * 1. Точное совпадение по uniqueId (если > 0)
+	 * 2. Совпадение по имени среди валидных (uniqueId > 0)
+	 * 3. Совпадение по имени среди сломанных (fallback)
+	 */
+	public WorkCalendar findBestDerivedCalendar(String name, long uniqueId) {
+		// ПРИОРИТЕТ 1: По uniqueId
+		if (uniqueId > 0) {
+			WorkCalendar byId = findDerivedCalendar(uniqueId);
+			if (byId != null) return byId;
+		}
+		
+		// ПРИОРИТЕТ 2 и 3: По имени (с приоритизацией валидных)
+		if (name != null) {
+			return findDerivedCalendar(name);
+		}
+		
 		return null;
 	}
 

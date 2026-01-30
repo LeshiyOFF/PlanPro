@@ -4,37 +4,19 @@ const https = require('https');
 const { execSync } = require('child_process');
 
 /**
- * Утилита для скачивания файла с поддержкой редиректов (рекурсивно)
+ * Утилита для скачивания файла с использованием системного curl
  */
 function downloadFile(url, dest) {
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      // Обработка редиректов (301, 302, 307, 308)
-      if ([301, 302, 307, 308].includes(res.statusCode) && res.headers.location) {
-        console.log(`[JRE] Redirecting to: ${res.headers.location}`);
-        return resolve(downloadFile(res.headers.location, dest));
-      }
-
-      if (res.statusCode !== 200) {
-        return reject(new Error(`Failed to download: ${res.statusCode} ${res.statusMessage}`));
-      }
-
-      const file = fs.createWriteStream(dest);
-      res.pipe(file);
-
-      file.on('finish', () => {
-        file.close();
-        resolve();
-      });
-
-      file.on('error', (err) => {
-        fs.unlink(dest, () => {});
-        reject(err);
-      });
-    }).on('error', (err) => {
-      fs.unlink(dest, () => {});
-      reject(err);
-    });
+    try {
+      console.log(`[JRE] Downloading via system curl: ${url}`);
+      // Убираем -s для отладки и добавляем -v для подробностей, если нужно. 
+      // Но пока просто уберем -s и добавим --retry
+      execSync(`curl -L -f --retry 3 -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "${url}" -o "${dest}"`, { stdio: 'inherit' });
+      resolve();
+    } catch (err) {
+      reject(new Error(`System curl failed: ${err.message}`));
+    }
   });
 }
 
@@ -48,11 +30,11 @@ class JreDownloader {
   getPlatformConfig() {
     const configs = {
       win32: {
-        url: 'https://download.bell-sw.com/java/17.0.10+13/bellsoft-jre17.0.10+13-windows-amd64.zip',
+        url: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jre_x64_windows_hotspot_17.0.13_11.zip',
         ext: '.zip'
       },
       linux: {
-        url: 'https://download.bell-sw.com/java/17.0.10+13/bellsoft-jre17.0.10+13-linux-amd64.tar.gz',
+        url: 'https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jre_x64_linux_hotspot_17.0.13_11.tar.gz',
         ext: '.tar.gz'
       }
     };
@@ -81,7 +63,13 @@ class JreDownloader {
       if (this.platform === 'win32') {
         // Используем PowerShell для распаковки zip на Windows
         const psCommand = `Expand-Archive -Path "${tempFile}" -DestinationPath "${this.targetDir}" -Force`;
-        execSync(`powershell -Command "${psCommand}"`, { stdio: 'inherit' });
+        try {
+          execSync(`powershell -Command "${psCommand}"`, { stdio: 'inherit' });
+        } catch (e) {
+          // Если PowerShell заблокирован или занят, пробуем через tar (он есть в современных Windows)
+          console.log(`[JRE] PowerShell extraction failed, trying tar...`);
+          execSync(`tar -xf "${tempFile}" -C "${this.targetDir}"`, { stdio: 'inherit' });
+        }
         this.cleanupSubfolder();
       } else {
         // Используем tar для Linux

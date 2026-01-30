@@ -91,6 +91,7 @@ public class ProjectData extends DocumentData implements HasName,DelegatesFields
 
 
     protected CalendarData calendar;
+    protected Collection calendars;
     protected Collection resources;
     protected Collection tasks;
     protected long calendarId=-1;
@@ -128,6 +129,12 @@ public class ProjectData extends DocumentData implements HasName,DelegatesFields
     public void setCalendar(CalendarData calendar) {
         this.calendar = calendar;
         setCalendarId((calendar==null)?-1L:calendar.getUniqueId());
+    }
+    public Collection getCalendars() {
+        return calendars;
+    }
+    public void setCalendars(Collection calendars) {
+        this.calendars = calendars;
     }
     public Collection getResources() {
         return resources;
@@ -197,6 +204,7 @@ public class ProjectData extends DocumentData implements HasName,DelegatesFields
 	public void emtpy(){
     	super.emtpy();
     	calendar=null;
+    	calendars=null;
     	resources=null;
     	tasks=null;
     }

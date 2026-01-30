@@ -1,4 +1,4 @@
-import { IContextMenu } from '../../domain/contextmenu/entities/ContextMenu';
+import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu';
 
 /**
  * Use Case для выполнения действия пункта меню

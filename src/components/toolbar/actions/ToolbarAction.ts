@@ -1,4 +1,4 @@
-import { IToolbarButton } from './interfaces/ToolbarInterfaces';
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
 
 /**
  * Базовый класс для действий кнопок панели инструментов
