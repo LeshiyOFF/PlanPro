@@ -3,10 +3,10 @@
  * Следует SOLID принципам и Atomic Design
  */
 
-import React from 'react';
-import { cn } from '@/utils/cn';
-import { AtomButton, AtomButtonProps } from '../atoms';
-import { BaseAtomicProps } from '../atoms/types';
+import React from 'react'
+import { cn } from '@/utils/cn'
+import { AtomButton, AtomButtonProps } from '../atoms'
+import { BaseAtomicProps } from '../atoms/types'
 
 /**
  * Props для ButtonGroup Molecule
@@ -32,7 +32,7 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
   equalWidth = false,
   selected = null,
   onSelect,
-  testId
+  testId,
 }) => {
   const containerClasses = cn(
     'flex',
@@ -43,24 +43,24 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
       'space-x-4': variant === 'horizontal' && spacing === 'lg',
       'space-y-1': variant === 'vertical' && spacing === 'sm',
       'space-y-2': variant === 'vertical' && spacing === 'md',
-      'space-y-4': variant === 'vertical' && spacing === 'lg'
+      'space-y-4': variant === 'vertical' && spacing === 'lg',
     },
     equalWidth && variant === 'horizontal' ? 'flex-1' : '',
     equalWidth && variant === 'vertical' ? 'w-full' : '',
-    className
-  );
+    className,
+  )
 
   const buttonClasses = cn(
     equalWidth && variant === 'horizontal' ? 'flex-1' : '',
-    equalWidth && variant === 'vertical' ? 'w-full' : ''
-  );
+    equalWidth && variant === 'vertical' ? 'w-full' : '',
+  )
 
   const handleButtonClick = (buttonId: string, onClick?: AtomButtonProps['onClick']) => {
     return (event: React.MouseEvent<HTMLButtonElement>) => {
-      onClick?.(event);
-      onSelect?.(buttonId);
-    };
-  };
+      onClick?.(event)
+      onSelect?.(buttonId)
+    }
+  }
 
   return (
     <div className={containerClasses} data-testid={testId}>
@@ -71,15 +71,15 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
           className={cn(buttonClasses, button.className)}
           onClick={handleButtonClick(button.id, button.onClick)}
           variant={
-            selected === button.id 
-              ? 'solid' 
-              : button.variant === 'solid' 
-                ? 'outline' 
+            selected === button.id
+              ? 'solid'
+              : button.variant === 'solid'
+                ? 'outline'
                 : button.variant
           }
           color={
-            selected === button.id 
-              ? 'primary' 
+            selected === button.id
+              ? 'primary'
               : button.color
           }
         >
@@ -87,6 +87,6 @@ export const ButtonGroup: React.FC<ButtonGroupProps> = ({
         </AtomButton>
       ))}
     </div>
-  );
-};
+  )
+}
 

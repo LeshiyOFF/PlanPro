@@ -3,10 +3,10 @@
  * Выделен из GanttCanvasController для соблюдения лимита 200 строк
  */
 
-import { useState, useCallback } from 'react';
-import { ViewMode } from 'gantt-task-react';
-import { GanttNavigationService } from '@/services/GanttNavigationService';
-import { Task } from '@/store/project/interfaces';
+import { useState, useCallback } from 'react'
+import { ViewMode } from 'gantt-task-react'
+import { GanttNavigationService } from '@/services/GanttNavigationService'
+import { Task } from '@/store/project/interfaces'
 
 /**
  * Результат хука навигации
@@ -43,58 +43,58 @@ export const useGanttNavigation = ({
   viewMode,
   onDateChange,
   onViewModeChange,
-  onZoomChange
+  onZoomChange,
 }: IUseGanttNavigationParams): IUseGanttNavigationResult => {
-  const [forcedEndDate, setForcedEndDate] = useState<Date | null>(null);
-  const [targetNavigationDate, setTargetNavigationDate] = useState<Date | null>(null);
-  const [pendingDate, setPendingDate] = useState<Date | null>(null);
-  const [showEmptyDateWarning, setShowEmptyDateWarning] = useState(false);
-  const [showLargeJumpWarning, setShowLargeJumpWarning] = useState(false);
+  const [forcedEndDate, setForcedEndDate] = useState<Date | null>(null)
+  const [targetNavigationDate, setTargetNavigationDate] = useState<Date | null>(null)
+  const [pendingDate, setPendingDate] = useState<Date | null>(null)
+  const [showEmptyDateWarning, setShowEmptyDateWarning] = useState(false)
+  const [showLargeJumpWarning, setShowLargeJumpWarning] = useState(false)
 
   const performScroll = useCallback((date: Date) => {
-    setForcedEndDate(date);
-    setTargetNavigationDate(date);
-    onDateChange(date);
-  }, [onDateChange]);
+    setForcedEndDate(date)
+    setTargetNavigationDate(date)
+    onDateChange(date)
+  }, [onDateChange])
 
-  const viewModeEnum = viewMode === 'day' ? ViewMode.Day : viewMode === 'week' ? ViewMode.Week : ViewMode.Month;
+  const viewModeEnum = viewMode === 'day' ? ViewMode.Day : viewMode === 'week' ? ViewMode.Week : ViewMode.Month
 
   const handleDateSelect = useCallback((date: Date | undefined) => {
-    if (!date) return;
+    if (!date) return
 
-    const safety = GanttNavigationService.checkNavigationSafety(date, viewModeEnum);
+    const safety = GanttNavigationService.checkNavigationSafety(date, viewModeEnum)
     if (!safety.isSafe) {
-      setPendingDate(date);
-      setShowLargeJumpWarning(true);
-      return;
+      setPendingDate(date)
+      setShowLargeJumpWarning(true)
+      return
     }
 
-    const hasTasks = GanttNavigationService.hasTasksAtDate(date, [...tasks]);
+    const hasTasks = GanttNavigationService.hasTasksAtDate(date, [...tasks])
     if (!hasTasks) {
-      setPendingDate(date);
-      setShowEmptyDateWarning(true);
+      setPendingDate(date)
+      setShowEmptyDateWarning(true)
     } else {
-      performScroll(date);
+      performScroll(date)
     }
-  }, [tasks, performScroll, viewModeEnum]);
+  }, [tasks, performScroll, viewModeEnum])
 
   const confirmLargeJump = useCallback(() => {
     if (pendingDate) {
-      onViewModeChange('month');
-      onZoomChange(0.8);
-      performScroll(pendingDate);
-      setPendingDate(null);
+      onViewModeChange('month')
+      onZoomChange(0.8)
+      performScroll(pendingDate)
+      setPendingDate(null)
     }
-    setShowLargeJumpWarning(false);
-  }, [pendingDate, performScroll, onViewModeChange, onZoomChange]);
+    setShowLargeJumpWarning(false)
+  }, [pendingDate, performScroll, onViewModeChange, onZoomChange])
 
   const confirmEmptyDateNavigation = useCallback(() => {
     if (pendingDate) {
-      performScroll(pendingDate);
-      setPendingDate(null);
+      performScroll(pendingDate)
+      setPendingDate(null)
     }
-    setShowEmptyDateWarning(false);
-  }, [pendingDate, performScroll]);
+    setShowEmptyDateWarning(false)
+  }, [pendingDate, performScroll])
 
   return {
     forcedEndDate,
@@ -106,6 +106,6 @@ export const useGanttNavigation = ({
     confirmLargeJump,
     confirmEmptyDateNavigation,
     setShowEmptyDateWarning,
-    setShowLargeJumpWarning
-  };
-};
+    setShowLargeJumpWarning,
+  }
+}

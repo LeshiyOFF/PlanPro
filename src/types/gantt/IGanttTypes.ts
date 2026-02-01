@@ -3,8 +3,8 @@
  * Устраняет использование any в GanttCanvas и связанных компонентах
  */
 
-import { Task } from '@/store/project/interfaces';
-import { GanttDisplayMode } from './GanttTaskTypes';
+import { Task } from '@/store/project/interfaces'
+import { GanttDisplayMode } from './GanttTaskTypes'
 
 /**
  * Обновление задачи в Gantt

@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { ContextMenuType, ContextMenuStatus } from '../ContextMenuType';
+import { ReactNode } from 'react'
+import { ContextMenuType, ContextMenuStatus } from '../ContextMenuType'
 
 /**
  * Действие пункта меню

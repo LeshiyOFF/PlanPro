@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { UserPreferencesService } from '@/components/userpreferences/services/UserPreferencesService';
-import { ThemeApplier } from '@/components/userpreferences/services/ThemeApplier';
-import { PreferencesCategory, Theme } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces';
+import { UserPreferencesService } from '@/components/userpreferences/services/UserPreferencesService'
+import { ThemeApplier } from '@/components/userpreferences/services/ThemeApplier'
+import { PreferencesCategory, Theme } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces'
 
 /**
  * Провайдер темы для приложения
@@ -36,11 +36,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   storageKey = 'projectlibre-ui-theme',
   ...props
 }) => {
-  const service = UserPreferencesService.getInstance();
-  
+  const service = UserPreferencesService.getInstance()
+
   const [theme, setTheme] = useState<Theme>(() => {
-    const prefs = service.getDisplayPreferences();
-    return prefs.theme ?? (defaultTheme as Theme);
+    const prefs = service.getDisplayPreferences()
+    return prefs.theme ?? (defaultTheme as Theme)
   })
 
   useEffect(() => {
@@ -60,22 +60,22 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     } else {
       root.classList.add(theme)
     }
-    
+
     // После изменения основной темы обязательно переприменяем флаг высокой контрастности,
     // так как он может быть активен независимо от темы
-    const prefs = service.getDisplayPreferences();
-    ThemeApplier.applyHighContrast(prefs.highContrast);
+    const prefs = service.getDisplayPreferences()
+    ThemeApplier.applyHighContrast(prefs.highContrast)
   }, [theme])
 
   // Динамическое обновление настроек отображения из UserPreferencesService
   useEffect(() => {
-    const displayPrefs = service.getDisplayPreferences();
-    
+    const displayPrefs = service.getDisplayPreferences()
+
     // Первичная инициализация при монтировании
-    if (displayPrefs.accentColor) ThemeApplier.applyAccentColor(displayPrefs.accentColor);
-    if (displayPrefs.fontSize) ThemeApplier.applyFontSize(displayPrefs.fontSize);
-    if (displayPrefs.fontFamily) ThemeApplier.applyFontFamily(displayPrefs.fontFamily);
-    ThemeApplier.applyHighContrast(displayPrefs.highContrast);
+    if (displayPrefs.accentColor) ThemeApplier.applyAccentColor(displayPrefs.accentColor)
+    if (displayPrefs.fontSize) ThemeApplier.applyFontSize(displayPrefs.fontSize)
+    if (displayPrefs.fontFamily) ThemeApplier.applyFontFamily(displayPrefs.fontFamily)
+    ThemeApplier.applyHighContrast(displayPrefs.highContrast)
 
     // Подписываемся на изменения настроек отображения
     const unsubscribe = service.subscribe((event) => {
@@ -84,33 +84,33 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         (event.key === 'load' || event.key === 'import') ||
         (event.category === PreferencesCategory.DISPLAY && (event.key === 'display' || event.key === 'general'))
       ) {
-        const raw = event.newValue;
-        if (raw == null || typeof raw !== 'object') return;
+        const raw = event.newValue
+        if (raw == null || typeof raw !== 'object') return
         const prefs = (event.key === 'load' || event.key === 'import')
           ? (raw as { display?: Record<string, string | number | boolean | undefined> }).display
-          : raw as Record<string, string | number | boolean | undefined>;
-        if (!prefs) return;
-        
+          : raw as Record<string, string | number | boolean | undefined>
+        if (!prefs) return
+
         if (typeof prefs.theme === 'string' && prefs.theme !== theme) {
-          setTheme(prefs.theme as Theme);
+          setTheme(prefs.theme as Theme)
         }
-        if (typeof prefs.accentColor === 'string') ThemeApplier.applyAccentColor(prefs.accentColor);
-        if (typeof prefs.fontSize === 'number') ThemeApplier.applyFontSize(prefs.fontSize);
-        if (typeof prefs.fontFamily === 'string') ThemeApplier.applyFontFamily(prefs.fontFamily);
+        if (typeof prefs.accentColor === 'string') ThemeApplier.applyAccentColor(prefs.accentColor)
+        if (typeof prefs.fontSize === 'number') ThemeApplier.applyFontSize(prefs.fontSize)
+        if (typeof prefs.fontFamily === 'string') ThemeApplier.applyFontFamily(prefs.fontFamily)
         if (typeof prefs.highContrast === 'boolean') {
-          ThemeApplier.applyHighContrast(prefs.highContrast);
+          ThemeApplier.applyHighContrast(prefs.highContrast)
         }
       }
-    });
+    })
 
-    return () => unsubscribe();
+    return () => unsubscribe()
   }, [theme])
 
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      service.updateDisplayPreferences({ theme: newTheme });
-      setTheme(newTheme);
+      service.updateDisplayPreferences({ theme: newTheme })
+      setTheme(newTheme)
     },
   }
 

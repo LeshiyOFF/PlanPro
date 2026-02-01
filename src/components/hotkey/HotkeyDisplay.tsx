@@ -1,8 +1,8 @@
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
-import { SafeTooltip } from '@/components/ui/tooltip';
-import type { Hotkey, HotkeyConfig } from '@/types/HotkeyTypes';
+import React from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/card'
+import { SafeTooltip } from '@/components/ui/tooltip'
+import type { Hotkey, HotkeyConfig } from '@/types/HotkeyTypes'
 
 interface HotkeyDisplayProps {
   hotkey?: Hotkey;
@@ -22,12 +22,12 @@ export const HotkeyDisplay: React.FC<HotkeyDisplayProps> = ({
   showLabel = false,
   size = 'md',
   variant = 'default',
-  className = ''
+  className = '',
 }) => {
-  const keys = config?.keys || hotkey;
-  const label = config?.description;
+  const keys = config?.keys || hotkey
+  const label = config?.description
 
-  if (!keys) return null;
+  if (!keys) return null
 
   const getKeyName = (key: string): string => {
     const keyMap: Record<string, string> = {
@@ -37,36 +37,36 @@ export const HotkeyDisplay: React.FC<HotkeyDisplayProps> = ({
       'ArrowDown': '↓',
       'ArrowLeft': '←',
       'ArrowRight': '→',
-      ' ': 'Space'
-    };
-    return keyMap[key] || key;
-  };
+      ' ': 'Space',
+    }
+    return keyMap[key] || key
+  }
 
   const keyElements = [
     ...(keys.ctrl ? ['Ctrl'] : []),
     ...(keys.alt ? ['Alt'] : []),
     ...(keys.shift ? ['Shift'] : []),
     ...(keys.meta ? ['Cmd'] : []),
-    [getKeyName(keys.key)]
-  ];
+    [getKeyName(keys.key)],
+  ]
 
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',
     md: 'px-3 py-1.5 text-sm',
-    lg: 'px-4 py-2 text-base'
-  };
+    lg: 'px-4 py-2 text-base',
+  }
 
   const keySizeClasses = {
     sm: 'px-1.5 py-0.5 text-xs min-w-[20px]',
     md: 'px-2 py-1 text-sm min-w-[24px]',
-    lg: 'px-3 py-1.5 text-base min-w-[28px]'
-  };
+    lg: 'px-3 py-1.5 text-base min-w-[28px]',
+  }
 
   const separator = (
     <span className={`mx-1 text-muted-foreground ${size === 'sm' ? 'text-xs' : size === 'lg' ? 'text-base' : 'text-sm'}`}>
       +
     </span>
-  );
+  )
 
   return (
     <div className={`inline-flex items-center gap-2 ${className}`}>
@@ -74,7 +74,7 @@ export const HotkeyDisplay: React.FC<HotkeyDisplayProps> = ({
         {keyElements.map((key, index) => (
           <React.Fragment key={index}>
             {index > 0 && separator}
-            <Badge 
+            <Badge
               variant={variant}
               className={`${keySizeClasses[size]} border-2 bg-background font-semibold shadow-sm`}
             >
@@ -89,8 +89,8 @@ export const HotkeyDisplay: React.FC<HotkeyDisplayProps> = ({
         </span>
       )}
     </div>
-  );
-};
+  )
+}
 
 interface HotkeyListProps {
   configs: HotkeyConfig[];
@@ -106,16 +106,16 @@ export const HotkeyList: React.FC<HotkeyListProps> = ({
   configs,
   groupBy = 'category',
   size = 'md',
-  className = ''
+  className = '',
 }) => {
   if (groupBy === 'category') {
     const grouped = configs.reduce((acc, config) => {
       if (!acc[config.category]) {
-        acc[config.category] = [];
+        acc[config.category] = []
       }
-      acc[config.category].push(config);
-      return acc;
-    }, {} as Record<string, HotkeyConfig[]>);
+      acc[config.category].push(config)
+      return acc
+    }, {} as Record<string, HotkeyConfig[]>)
 
     return (
       <div className={`space-y-6 ${className}`}>
@@ -128,8 +128,8 @@ export const HotkeyList: React.FC<HotkeyListProps> = ({
                   <span className="text-sm text-muted-foreground">
                     {config.description}
                   </span>
-                  <HotkeyDisplay 
-                    config={config} 
+                  <HotkeyDisplay
+                    config={config}
                     size={size}
                     variant="outline"
                   />
@@ -139,7 +139,7 @@ export const HotkeyList: React.FC<HotkeyListProps> = ({
           </Card>
         ))}
       </div>
-    );
+    )
   }
 
   return (
@@ -149,16 +149,16 @@ export const HotkeyList: React.FC<HotkeyListProps> = ({
           <span className="text-sm text-muted-foreground">
             {config.description}
           </span>
-          <HotkeyDisplay 
-            config={config} 
+          <HotkeyDisplay
+            config={config}
             size={size}
             variant="outline"
           />
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 
 interface HotkeyTooltipProps {
   hotkey?: Hotkey;
@@ -176,12 +176,12 @@ export const HotkeyTooltip: React.FC<HotkeyTooltipProps> = ({
   config,
   children,
   side = 'top',
-  align = 'center'
+  align = 'center',
 }) => {
-  const keys = config?.keys || hotkey;
-  
+  const keys = config?.keys || hotkey
+
   if (!keys) {
-    return <>{children}</>;
+    return <>{children}</>
   }
 
   const content = (
@@ -193,12 +193,12 @@ export const HotkeyTooltip: React.FC<HotkeyTooltipProps> = ({
         </div>
       )}
     </div>
-  );
+  )
 
   return (
     <SafeTooltip content={content} side={side} align={align}>
       {children}
     </SafeTooltip>
-  );
-};
+  )
+}
 

@@ -1,121 +1,121 @@
-import React, { useCallback, useEffect } from 'react';
-import { ContextMenu } from './ContextMenu';
-import { ContextMenuType, ContextMenuItem, useMenuContext } from '@/providers/MenuProvider';
-import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from '@/hooks/useKeyboardShortcuts';
-import { ContextMenuFactory } from './factories/ContextMenuFactory';
-import { useFileOperations } from '@/hooks/useFileOperations';
-import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
-import { contextActionService, ContextActionType } from '@/services/ContextActionService';
-import { getElectronAPI } from '@/utils/electronAPI';
+import React, { useCallback, useEffect } from 'react'
+import { ContextMenu } from './ContextMenu'
+import { ContextMenuType, ContextMenuItem, useMenuContext } from '@/providers/MenuProvider'
+import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from '@/hooks/useKeyboardShortcuts'
+import { ContextMenuFactory } from './factories/ContextMenuFactory'
+import { useFileOperations } from '@/hooks/useFileOperations'
+import { useTaskDeletion } from '@/hooks/task/useTaskDeletion'
+import { contextActionService, ContextActionType } from '@/services/ContextActionService'
+import { getElectronAPI } from '@/utils/electronAPI'
 
 /**
  * Интегрированный Menu компонент
  * Объединяет Ribbon Menu, горячие клавиши и контекстные меню
  */
 export const IntegratedMenu: React.FC = () => {
-  const { contextMenu, showContextMenu, hideContextMenu } = useMenuContext();
-  const { isDeletionAllowed } = useTaskDeletion();
-  const { createNewProject, openProject, saveProject, saveProjectAs, loadProjectFromPath } = useFileOperations();
+  const { contextMenu, showContextMenu, hideContextMenu } = useMenuContext()
+  const { isDeletionAllowed } = useTaskDeletion()
+  const { createNewProject, openProject, saveProject, saveProjectAs, loadProjectFromPath } = useFileOperations()
 
   // Обработчики горячих клавиш
   const handleShortcutAction = useCallback((action: string) => {
-    console.log(`Hotkey triggered: ${action}`);
-    
+    console.log(`Hotkey triggered: ${action}`)
+
     switch (action) {
       case 'DELETE_TASK':
         if (!isDeletionAllowed) {
-          console.warn('[IntegratedMenu] Deletion is disabled in preferences');
-          break;
+          console.warn('[IntegratedMenu] Deletion is disabled in preferences')
+          break
         }
-        console.log('Task deletion triggered from menu/shortcut');
-        break;
+        console.log('Task deletion triggered from menu/shortcut')
+        break
       case 'NEW_PROJECT':
-        createNewProject();
-        break;
+        createNewProject()
+        break
       case 'OPEN_PROJECT':
-        openProject();
-        break;
+        openProject()
+        break
       case 'SAVE_PROJECT':
-        saveProject();
-        break;
+        saveProject()
+        break
       case 'SAVE_AS':
-        saveProjectAs();
-        break;
+        saveProjectAs()
+        break
       case 'INSERT_TASK':
-        window.dispatchEvent(new CustomEvent('task:insert'));
-        break;
+        window.dispatchEvent(new CustomEvent('task:insert'))
+        break
       case 'FIND_TASK':
-        window.dispatchEvent(new CustomEvent('search:open'));
-        break;
+        window.dispatchEvent(new CustomEvent('search:open'))
+        break
       default:
-        console.log(`Unhandled hotkey action: ${action}`);
+        console.log(`Unhandled hotkey action: ${action}`)
     }
-  }, [isDeletionAllowed, createNewProject, openProject, saveProject, saveProjectAs]);
+  }, [isDeletionAllowed, createNewProject, openProject, saveProject, saveProjectAs])
 
   // Глобальный обработчик Drag-and-Drop
   React.useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-    };
+      e.preventDefault()
+      e.stopPropagation()
+    }
 
     const handleDrop = async (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
+      e.preventDefault()
+      e.stopPropagation()
 
-      const files = e.dataTransfer?.files;
+      const files = e.dataTransfer?.files
       if (files && files.length > 0) {
-        const file = files[0];
+        const file = files[0]
         // Electron добавляет path к File в drag-and-drop; в браузере его нет
-        const fileWithPath = file as File & { path?: string };
-        const filePath = fileWithPath.path;
-        
+        const fileWithPath = file as File & { path?: string }
+        const filePath = fileWithPath.path
+
         console.log('[IntegratedMenu] File dropped:', {
           name: file.name,
           type: file.type,
           size: file.size,
-          path: filePath
-        });
-        
+          path: filePath,
+        })
+
         if (filePath) {
           // Проверяем расширение файла
           if (!filePath.endsWith('.pod')) {
-            const api = getElectronAPI();
+            const api = getElectronAPI()
             if (api?.showMessageBox) {
               await api.showMessageBox({
                 type: 'warning',
                 title: 'Неверный формат файла',
-                message: 'Можно открывать только файлы с расширением .pod'
-              });
+                message: 'Можно открывать только файлы с расширением .pod',
+              })
             }
-            return;
+            return
           }
-          
-          console.log(`[IntegratedMenu] Loading project from: ${filePath}`);
-          await loadProjectFromPath(filePath);
+
+          console.log(`[IntegratedMenu] Loading project from: ${filePath}`)
+          await loadProjectFromPath(filePath)
         } else {
           // Fallback: если path недоступен, предлагаем использовать диалог
-          console.error('[IntegratedMenu] File path not available from drop event. This might be a security restriction.');
-          const api = getElectronAPI();
+          console.error('[IntegratedMenu] File path not available from drop event. This might be a security restriction.')
+          const api = getElectronAPI()
           if (api?.showMessageBox) {
             await api.showMessageBox({
               type: 'info',
               title: 'Используйте кнопку "Открыть"',
-              message: 'Drag-and-drop временно недоступен из-за настроек безопасности.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.'
-            });
+              message: 'Drag-and-drop временно недоступен из-за настроек безопасности.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+            })
           }
         }
       }
-    };
+    }
 
-    window.addEventListener('dragover', handleDragOver);
-    window.addEventListener('drop', handleDrop);
+    window.addEventListener('dragover', handleDragOver)
+    window.addEventListener('drop', handleDrop)
 
     return () => {
-      window.removeEventListener('dragover', handleDragOver);
-      window.removeEventListener('drop', handleDrop);
-    };
-  }, [loadProjectFromPath]);
+      window.removeEventListener('dragover', handleDragOver)
+      window.removeEventListener('drop', handleDrop)
+    }
+  }, [loadProjectFromPath])
 
   // Конфигурация горячих клавиш
   const shortcuts = [
@@ -141,42 +141,42 @@ export const IntegratedMenu: React.FC = () => {
     { key: DEFAULT_SHORTCUTS.TASK_INFO, description: 'Информация о задаче', handler: () => handleShortcutAction('TASK_INFO') },
     { key: DEFAULT_SHORTCUTS.ASSIGN_RESOURCES, description: 'Назначить ресурсы', handler: () => handleShortcutAction('ASSIGN_RESOURCES') },
     { key: DEFAULT_SHORTCUTS.RESOURCE_INFO, description: 'Информация о ресурсе', handler: () => handleShortcutAction('RESOURCE_INFO') },
-    { key: DEFAULT_SHORTCUTS.EXIT, description: 'Выход', handler: () => handleShortcutAction('EXIT') }
-  ];
+    { key: DEFAULT_SHORTCUTS.EXIT, description: 'Выход', handler: () => handleShortcutAction('EXIT') },
+  ]
 
   // Включаем горячие клавиши
-  useKeyboardShortcuts(shortcuts, true);
+  useKeyboardShortcuts(shortcuts, true)
 
   // Обработчики контекстных меню
   const handleContextMenuAction = useCallback(async (type: string, action: string) => {
-    const fullAction: ContextActionType = `${type}-${action}` as ContextActionType;
-    await contextActionService.executeAction(fullAction);
-  }, []);
+    const fullAction: ContextActionType = `${type}-${action}` as ContextActionType
+    await contextActionService.executeAction(fullAction)
+  }, [])
 
-  const VALID_CONTEXT_TYPES: ContextMenuType[] = ['task', 'resource', 'project', 'gantt'];
+  const VALID_CONTEXT_TYPES: ContextMenuType[] = ['task', 'resource', 'project', 'gantt']
 
   const handleContextMenu = useCallback((event: MouseEvent) => {
-    event.preventDefault();
-    const target = event.target as HTMLElement;
-    const rawType = target.getAttribute('data-context-type');
+    event.preventDefault()
+    const target = event.target as HTMLElement
+    const rawType = target.getAttribute('data-context-type')
     const contextType = rawType && VALID_CONTEXT_TYPES.includes(rawType as ContextMenuType)
       ? (rawType as ContextMenuType)
-      : null;
-    if (!contextType) return;
+      : null
+    if (!contextType) return
 
     const menuItems: ContextMenuItem[] = ContextMenuFactory.getMenuByType(
       contextType,
-      (action) => handleContextMenuAction(contextType, action)
-    );
+      (action) => handleContextMenuAction(contextType, action),
+    )
     if (menuItems.length > 0) {
-      showContextMenu(contextType, menuItems, event.clientX, event.clientY);
+      showContextMenu(contextType, menuItems, event.clientX, event.clientY)
     }
-  }, [showContextMenu, handleContextMenuAction]);
+  }, [showContextMenu, handleContextMenuAction])
 
   useEffect(() => {
-    document.addEventListener('contextmenu', handleContextMenu);
-    return () => document.removeEventListener('contextmenu', handleContextMenu);
-  }, [handleContextMenu]);
+    document.addEventListener('contextmenu', handleContextMenu)
+    return () => document.removeEventListener('contextmenu', handleContextMenu)
+  }, [handleContextMenu])
 
   return (
     <>
@@ -187,8 +187,8 @@ export const IntegratedMenu: React.FC = () => {
         />
       )}
     </>
-  );
-};
+  )
+}
 
-export default IntegratedMenu;
+export default IntegratedMenu
 

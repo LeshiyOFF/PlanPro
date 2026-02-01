@@ -1,17 +1,17 @@
-import React, { useMemo, useImperativeHandle, forwardRef } from 'react';
-import { useSheetEditing } from '@/hooks/sheets/useSheetEditing';
-import { useSheetSelection } from '@/hooks/sheets/useSheetSelection';
-import { useSheetDataProcessor } from '@/hooks/sheets/useSheetDataProcessor';
-import { SheetValidationService } from '@/domain/sheets/services/SheetValidationService';
-import { SheetBatchService } from '@/domain/sheets/services/SheetBatchService';
-import { SheetHeader } from './SheetHeader';
-import { SheetBody } from './SheetBody';
-import { SheetFilterRow } from './SheetFilterRow';
-import type { ProfessionalSheetHandle, ProfessionalSheetProps } from './ProfessionalSheetTypes';
-import { ProfessionalSheetExport } from './ProfessionalSheetExport';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import type { SheetBodyProps } from './SheetBody';
-import type { JsonValue } from '@/types/json-types';
+import React, { useMemo, useImperativeHandle, forwardRef } from 'react'
+import { useSheetEditing } from '@/hooks/sheets/useSheetEditing'
+import { useSheetSelection } from '@/hooks/sheets/useSheetSelection'
+import { useSheetDataProcessor } from '@/hooks/sheets/useSheetDataProcessor'
+import { SheetValidationService } from '@/domain/sheets/services/SheetValidationService'
+import { SheetBatchService } from '@/domain/sheets/services/SheetBatchService'
+import { SheetHeader } from './SheetHeader'
+import { SheetBody } from './SheetBody'
+import { SheetFilterRow } from './SheetFilterRow'
+import type { ProfessionalSheetHandle, ProfessionalSheetProps } from './ProfessionalSheetTypes'
+import { ProfessionalSheetExport } from './ProfessionalSheetExport'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import type { SheetBodyProps } from './SheetBody'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * Professional Sheet - Универсальный движок таблиц.
@@ -27,67 +27,67 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
     onRowSelect,
     onDeleteRows,
     disabledRowIds = [],
-    className = ''
+    className = '',
   }: ProfessionalSheetProps<T>,
-  ref: React.Ref<ProfessionalSheetHandle>
+  ref: React.Ref<ProfessionalSheetHandle>,
 ) => {
-  const validationService = useMemo(() => new SheetValidationService(), []);
-  const batchService = useMemo(() => new SheetBatchService(), []);
+  const validationService = useMemo(() => new SheetValidationService(), [])
+  const batchService = useMemo(() => new SheetBatchService(), [])
 
   const { processedData, sortRules, toggleSort, setFilter } =
-    useSheetDataProcessor(data, columns);
+    useSheetDataProcessor(data, columns)
 
   useImperativeHandle(ref, () => ({
-    exportToCSV: async () => ProfessionalSheetExport.exportToCSV(processedData, columns)
-  }));
+    exportToCSV: async () => ProfessionalSheetExport.exportToCSV(processedData, columns),
+  }))
 
   const allIds = useMemo(
     () => processedData.map((r) => String(r[rowIdField])),
-    [processedData, rowIdField]
-  );
+    [processedData, rowIdField],
+  )
 
   const { selectedIds, isSelected, toggleSelection } =
-    useSheetSelection(allIds);
+    useSheetSelection(allIds)
 
   const handleValidate = (value: CellValue, columnId: string, rowId: string) => {
-    const column = columns.find((c) => c.id === columnId);
-    const row = data.find((r) => String(r[rowIdField]) === rowId);
-    if (!column || !row) return { isValid: true };
-    return validationService.validate(value, column.type, String(column.field), row);
-  };
+    const column = columns.find((c) => c.id === columnId)
+    const row = data.find((r) => String(r[rowIdField]) === rowId)
+    if (!column || !row) return { isValid: true }
+    return validationService.validate(value, column.type, String(column.field), row)
+  }
 
   const { editState, startEditing, updateEditValue, commitEditing, cancelEditing, isEditing } =
     useSheetEditing(
       (rowId, columnId, value) => {
-        const column = columns.find((c) => c.id === columnId);
-        if (!column) return;
+        const column = columns.find((c) => c.id === columnId)
+        if (!column) return
 
         if (selectedIds.length > 1 && selectedIds.includes(rowId)) {
           if (onBatchChange) {
-            onBatchChange(selectedIds, String(column.field), value);
+            onBatchChange(selectedIds, String(column.field), value)
           } else if (onDataChange) {
-            batchService.applyUpdate(selectedIds, String(column.field), value, onDataChange);
+            batchService.applyUpdate(selectedIds, String(column.field), value, onDataChange)
           }
         } else if (onDataChange) {
-          onDataChange(rowId, String(column.field), value);
+          onDataChange(rowId, String(column.field), value)
         }
       },
-      handleValidate
-    );
+      handleValidate,
+    )
 
-  const visibleColumns = useMemo(() => columns.filter((c) => c.visible), [columns]);
+  const visibleColumns = useMemo(() => columns.filter((c) => c.visible), [columns])
 
   const handleRowClick = (rowId: string, isMulti: boolean, isRange: boolean) => {
-    toggleSelection(rowId, isMulti, isRange);
-    const row = data.find((r) => String(r[rowIdField]) === rowId);
-    if (row && onRowSelect) onRowSelect(row);
-  };
+    toggleSelection(rowId, isMulti, isRange)
+    const row = data.find((r) => String(r[rowIdField]) === rowId)
+    if (row && onRowSelect) onRowSelect(row)
+  }
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Delete' && selectedIds.length > 0 && onDeleteRows) {
-      onDeleteRows(selectedIds);
+      onDeleteRows(selectedIds)
     }
-  };
+  }
 
   return (
     <div
@@ -117,20 +117,20 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
               onCommit: commitEditing,
               onCancel: cancelEditing,
               onContextMenu,
-              disabledRowIds
-            };
-            return <SheetBody<T> {...bodyProps} />;
+              disabledRowIds,
+            }
+            return <SheetBody<T> {...bodyProps} />
           })()}
         </table>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const ProfessionalSheet = forwardRef(ProfessionalSheetRender) as <
   T extends Record<string, JsonValue>
 >(
   props: ProfessionalSheetProps<T> & { ref?: React.Ref<ProfessionalSheetHandle> }
-) => React.ReactElement;
+) => React.ReactElement
 
-export type { ProfessionalSheetHandle } from './ProfessionalSheetTypes';
+export type { ProfessionalSheetHandle } from './ProfessionalSheetTypes'

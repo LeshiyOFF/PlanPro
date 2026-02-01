@@ -16,7 +16,7 @@ export const INITIAL_TASKS = [
     summary: true,
     type: 'summary',
     children: ['TASK-002', 'TASK-003', 'TASK-004', 'TASK-005', 'TASK-006'],
-    predecessors: []
+    predecessors: [],
   },
   {
     id: 'TASK-002',
@@ -31,7 +31,7 @@ export const INITIAL_TASKS = [
     critical: true,
     criticalPath: true,
     resourceIds: ['1'], // John Smith
-    predecessors: ['TASK-001']
+    predecessors: ['TASK-001'],
   },
   {
     id: 'TASK-003',
@@ -46,7 +46,7 @@ export const INITIAL_TASKS = [
     critical: true,
     criticalPath: true,
     resourceIds: ['1', '2'], // John & Maria
-    predecessors: ['TASK-002']
+    predecessors: ['TASK-002'],
   },
   {
     id: 'TASK-004',
@@ -57,7 +57,7 @@ export const INITIAL_TASKS = [
     color: '#ffc107',
     level: 1,
     estimated: true,
-    predecessors: ['TASK-002']
+    predecessors: ['TASK-002'],
   },
   {
     id: 'TASK-005',
@@ -69,7 +69,7 @@ export const INITIAL_TASKS = [
     level: 1,
     critical: true,
     criticalPath: true,
-    predecessors: ['TASK-003', 'TASK-004']
+    predecessors: ['TASK-003', 'TASK-004'],
   },
   {
     id: 'TASK-006',
@@ -81,8 +81,8 @@ export const INITIAL_TASKS = [
     level: 1,
     milestone: true,
     type: 'milestone',
-    predecessors: ['TASK-005']
-  }
-];
+    predecessors: ['TASK-005'],
+  },
+]
 
 

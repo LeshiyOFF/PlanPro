@@ -14,8 +14,8 @@ function toExportFormat(format: 'xml' | 'xlsx' | 'pdf'): ExportFormat {
     xml: ExportFormat.XML,
     xlsx: ExportFormat.EXCEL,
     pdf: ExportFormat.PDF,
-  };
-  return map[format];
+  }
+  return map[format]
 }
 
 /**
@@ -29,69 +29,69 @@ export const useProjectAPI = (config?: APIClientConfig) => {
       retryAttempts: 3,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      ...config
-    });
-  }, [config]);
+      ...config,
+    })
+  }, [config])
 
   const handleError = useCallback((error: CaughtError, context: string) => {
-    console.error(`${context}:`, error);
-    return { message: error.message, code: 'API_ERROR', context };
-  }, []);
+    console.error(`${context}:`, error)
+    return { message: error.message, code: 'API_ERROR', context }
+  }, [])
 
   return useMemo(() => ({
     getAllProjects: async () => {
       try {
-        return await apiClient.getProjects();
+        return await apiClient.getProjects()
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to fetch projects');
+        throw handleError(toCaughtError(error), 'Failed to fetch projects')
       }
     },
 
     getProject: async (id: string | ID) => {
-      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id
       try {
-        return await apiClient.getProject(catalogId);
+        return await apiClient.getProject(catalogId)
       } catch (error) {
-        throw handleError(toCaughtError(error), `Failed to fetch project ${typeof id === 'string' ? id : (id as ID).value}`);
+        throw handleError(toCaughtError(error), `Failed to fetch project ${typeof id === 'string' ? id : (id as ID).value}`)
       }
     },
 
     createProject: async (project: Partial<Project>) => {
       try {
-        return await apiClient.createProject(uiProjectPartialToCatalog(project));
+        return await apiClient.createProject(uiProjectPartialToCatalog(project))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to create project');
+        throw handleError(toCaughtError(error), 'Failed to create project')
       }
     },
 
     updateProject: async (id: string | ID, project: Partial<Project>) => {
-      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id
       try {
-        return await apiClient.updateProject(catalogId, uiProjectPartialToCatalog(project));
+        return await apiClient.updateProject(catalogId, uiProjectPartialToCatalog(project))
       } catch (error) {
-        throw handleError(toCaughtError(error), `Failed to update project ${typeof id === 'string' ? id : (id as ID).value}`);
+        throw handleError(toCaughtError(error), `Failed to update project ${typeof id === 'string' ? id : (id as ID).value}`)
       }
     },
 
     deleteProject: async (id: string | ID) => {
-      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id
       try {
-        await apiClient.deleteProject(catalogId);
+        await apiClient.deleteProject(catalogId)
       } catch (error) {
-        throw handleError(toCaughtError(error), `Failed to delete project ${typeof id === 'string' ? id : (id as ID).value}`);
+        throw handleError(toCaughtError(error), `Failed to delete project ${typeof id === 'string' ? id : (id as ID).value}`)
       }
     },
 
     exportProject: async (id: string | ID, format: 'xml' | 'xlsx' | 'pdf') => {
-      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id
       try {
-        return await apiClient.exportProject(catalogId, toExportFormat(format));
+        return await apiClient.exportProject(catalogId, toExportFormat(format))
       } catch (error) {
-        throw handleError(toCaughtError(error), `Failed to export project ${typeof id === 'string' ? id : (id as ID).value}`);
+        throw handleError(toCaughtError(error), `Failed to export project ${typeof id === 'string' ? id : (id as ID).value}`)
       }
-    }
-  }), [apiClient, handleError]);
+    },
+  }), [apiClient, handleError])
 }
 

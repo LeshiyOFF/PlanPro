@@ -1,31 +1,31 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export interface EVMetrics {
   plannedValue: number;      // PV
   earnedValue: number;       // EV
   actualCost: number;        // AC
   budgetAtCompletion: number; // BAC
-  
+
   // Variances
   scheduleVariance: number;  // SV = EV - PV
   costVariance: number;      // CV = EV - AC
-  
+
   // Indices
   schedulePerformanceIndex: number;  // SPI = EV / PV
   costPerformanceIndex: number;     // CPI = EV / AC
-  
+
   // Forecasts
   estimateAtCompletion: number;      // EAC = BAC / CPI
   estimateToComplete: number;        // ETC = EAC - AC
   varianceAtCompletion: number;      // VAC = BAC - EAC
-  
+
   // Percentages
   schedulePercentComplete: number;    // EV / BAC
   costPercentComplete: number;       // AC / EAC
@@ -55,23 +55,23 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [selectedPeriod, setSelectedPeriod] = React.useState(analysisPeriod);
-  const [showTrends, setShowTrends] = React.useState(false);
+  const [selectedPeriod, setSelectedPeriod] = React.useState(analysisPeriod)
+  const [showTrends, setShowTrends] = React.useState(false)
 
   const getStatusColor = (value: number, target: number = 1) => {
-    if (value >= target * 0.95) return 'text-green-600';
-    if (value >= target * 0.8) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+    if (value >= target * 0.95) return 'text-green-600'
+    if (value >= target * 0.8) return 'text-yellow-600'
+    return 'text-red-600'
+  }
 
   const getPerformanceLevel = (index: number) => {
-    if (index >= 0.95) return 'Excellent';
-    if (index >= 0.85) return 'Good';
-    if (index >= 0.7) return 'Fair';
-    return 'Poor';
-  };
+    if (index >= 0.95) return 'Excellent'
+    if (index >= 0.85) return 'Good'
+    if (index >= 0.7) return 'Fair'
+    return 'Poor'
+  }
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   if (!currentMetrics) {
     return (
@@ -96,7 +96,7 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
           </div>
         </div>
       </BaseDialog>
-    );
+    )
   }
 
   return (
@@ -335,8 +335,8 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
                   <span>Schedule Progress</span>
                   <span>{currentMetrics.schedulePercentComplete.toFixed(1)}%</span>
                 </div>
-                <Progress 
-                  value={currentMetrics.schedulePercentComplete} 
+                <Progress
+                  value={currentMetrics.schedulePercentComplete}
                   className="h-2"
                 />
               </div>
@@ -345,8 +345,8 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
                   <span>Cost Progress</span>
                   <span>{currentMetrics.costPercentComplete.toFixed(1)}%</span>
                 </div>
-                <Progress 
-                  value={currentMetrics.costPercentComplete} 
+                <Progress
+                  value={currentMetrics.costPercentComplete}
                   className="h-2"
                 />
               </div>
@@ -355,8 +355,8 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
                   <span>Schedule Performance Index</span>
                   <span>{currentMetrics.schedulePerformanceIndex.toFixed(2)}</span>
                 </div>
-                <Progress 
-                  value={Math.min(currentMetrics.schedulePerformanceIndex * 100, 100)} 
+                <Progress
+                  value={Math.min(currentMetrics.schedulePerformanceIndex * 100, 100)}
                   className="h-2"
                 />
               </div>
@@ -365,8 +365,8 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
                   <span>Cost Performance Index</span>
                   <span>{currentMetrics.costPerformanceIndex.toFixed(2)}</span>
                 </div>
-                <Progress 
-                  value={Math.min(currentMetrics.costPerformanceIndex * 100, 100)} 
+                <Progress
+                  value={Math.min(currentMetrics.costPerformanceIndex * 100, 100)}
                   className="h-2"
                 />
               </div>
@@ -417,14 +417,14 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
 
         {/* Report Information */}
         <div className="text-center text-sm text-muted-foreground border-t pt-4">
-          Report Date: {reportDate} • Analysis Period: {selectedPeriod} • 
+          Report Date: {reportDate} • Analysis Period: {selectedPeriod} •
           Performance Level: {getPerformanceLevel(Math.min(
             currentMetrics.schedulePerformanceIndex,
-            currentMetrics.costPerformanceIndex
+            currentMetrics.costPerformanceIndex,
           ))}
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

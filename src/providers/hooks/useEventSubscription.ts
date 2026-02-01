@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useCallback } from 'react';
-import { useEventFlow } from '../EventFlowContext';
-import { EventHandler, EventType } from '@/types/EventFlowTypes';
+import React, { useRef, useEffect, useCallback } from 'react'
+import { useEventFlow } from '../EventFlowContext'
+import { EventHandler, EventType } from '@/types/EventFlowTypes'
 
 /**
  * Хук для подписки на события с автоматической очисткой
@@ -9,23 +9,23 @@ export const useEventSubscription = (
   eventType: EventType,
   handler: EventHandler,
   priority?: number,
-  dependencies: React.DependencyList = []
+  dependencies: React.DependencyList = [],
 ): string => {
-  const { subscribe, unsubscribe } = useEventFlow();
-  const subscriptionIdRef = useRef<string | null>(null);
+  const { subscribe, unsubscribe } = useEventFlow()
+  const subscriptionIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    subscriptionIdRef.current = subscribe(eventType, handler, priority);
-    
+    subscriptionIdRef.current = subscribe(eventType, handler, priority)
+
     return () => {
       if (subscriptionIdRef.current) {
-        unsubscribe(subscriptionIdRef.current);
+        unsubscribe(subscriptionIdRef.current)
       }
-    };
-  }, [eventType, priority, ...dependencies]);
+    }
+  }, [eventType, priority, ...dependencies])
 
-  return subscriptionIdRef.current || '';
-};
+  return subscriptionIdRef.current || ''
+}
 
 /**
  * Хук для подписки на одно выполнение события
@@ -33,24 +33,24 @@ export const useEventSubscription = (
 export const useEventOnce = (
   eventType: EventType,
   handler: EventHandler,
-  dependencies: React.DependencyList = []
+  dependencies: React.DependencyList = [],
 ): void => {
-  const { once } = useEventFlow();
+  const { once } = useEventFlow()
 
   useEffect(() => {
-    once(eventType, handler);
-    
+    once(eventType, handler)
+
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    return () => {}; // once автоматически удаляется после выполнения
-  }, [eventType, ...dependencies]);
-};
+    return () => {} // once автоматически удаляется после выполнения
+  }, [eventType, ...dependencies])
+}
 
 /**
  * Хук для диспетчеризации событий
  */
 export const useEventDispatcher = () => {
-  const { dispatch } = useEventFlow();
-  
-  return useCallback(dispatch, []);
-};
+  const { dispatch } = useEventFlow()
+
+  return useCallback(dispatch, [])
+}
 

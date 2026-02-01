@@ -1,119 +1,119 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { IGeneralPreferences } from '../interfaces/UserPreferencesInterfaces';
-import { ViewType } from '@/types/ViewTypes';
-import { useDebouncedCallback } from '@/hooks/useDebounce';
-import { localizeFormatMask } from '@/utils/formatUtils';
+import React, { useCallback, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { IGeneralPreferences } from '../interfaces/UserPreferencesInterfaces'
+import { ViewType } from '@/types/ViewTypes'
+import { useDebouncedCallback } from '@/hooks/useDebounce'
+import { localizeFormatMask } from '@/utils/formatUtils'
 
 /**
  * Компонент общих настроек
  */
 export const GeneralPreferences: React.FC = () => {
-  const { t } = useTranslation();
-  const { preferences, updateGeneralPreferences, flush } = useUserPreferences();
-  const generalPrefs = preferences.general as IGeneralPreferences;
+  const { t } = useTranslation()
+  const { preferences, updateGeneralPreferences, flush } = useUserPreferences()
+  const generalPrefs = preferences.general as IGeneralPreferences
 
   // Локальное состояние для текстовых полей (предотвращает лаги и потерю фокуса)
-  const [localUserName, setLocalUserName] = useState(generalPrefs.userName || '');
-  const [localCompanyName, setLocalCompanyName] = useState(generalPrefs.companyName || '');
-  const [localStandardRate, setLocalStandardRate] = useState((generalPrefs.defaultStandardRate ?? 0).toString());
-  const [localOvertimeRate, setLocalOvertimeRate] = useState((generalPrefs.defaultOvertimeRate ?? 0).toString());
+  const [localUserName, setLocalUserName] = useState(generalPrefs.userName || '')
+  const [localCompanyName, setLocalCompanyName] = useState(generalPrefs.companyName || '')
+  const [localStandardRate, setLocalStandardRate] = useState((generalPrefs.defaultStandardRate ?? 0).toString())
+  const [localOvertimeRate, setLocalOvertimeRate] = useState((generalPrefs.defaultOvertimeRate ?? 0).toString())
 
   // Гарантированное сохранение при размонтировании (закрытии окна настроек)
   useEffect(() => {
     return () => {
       // Принудительно сбрасываем все изменения из дебаунса в хранилище
-      flush();
-    };
-  }, [flush]);
+      flush()
+    }
+  }, [flush])
 
   // Синхронизация локального состояния при внешнем изменении (например, импорт)
   useEffect(() => {
-    setLocalUserName(generalPrefs.userName || '');
-  }, [generalPrefs.userName]);
+    setLocalUserName(generalPrefs.userName || '')
+  }, [generalPrefs.userName])
 
   useEffect(() => {
-    setLocalCompanyName(generalPrefs.companyName || '');
-  }, [generalPrefs.companyName]);
+    setLocalCompanyName(generalPrefs.companyName || '')
+  }, [generalPrefs.companyName])
 
   useEffect(() => {
-    setLocalStandardRate((generalPrefs.defaultStandardRate ?? 0).toString());
-  }, [generalPrefs.defaultStandardRate]);
+    setLocalStandardRate((generalPrefs.defaultStandardRate ?? 0).toString())
+  }, [generalPrefs.defaultStandardRate])
 
   useEffect(() => {
-    setLocalOvertimeRate((generalPrefs.defaultOvertimeRate ?? 0).toString());
-  }, [generalPrefs.defaultOvertimeRate]);
+    setLocalOvertimeRate((generalPrefs.defaultOvertimeRate ?? 0).toString())
+  }, [generalPrefs.defaultOvertimeRate])
 
   // Дебаунс-обработчики для сохранения (фоновое)
   const debouncedUpdateGeneral = useDebouncedCallback((updates: Partial<IGeneralPreferences>) => {
-    updateGeneralPreferences(updates);
-  }, 500);
+    updateGeneralPreferences(updates)
+  }, 500)
 
   /**
    * Немедленное сохранение при потере фокуса (onBlur)
    * Это гарантирует, что данные не потеряются, даже если окно закроется сразу после ввода
    */
   const handleBlur = useCallback((field: keyof IGeneralPreferences, value: string | number) => {
-    updateGeneralPreferences({ [field]: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ [field]: value })
+  }, [updateGeneralPreferences])
 
   const handleUserNameChange = useCallback((value: string) => {
-    setLocalUserName(value);
-    debouncedUpdateGeneral({ userName: value });
-  }, [debouncedUpdateGeneral]);
+    setLocalUserName(value)
+    debouncedUpdateGeneral({ userName: value })
+  }, [debouncedUpdateGeneral])
 
   const handleCompanyNameChange = useCallback((value: string) => {
-    setLocalCompanyName(value);
-    debouncedUpdateGeneral({ companyName: value });
-  }, [debouncedUpdateGeneral]);
+    setLocalCompanyName(value)
+    debouncedUpdateGeneral({ companyName: value })
+  }, [debouncedUpdateGeneral])
 
   const handleDefaultViewChange = useCallback((value: ViewType) => {
-    updateGeneralPreferences({ defaultView: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ defaultView: value })
+  }, [updateGeneralPreferences])
 
   const handleAutoSaveChange = useCallback((checked: boolean) => {
-    updateGeneralPreferences({ autoSave: checked });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ autoSave: checked })
+  }, [updateGeneralPreferences])
 
   const handleAutoSaveIntervalChange = useCallback((value: string) => {
-    updateGeneralPreferences({ autoSaveInterval: parseInt(value) || 5 });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ autoSaveInterval: parseInt(value) || 5 })
+  }, [updateGeneralPreferences])
 
   const handleDateFormatChange = useCallback((value: string) => {
-    updateGeneralPreferences({ dateFormat: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ dateFormat: value })
+  }, [updateGeneralPreferences])
 
   const handleTimeFormatChange = useCallback((value: string) => {
-    updateGeneralPreferences({ timeFormat: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ timeFormat: value })
+  }, [updateGeneralPreferences])
 
   const handleCurrencyChange = useCallback((value: string) => {
-    updateGeneralPreferences({ currency: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ currency: value })
+  }, [updateGeneralPreferences])
 
   const handleLanguageChange = useCallback((value: string) => {
-    updateGeneralPreferences({ language: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ language: value })
+  }, [updateGeneralPreferences])
 
   const handleDefaultStandardRateChange = useCallback((value: string) => {
-    setLocalStandardRate(value);
-    debouncedUpdateGeneral({ defaultStandardRate: parseFloat(value) || 0 });
-  }, [debouncedUpdateGeneral]);
+    setLocalStandardRate(value)
+    debouncedUpdateGeneral({ defaultStandardRate: parseFloat(value) || 0 })
+  }, [debouncedUpdateGeneral])
 
   const handleDefaultOvertimeRateChange = useCallback((value: string) => {
-    setLocalOvertimeRate(value);
-    debouncedUpdateGeneral({ defaultOvertimeRate: parseFloat(value) || 0 });
-  }, [debouncedUpdateGeneral]);
+    setLocalOvertimeRate(value)
+    debouncedUpdateGeneral({ defaultOvertimeRate: parseFloat(value) || 0 })
+  }, [debouncedUpdateGeneral])
 
   const handleDefaultCalendarChange = useCallback((value: string) => {
-    updateGeneralPreferences({ defaultCalendar: value });
-  }, [updateGeneralPreferences]);
+    updateGeneralPreferences({ defaultCalendar: value })
+  }, [updateGeneralPreferences])
 
   return (
     <PreferencesSection
@@ -305,6 +305,6 @@ export const GeneralPreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

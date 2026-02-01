@@ -1,4 +1,4 @@
-import type { ProfilerOnRenderCallback } from 'react';
+import type { ProfilerOnRenderCallback } from 'react'
 
 /**
  * Интерфейс для метрик профилирования
@@ -43,15 +43,15 @@ export interface ComponentProfile {
  * - Dependency Inversion: Работает с интерфейсами метрик
  */
 export class ReactProfilerService {
-  private static instance: ReactProfilerService;
-  private config: ProfilerConfig;
-  private metrics: ProfilerMetrics[] = [];
-  private componentProfiles: Map<string, ComponentProfile> = new Map();
-  private enabled: boolean = false;
+  private static instance: ReactProfilerService
+  private config: ProfilerConfig
+  private metrics: ProfilerMetrics[] = []
+  private componentProfiles: Map<string, ComponentProfile> = new Map()
+  private enabled: boolean = false
 
   private constructor(config: ProfilerConfig) {
-    this.config = config;
-    this.enabled = config.enabled;
+    this.config = config
+    this.enabled = config.enabled
   }
 
   /**
@@ -63,10 +63,10 @@ export class ReactProfilerService {
         enabled: true,
         maxSamples: 1000,
         samplingRate: 1.0,
-      };
-      ReactProfilerService.instance = new ReactProfilerService(config || defaultConfig);
+      }
+      ReactProfilerService.instance = new ReactProfilerService(config || defaultConfig)
     }
-    return ReactProfilerService.instance;
+    return ReactProfilerService.instance
   }
 
   /**
@@ -74,7 +74,7 @@ export class ReactProfilerService {
    */
   public getProfilerCallback(_id: string): ProfilerOnRenderCallback {
     if (!this.enabled) {
-      return () => {};
+      return () => {}
     }
 
     const callback: ProfilerOnRenderCallback = (
@@ -83,7 +83,7 @@ export class ReactProfilerService {
       actualDuration: number,
       baseDuration: number,
       startTime: number,
-      commitTime: number
+      commitTime: number,
     ) => {
       const metric: ProfilerMetrics = {
         id,
@@ -93,27 +93,27 @@ export class ReactProfilerService {
         startTime,
         commitTime,
         interactions: [],
-      };
-
-      this.recordMetric(metric);
-      this.updateComponentProfile(id, actualDuration);
-      if (this.config.onMetrics) {
-        this.config.onMetrics(metric);
       }
-    };
-    return callback;
+
+      this.recordMetric(metric)
+      this.updateComponentProfile(id, actualDuration)
+      if (this.config.onMetrics) {
+        this.config.onMetrics(metric)
+      }
+    }
+    return callback
   }
 
   /**
    * Записать метрику
    */
   private recordMetric(metric: ProfilerMetrics): void {
-    this.metrics.push(metric);
+    this.metrics.push(metric)
 
     // Ограничение размера выборки
-    const maxSamples = this.config.maxSamples || 1000;
+    const maxSamples = this.config.maxSamples || 1000
     if (this.metrics.length > maxSamples) {
-      this.metrics = this.metrics.slice(-maxSamples);
+      this.metrics = this.metrics.slice(-maxSamples)
     }
   }
 
@@ -121,8 +121,8 @@ export class ReactProfilerService {
    * Обновить профиль компонента
    */
   private updateComponentProfile(componentId: string, renderTime: number): void {
-    let profile = this.componentProfiles.get(componentId);
-    
+    let profile = this.componentProfiles.get(componentId)
+
     if (!profile) {
       profile = {
         componentName: componentId,
@@ -131,29 +131,29 @@ export class ReactProfilerService {
         averageRenderTime: 0,
         maxRenderTime: 0,
         lastRenderTime: 0,
-      };
-      this.componentProfiles.set(componentId, profile);
+      }
+      this.componentProfiles.set(componentId, profile)
     }
 
-    profile.renderCount++;
-    profile.totalRenderTime += renderTime;
-    profile.lastRenderTime = renderTime;
-    profile.maxRenderTime = Math.max(profile.maxRenderTime, renderTime);
-    profile.averageRenderTime = profile.totalRenderTime / profile.renderCount;
+    profile.renderCount++
+    profile.totalRenderTime += renderTime
+    profile.lastRenderTime = renderTime
+    profile.maxRenderTime = Math.max(profile.maxRenderTime, renderTime)
+    profile.averageRenderTime = profile.totalRenderTime / profile.renderCount
   }
 
   /**
    * Получить все метрики
    */
   public getMetrics(): ProfilerMetrics[] {
-    return [...this.metrics];
+    return [...this.metrics]
   }
 
   /**
    * Получить профили компонентов
    */
   public getComponentProfiles(): ComponentProfile[] {
-    return Array.from(this.componentProfiles.values());
+    return Array.from(this.componentProfiles.values())
   }
 
   /**
@@ -162,7 +162,7 @@ export class ReactProfilerService {
   public getSlowComponents(limit: number = 10): ComponentProfile[] {
     return this.getComponentProfiles()
       .sort((a, b) => b.averageRenderTime - a.averageRenderTime)
-      .slice(0, limit);
+      .slice(0, limit)
   }
 
   /**
@@ -171,7 +171,7 @@ export class ReactProfilerService {
   public getMostRenderedComponents(limit: number = 10): ComponentProfile[] {
     return this.getComponentProfiles()
       .sort((a, b) => b.renderCount - a.renderCount)
-      .slice(0, limit);
+      .slice(0, limit)
   }
 
   /**
@@ -183,15 +183,15 @@ export class ReactProfilerService {
     maxRenderTime: number;
     slowRenderCount: number;
     slowComponents: ComponentProfile[];
-  } {
-    const totalRenders = this.metrics.length;
-    const renderTimes = this.metrics.map(m => m.actualDuration);
-    const averageRenderTime = totalRenders > 0 
-      ? renderTimes.reduce((sum, time) => sum + time, 0) / totalRenders 
-      : 0;
-    const maxRenderTime = Math.max(...renderTimes, 0);
-    const slowRenderCount = renderTimes.filter(time => time > 16).length; // > 16ms
-    const slowComponents = this.getSlowComponents();
+    } {
+    const totalRenders = this.metrics.length
+    const renderTimes = this.metrics.map(m => m.actualDuration)
+    const averageRenderTime = totalRenders > 0
+      ? renderTimes.reduce((sum, time) => sum + time, 0) / totalRenders
+      : 0
+    const maxRenderTime = Math.max(...renderTimes, 0)
+    const slowRenderCount = renderTimes.filter(time => time > 16).length // > 16ms
+    const slowComponents = this.getSlowComponents()
 
     return {
       totalRenders,
@@ -199,30 +199,30 @@ export class ReactProfilerService {
       maxRenderTime,
       slowRenderCount,
       slowComponents,
-    };
+    }
   }
 
   /**
    * Сбросить все метрики
    */
   public reset(): void {
-    this.metrics = [];
-    this.componentProfiles.clear();
+    this.metrics = []
+    this.componentProfiles.clear()
   }
 
   /**
    * Включить/выключить профилирование
    */
   public setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
-    this.config.enabled = enabled;
+    this.enabled = enabled
+    this.config.enabled = enabled
   }
 
   /**
    * Проверить включено ли профилирование
    */
   public isEnabled(): boolean {
-    return this.enabled;
+    return this.enabled
   }
 }
 

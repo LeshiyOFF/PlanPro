@@ -47,7 +47,7 @@ export function isDurationValue(value: unknown): value is DurationValue {
     'unit' in value &&
     typeof (value as DurationValue).value === 'number' &&
     ['days', 'hours', 'minutes'].includes((value as DurationValue).unit)
-  );
+  )
 }
 
 /**
@@ -61,7 +61,7 @@ export function isWbsValue(value: unknown): value is WbsValue {
     'level' in value &&
     typeof (value as WbsValue).code === 'string' &&
     typeof (value as WbsValue).level === 'number'
-  );
+  )
 }
 
 /**
@@ -74,5 +74,5 @@ export function isPrimitiveValue(value: unknown): value is CellValuePrimitive {
     typeof value === 'number' ||
     typeof value === 'boolean' ||
     value instanceof Date
-  );
+  )
 }

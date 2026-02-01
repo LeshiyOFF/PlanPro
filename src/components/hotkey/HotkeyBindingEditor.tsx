@@ -1,6 +1,6 @@
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 /**
  * Информация о редактируемой привязке
@@ -26,23 +26,23 @@ export const HotkeyBindingEditor: React.FC<HotkeyBindingEditorProps> = ({
   editingBinding,
   onChange,
   onSave,
-  onCancel
+  onCancel,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent) => {
-    event.preventDefault();
-    
-    const keys: string[] = [];
-    if (event.ctrlKey || event.metaKey) keys.push('Ctrl');
-    if (event.altKey) keys.push('Alt');
-    if (event.shiftKey) keys.push('Shift');
-    
-    const key = event.key;
+    event.preventDefault()
+
+    const keys: string[] = []
+    if (event.ctrlKey || event.metaKey) keys.push('Ctrl')
+    if (event.altKey) keys.push('Alt')
+    if (event.shiftKey) keys.push('Shift')
+
+    const key = event.key
     if (key && !['Control', 'Alt', 'Shift', 'Meta'].includes(key)) {
-      keys.push(key);
+      keys.push(key)
     }
 
-    onChange(keys.join('+'));
-  };
+    onChange(keys.join('+'))
+  }
 
   return (
     <div className="flex items-center gap-2">
@@ -60,5 +60,5 @@ export const HotkeyBindingEditor: React.FC<HotkeyBindingEditorProps> = ({
         ✕
       </Button>
     </div>
-  );
-};
+  )
+}

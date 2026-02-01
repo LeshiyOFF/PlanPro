@@ -1,28 +1,28 @@
-import React from 'react';
-import { ActionBarProps } from './ViewHeaderTypes';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { SafeTooltip } from '@/components/ui/tooltip';
+import React from 'react'
+import { ActionBarProps } from './ViewHeaderTypes'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { SafeTooltip } from '@/components/ui/tooltip'
 
 /**
  * ActionBar - Tier 2: Action Bar
- * 
+ *
  * Панель действий с динамической поддержкой акцентного цвета.
  * Использует Dynamic Accent System для стилизации кнопок и рамок.
- * 
+ *
  * @version 8.14
  */
 export const ActionBar: React.FC<ActionBarProps> = ({
   primaryAction,
   secondaryActions = [],
   controls,
-  className = ''
+  className = '',
 }) => {
   return (
-    <div 
+    <div
       className={cn(
-        "action-bar-tier2 bg-slate-50/80 backdrop-blur-sm border-b border-[hsl(var(--primary-border)/0.4)] px-6 py-2 flex items-center justify-between gap-4 min-h-[44px] flex-shrink-0 shadow-sm shadow-[hsl(var(--primary-shadow-light)/0.5)]",
-        className
+        'action-bar-tier2 bg-slate-50/80 backdrop-blur-sm border-b border-[hsl(var(--primary-border)/0.4)] px-6 py-2 flex items-center justify-between gap-4 min-h-[44px] flex-shrink-0 shadow-sm shadow-[hsl(var(--primary-shadow-light)/0.5)]',
+        className,
       )}
       role="toolbar"
       aria-label="Действия представления"
@@ -73,6 +73,6 @@ export const ActionBar: React.FC<ActionBarProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 

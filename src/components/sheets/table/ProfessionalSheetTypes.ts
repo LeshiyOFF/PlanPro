@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import type { JsonValue } from '@/types/json-types';
+import { ReactNode } from 'react'
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * Handle для внешнего управления таблицей
@@ -30,11 +30,11 @@ export interface ProfessionalSheetProps<T extends Record<string, JsonValue>> {
  * Извлечение чистого текста из React-элементов
  */
 export function extractTextFromFormatted(value: ReactNode): string {
-  if (value === null || value === undefined || typeof value === 'boolean') return '';
-  if (typeof value === 'string' || typeof value === 'number') return String(value);
+  if (value === null || value === undefined || typeof value === 'boolean') return ''
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
 
   if (Array.isArray(value)) {
-    return value.map(extractTextFromFormatted).join('');
+    return value.map(extractTextFromFormatted).join('')
   }
 
   if (
@@ -45,8 +45,8 @@ export function extractTextFromFormatted(value: ReactNode): string {
     typeof value.props === 'object' &&
     'children' in value.props
   ) {
-    return extractTextFromFormatted((value.props as { children?: ReactNode }).children);
+    return extractTextFromFormatted((value.props as { children?: ReactNode }).children)
   }
 
-  return String(value);
+  return String(value)
 }

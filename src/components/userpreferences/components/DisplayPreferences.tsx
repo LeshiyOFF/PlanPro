@@ -1,76 +1,76 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { IDisplayPreferences, Theme } from '../interfaces/UserPreferencesInterfaces';
-import { useDebouncedCallback } from '@/hooks/useDebounce';
-import { APP_FONTS } from '../constants/FontConstants';
+import React, { useCallback, useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { IDisplayPreferences, Theme } from '../interfaces/UserPreferencesInterfaces'
+import { useDebouncedCallback } from '@/hooks/useDebounce'
+import { APP_FONTS } from '../constants/FontConstants'
 
 /**
  * Компонент настроек отображения
  */
 export const DisplayPreferences: React.FC = () => {
-  const { t } = useTranslation();
-  const { preferences, updateDisplayPreferences, flush } = useUserPreferences();
-  const displayPrefs = preferences.display as IDisplayPreferences;
+  const { t } = useTranslation()
+  const { preferences, updateDisplayPreferences, flush } = useUserPreferences()
+  const displayPrefs = preferences.display as IDisplayPreferences
 
   // Локальное состояние для слайдеров и сложных элементов
-  const [localFontSize, setLocalFontSize] = useState(displayPrefs.fontSize);
+  const [localFontSize, setLocalFontSize] = useState(displayPrefs.fontSize)
 
   // Гарантированное сохранение при закрытии окна
   useEffect(() => {
     return () => {
-      flush();
-    };
-  }, [flush]);
+      flush()
+    }
+  }, [flush])
 
   useEffect(() => {
-    setLocalFontSize(displayPrefs.fontSize);
-  }, [displayPrefs.fontSize]);
+    setLocalFontSize(displayPrefs.fontSize)
+  }, [displayPrefs.fontSize])
 
   const debouncedUpdateDisplay = useDebouncedCallback((updates: Partial<IDisplayPreferences>) => {
-    updateDisplayPreferences(updates);
-  }, 300);
+    updateDisplayPreferences(updates)
+  }, 300)
 
   /**
    * Немедленное сохранение при завершении взаимодействия (для Slider)
    */
   const handleFontSizeCommit = useCallback((value: number) => {
-    updateDisplayPreferences({ fontSize: value });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ fontSize: value })
+  }, [updateDisplayPreferences])
 
   const handleShowTipsChange = useCallback((checked: boolean) => {
-    updateDisplayPreferences({ showTips: checked });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ showTips: checked })
+  }, [updateDisplayPreferences])
 
   const handleShowWelcomeScreenChange = useCallback((checked: boolean) => {
-    updateDisplayPreferences({ showWelcomeScreen: checked });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ showWelcomeScreen: checked })
+  }, [updateDisplayPreferences])
 
   const handleAnimationEnabledChange = useCallback((checked: boolean) => {
-    updateDisplayPreferences({ animationEnabled: checked });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ animationEnabled: checked })
+  }, [updateDisplayPreferences])
 
   const handleHighContrastChange = useCallback((checked: boolean) => {
-    updateDisplayPreferences({ highContrast: checked });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ highContrast: checked })
+  }, [updateDisplayPreferences])
 
   const handleFontSizeChange = useCallback((value: number) => {
-    setLocalFontSize(value);
-    debouncedUpdateDisplay({ fontSize: value });
-  }, [debouncedUpdateDisplay]);
+    setLocalFontSize(value)
+    debouncedUpdateDisplay({ fontSize: value })
+  }, [debouncedUpdateDisplay])
 
   const handleFontFamilyChange = useCallback((value: string) => {
-    updateDisplayPreferences({ fontFamily: value });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ fontFamily: value })
+  }, [updateDisplayPreferences])
 
   const handleThemeChange = useCallback((value: Theme) => {
-    updateDisplayPreferences({ theme: value });
-  }, [updateDisplayPreferences]);
+    updateDisplayPreferences({ theme: value })
+  }, [updateDisplayPreferences])
 
   return (
     <PreferencesSection
@@ -181,7 +181,7 @@ export const DisplayPreferences: React.FC = () => {
                 {displayPrefs.accentColor?.toUpperCase() || '#1F1F1F'}
               </span>
             </div>
-            
+
             <div className="space-y-1.5">
               <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{t('preferences.presets')}</span>
               <div className="flex wrap gap-2">
@@ -191,7 +191,7 @@ export const DisplayPreferences: React.FC = () => {
                   { name: t('preferences.color_green'), color: '#16a34a' },
                   { name: t('preferences.color_red'), color: '#dc2626' },
                   { name: t('preferences.color_orange'), color: '#d97706' },
-                  { name: t('preferences.color_purple'), color: '#7c3aed' }
+                  { name: t('preferences.color_purple'), color: '#7c3aed' },
                 ].map((item) => (
                   <button
                     key={item.color}
@@ -213,6 +213,6 @@ export const DisplayPreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

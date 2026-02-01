@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { logger } from '@/utils/logger';
-import { authService, type LoginCredentials } from '@/services/AuthService';
-import { 
-  ILoginDialogData as LoginDialogData, 
+import React, { useState, useEffect } from 'react'
+import { BaseDialog } from '@/components/dialogs/base/BaseDialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { logger } from '@/utils/logger'
+import { authService, type LoginCredentials } from '@/services/AuthService'
+import {
+  ILoginDialogData as LoginDialogData,
   IDialogActions,
   IDialogData,
   ValidationRule,
-  DialogResult 
-} from '@/types/dialog/DialogTypes';
-import { DialogRenderFunction } from '@/components/dialogs/base/BaseDialog';
-import { Eye, EyeOff, Shield, User } from 'lucide-react';
-import { getErrorMessage } from '@/utils/errorUtils';
+  DialogResult,
+} from '@/types/dialog/DialogTypes'
+import { DialogRenderFunction } from '@/components/dialogs/base/BaseDialog'
+import { Eye, EyeOff, Shield, User } from 'lucide-react'
+import { getErrorMessage } from '@/utils/errorUtils'
 
 /**
  * Интерфейс для LoginDialog компонента
@@ -35,7 +35,7 @@ export interface LoginDialogProps {
 export const LoginDialog: React.FC<LoginDialogProps> = ({
   data = {},
   isOpen,
-  onClose
+  onClose,
 }) => {
   const [loginData, setLoginData] = useState<LoginDialogData>(() => {
     const initial: LoginDialogData = {
@@ -46,43 +46,43 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
       password: '',
       rememberCredentials: false,
       useMenus: true,
-      ...data
-    };
-    return initial;
-  });
+      ...data,
+    }
+    return initial
+  })
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [loginError, setLoginError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
   /**
    * Выполнение входа в систему
    */
   const performLogin = async (username: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    setLoginError(null);
-    
+    setIsLoading(true)
+    setLoginError(null)
+
     try {
-      const success = await authenticateUser(username, password);
-      
+      const success = await authenticateUser(username, password)
+
       if (success) {
-        logger.info('User login successful', { username });
+        logger.info('User login successful', { username })
       } else {
-        const errorMessage = 'Неверное имя пользователя или пароль';
-        setLoginError(errorMessage);
-        logger.error('Login failed', { username, error: errorMessage });
+        const errorMessage = 'Неверное имя пользователя или пароль'
+        setLoginError(errorMessage)
+        logger.error('Login failed', { username, error: errorMessage })
       }
-      
-      return success;
+
+      return success
     } catch (error) {
-      const errorMessage = 'Ошибка соединения с сервером аутентификации';
-      setLoginError(errorMessage);
-      logger.error('Login service error', getErrorMessage(error));
-      return false;
+      const errorMessage = 'Ошибка соединения с сервером аутентификации'
+      setLoginError(errorMessage)
+      logger.error('Login service error', getErrorMessage(error))
+      return false
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   /**
    * Правила валидации полей входа
@@ -94,16 +94,16 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
       minLength: 3,
       custom: (value: string) => {
         if (!value || value.trim().length === 0) {
-          return 'Имя пользователя обязательно';
+          return 'Имя пользователя обязательно'
         }
         if (value.trim().length < 3) {
-          return 'Минимальная длина имени - 3 символа';
+          return 'Минимальная длина имени - 3 символа'
         }
         if (!/^[a-zA-Z0-9_.-]+$/.test(value)) {
-          return 'Имя пользователя содержит недопустимые символы';
+          return 'Имя пользователя содержит недопустимые символы'
         }
-        return true;
-      }
+        return true
+      },
     },
     {
       field: 'password',
@@ -111,15 +111,15 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
       minLength: 6,
       custom: (value: string) => {
         if (!value) {
-          return 'Пароль обязателен';
+          return 'Пароль обязателен'
         }
         if (value.length < 6) {
-          return 'Минимальная длина пароля - 6 символов';
+          return 'Минимальная длина пароля - 6 символов'
         }
-        return true;
-      }
-    }
-  ];
+        return true
+      },
+    },
+  ]
 
   /**
    * Обработчик изменения полей
@@ -127,14 +127,14 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
   const handleFieldChange = (field: keyof LoginDialogData, value: string | boolean | null | undefined) => {
     setLoginData((prev: LoginDialogData) => ({
       ...prev,
-      [field]: value ?? undefined
-    } as LoginDialogData));
-    
+      [field]: value ?? undefined,
+    } as LoginDialogData))
+
     // Очистка ошибок при изменении полей
     if (loginError) {
-      setLoginError(null);
+      setLoginError(null)
     }
-  };
+  }
 
   /**
    * Аутентификация пользователя через сервис
@@ -143,12 +143,12 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
     const credentials: LoginCredentials = {
       username,
       password,
-      rememberMe: loginData.rememberCredentials
-    };
+      rememberMe: loginData.rememberCredentials,
+    }
 
-    const response = await authService.login(credentials);
-    return response.success;
-  };
+    const response = await authService.login(credentials)
+    return response.success
+  }
 
   /**
    * Сохранение учетных данных
@@ -156,26 +156,26 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
   const saveCredentials = (username: string, _password: string) => {
     if (loginData.rememberCredentials) {
       // В реальном приложении здесь будет безопасное хранение
-      localStorage.setItem('remembered_username', username);
+      localStorage.setItem('remembered_username', username)
       // Пароль не сохраняем в localStorage по соображениям безопасности
     } else {
-      localStorage.removeItem('remembered_username');
+      localStorage.removeItem('remembered_username')
     }
-  };
+  }
 
   /**
    * Загрузка сохраненных учетных данных
    */
   const loadCredentials = () => {
-    const rememberedUsername = localStorage.getItem('remembered_username');
+    const rememberedUsername = localStorage.getItem('remembered_username')
     if (rememberedUsername) {
       setLoginData(prev => ({
         ...prev,
         username: rememberedUsername,
-        rememberCredentials: true
-      }));
+        rememberCredentials: true,
+      }))
     }
-  };
+  }
 
   /**
    * Действия диалога
@@ -183,44 +183,44 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
   const actions: IDialogActions = {
     onOk: async (_data?: IDialogData) => {
       try {
-        const username = loginData.username || '';
-        const password = loginData.password || '';
-        const success = await performLogin(username, password);
-        
+        const username = loginData.username || ''
+        const password = loginData.password || ''
+        const success = await performLogin(username, password)
+
         if (success) {
-          saveCredentials(username, password);
-          logger.info('Login successful for user:', username);
-          onClose({ success: true, data: loginData, action: 'ok' });
+          saveCredentials(username, password)
+          logger.info('Login successful for user:', username)
+          onClose({ success: true, data: loginData, action: 'ok' })
         } else {
-          setLoginError('Неверное имя пользователя или пароль');
+          setLoginError('Неверное имя пользователя или пароль')
         }
       } catch (error) {
-        logger.error('Login error:', getErrorMessage(error));
-        setLoginError(getErrorMessage(error));
+        logger.error('Login error:', getErrorMessage(error))
+        setLoginError(getErrorMessage(error))
       }
     },
-    
+
     onCancel: () => {
-      logger.info('Login dialog cancelled');
-      setLoginError(null);
-      onClose({ success: false, action: 'cancel' });
+      logger.info('Login dialog cancelled')
+      setLoginError(null)
+      onClose({ success: false, action: 'cancel' })
     },
-    
+
     onHelp: () => {
-      logger.info('Opening login help...');
+      logger.info('Opening login help...')
       // Открытие справки по входу в систему
     },
-    
+
     onValidate: (_data: IDialogData) => {
       if (!loginData.username || loginData.username.trim().length === 0) {
-        return false;
+        return false
       }
       if (!loginData.password || loginData.password.length === 0) {
-        return false;
+        return false
       }
-      return true;
-    }
-  };
+      return true
+    },
+  }
 
   /**
    * Инициализация при монтировании
@@ -231,15 +231,15 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
         ...prev,
         ...data,
         id: prev.id,
-        timestamp: new Date()
-      }));
+        timestamp: new Date(),
+      }))
     }
-  }, [data]);
+  }, [data])
 
   // Загрузка сохраненных учетных данных
   useEffect(() => {
-    loadCredentials();
-  }, []);
+    loadCredentials()
+  }, [])
 
   const renderDialogContent = (data: LoginDialogData, validationErrors: Record<string, string[]>): React.ReactNode => (
     <div className="space-y-6 p-6">
@@ -357,7 +357,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
         <div>• user / user123 (пользователь)</div>
       </div>
     </div>
-  );
+  )
 
   return (
     <BaseDialog<LoginDialogData>
@@ -372,12 +372,12 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
         modal: true,
         showHelp: true,
         closeOnEscape: !isLoading,
-        closeOnEnter: false
+        closeOnEnter: false,
       }}
     >
       {((data: LoginDialogData, validationErrors: Record<string, string[]>) => renderDialogContent(data, validationErrors)) as DialogRenderFunction<LoginDialogData>}
     </BaseDialog>
-  );
-};
+  )
+}
 
-export default LoginDialog;
+export default LoginDialog

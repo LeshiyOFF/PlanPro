@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { useJavaApi, Project } from '@/hooks/useJavaApi';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
-import { logger } from '@/utils/logger';
-import { ProjectForm } from './ProjectForm';
-import { ProjectCard } from './ProjectCard';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { ErrorAlert } from '@/components/ui/error-alert';
-import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { ProjectCardSkeleton } from '@/components/ui/skeleton-loader';
+import React, { useState, useEffect } from 'react'
+import { useJavaApi, Project } from '@/hooks/useJavaApi'
+import { useAsyncOperation } from '@/hooks/useAsyncOperation'
+import { logger } from '@/utils/logger'
+import { ProjectForm } from './ProjectForm'
+import { ProjectCard } from './ProjectCard'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { ErrorAlert } from '@/components/ui/error-alert'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { ProjectCardSkeleton } from '@/components/ui/skeleton-loader'
 
 /**
  * Компонент управления проектами с реальной Java API интеграцией
  */
 export const ProjectManager: React.FC = () => {
-  const javaApi = useJavaApi();
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const javaApi = useJavaApi()
+  const [isCreating, setIsCreating] = useState(false)
+  const [editingProject, setEditingProject] = useState<Project | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     startDate: '',
     endDate: '',
-    status: 'planning'
-  });
+    status: 'planning',
+  })
 
   // Hook для операций с проектами
-  const projectOperation = useAsyncOperation<Project>();
-  const loadProjectsOperation = useAsyncOperation<Project[]>();
-  
+  const projectOperation = useAsyncOperation<Project>()
+  const loadProjectsOperation = useAsyncOperation<Project[]>()
+
   /**
    * Инициализация при монтировании
    */
@@ -37,17 +37,17 @@ export const ProjectManager: React.FC = () => {
         () => javaApi.loadProjects(),
         {
           onSuccess: (data: unknown) => {
-            const list = data as Project[] | null | undefined;
-            logger.info('Projects loaded successfully:', { count: list?.length ?? 0 });
+            const list = data as Project[] | null | undefined
+            logger.info('Projects loaded successfully:', { count: list?.length ?? 0 })
           },
           onError: (error) => {
-            logger.error('Failed to load projects:', { message: error instanceof Error ? error.message : String(error) });
-          }
-        }
-      );
+            logger.error('Failed to load projects:', { message: error instanceof Error ? error.message : String(error) })
+          },
+        },
+      )
     }
-  }, [javaApi.isApiAvailable, javaApi.loadProjects, loadProjectsOperation]);
-  
+  }, [javaApi.isApiAvailable, javaApi.loadProjects, loadProjectsOperation])
+
   /**
    * Сброс формы
    */
@@ -57,69 +57,69 @@ export const ProjectManager: React.FC = () => {
       description: '',
       startDate: '',
       endDate: '',
-      status: 'planning'
-    });
-    setEditingProject(null);
-    setIsCreating(false);
-  };
-  
+      status: 'planning',
+    })
+    setEditingProject(null)
+    setIsCreating(false)
+  }
+
   /**
    * Создание проекта
    */
   const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     if (!formData.name.trim()) {
       await javaApi.ipcService.showMessageBox({
         type: 'error',
         title: 'Ошибка валидации',
-        message: 'Название проекта обязательно для заполнения'
-      });
-      return;
+        message: 'Название проекта обязательно для заполнения',
+      })
+      return
     }
-    
+
     projectOperation.execute(
-      () => javaApi.createProject(formData).then((p) => { if (!p) throw new Error('Create failed'); return p; }),
+      () => javaApi.createProject(formData).then((p) => { if (!p) throw new Error('Create failed'); return p }),
       {
         onSuccess: (data: unknown) => {
-          const project = data as Project | null | undefined;
-          logger.info('Project created successfully:', { projectId: project?.id });
-          resetForm();
-          loadProjectsOperation.execute(() => javaApi.loadProjects());
+          const project = data as Project | null | undefined
+          logger.info('Project created successfully:', { projectId: project?.id })
+          resetForm()
+          loadProjectsOperation.execute(() => javaApi.loadProjects())
         },
         onError: (error) => {
-          logger.error('Failed to create project:', { message: error instanceof Error ? error.message : String(error) });
-        }
-      }
-    );
-  };
-  
+          logger.error('Failed to create project:', { message: error instanceof Error ? error.message : String(error) })
+        },
+      },
+    )
+  }
+
   /**
    * Обновление проекта
    */
   const handleUpdateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     if (!editingProject || !formData.name.trim()) {
-      return;
+      return
     }
-    
+
     projectOperation.execute(
-      () => javaApi.updateProject(editingProject.id, formData).then((p) => { if (!p) throw new Error('Update failed'); return p; }),
+      () => javaApi.updateProject(editingProject.id, formData).then((p) => { if (!p) throw new Error('Update failed'); return p }),
       {
         onSuccess: (data: unknown) => {
-          const updated = data as Project | null | undefined;
-          logger.info('Project updated successfully:', { projectId: updated?.id });
-          resetForm();
-          loadProjectsOperation.execute(() => javaApi.loadProjects());
+          const updated = data as Project | null | undefined
+          logger.info('Project updated successfully:', { projectId: updated?.id })
+          resetForm()
+          loadProjectsOperation.execute(() => javaApi.loadProjects())
         },
         onError: (error) => {
-          logger.error('Failed to update project:', { message: error instanceof Error ? error.message : String(error) });
-        }
-      }
-    );
-  };
-  
+          logger.error('Failed to update project:', { message: error instanceof Error ? error.message : String(error) })
+        },
+      },
+    )
+  }
+
   /**
    * Удаление проекта
    */
@@ -129,58 +129,58 @@ export const ProjectManager: React.FC = () => {
       title: 'Удалить проект',
       message: `Вы уверены, что хотите удалить "${project.name}"?`,
       buttons: ['Да', 'Нет'],
-      defaultId: 1
-    });
-    
+      defaultId: 1,
+    })
+
     if (result.response === 0) {
       projectOperation.execute(
         () => javaApi.deleteProject(project.id).then(() => project),
         {
           onSuccess: () => {
-            logger.info('Project deleted successfully:', { projectId: project.id });
-            loadProjectsOperation.execute(() => javaApi.loadProjects());
+            logger.info('Project deleted successfully:', { projectId: project.id })
+            loadProjectsOperation.execute(() => javaApi.loadProjects())
           },
           onError: (error) => {
-            logger.error('Failed to delete project:', { message: error instanceof Error ? error.message : String(error) });
-          }
-        }
-      );
+            logger.error('Failed to delete project:', { message: error instanceof Error ? error.message : String(error) })
+          },
+        },
+      )
     }
-  };
-  
+  }
+
   /**
    * Редактирование проекта
    */
   const startEditProject = (project: Project) => {
-    setEditingProject(project);
+    setEditingProject(project)
     setFormData({
       name: project.name,
       description: project.description || '',
       startDate: project.startDate || '',
       endDate: project.endDate || '',
-      status: project.status || 'planning'
-    });
-    setIsCreating(true);
-  };
-  
+      status: project.status || 'planning',
+    })
+    setIsCreating(true)
+  }
+
   /**
    * Экспорт проекта
    */
   const handleExportProject = async (project: Project) => {
     try {
-      const result = await javaApi.exportProject(project.id, 'json');
+      const result = await javaApi.exportProject(project.id, 'json')
       if (result) {
         await javaApi.ipcService.showMessageBox({
           type: 'info',
           title: 'Экспорт выполнен',
-          message: `Проект "${project.name}" успешно экспортирован`
-        });
+          message: `Проект "${project.name}" успешно экспортирован`,
+        })
       }
     } catch (error) {
-      logger.error('Failed to export project:', { message: error instanceof Error ? error.message : String(error) });
+      logger.error('Failed to export project:', { message: error instanceof Error ? error.message : String(error) })
     }
-  };
-  
+  }
+
   return (
     <ErrorBoundary>
       <div style={{ padding: '20px' }}>
@@ -188,21 +188,21 @@ export const ProjectManager: React.FC = () => {
         <ErrorAlert
           error={projectOperation.error || loadProjectsOperation.error}
           onRetry={() => {
-            projectOperation.clearError();
-            loadProjectsOperation.clearError();
-            loadProjectsOperation.execute(() => javaApi.loadProjects());
+            projectOperation.clearError()
+            loadProjectsOperation.clearError()
+            loadProjectsOperation.execute(() => javaApi.loadProjects())
           }}
           onDismiss={() => {
-            projectOperation.clearError();
-            loadProjectsOperation.clearError();
+            projectOperation.clearError()
+            loadProjectsOperation.clearError()
           }}
         />
 
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '20px'
+          marginBottom: '20px',
         }}>
           <h2>Проекты</h2>
           <button
@@ -214,16 +214,16 @@ export const ProjectManager: React.FC = () => {
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: projectOperation.loading ? 'not-allowed' : 'pointer'
+              cursor: projectOperation.loading ? 'not-allowed' : 'pointer',
             }}
           >
             {projectOperation.loading ? 'Создание...' : 'Новый проект'}
           </button>
         </div>
-      
-      {/* Форма создания/редактирования */}
-      {isCreating && (
-        <ProjectForm
+
+        {/* Форма создания/редактирования */}
+        {isCreating && (
+          <ProjectForm
             project={editingProject}
             formData={formData}
             onFormChange={setFormData}
@@ -231,9 +231,9 @@ export const ProjectManager: React.FC = () => {
             onCancel={resetForm}
             isLoading={projectOperation.loading}
           />
-      )}
-      
-      {/* Список проектов */}
+        )}
+
+        {/* Список проектов */}
         <div style={{ display: 'grid', gap: '15px' }}>
           {loadProjectsOperation.loading ? (
             // Show skeleton loaders during loading
@@ -248,7 +248,7 @@ export const ProjectManager: React.FC = () => {
               padding: '40px',
               color: '#666',
               border: '2px dashed #ddd',
-              borderRadius: '10px'
+              borderRadius: '10px',
             }}>
               <h3>Проекты не найдены</h3>
               <p>Создайте свой первый проект, чтобы начать работу</p>
@@ -275,6 +275,6 @@ export const ProjectManager: React.FC = () => {
         )}
       </div>
     </ErrorBoundary>
-  );
-};
+  )
+}
 

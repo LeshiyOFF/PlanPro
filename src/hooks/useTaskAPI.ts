@@ -19,60 +19,60 @@ export const useTaskAPI = (config?: APIClientConfig) => {
       retryAttempts: 3,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
       },
-      ...config
-    });
-  }, [config]);
+      ...config,
+    })
+  }, [config])
 
   const handleError = useCallback((error: CaughtError, context: string) => {
-    console.error(`${context}:`, error);
-    return { message: error.message, code: 'API_ERROR', context };
-  }, []);
+    console.error(`${context}:`, error)
+    return { message: error.message, code: 'API_ERROR', context }
+  }, [])
 
   const toId = (id: string | ID): ID =>
-    typeof id === 'string' ? stringToCatalogTaskId(id) : id;
+    typeof id === 'string' ? stringToCatalogTaskId(id) : id
 
   return useMemo(() => ({
     getAll: async (projectId: string | ID) => {
       try {
-        return await apiClient.getTasks(toId(projectId));
+        return await apiClient.getTasks(toId(projectId))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to fetch tasks for project');
+        throw handleError(toCaughtError(error), 'Failed to fetch tasks for project')
       }
     },
 
     getById: async (id: string | ID) => {
       try {
-        return await apiClient.getTask(toId(id));
+        return await apiClient.getTask(toId(id))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to fetch task');
+        throw handleError(toCaughtError(error), 'Failed to fetch task')
       }
     },
 
     create: async (task: Partial<Task>) => {
       try {
-        return await apiClient.createTask(uiTaskPartialToCatalog(task));
+        return await apiClient.createTask(uiTaskPartialToCatalog(task))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to create task');
+        throw handleError(toCaughtError(error), 'Failed to create task')
       }
     },
 
     update: async (id: string | ID, task: Partial<Task>) => {
       try {
-        return await apiClient.updateTask(toId(id), uiTaskPartialToCatalog(task));
+        return await apiClient.updateTask(toId(id), uiTaskPartialToCatalog(task))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to update task');
+        throw handleError(toCaughtError(error), 'Failed to update task')
       }
     },
 
     delete: async (id: string | ID) => {
       try {
-        await apiClient.deleteTask(toId(id));
+        await apiClient.deleteTask(toId(id))
       } catch (error) {
-        throw handleError(toCaughtError(error), 'Failed to delete task');
+        throw handleError(toCaughtError(error), 'Failed to delete task')
       }
-    }
-  }), [apiClient, handleError]);
+    },
+  }), [apiClient, handleError])
 }
 

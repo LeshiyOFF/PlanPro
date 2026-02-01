@@ -1,5 +1,5 @@
-import React from 'react';
-import { UsageStatsCard, StatsCardColorScheme } from '@/components/ui/usage-stats-card';
+import React from 'react'
+import { UsageStatsCard, StatsCardColorScheme } from '@/components/ui/usage-stats-card'
 
 /**
  * Пропсы для карточки статистики ресурсов
@@ -14,12 +14,12 @@ interface ResourceUsageStatsCardProps {
 
 /**
  * ResourceUsageStatsCard - Карточка статистики для представления использования ресурсов.
- * 
+ *
  * Обёртка над унифицированным UsageStatsCard для обратной совместимости
  * с существующим ResourceUsageView.
- * 
+ *
  * @deprecated Рекомендуется использовать UsageStatsCard напрямую
  */
 export const ResourceUsageStatsCard: React.FC<ResourceUsageStatsCardProps> = (props) => {
-  return <UsageStatsCard {...props} />;
-};
+  return <UsageStatsCard {...props} />
+}

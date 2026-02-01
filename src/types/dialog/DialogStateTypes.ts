@@ -3,8 +3,8 @@
  * Заменяет использование any в DialogState<TData, TResult>
  */
 
-import type { DialogType } from './DialogType';
-import type { JsonObject, JsonValue } from '../json-types';
+import type { DialogType } from './DialogType'
+import type { JsonObject, JsonValue } from '../json-types'
 
 /** Дефолтный тип данных диалога (вместо unknown) */
 export type DefaultDialogData = JsonObject;

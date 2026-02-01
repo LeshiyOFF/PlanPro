@@ -1,6 +1,6 @@
-import React from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { ButtonGroup } from './ButtonGroup';
+import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { ButtonGroup } from './ButtonGroup'
 
 const meta: Meta<typeof ButtonGroup> = {
   title: 'Design System/Molecules/ButtonGroup',
@@ -40,9 +40,9 @@ const meta: Meta<typeof ButtonGroup> = {
       description: 'ID выбранной кнопки',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
@@ -53,7 +53,7 @@ export const Default: Story = {
       { id: '3', children: 'Button 3' },
     ],
   },
-};
+}
 
 export const Vertical: Story = {
   args: {
@@ -64,7 +64,7 @@ export const Vertical: Story = {
       { id: '3', children: 'Option 3' },
     ],
   },
-};
+}
 
 export const WithSpacing: Story = {
   render: () => (
@@ -81,7 +81,7 @@ export const WithSpacing: Story = {
           ]}
         />
       </div>
-      
+
       <div>
         <h3 className="mb-2 text-sm font-medium text-gray-700">Small Spacing</h3>
         <ButtonGroup
@@ -94,7 +94,7 @@ export const WithSpacing: Story = {
           ]}
         />
       </div>
-      
+
       <div>
         <h3 className="mb-2 text-sm font-medium text-gray-700">Large Spacing</h3>
         <ButtonGroup
@@ -109,7 +109,7 @@ export const WithSpacing: Story = {
       </div>
     </div>
   ),
-};
+}
 
 export const EqualWidth: Story = {
   args: {
@@ -121,7 +121,7 @@ export const EqualWidth: Story = {
       { id: 'very-long-button', children: 'Very Long Button' },
     ],
   },
-};
+}
 
 export const WithSelection: Story = {
   args: {
@@ -132,7 +132,7 @@ export const WithSelection: Story = {
       { id: '3', children: 'Option 3' },
     ],
   },
-};
+}
 
 export const DifferentColors: Story = {
   args: {
@@ -142,7 +142,7 @@ export const DifferentColors: Story = {
       { id: 'success', children: 'Success', color: 'success' },
     ],
   },
-};
+}
 
 export const WithIcons: Story = {
   args: {
@@ -152,12 +152,12 @@ export const WithIcons: Story = {
       { id: 'delete', children: '🗑️ Delete' },
     ],
   },
-};
+}
 
 export const RadioGroup: Story = {
   render: () => {
-    const [selected, setSelected] = React.useState('option1');
-    
+    const [selected, setSelected] = React.useState('option1')
+
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900">Select Option</h3>
@@ -174,7 +174,7 @@ export const RadioGroup: Story = {
         />
         <p className="text-sm text-gray-600">Selected: {selected}</p>
       </div>
-    );
+    )
   },
-};
+}
 

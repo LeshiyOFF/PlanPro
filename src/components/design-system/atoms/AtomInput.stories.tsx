@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { AtomInput } from './AtomInput';
+import type { Meta, StoryObj } from '@storybook/react'
+import { AtomInput } from './AtomInput'
 
 const meta: Meta<typeof AtomInput> = {
   title: 'Design System/Atoms/AtomInput',
@@ -59,23 +59,23 @@ const meta: Meta<typeof AtomInput> = {
       description: 'Вспомогательный текст',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     placeholder: 'Enter text...',
   },
-};
+}
 
 export const WithValue: Story = {
   args: {
     value: 'Sample text',
     placeholder: 'Enter text...',
   },
-};
+}
 
 export const WithError: Story = {
   args: {
@@ -83,26 +83,26 @@ export const WithError: Story = {
     error: true,
     helperText: 'Please enter a valid email address',
   },
-};
+}
 
 export const WithHelper: Story = {
   args: {
     placeholder: 'Enter password...',
     helperText: 'Password must be at least 8 characters',
   },
-};
+}
 
 export const Disabled: Story = {
   args: {
     value: 'Disabled input',
     disabled: true,
   },
-};
+}
 
 export const Required: Story = {
   args: {
     placeholder: 'Enter name...',
     required: true,
   },
-};
+}
 

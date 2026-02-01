@@ -31,16 +31,16 @@ export const useProjectCore = () => {
 
     const updatedProject: Project = {
       ...project,
-      ...updates
+      ...updates,
     }
 
     setProject(updatedProject)
     setCurrentProject(updatedProject)
-    
+
     // Синхронизация с глобальным стором для автосохранения
-    setProjectState({ 
+    setProjectState({
       unsavedChanges: true,
-      lastModified: new Date()
+      lastModified: new Date(),
     })
 
     logger.info('Метаданные проекта обновлены', {

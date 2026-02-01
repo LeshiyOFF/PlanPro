@@ -1,4 +1,4 @@
-import { CalendarException } from '@/types/calendar-types';
+import { CalendarException } from '@/types/calendar-types'
 
 export interface CalendarExceptionsProps {
   exceptions: CalendarException[];

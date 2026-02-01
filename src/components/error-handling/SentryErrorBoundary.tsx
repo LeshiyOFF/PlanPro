@@ -1,6 +1,6 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
-import { SentryService, type SentryContextValue } from '@/services/SentryService';
-import type { JsonObject } from '@/types/json-types';
+import { Component, ErrorInfo, ReactNode } from 'react'
+import { SentryService, type SentryContextValue } from '@/services/SentryService'
+import type { JsonObject } from '@/types/json-types'
 
 interface Props {
   children: ReactNode;
@@ -21,26 +21,26 @@ interface State {
  */
 export class SentryErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
+    super(props)
+    this.state = { hasError: false }
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    const sentryService = SentryService.getInstance();
+    const sentryService = SentryService.getInstance()
 
     // Установка тегов и контекста
     if (this.props.tags) {
-      sentryService.setTags(this.props.tags);
+      sentryService.setTags(this.props.tags)
     }
 
     if (this.props.userContext) {
       Object.entries(this.props.userContext).forEach(([key, value]) => {
-        sentryService.setTags({ [`user.${key}`]: String(value) });
-      });
+        sentryService.setTags({ [`user.${key}`]: String(value) })
+      })
     }
 
     // Отправка ошибки в Sentry с детальной информацией (контекст — примитивы или вложенные объекты)
@@ -55,11 +55,11 @@ export class SentryErrorBoundary extends Component<Props, State> {
         hasUserContext: !!this.props.userContext,
         hasCustomHandler: !!this.props.onError,
       } as JsonObject,
-    });
+    })
 
     // Вызов кастомного обработчика если предоставлен
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(error, errorInfo)
     }
 
     // Логирование для разработки
@@ -69,21 +69,21 @@ export class SentryErrorBoundary extends Component<Props, State> {
         errorInfo,
         tags: this.props.tags,
         userContext: this.props.userContext,
-      });
+      })
     }
   }
 
   public override componentDidUpdate(prevProps: Props) {
     // Сброс ошибки при смене children
     if (this.state.hasError && prevProps.children !== this.props.children) {
-      this.setState({ hasError: false, error: undefined });
+      this.setState({ hasError: false, error: undefined })
     }
   }
 
   public override render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       // Fallback по умолчанию с информацией об ошибке
@@ -96,10 +96,10 @@ export class SentryErrorBoundary extends Component<Props, State> {
                 Ошибка приложения
               </h1>
               <p className="text-gray-600 mb-4">
-                Произошла непредвиденная ошибка. 
+                Произошла непредвиденная ошибка.
                 Информация об ошибке отправлена в систему мониторинга.
               </p>
-              
+
               <details className="text-left text-sm text-gray-500">
                 <summary className="cursor-pointer mb-2">Техническая информация</summary>
                 <div className="mt-2 space-y-2">
@@ -109,7 +109,7 @@ export class SentryErrorBoundary extends Component<Props, State> {
                       {this.state.error?.message}
                     </p>
                   </div>
-                  
+
                   {this.props.tags && (
                     <div>
                       <strong>Теги:</strong>
@@ -120,7 +120,7 @@ export class SentryErrorBoundary extends Component<Props, State> {
                   )}
                 </div>
               </details>
-              
+
               <button
                 onClick={() => this.setState({ hasError: false, error: undefined })}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -130,9 +130,9 @@ export class SentryErrorBoundary extends Component<Props, State> {
             </div>
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }

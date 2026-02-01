@@ -3,10 +3,10 @@
  * Этот файл сохранен для обратной совместимости
  */
 
-import React from 'react';
-import { TypedDialogService } from './dialog/TypedDialogService';
-import type { JsonValue } from '@/types/json-types';
-import type { JsonValue } from '@/types/json-types';
+import React from 'react'
+import { TypedDialogService } from './dialog/TypedDialogService'
+import type { JsonValue } from '@/types/json-types'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * @deprecated Legacy интерфейс, используйте IDialogService
@@ -38,12 +38,12 @@ export interface DialogState {
  * Обертка для обратной совместимости
  */
 export class DialogService {
-  private static instance: DialogService;
-  private typedService: TypedDialogService;
-  private readonly legacyRegistrations = new Map<string, DialogRegistration>();
+  private static instance: DialogService
+  private typedService: TypedDialogService
+  private readonly legacyRegistrations = new Map<string, DialogRegistration>()
 
   private constructor() {
-    this.typedService = TypedDialogService.getInstance();
+    this.typedService = TypedDialogService.getInstance()
   }
 
   /**
@@ -51,24 +51,24 @@ export class DialogService {
    */
   public static getInstance(): DialogService {
     if (!DialogService.instance) {
-      DialogService.instance = new DialogService();
+      DialogService.instance = new DialogService()
     }
-    return DialogService.instance;
+    return DialogService.instance
   }
 
   /**
    * @deprecated Используйте typedService.register()
    */
   public registerDialog(registration: DialogRegistration): void {
-    this.legacyRegistrations.set(registration.id, registration);
-    console.warn('DialogService.registerDialog is deprecated. Use TypedDialogService.register()');
+    this.legacyRegistrations.set(registration.id, registration)
+    console.warn('DialogService.registerDialog is deprecated. Use TypedDialogService.register()')
   }
 
   /**
    * @deprecated Возвращает legacy-регистрацию по id для обратной совместимости
    */
   public getDialog(id: string): DialogRegistration | null {
-    return this.legacyRegistrations.get(id) ?? null;
+    return this.legacyRegistrations.get(id) ?? null
   }
 
   /**
@@ -76,49 +76,49 @@ export class DialogService {
    */
   public async openDialog(
     _dialogId: string,
-    _data?: Record<string, JsonValue>
+    _data?: Record<string, JsonValue>,
   ): Promise<{ success: boolean; error?: string }> {
-    console.warn('DialogService.openDialog is deprecated. Use TypedDialogService.open()');
-    return { success: false, error: 'Use TypedDialogService' };
+    console.warn('DialogService.openDialog is deprecated. Use TypedDialogService.open()')
+    return { success: false, error: 'Use TypedDialogService' }
   }
 
   /**
    * @deprecated Используйте typedService.close()
    */
   public closeDialog(_dialogId: string): void {
-    console.warn('DialogService.closeDialog is deprecated. Use TypedDialogService.close()');
+    console.warn('DialogService.closeDialog is deprecated. Use TypedDialogService.close()')
   }
 
   /**
    * @deprecated Используйте typedService.isOpen()
    */
   public isDialogOpen(_dialogId: string): boolean {
-    console.warn('DialogService.isDialogOpen is deprecated. Use TypedDialogService.isOpen()');
-    return false;
+    console.warn('DialogService.isDialogOpen is deprecated. Use TypedDialogService.isOpen()')
+    return false
   }
 
   /**
    * @deprecated Используйте typedService.closeAll()
    */
   public closeAllDialogs(): void {
-    console.warn('DialogService.closeAllDialogs is deprecated. Use TypedDialogService.closeAll()');
+    console.warn('DialogService.closeAllDialogs is deprecated. Use TypedDialogService.closeAll()')
   }
 
   /**
    * @deprecated Используйте typedService.subscribe()
    */
   public subscribe(listener: () => void): () => void {
-    return this.typedService.subscribe(listener);
+    return this.typedService.subscribe(listener)
   }
 }
 
 /**
  * @deprecated Используйте dialogService из './dialog/TypedDialogService'
  */
-export const dialogService = DialogService.getInstance();
+export const dialogService = DialogService.getInstance()
 
 /**
  * @deprecated Используйте TypedDialogService.getInstance()
  */
-export default DialogService.getInstance();
+export default DialogService.getInstance()
 

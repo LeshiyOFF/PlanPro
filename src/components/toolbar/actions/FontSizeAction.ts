@@ -1,16 +1,16 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { textFormattingService } from '@/services/TextFormattingService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { textFormattingService } from '@/services/TextFormattingService'
 
 /**
  * Действие для изменения размера шрифта
  * Кнопка форматирования TF004
  */
 export class FontSizeAction extends ToolbarAction {
-  private readonly sizes: number[] = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
+  private readonly sizes: number[] = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72]
 
   constructor() {
-    super('TF004', 'Размер шрифта', 'Aa', 'Изменить размер шрифта');
+    super('TF004', 'Размер шрифта', 'Aa', 'Изменить размер шрифта')
   }
 
   /**
@@ -25,7 +25,7 @@ export class FontSizeAction extends ToolbarAction {
    */
   setSize(size: number): void {
     if (this.sizes.includes(size)) {
-      textFormattingService.setFontSize(size);
+      textFormattingService.setFontSize(size)
     }
   }
 
@@ -33,27 +33,27 @@ export class FontSizeAction extends ToolbarAction {
    * Возвращает текущий размер шрифта
    */
   getCurrentSize(): number {
-    return textFormattingService.getFontSize();
+    return textFormattingService.getFontSize()
   }
 
   /**
    * Возвращает доступные размеры шрифтов
    */
   getAvailableSizes(): number[] {
-    return [...this.sizes];
+    return [...this.sizes]
   }
 
   /**
    * Создаёт экземпляр кнопки для тулбара с dropdown
    */
   createButton(): IToolbarButton {
-    const currentSize = this.getCurrentSize();
+    const currentSize = this.getCurrentSize()
     const dropdownItems = this.sizes.map(size => ({
       id: `${this.id}-${size}`,
       label: `${size}pt`,
       icon: size === currentSize ? '✓' : '',
-      onClick: () => this.setSize(size)
-    }));
+      onClick: () => this.setSize(size),
+    }))
 
     return {
       id: this.id,
@@ -63,9 +63,9 @@ export class FontSizeAction extends ToolbarAction {
       disabled: this.disabled,
       dropdownItems,
       onClick: () => {
-        console.log('Показать меню выбора размера шрифта');
-      }
-    };
+        console.log('Показать меню выбора размера шрифта')
+      },
+    }
   }
 }
 

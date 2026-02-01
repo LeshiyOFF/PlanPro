@@ -25,38 +25,38 @@ interface UseAPIConfig extends APIClientConfig {
  * Следует SOLID принципам
  */
 export const useProjectLibreAPI = (config?: UseAPIConfig) => {
-  const defaultBaseUrl = `${EnvironmentConfig.getApiBaseUrl()}/api`;
+  const defaultBaseUrl = `${EnvironmentConfig.getApiBaseUrl()}/api`
 
   // Получение отдельных API клиентов
   const projects = useProjectAPI({
     ...config?.projectAPI,
     baseURL: config?.projectAPI?.baseURL || config?.baseURL || defaultBaseUrl,
-    timeout: config?.timeout || 5000
-  });
+    timeout: config?.timeout || 5000,
+  })
 
   const tasks = useTaskAPI({
     ...config?.taskAPI,
     baseURL: config?.taskAPI?.baseURL || config?.baseURL || defaultBaseUrl,
-    timeout: config?.timeout || 5000
-  });
+    timeout: config?.timeout || 5000,
+  })
 
   const resources = useResourceAPI({
     ...config?.resourceAPI,
     baseURL: config?.resourceAPI?.baseURL || config?.baseURL || defaultBaseUrl,
-    timeout: config?.timeout || 5000
-  });
+    timeout: config?.timeout || 5000,
+  })
 
   const file = useFileAPI({
     ...config?.fileAPI,
     baseURL: config?.fileAPI?.baseURL || config?.baseURL || defaultBaseUrl,
-    timeout: config?.timeout || 10000
-  });
+    timeout: config?.timeout || 10000,
+  })
 
   return useMemo(() => ({
     projects,
     tasks,
     resources,
-    file
-  }), [projects, tasks, resources, file]);
+    file,
+  }), [projects, tasks, resources, file])
 }
 

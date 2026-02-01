@@ -1,4 +1,4 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react'
 
 interface Props {
   children: ReactNode;
@@ -17,33 +17,33 @@ interface State {
  */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
+    super(props)
+    this.state = { hasError: false }
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+    console.error('ErrorBoundary caught an error:', error, errorInfo)
+
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(error, errorInfo)
     }
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
-  };
+    this.setState({ hasError: false, error: undefined })
+  }
 
   public override render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
         if (typeof this.props.fallback === 'function') {
-          return this.props.fallback(this.state.error, this.handleReset);
+          return this.props.fallback(this.state.error, this.handleReset)
         }
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       return (
@@ -53,7 +53,7 @@ export class ErrorBoundary extends Component<Props, State> {
           backgroundColor: '#fff5f5',
           border: '1px solid #fed7d7',
           borderRadius: '8px',
-          margin: '20px'
+          margin: '20px',
         }}>
           <h2 style={{ color: '#e53e3e', marginBottom: '15px' }}>
             Something went wrong
@@ -69,16 +69,16 @@ export class ErrorBoundary extends Component<Props, State> {
               color: 'white',
               border: 'none',
               borderRadius: '5px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             Try Again
           </button>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 

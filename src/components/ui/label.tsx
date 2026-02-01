@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/utils/cn';
+import React from 'react'
+import { cn } from '@/utils/cn'
 
 /**
  * Компонент Label
@@ -16,11 +16,11 @@ export const Label: React.FC<LabelProps> = ({ htmlFor, className, children }) =>
       htmlFor={htmlFor}
       className={cn(
         'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
-        className
+        className,
       )}
     >
       {children}
     </label>
-  );
-};
+  )
+}
 

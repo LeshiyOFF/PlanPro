@@ -2,7 +2,7 @@
  * Интерфейсы для ячеек таблицы.
  */
 
-import { CellValue } from '@/types/sheet/CellValueTypes';
+import { CellValue } from '@/types/sheet/CellValueTypes'
 
 /**
  * Координаты ячейки

@@ -1,5 +1,5 @@
-import type { StoryObj, Meta } from '@storybook/react';
-import { AtomButton } from './AtomButton';
+import type { StoryObj, Meta } from '@storybook/react'
+import { AtomButton } from './AtomButton'
 
 const meta: Meta<typeof AtomButton> = {
   title: 'Design System/Atoms/AtomButton/Variants',
@@ -11,11 +11,11 @@ const meta: Meta<typeof AtomButton> = {
       },
     },
   },
-};
+}
 
 type Story = StoryObj<typeof meta>;
 
-export default meta;
+export default meta
 
 export const Colors: Story = {
   render: () => (
@@ -29,7 +29,7 @@ export const Colors: Story = {
       <meta.component variant="solid" color="neutral">Neutral</meta.component>
     </div>
   ),
-};
+}
 
 export const Sizes: Story = {
   render: () => (
@@ -41,14 +41,14 @@ export const Sizes: Story = {
       <meta.component size="xl">XL</meta.component>
     </div>
   ),
-};
+}
 
 export const Disabled: Story = {
   args: {
     children: 'Disabled Button',
     disabled: true,
   },
-};
+}
 
 export const WithIcon: Story = {
   args: {
@@ -59,5 +59,5 @@ export const WithIcon: Story = {
       </span>
     ),
   },
-};
+}
 

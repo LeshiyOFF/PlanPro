@@ -1,44 +1,44 @@
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Trash2, ShieldCheck } from 'lucide-react';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { ISecurityPreferences } from '../interfaces/UserPreferencesInterfaces';
+import React, { useState } from 'react'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Plus, Trash2, ShieldCheck } from 'lucide-react'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { ISecurityPreferences } from '../interfaces/UserPreferencesInterfaces'
 
 /**
  * Компонент настроек безопасности документа
  * Управляет защитой паролем и макросами
  */
 export const SecurityPreferences: React.FC = () => {
-  const { preferences, updateSecurityPreferences } = useUserPreferences();
-  const securityPrefs = preferences.security as ISecurityPreferences;
-  const [newLocation, setNewLocation] = useState('');
+  const { preferences, updateSecurityPreferences } = useUserPreferences()
+  const securityPrefs = preferences.security as ISecurityPreferences
+  const [newLocation, setNewLocation] = useState('')
 
   const handleAddLocation = () => {
-    if (!newLocation.trim()) return;
-    const currentLocations = securityPrefs.trustCenter.trustedLocations || [];
-    if (currentLocations.includes(newLocation.trim())) return;
+    if (!newLocation.trim()) return
+    const currentLocations = securityPrefs.trustCenter.trustedLocations || []
+    if (currentLocations.includes(newLocation.trim())) return
 
     updateSecurityPreferences({
       trustCenter: {
         ...securityPrefs.trustCenter,
-        trustedLocations: [...currentLocations, newLocation.trim()]
-      }
-    });
-    setNewLocation('');
-  };
+        trustedLocations: [...currentLocations, newLocation.trim()],
+      },
+    })
+    setNewLocation('')
+  }
 
   const handleRemoveLocation = (location: string) => {
     updateSecurityPreferences({
       trustCenter: {
         ...securityPrefs.trustCenter,
-        trustedLocations: (securityPrefs.trustCenter.trustedLocations || []).filter(l => l !== location)
-      }
-    });
-  };
+        trustedLocations: (securityPrefs.trustCenter.trustedLocations || []).filter(l => l !== location),
+      },
+    })
+  }
 
   return (
     <PreferencesSection
@@ -88,14 +88,14 @@ export const SecurityPreferences: React.FC = () => {
           <p className="text-xs text-muted-foreground mt-2">
             Включение макросов может быть небезопасно для документов из ненадежных источников.
           </p>
-          
+
           <div className="mt-4 pt-4 border-t border-muted">
             <div className="flex items-center space-x-2">
               <Switch
                 id="trustVba"
                 checked={securityPrefs.trustCenter.trustVbaProjects}
-                onCheckedChange={(checked) => updateSecurityPreferences({ 
-                  trustCenter: { ...securityPrefs.trustCenter, trustVbaProjects: checked } 
+                onCheckedChange={(checked) => updateSecurityPreferences({
+                  trustCenter: { ...securityPrefs.trustCenter, trustVbaProjects: checked },
                 })}
               />
               <Label htmlFor="trustVba">Доверять проектам VBA</Label>
@@ -107,10 +107,10 @@ export const SecurityPreferences: React.FC = () => {
               <ShieldCheck size={16} className="text-primary" />
               <h5 className="text-xs font-semibold uppercase tracking-wider">Надежные расположения</h5>
             </div>
-            
+
             <div className="flex gap-2">
-              <Input 
-                placeholder="Путь к папке..." 
+              <Input
+                placeholder="Путь к папке..."
                 value={newLocation}
                 onChange={(e) => setNewLocation(e.target.value)}
                 className="h-8 text-xs"
@@ -124,9 +124,9 @@ export const SecurityPreferences: React.FC = () => {
               {(securityPrefs.trustCenter.trustedLocations || []).map((loc, idx) => (
                 <div key={idx} className="flex items-center justify-between p-1.5 bg-background rounded border text-[10px] group">
                   <span className="truncate flex-1 mr-2">{loc}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-5 w-5 p-0 opacity-0 group-hover:opacity-100 text-destructive"
                     onClick={() => handleRemoveLocation(loc)}
                   >
@@ -144,6 +144,6 @@ export const SecurityPreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

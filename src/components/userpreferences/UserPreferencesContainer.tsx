@@ -1,75 +1,75 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GeneralPreferences, DisplayPreferences, SchedulePreferences, CalendarPreferences, EditingPreferences, CalculationPreferences, SecurityPreferences } from './components';
-import { useUserPreferences } from './hooks/useUserPreferences';
-import { WebImportDialog } from './components/WebImportDialog';
-import { AboutDialog } from '@/components/dialogs/information/AboutDialog';
-import { Info } from 'lucide-react';
-import { getElectronAPI } from '@/utils/electronAPI';
-import type { JsonObject } from '@/types/json-types';
-import './UserPreferencesStyles.css';
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { GeneralPreferences, DisplayPreferences, SchedulePreferences, CalendarPreferences, EditingPreferences, CalculationPreferences, SecurityPreferences } from './components'
+import { useUserPreferences } from './hooks/useUserPreferences'
+import { WebImportDialog } from './components/WebImportDialog'
+import { AboutDialog } from '@/components/dialogs/information/AboutDialog'
+import { Info } from 'lucide-react'
+import { getElectronAPI } from '@/utils/electronAPI'
+import type { JsonObject } from '@/types/json-types'
+import './UserPreferencesStyles.css'
 
 /**
  * Основной контейнер пользовательских настроек (SOLID Container).
  */
 export const UserPreferencesContainer: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('general');
-  const { preferences, exportPreferences, importPreferences } = useUserPreferences();
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general')
+  const { preferences, exportPreferences, importPreferences } = useUserPreferences()
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false)
 
   const handleExport = async () => {
     try {
-      const api = getElectronAPI();
+      const api = getElectronAPI()
       if (!api?.showSaveDialog) {
-        const data = exportPreferences();
-        const blob = new Blob([data], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'user-preferences.json'; a.click();
-        URL.revokeObjectURL(url);
-        return;
+        const data = exportPreferences()
+        const blob = new Blob([data], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url; a.download = 'user-preferences.json'; a.click()
+        URL.revokeObjectURL(url)
+        return
       }
 
       const result = await api.showSaveDialog({
         title: 'Экспорт настроек',
         defaultPath: 'projectlibre-settings.json',
-        filters: [{ name: 'JSON Files', extensions: ['json'] }]
-      } as Record<string, JsonObject>);
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      } as Record<string, JsonObject>)
 
       if (!result.canceled && result.filePath && api.exportPreferencesToFile) {
-        await api.exportPreferencesToFile(result.filePath, preferences as JsonObject);
+        await api.exportPreferencesToFile(result.filePath, preferences as JsonObject)
       }
-    } catch (e) { console.error('Export failed:', e); }
-  };
+    } catch (e) { console.error('Export failed:', e) }
+  }
 
   const handleImport = async () => {
-    const api = getElectronAPI();
-    if (!api?.showOpenDialog) { setIsImportDialogOpen(true); return; }
+    const api = getElectronAPI()
+    if (!api?.showOpenDialog) { setIsImportDialogOpen(true); return }
     try {
       const result = await api.showOpenDialog({
         title: 'Импорт настроек',
         properties: ['openFile'],
-        filters: [{ name: 'JSON Files', extensions: ['json'] }]
-      } as Record<string, JsonObject>);
+        filters: [{ name: 'JSON Files', extensions: ['json'] }],
+      } as Record<string, JsonObject>)
 
       if (!result.canceled && result.filePaths?.length > 0 && api.importPreferencesFromFile) {
-        const res = await api.importPreferencesFromFile(result.filePaths[0]);
-        if (res.success && res.data) await importPreferences(JSON.stringify(res.data));
+        const res = await api.importPreferencesFromFile(result.filePaths[0])
+        if (res.success && res.data) await importPreferences(JSON.stringify(res.data))
       }
-    } catch (e) { console.error('Import failed:', e); }
-  };
+    } catch (e) { console.error('Import failed:', e) }
+  }
 
   const handleWebImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const file = event.target.files?.[0]
+    if (!file) return
     try {
-      const text = await file.text();
-      await importPreferences(text);
-      setIsImportDialogOpen(false);
-    } catch (e) { console.error('Web import failed:', e); }
-  };
+      const text = await file.text()
+      await importPreferences(text)
+      setIsImportDialogOpen(false)
+    } catch (e) { console.error('Web import failed:', e) }
+  }
 
   return (
     <div className="user-preferences-container bg-slate-50/50">
@@ -77,7 +77,7 @@ export const UserPreferencesContainer: React.FC = () => {
         <h1 className="preferences-title">Пользовательские настройки</h1>
         <p className="preferences-description">Управление настройками приложения и безопасности</p>
       </div>
-      
+
       <div className="preferences-content scrollbar-thin">
         <div className="flex justify-between items-center mb-8">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -89,7 +89,7 @@ export const UserPreferencesContainer: React.FC = () => {
               <TabsTrigger value="editing">Редактирование</TabsTrigger>
             </TabsList>
           </Tabs>
-          
+
           <div className="flex gap-3">
             <Button variant="outline" size="sm" onClick={handleImport} className="rounded-xl border-border/40 hover:bg-primary/5 transition-all">Импорт</Button>
             <Button variant="outline" size="sm" onClick={handleExport} className="rounded-xl border-border/40 hover:bg-primary/5 transition-all">Экспорт</Button>
@@ -111,9 +111,9 @@ export const UserPreferencesContainer: React.FC = () => {
         <div className="preferences-footer mt-auto pt-6 border-t border-border/10 flex justify-between items-center">
           <div className="text-xs text-muted-foreground flex items-center gap-4 opacity-70">
             <span>Версия настроек: 1.0.0</span>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="h-7 text-[10px] gap-1 px-2 hover:bg-primary/5 hover:text-primary transition-all"
               onClick={() => setIsAboutDialogOpen(true)}
             >
@@ -127,5 +127,5 @@ export const UserPreferencesContainer: React.FC = () => {
       <WebImportDialog isOpen={isImportDialogOpen} onClose={() => setIsImportDialogOpen(false)} onImport={handleWebImport} />
       <AboutDialog isOpen={isAboutDialogOpen} onClose={() => setIsAboutDialogOpen(false)} />
     </div>
-  );
-};
+  )
+}

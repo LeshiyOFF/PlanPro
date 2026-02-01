@@ -1,5 +1,5 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 /**
  * Базовый компонент для секции настроек
@@ -15,7 +15,7 @@ export const PreferencesSection: React.FC<PreferencesSectionProps> = ({
   title,
   description,
   children,
-  className = ''
+  className = '',
 }) => {
   return (
     <Card className={`preferences-section ${className}`}>
@@ -29,6 +29,6 @@ export const PreferencesSection: React.FC<PreferencesSectionProps> = ({
         {children}
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 

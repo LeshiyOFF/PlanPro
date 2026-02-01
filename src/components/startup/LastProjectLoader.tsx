@@ -1,17 +1,17 @@
-import React from 'react';
-import { useLastProjectLoader } from '@/hooks/useLastProjectLoader';
+import React from 'react'
+import { useLastProjectLoader } from '@/hooks/useLastProjectLoader'
 
 /**
  * Компонент для автоматической загрузки последнего проекта при старте.
  * Должен располагаться внутри ProjectProvider для доступа к API.
- * 
+ *
  * Не рендерит ничего - только выполняет логику загрузки.
  */
 export const LastProjectLoader: React.FC = () => {
   // Хук выполняет загрузку при монтировании
-  useLastProjectLoader();
-  
+  useLastProjectLoader()
+
   // Компонент невидим
-  return null;
-};
+  return null
+}
 

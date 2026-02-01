@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export interface ProjectStats {
   id: string;
@@ -65,23 +65,23 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
   onClose,
   ...props
 }) => {
-  const completionPercentage = projectStats ? (projectStats.completedTasks / projectStats.totalTasks * 100) : 0;
-  const costVariance = projectStats ? projectStats.actualCost - projectStats.totalCost : 0;
-  const scheduleVariance = projectStats ? projectStats.actualDuration - projectStats.totalDuration : 0;
+  const completionPercentage = projectStats ? (projectStats.completedTasks / projectStats.totalTasks * 100) : 0
+  const costVariance = projectStats ? projectStats.actualCost - projectStats.totalCost : 0
+  const scheduleVariance = projectStats ? projectStats.actualDuration - projectStats.totalDuration : 0
 
   const getStatusColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-green-600';
-    if (percentage >= 70) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+    if (percentage >= 90) return 'text-green-600'
+    if (percentage >= 70) return 'text-yellow-600'
+    return 'text-red-600'
+  }
 
   const getVarianceColor = (variance: number) => {
-    if (variance <= 0) return 'text-green-600';
-    if (variance <= 10) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+    if (variance <= 0) return 'text-green-600'
+    if (variance <= 10) return 'text-yellow-600'
+    return 'text-red-600'
+  }
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   if (!projectStats) {
     return (
@@ -106,7 +106,7 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
           </div>
         </div>
       </BaseDialog>
-    );
+    )
   }
 
   return (
@@ -120,20 +120,20 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
       footer={
         <div className="flex justify-between">
           <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onExport?.('pdf')}
             >
               Export PDF
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onExport?.('excel')}
             >
               Export Excel
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => onExport?.('csv')}
             >
               Export CSV
@@ -229,7 +229,7 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
                   )}
                 </div>
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium mb-3">Duration Analysis</Label>
                 <div className="space-y-2 text-sm">
@@ -397,6 +397,6 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
         </Card>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

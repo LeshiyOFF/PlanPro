@@ -3,7 +3,7 @@
  * Заменяют использование `any` для строгой типизации
  */
 
-import type { JsonObject, JsonValue } from '../json-types';
+import type { JsonObject, JsonValue } from '../json-types'
 
 // Базовые типы запросов
 export interface BaseRequest {
@@ -288,7 +288,7 @@ export interface FrontendTaskData {
 /**
  * Данные календаря для синхронизации с бэкендом.
  * Соответствует CalendarSyncDto.java на бэкенде.
- * 
+ *
  * КРИТИЧЕСКОЕ: Передача полных настроек WorkWeek (рабочие дни, часы)
  * необходима для корректного сохранения кастомных календарей.
  */

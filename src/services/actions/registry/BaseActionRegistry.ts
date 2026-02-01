@@ -1,5 +1,5 @@
-import type { Project } from '@/types/project-types';
-import type { ViewType, ViewSettings } from '@/types/ViewTypes';
+import type { Project } from '@/types/project-types'
+import type { ViewType, ViewSettings } from '@/types/ViewTypes'
 
 /** Порт провайдера проекта для действий MainWindow */
 export interface ProjectProviderPort {
@@ -48,18 +48,18 @@ export interface MainWindowDependencies {
   fileOperations?: FileOperationsPort;
 }
 
-import type { IActionManager } from '../ActionManagerTypes';
+import type { IActionManager } from '../ActionManagerTypes'
 
 /**
  * Базовый класс для регистрации действий
  */
 export abstract class BaseActionRegistry {
-  protected actionManager: IActionManager;
-  protected dependencies: MainWindowDependencies;
+  protected actionManager: IActionManager
+  protected dependencies: MainWindowDependencies
 
   constructor(actionManager: IActionManager, dependencies: MainWindowDependencies) {
-    this.actionManager = actionManager;
-    this.dependencies = dependencies;
+    this.actionManager = actionManager
+    this.dependencies = dependencies
   }
 
   /**
@@ -71,19 +71,19 @@ export abstract class BaseActionRegistry {
    * Удаление всех действий
    */
   public unregisterAllActions(): void {
-    const allActions = this.actionManager.getAllActions();
-    
+    const allActions = this.actionManager.getAllActions()
+
     allActions.forEach(action => {
-      this.actionManager.unregisterAction(action.id);
-    });
+      this.actionManager.unregisterAction(action.id)
+    })
   }
 
   /**
    * Перерегистрация всех действий
    */
   public reregisterAllActions(): void {
-    this.unregisterAllActions();
-    this.registerAllActions();
+    this.unregisterAllActions()
+    this.registerAllActions()
   }
 }
 

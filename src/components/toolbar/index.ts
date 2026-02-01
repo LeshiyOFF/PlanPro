@@ -4,14 +4,14 @@
  */
 
 // Основные компоненты
-export { ToolbarContainer } from './ToolbarContainer';
-export { IntegratedToolbar } from './IntegratedToolbar';
+export { ToolbarContainer } from './ToolbarContainer'
+export { IntegratedToolbar } from './IntegratedToolbar'
 
 // Интерфейсы
-export * from './interfaces/ToolbarInterfaces';
+export * from './interfaces/ToolbarInterfaces'
 
 // Действия (Actions)
-export * from './actions';
+export * from './actions'
 
 // Стили (если понадобятся в будущем)
 // export * from './styles/ToolbarStyles';

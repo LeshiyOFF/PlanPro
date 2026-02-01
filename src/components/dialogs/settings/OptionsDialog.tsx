@@ -1,6 +1,6 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '@/components/dialogs/base/SimpleBaseDialog';
-import { UserPreferencesContainer } from '@/components/userpreferences/UserPreferencesContainer';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '@/components/dialogs/base/SimpleBaseDialog'
+import { UserPreferencesContainer } from '@/components/userpreferences/UserPreferencesContainer'
 
 export interface OptionsDialogProps extends Omit<BaseDialogProps, 'children' | 'title'> {
   title?: string;
@@ -30,6 +30,6 @@ export const OptionsDialog: React.FC<OptionsDialogProps> = ({
     >
       <UserPreferencesContainer />
     </BaseDialog>
-  );
-};
+  )
+}
 

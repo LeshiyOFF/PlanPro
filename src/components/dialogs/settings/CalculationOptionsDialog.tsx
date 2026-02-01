@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface CalculationOptions {
   taskMode: 'manual' | 'auto' | 'effort-driven';
@@ -45,8 +45,8 @@ export interface CalculationOptionsDialogProps extends Omit<BaseDialogProps, 'ch
 const TASK_MODES = [
   { value: 'manual', label: 'Manual', description: 'Dates are manually set' },
   { value: 'auto', label: 'Auto Scheduled', description: 'Dates are calculated automatically' },
-  { value: 'effort-driven', label: 'Effort Driven', description: 'Duration changes with resource assignments' }
-];
+  { value: 'effort-driven', label: 'Effort Driven', description: 'Duration changes with resource assignments' },
+]
 
 const CONSTRAINT_TYPES = [
   { value: 'asap', label: 'ASAP', description: 'As Soon As Possible' },
@@ -56,21 +56,21 @@ const CONSTRAINT_TYPES = [
   { value: 'snet', label: 'SNET', description: 'Start No Earlier Than' },
   { value: 'snlt', label: 'SNLT', description: 'Start No Later Than' },
   { value: 'fnet', label: 'FNET', description: 'Finish No Earlier Than' },
-  { value: 'fnlt', label: 'FNLT', description: 'Finish No Later Than' }
-];
+  { value: 'fnlt', label: 'FNLT', description: 'Finish No Later Than' },
+]
 
 const LEVELING_PRIORITIES = [
   { value: 'priority', label: 'Priority' },
   { value: 'duration', label: 'Duration' },
   { value: 'standard', label: 'Standard' },
-  { value: 'id', label: 'ID' }
-];
+  { value: 'id', label: 'ID' },
+]
 
 const EV_METHODS = [
   { value: 'physical', label: 'Physical % Complete' },
   { value: 'percent-complete', label: 'Percent Complete' },
-  { value: 'effort-driven', label: 'Effort Driven' }
-];
+  { value: 'effort-driven', label: 'Effort Driven' },
+]
 
 export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> = ({
   currentOptions,
@@ -92,97 +92,97 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
         lookAhead: 1,
         allowOverallocation: false,
         levelOnlyWithinSlack: false,
-        clearLevelingValues: true
+        clearLevelingValues: true,
       },
       earnedValueSettings: {
         baselineType: 'baseline0',
         method: 'physical',
         statusDate: new Date().toISOString().split('T')[0],
-        updateInterval: 'weekly'
+        updateInterval: 'weekly',
       },
       advancedSettings: {
         criticalSlack: 0,
         multipleCriticalPaths: false,
         showCriticalSlack: false,
         ignoreLinksToOtherProjects: false,
-        actualsInSync: true
-      }
-    }
-  );
+        actualsInSync: true,
+      },
+    },
+  )
 
   const { validate, errors, isValid } = useDialogValidation({
     'levelingSettings.lookAhead': {
       required: true,
       min: 0,
       max: 30,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 30) ? null : 'Look ahead must be between 0 and 30 days'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 30) ? null : 'Look ahead must be between 0 and 30 days',
     },
     'advancedSettings.criticalSlack': {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Critical slack must be between 0 and 100 days'
-    }
-  });
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Critical slack must be between 0 and 100 days',
+    },
+  })
 
   React.useEffect(() => {
     if (currentOptions) {
-      setOptions(currentOptions);
+      setOptions(currentOptions)
     }
-  }, [currentOptions]);
+  }, [currentOptions])
 
   React.useEffect(() => {
-    validate('levelingSettings.lookAhead', options.levelingSettings.lookAhead);
-    validate('advancedSettings.criticalSlack', options.advancedSettings.criticalSlack);
-  }, [options.levelingSettings.lookAhead, options.advancedSettings.criticalSlack]);
+    validate('levelingSettings.lookAhead', options.levelingSettings.lookAhead)
+    validate('advancedSettings.criticalSlack', options.advancedSettings.criticalSlack)
+  }, [options.levelingSettings.lookAhead, options.advancedSettings.criticalSlack])
 
   const handleOptionChange = (category: string, field: string, value: string | number | boolean) => {
     setOptions(prev => {
       if (!category) {
-        return { ...prev, [field]: value };
+        return { ...prev, [field]: value }
       }
-      const catKey = category as keyof CalculationOptions;
-      const categoryData = prev[catKey];
-      
+      const catKey = category as keyof CalculationOptions
+      const categoryData = prev[catKey]
+
       if (typeof categoryData !== 'object' || categoryData === null) {
-        return prev;
+        return prev
       }
 
       return {
         ...prev,
         [catKey]: {
           ...categoryData,
-          [field]: value
-        }
-      };
-    });
-  };
+          [field]: value,
+        },
+      }
+    })
+  }
 
   const handleAdvancedChange = (field: string, value: string | number | boolean) => {
     setOptions(prev => ({
       ...prev,
       advancedSettings: {
         ...prev.advancedSettings,
-        [field]: value
-      }
-    }));
-  };
+        [field]: value,
+      },
+    }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(options);
-      onClose?.();
+      onSave?.(options)
+      onClose?.()
     }
-  };
+  }
 
   const handleReset = () => {
-    onReset?.();
-    onClose?.();
-  };
+    onReset?.()
+    onClose?.()
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -435,7 +435,7 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
               </div>
 
               <div className="text-sm text-muted-foreground">
-                The status date determines the point in time when earned value calculations are based on. 
+                The status date determines the point in time when earned value calculations are based on.
                 This affects progress reporting and performance metrics.
               </div>
             </div>
@@ -505,6 +505,6 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

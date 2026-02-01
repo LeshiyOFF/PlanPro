@@ -1,9 +1,9 @@
-import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { HotkeyDisplay } from './HotkeyDisplay';
-import { HotkeyBindingEditor, EditingBinding } from './HotkeyBindingEditor';
-import { hotkeyToString, type HotkeyBinding } from '@/types/HotkeyTypes';
+import React from 'react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { HotkeyDisplay } from './HotkeyDisplay'
+import { HotkeyBindingEditor, EditingBinding } from './HotkeyBindingEditor'
+import { hotkeyToString, type HotkeyBinding } from '@/types/HotkeyTypes'
 
 interface HotkeyBindingListProps {
   bindings: HotkeyBinding[];
@@ -27,13 +27,13 @@ export const HotkeyBindingList: React.FC<HotkeyBindingListProps> = ({
   onSaveEdit,
   onCancelEdit,
   onResetToDefault,
-  onEditingKeysChange
+  onEditingKeysChange,
 }) => {
   return (
     <div className="space-y-3 max-h-96 overflow-y-auto">
       {bindings.map(binding => {
-        const isEditing = editingBinding?.actionId === binding.actionId;
-        
+        const isEditing = editingBinding?.actionId === binding.actionId
+
         return (
           <Card key={binding.actionId} className="p-4">
             <div className="flex items-center justify-between">
@@ -45,7 +45,7 @@ export const HotkeyBindingList: React.FC<HotkeyBindingListProps> = ({
                   {binding.actionId}
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {isEditing && editingBinding ? (
                   <HotkeyBindingEditor
@@ -57,15 +57,15 @@ export const HotkeyBindingList: React.FC<HotkeyBindingListProps> = ({
                 ) : (
                   <div className="flex items-center gap-2">
                     <HotkeyDisplay hotkey={binding.keys} />
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => onStartEdit(binding.actionId, hotkeyToString(binding.keys))}
                     >
                       Изменить
                     </Button>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="ghost"
                       onClick={() => onResetToDefault(binding.actionId)}
                     >
@@ -76,8 +76,8 @@ export const HotkeyBindingList: React.FC<HotkeyBindingListProps> = ({
               </div>
             </div>
           </Card>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}

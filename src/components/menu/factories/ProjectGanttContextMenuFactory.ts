@@ -1,11 +1,11 @@
-import { BaseContextMenuFactory } from './BaseContextMenuFactory';
-import { ContextMenuItem } from '@/providers/MenuProvider';
+import { BaseContextMenuFactory } from './BaseContextMenuFactory'
+import { ContextMenuItem } from '@/providers/MenuProvider'
 
 /**
  * Фабрика контекстных меню для проектов и диаграмм
  */
 export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
-  
+
   /**
    * Контекстное меню для проекта
    */
@@ -15,7 +15,7 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         id: 'close',
         label: 'Закрыть проект',
         icon: '❌',
-        handler: () => onAction('close')
+        handler: () => onAction('close'),
       },
       BaseContextMenuFactory.createSeparator(),
       {
@@ -23,14 +23,14 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         label: 'Сохранить проект',
         icon: '💾',
         shortcut: 'Ctrl+S',
-        handler: () => onAction('save')
+        handler: () => onAction('save'),
       },
       {
         id: 'saveAs',
         label: 'Сохранить как...',
         icon: '💾📝',
         shortcut: 'Ctrl+Shift+S',
-        handler: () => onAction('saveAs')
+        handler: () => onAction('saveAs'),
       },
       BaseContextMenuFactory.createSeparator(),
       {
@@ -38,15 +38,15 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         label: 'Печать',
         icon: '🖨️',
         shortcut: 'Ctrl+P',
-        handler: () => onAction('print')
+        handler: () => onAction('print'),
       },
       {
         id: 'exportPdf',
         label: 'Экспорт в PDF',
         icon: '📄',
-        handler: () => onAction('exportPdf')
-      }
-    ];
+        handler: () => onAction('exportPdf'),
+      },
+    ]
   }
 
   /**
@@ -59,37 +59,37 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         label: 'Увеличить масштаб',
         icon: '🔍+',
         shortcut: 'Ctrl++',
-        handler: () => onAction('zoomIn')
+        handler: () => onAction('zoomIn'),
       },
       {
         id: 'zoomOut',
         label: 'Уменьшить масштаб',
         icon: '🔍-',
         shortcut: 'Ctrl+-',
-        handler: () => onAction('zoomOut')
+        handler: () => onAction('zoomOut'),
       },
       {
         id: 'fitWidth',
         label: 'Масштаб по ширине',
         icon: '↔️',
         shortcut: 'Ctrl+0',
-        handler: () => onAction('fitWidth')
+        handler: () => onAction('fitWidth'),
       },
       BaseContextMenuFactory.createSeparator(),
       {
         id: 'filter',
         label: 'Фильтр задач',
         icon: '🔽',
-        handler: () => onAction('filter')
+        handler: () => onAction('filter'),
       },
       {
         id: 'find',
         label: 'Найти задачу',
         icon: '🔍',
         shortcut: 'Ctrl+F',
-        handler: () => onAction('find')
-      }
-    ];
+        handler: () => onAction('find'),
+      },
+    ]
   }
 }
 

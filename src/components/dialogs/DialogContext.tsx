@@ -1,30 +1,30 @@
-import React, { useState, useCallback, ReactNode, useContext } from 'react';
-import type { DialogType } from '@/types/dialog/DialogType';
+import React, { useState, useCallback, ReactNode, useContext } from 'react'
+import type { DialogType } from '@/types/dialog/DialogType'
 import {
   DialogState,
   DialogContextType,
   DialogResult,
   type DefaultDialogData,
-  type DefaultDialogResult
-} from '@/types/dialog/DialogStateTypes';
-import { getErrorMessage } from '@/utils/errorUtils';
+  type DefaultDialogResult,
+} from '@/types/dialog/DialogStateTypes'
+import { getErrorMessage } from '@/utils/errorUtils'
 
 /**
  * Типизированный контекст для диалоговых окон.
  * Generic DialogState<TData, TResult>, data?: TData в openDialog.
  */
-const TypedDialogContext = React.createContext<DialogContextType | undefined>(undefined);
+const TypedDialogContext = React.createContext<DialogContextType | undefined>(undefined)
 
 interface TypedDialogProviderProps {
   children: ReactNode;
 }
 
 export const TypedDialogProvider: React.FC<TypedDialogProviderProps> = ({ children }) => {
-  const [currentDialog, setCurrentDialog] = useState<DialogState<DefaultDialogData, DefaultDialogResult> | null>(null);
+  const [currentDialog, setCurrentDialog] = useState<DialogState<DefaultDialogData, DefaultDialogResult> | null>(null)
 
   const openDialog = useCallback(<TData = DefaultDialogData, TResult = DefaultDialogResult>(
     type: DialogType,
-    data?: TData
+    data?: TData,
   ): DialogState<TData, TResult> => {
     const newState: DialogState<TData, TResult> = {
       type,
@@ -32,54 +32,54 @@ export const TypedDialogProvider: React.FC<TypedDialogProviderProps> = ({ childr
       isSubmitting: false,
       error: null,
       data: data ?? undefined,
-      result: null
-    };
-    setCurrentDialog(newState);
-    return newState;
-  }, []);
+      result: null,
+    }
+    setCurrentDialog(newState)
+    return newState
+  }, [])
 
   const closeDialog = useCallback((): void => {
-    setCurrentDialog(null);
-  }, []);
+    setCurrentDialog(null)
+  }, [])
 
   const submitDialog = useCallback(async <TData = DefaultDialogData, TResult = DefaultDialogResult>(
-    _data: TData
+    _data: TData,
   ): Promise<DialogResult<TResult>> => {
-    if (!currentDialog) return { success: false, error: 'No dialog open' };
+    if (!currentDialog) return { success: false, error: 'No dialog open' }
 
     setCurrentDialog((prev: DialogState<DefaultDialogData, DefaultDialogResult> | null) => {
-      if (!prev) return null;
+      if (!prev) return null
       return {
         ...prev,
         isSubmitting: true,
-        error: null
-      };
-    });
+        error: null,
+      }
+    })
 
     try {
       // Здесь будет вызвана функция onSubmit из компонента диалога
       // Result будет установлен через setCurrentDialog
-      return { success: true, data: undefined as TResult };
+      return { success: true, data: undefined as TResult }
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
+      const errorMessage = getErrorMessage(error)
       setCurrentDialog((prev: DialogState<DefaultDialogData, DefaultDialogResult> | null) => {
-        if (!prev) return null;
+        if (!prev) return null
         return {
           ...prev,
           isSubmitting: false,
-          error: errorMessage
-        };
-      });
-      return { success: false, error: errorMessage };
+          error: errorMessage,
+        }
+      })
+      return { success: false, error: errorMessage }
     }
-  }, [currentDialog]);
+  }, [currentDialog])
 
   const validateDialog = useCallback(<TData = DefaultDialogData>(
-    _data: TData
+    _data: TData,
   ): boolean | string => {
     // Валидация будет реализована в конкретных диалогах
-    return true;
-  }, []);
+    return true
+  }, [])
 
   const value: DialogContextType = {
     currentDialog,
@@ -87,24 +87,24 @@ export const TypedDialogProvider: React.FC<TypedDialogProviderProps> = ({ childr
     closeDialog,
     submitDialog,
     validateDialog,
-    isDialogOpen: (t: DialogType) => currentDialog?.type === t
-  };
+    isDialogOpen: (t: DialogType) => currentDialog?.type === t,
+  }
 
   return (
     <TypedDialogContext.Provider value={value}>
       {children}
     </TypedDialogContext.Provider>
-  );
-};
+  )
+}
 
 export const useTypedDialogContext = (): DialogContextType => {
-  const context = useContext(TypedDialogContext);
+  const context = useContext(TypedDialogContext)
   if (context === undefined) {
-    throw new Error('useTypedDialogContext must be used within a TypedDialogProvider');
+    throw new Error('useTypedDialogContext must be used within a TypedDialogProvider')
   }
-  return context;
-};
+  return context
+}
 
 // Алиасы для обратной совместимости
-export const DialogProvider = TypedDialogProvider;
-export const useDialogContext = useTypedDialogContext;
+export const DialogProvider = TypedDialogProvider
+export const useDialogContext = useTypedDialogContext

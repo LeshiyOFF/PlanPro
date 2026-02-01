@@ -1,5 +1,5 @@
-import React from 'react';
-import { Project } from '@/hooks/useJavaApi';
+import React from 'react'
+import { Project } from '@/hooks/useJavaApi'
 
 interface ProjectCardProps {
   project: Project;
@@ -15,17 +15,17 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
   project,
   onEdit,
   onExport,
-  onDelete
+  onDelete,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#28a745';
-      case 'active': return '#007acc';
-      case 'on_hold': return '#ffc107';
-      case 'cancelled': return '#dc3545';
-      default: return '#6c757d';
+      case 'completed': return '#28a745'
+      case 'active': return '#007acc'
+      case 'on_hold': return '#ffc107'
+      case 'cancelled': return '#dc3545'
+      default: return '#6c757d'
     }
-  };
+  }
 
   return (
     <div style={{
@@ -33,12 +33,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
       borderRadius: '8px',
       padding: '20px',
       backgroundColor: 'white',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     }}>
-      <div style={{ 
-        display: 'flex', 
+      <div style={{
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
       }}>
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
@@ -49,14 +49,14 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               {project.description}
             </p>
           )}
-          <div style={{ 
-            display: 'flex', 
+          <div style={{
+            display: 'flex',
             gap: '15px',
             fontSize: '14px',
-            color: '#666'
+            color: '#666',
           }}>
             <span>
-              <strong>Status:</strong> 
+              <strong>Status:</strong>
               <span style={{ color: getStatusColor(project.status || 'planning') }}>
                 {project.status || 'Unknown'}
               </span>
@@ -73,11 +73,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
             )}
           </div>
         </div>
-        
-        <div style={{ 
-          display: 'flex', 
+
+        <div style={{
+          display: 'flex',
           gap: '5px',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}>
           <button
             onClick={() => onEdit(project)}
@@ -88,7 +88,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               border: 'none',
               borderRadius: '3px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Edit
@@ -102,7 +102,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               border: 'none',
               borderRadius: '3px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Export
@@ -116,7 +116,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
               border: 'none',
               borderRadius: '3px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Delete
@@ -124,6 +124,6 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

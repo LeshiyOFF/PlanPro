@@ -1,7 +1,7 @@
-import * as Sentry from '@sentry/react';
-import type { SeverityLevel } from '@sentry/types';
-import type { Event, EventHint } from '@sentry/types';
-import type { JsonObject, JsonValue } from '@/types/json-types';
+import * as Sentry from '@sentry/react'
+import type { SeverityLevel } from '@sentry/types'
+import type { Event, EventHint } from '@sentry/types'
+import type { JsonObject, JsonValue } from '@/types/json-types'
 
 /** Допустимые значения контекста Sentry: примитивы или вложенные объекты для setContext */
 export type SentryContextValue = string | number | boolean | JsonObject;
@@ -26,12 +26,12 @@ export interface SentryConfig {
  * - Dependency Inversion: Работает с интерфейсами
  */
 export class SentryService {
-  private static instance: SentryService;
-  private config: SentryConfig;
-  private initialized: boolean = false;
+  private static instance: SentryService
+  private config: SentryConfig
+  private initialized: boolean = false
 
   private constructor(config: SentryConfig) {
-    this.config = config;
+    this.config = config
   }
 
   /**
@@ -44,10 +44,10 @@ export class SentryService {
         dsn: (typeof process !== 'undefined' && process.env?.REACT_APP_SENTRY_DSN) || 'https://default@sentry.io',
         environment: (typeof process !== 'undefined' && process.env?.NODE_ENV) || 'development',
         enabled: !!(typeof process !== 'undefined' && process.env?.REACT_APP_SENTRY_DSN),
-      };
-      SentryService.instance = new SentryService(defaultConfig);
+      }
+      SentryService.instance = new SentryService(defaultConfig)
     }
-    return SentryService.instance;
+    return SentryService.instance
   }
 
   /**
@@ -55,14 +55,14 @@ export class SentryService {
    */
   public initialize(): void {
     if (this.initialized || !this.config.enabled) {
-      return;
+      return
     }
 
     try {
       const browserTracing =
         typeof Sentry.browserTracingIntegration === 'function'
           ? Sentry.browserTracingIntegration()
-          : undefined;
+          : undefined
 
       Sentry.init({
         dsn: this.config.dsn,
@@ -72,12 +72,12 @@ export class SentryService {
         tracesSampleRate: this.config.tracesSampleRate || 0.1,
         beforeSend: ((event: Event, _hint: EventHint) =>
           SentryService.filterSensitiveData(event)) as Sentry.BrowserOptions['beforeSend'],
-      });
+      })
 
-      this.initialized = true;
-      console.log('Sentry initialized successfully');
+      this.initialized = true
+      console.log('Sentry initialized successfully')
     } catch (error) {
-      console.error('Failed to initialize Sentry:', error);
+      console.error('Failed to initialize Sentry:', error)
     }
   }
 
@@ -87,11 +87,11 @@ export class SentryService {
   public captureException(
     error: Error,
     context?: Record<string, SentryContextValue>,
-    level: SeverityLevel = 'error'
+    level: SeverityLevel = 'error',
   ): void {
     if (!this.initialized) {
-      console.warn('Sentry not initialized, logging to console:', error);
-      return;
+      console.warn('Sentry not initialized, logging to console:', error)
+      return
     }
 
     Sentry.withScope(scope => {
@@ -100,13 +100,13 @@ export class SentryService {
           const ctx: JsonObject =
             typeof value === 'object' && value !== null && !Array.isArray(value)
               ? (value as JsonObject)
-              : { value: value as JsonValue }; // Fallback for primitive values
-          scope.setContext(key, ctx);
-        });
+              : { value: value as JsonValue } // Fallback for primitive values
+          scope.setContext(key, ctx)
+        })
       }
-      scope.setLevel(level);
-      Sentry.captureException(error);
-    });
+      scope.setLevel(level)
+      Sentry.captureException(error)
+    })
   }
 
   /**
@@ -115,11 +115,11 @@ export class SentryService {
   public captureMessage(
     message: string,
     level: SeverityLevel = 'info',
-    context?: Record<string, SentryContextValue>
+    context?: Record<string, SentryContextValue>,
   ): void {
     if (!this.initialized) {
-      console.warn('Sentry not initialized, logging to console:', message);
-      return;
+      console.warn('Sentry not initialized, logging to console:', message)
+      return
     }
 
     Sentry.withScope(scope => {
@@ -128,13 +128,13 @@ export class SentryService {
           const ctx: JsonObject =
             typeof value === 'object' && value !== null && !Array.isArray(value)
               ? (value as JsonObject)
-              : { value: value as JsonValue }; // Fallback for primitive values
-          scope.setContext(key, ctx);
-        });
+              : { value: value as JsonValue } // Fallback for primitive values
+          scope.setContext(key, ctx)
+        })
       }
-      scope.setLevel(level);
-      Sentry.captureMessage(message);
-    });
+      scope.setLevel(level)
+      Sentry.captureMessage(message)
+    })
   }
 
   /**
@@ -142,10 +142,10 @@ export class SentryService {
    */
   public setUser(user: { id?: string; email?: string; username?: string } | null): void {
     if (!this.initialized) {
-      return;
+      return
     }
 
-    Sentry.setUser(user);
+    Sentry.setUser(user)
   }
 
   /**
@@ -153,10 +153,10 @@ export class SentryService {
    */
   public clearUser(): void {
     if (!this.initialized) {
-      return;
+      return
     }
 
-    Sentry.setUser(null);
+    Sentry.setUser(null)
   }
 
   /**
@@ -164,14 +164,14 @@ export class SentryService {
    */
   public setTags(tags: Record<string, string>): void {
     if (!this.initialized) {
-      return;
+      return
     }
 
     Sentry.withScope(scope => {
       Object.entries(tags).forEach(([key, value]) => {
-        scope.setTag(key, value);
-      });
-    });
+        scope.setTag(key, value)
+      })
+    })
   }
 
   /**
@@ -180,20 +180,20 @@ export class SentryService {
    */
   public startTransaction(name: string, op?: string): undefined {
     if (!this.initialized) {
-      return undefined;
+      return undefined
     }
-    const spanOp = op ?? 'navigation';
+    const spanOp = op ?? 'navigation'
     if (typeof Sentry.startSpan === 'function') {
       try {
         (Sentry.startSpan as (options: { name: string; op: string }) => void)({
           name,
           op: spanOp,
-        });
+        })
       } catch {
         // игнорируем ошибки трейсинга
       }
     }
-    return undefined;
+    return undefined
   }
 
   /**
@@ -201,7 +201,7 @@ export class SentryService {
    */
   private static filterSensitiveData(event: Event): Event | null {
     if (!event.breadcrumbs) {
-      return event;
+      return event
     }
 
     // Фильтрация URL с чувствительными данными
@@ -213,18 +213,18 @@ export class SentryService {
             ...breadcrumb.data,
             url: breadcrumb.data.url.replace(/\/\/.*@/, '//***@'),
           },
-        };
+        }
       }
-      return breadcrumb;
-    });
+      return breadcrumb
+    })
 
-    return event;
+    return event
   }
 
   /**
    * Проверка инициализации
    */
   public isInitialized(): boolean {
-    return this.initialized;
+    return this.initialized
   }
 }

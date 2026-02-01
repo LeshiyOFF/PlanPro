@@ -1,20 +1,20 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useTypedDialog } from './context/TypedDialogContext';
-import { DialogType } from '@/types/dialog/IDialogRegistry';
-import { 
-  FileText, 
-  Users, 
-  Calendar, 
-  Settings, 
-  Search, 
+import React from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { useTypedDialog } from './context/TypedDialogContext'
+import { DialogType } from '@/types/dialog/IDialogRegistry'
+import {
+  FileText,
+  Users,
+  Calendar,
+  Settings,
+  Search,
   Edit,
   Info,
   Target,
-  Hash
-} from 'lucide-react';
+  Hash,
+} from 'lucide-react'
 
 interface DialogCategory {
   name: string;
@@ -29,7 +29,7 @@ interface DialogCategory {
 }
 
 export const DialogDemo: React.FC = () => {
-  const { openDialog } = useTypedDialog();
+  const { openDialog } = useTypedDialog()
 
   const categories: DialogCategory[] = [
     {
@@ -41,33 +41,33 @@ export const DialogDemo: React.FC = () => {
           type: 'projects',
           label: 'Управление проектами',
           description: 'Создание, открытие и управление проектами',
-          icon: <FileText className="h-4 w-4" />
+          icon: <FileText className="h-4 w-4" />,
         },
         {
           type: 'update-project',
           label: 'Обновление проекта',
           description: 'Обновление информации о проекте',
-          icon: <Edit className="h-4 w-4" />
+          icon: <Edit className="h-4 w-4" />,
         },
         {
           type: 'rename-project',
           label: 'Переименование проекта',
           description: 'Переименование или сохранение как новый проект',
-          icon: <Edit className="h-4 w-4" />
+          icon: <Edit className="h-4 w-4" />,
         },
         {
           type: 'open-project',
           label: 'Открытие проекта',
           description: 'Открытие существующего проекта',
-          icon: <FileText className="h-4 w-4" />
+          icon: <FileText className="h-4 w-4" />,
         },
         {
           type: 'baseline',
           label: 'Базовые планы',
           description: 'Управление базовыми планами проекта',
-          icon: <Target className="h-4 w-4" />
-        }
-      ]
+          icon: <Target className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Задачи',
@@ -78,27 +78,27 @@ export const DialogDemo: React.FC = () => {
           type: 'dependency',
           label: 'Зависимости задач',
           description: 'Создание и управление зависимостями',
-          icon: <Target className="h-4 w-4" />
+          icon: <Target className="h-4 w-4" />,
         },
         {
           type: 'xbs-dependency',
           label: 'Расширенные зависимости',
           description: 'Управление XBS зависимостями',
-          icon: <Target className="h-4 w-4" />
+          icon: <Target className="h-4 w-4" />,
         },
         {
           type: 'delegate-task',
           label: 'Делегирование задач',
           description: 'Делегирование задач другим пользователям',
-          icon: <Users className="h-4 w-4" />
+          icon: <Users className="h-4 w-4" />,
         },
         {
           type: 'update-task',
           label: 'Массовое обновление',
           description: 'Обновление нескольких задач одновременно',
-          icon: <Edit className="h-4 w-4" />
-        }
-      ]
+          icon: <Edit className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Ресурсы',
@@ -109,27 +109,27 @@ export const DialogDemo: React.FC = () => {
           type: 'assignment',
           label: 'Назначения ресурсов',
           description: 'Управление назначением ресурсов на задачи',
-          icon: <Users className="h-4 w-4" />
+          icon: <Users className="h-4 w-4" />,
         },
         {
           type: 'resource-mapping',
           label: 'Маппинг ресурсов',
           description: 'Сопоставление полей ресурсов',
-          icon: <Hash className="h-4 w-4" />
+          icon: <Hash className="h-4 w-4" />,
         },
         {
           type: 'resource-addition',
           label: 'Добавление ресурсов',
           description: 'Создание новых ресурсов',
-          icon: <Users className="h-4 w-4" />
+          icon: <Users className="h-4 w-4" />,
         },
         {
           type: 'replace-assignment',
           label: 'Замена назначений',
           description: 'Замена одного ресурса другим',
-          icon: <Users className="h-4 w-4" />
-        }
-      ]
+          icon: <Users className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Календарь',
@@ -140,15 +140,15 @@ export const DialogDemo: React.FC = () => {
           type: 'new-base-calendar',
           label: 'Новый календарь',
           description: 'Создание или копирование базового календаря',
-          icon: <Calendar className="h-4 w-4" />
+          icon: <Calendar className="h-4 w-4" />,
         },
         {
           type: 'holiday',
           label: 'Праздники',
           description: 'Управление праздничными днями',
-          icon: <Calendar className="h-4 w-4" />
-        }
-      ]
+          icon: <Calendar className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Информация',
@@ -159,33 +159,33 @@ export const DialogDemo: React.FC = () => {
           type: 'task-details',
           label: 'Детали задачи',
           description: 'Подробная информация о задаче',
-          icon: <Info className="h-4 w-4" />
+          icon: <Info className="h-4 w-4" />,
         },
         {
           type: 'earned-value',
           label: 'Освоенный объем',
           description: 'Анализ освоенного объема',
-          icon: <Target className="h-4 w-4" />
+          icon: <Target className="h-4 w-4" />,
         },
         {
           type: 'project-statistics',
           label: 'Статистика проекта',
           description: 'Статистические данные по проекту',
-          icon: <Info className="h-4 w-4" />
+          icon: <Info className="h-4 w-4" />,
         },
         {
           type: 'task-links',
           label: 'Связи задач',
           description: 'Просмотр и управление связями задач',
-          icon: <Target className="h-4 w-4" />
+          icon: <Target className="h-4 w-4" />,
         },
         {
           type: 'task-notes',
           label: 'Заметки задач',
           description: 'Управление заметками к задачам',
-          icon: <Info className="h-4 w-4" />
-        }
-      ]
+          icon: <Info className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Поиск',
@@ -196,15 +196,15 @@ export const DialogDemo: React.FC = () => {
           type: 'advanced-search',
           label: 'Расширенный поиск',
           description: 'Продвинутый поиск с фильтрами',
-          icon: <Search className="h-4 w-4" />
+          icon: <Search className="h-4 w-4" />,
         },
         {
           type: 'filter',
           label: 'Фильтрация',
           description: 'Фильтрация данных проекта',
-          icon: <Search className="h-4 w-4" />
-        }
-      ]
+          icon: <Search className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Настройки',
@@ -215,33 +215,33 @@ export const DialogDemo: React.FC = () => {
           type: 'project-options',
           label: 'Настройки проекта',
           description: 'Основные настройки проекта',
-          icon: <Settings className="h-4 w-4" />
+          icon: <Settings className="h-4 w-4" />,
         },
         {
           type: 'gantt-chart-options',
           label: 'Настройки диаграммы Ганта',
           description: 'Настройки отображения диаграммы',
-          icon: <Settings className="h-4 w-4" />
+          icon: <Settings className="h-4 w-4" />,
         },
         {
           type: 'calculation-options',
           label: 'Настройки расчетов',
           description: 'Параметры расчета проекта',
-          icon: <Settings className="h-4 w-4" />
+          icon: <Settings className="h-4 w-4" />,
         },
         {
           type: 'notification-settings',
           label: 'Уведомления',
           description: 'Настройки системы уведомлений',
-          icon: <Settings className="h-4 w-4" />
+          icon: <Settings className="h-4 w-4" />,
         },
         {
           type: 'security-settings',
           label: 'Безопасность',
           description: 'Настройки безопасности проекта',
-          icon: <Settings className="h-4 w-4" />
-        }
-      ]
+          icon: <Settings className="h-4 w-4" />,
+        },
+      ],
     },
     {
       name: 'Редактирование',
@@ -252,28 +252,28 @@ export const DialogDemo: React.FC = () => {
           type: 'find-and-replace',
           label: 'Найти и заменить',
           description: 'Поиск и замена текста',
-          icon: <Search className="h-4 w-4" />
+          icon: <Search className="h-4 w-4" />,
         },
         {
           type: 'go-to',
           label: 'Перейти к',
           description: 'Быстрый переход к элементам',
-          icon: <Target className="h-4 w-4" />
-        }
-      ]
-    }
-  ];
+          icon: <Target className="h-4 w-4" />,
+        },
+      ],
+    },
+  ]
 
   const handleOpenDialog = (type: string) => {
     // Проверяем, зарегистрирован ли диалог
-    const registeredTypes: DialogType[] = ['about', 'welcome', 'task-details'];
-    
+    const registeredTypes: DialogType[] = ['about', 'welcome', 'task-details']
+
     if (registeredTypes.includes(type as DialogType)) {
-      openDialog(type as DialogType, {});
+      openDialog(type as DialogType, {})
     } else {
-      console.warn(`Dialog type "${type}" is not yet registered in TypedDialogService`);
+      console.warn(`Dialog type "${type}" is not yet registered in TypedDialogService`)
     }
-  };
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -345,6 +345,6 @@ export const DialogDemo: React.FC = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

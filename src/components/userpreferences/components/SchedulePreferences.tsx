@@ -1,60 +1,60 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { ISchedulePreferences } from '../interfaces/UserPreferencesInterfaces';
-import { useDebouncedCallback } from '@/hooks/useDebounce';
+import React, { useCallback, useState, useEffect } from 'react'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { ISchedulePreferences } from '../interfaces/UserPreferencesInterfaces'
+import { useDebouncedCallback } from '@/hooks/useDebounce'
 
 /**
  * Компонент настроек планирования
  */
 export const SchedulePreferences: React.FC = () => {
-  const { preferences, updateSchedulePreferences } = useUserPreferences();
-  const schedulePrefs = preferences.schedule as ISchedulePreferences;
+  const { preferences, updateSchedulePreferences } = useUserPreferences()
+  const schedulePrefs = preferences.schedule as ISchedulePreferences
 
   // Локальное состояние для предотвращения лагов селекторов
-  const [localDurationIn, setLocalDurationIn] = useState((schedulePrefs.durationEnteredIn ?? 5).toString());
-  const [localWorkUnit, setLocalWorkUnit] = useState((schedulePrefs.workUnit ?? 4).toString());
+  const [localDurationIn, setLocalDurationIn] = useState((schedulePrefs.durationEnteredIn ?? 5).toString())
+  const [localWorkUnit, setLocalWorkUnit] = useState((schedulePrefs.workUnit ?? 4).toString())
 
   useEffect(() => {
-    setLocalDurationIn((schedulePrefs.durationEnteredIn ?? 5).toString());
-  }, [schedulePrefs.durationEnteredIn]);
+    setLocalDurationIn((schedulePrefs.durationEnteredIn ?? 5).toString())
+  }, [schedulePrefs.durationEnteredIn])
 
   useEffect(() => {
-    setLocalWorkUnit((schedulePrefs.workUnit ?? 4).toString());
-  }, [schedulePrefs.workUnit]);
+    setLocalWorkUnit((schedulePrefs.workUnit ?? 4).toString())
+  }, [schedulePrefs.workUnit])
 
   const debouncedUpdate = useDebouncedCallback((updates: Partial<ISchedulePreferences>) => {
-    updateSchedulePreferences(updates);
-  }, 400);
+    updateSchedulePreferences(updates)
+  }, 400)
 
   const handleSchedulingRuleChange = useCallback((value: string) => {
-    updateSchedulePreferences({ schedulingRule: parseInt(value) });
-  }, [updateSchedulePreferences]);
+    updateSchedulePreferences({ schedulingRule: parseInt(value) })
+  }, [updateSchedulePreferences])
 
   const handleEffortDrivenChange = useCallback((checked: boolean) => {
-    updateSchedulePreferences({ effortDriven: checked });
-  }, [updateSchedulePreferences]);
+    updateSchedulePreferences({ effortDriven: checked })
+  }, [updateSchedulePreferences])
 
   const handleDurationEnteredInChange = useCallback((value: string) => {
-    setLocalDurationIn(value);
-    debouncedUpdate({ durationEnteredIn: parseInt(value) });
-  }, [debouncedUpdate]);
+    setLocalDurationIn(value)
+    debouncedUpdate({ durationEnteredIn: parseInt(value) })
+  }, [debouncedUpdate])
 
   const handleWorkUnitChange = useCallback((value: string) => {
-    setLocalWorkUnit(value);
-    debouncedUpdate({ workUnit: parseInt(value) });
-  }, [debouncedUpdate]);
+    setLocalWorkUnit(value)
+    debouncedUpdate({ workUnit: parseInt(value) })
+  }, [debouncedUpdate])
 
   const handleNewTasksStartTodayChange = useCallback((checked: boolean) => {
-    updateSchedulePreferences({ newTasksStartToday: checked });
-  }, [updateSchedulePreferences]);
+    updateSchedulePreferences({ newTasksStartToday: checked })
+  }, [updateSchedulePreferences])
 
   const handleHonorRequiredDatesChange = useCallback((checked: boolean) => {
-    updateSchedulePreferences({ honorRequiredDates: checked });
-  }, [updateSchedulePreferences]);
+    updateSchedulePreferences({ honorRequiredDates: checked })
+  }, [updateSchedulePreferences])
 
   return (
     <PreferencesSection
@@ -64,8 +64,8 @@ export const SchedulePreferences: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="schedulingRule">Тип планирования по умолчанию</Label>
-          <Select 
-            value={(schedulePrefs.schedulingRule ?? 0).toString()} 
+          <Select
+            value={(schedulePrefs.schedulingRule ?? 0).toString()}
             onValueChange={handleSchedulingRuleChange}
           >
             <SelectTrigger id="schedulingRule">
@@ -90,8 +90,8 @@ export const SchedulePreferences: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="durationEnteredIn">Длительность вводится в</Label>
-          <Select 
-            value={localDurationIn} 
+          <Select
+            value={localDurationIn}
             onValueChange={handleDurationEnteredInChange}
           >
             <SelectTrigger id="durationEnteredIn">
@@ -109,8 +109,8 @@ export const SchedulePreferences: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="workUnit">Трудозатраты выводятся в</Label>
-          <Select 
-            value={localWorkUnit} 
+          <Select
+            value={localWorkUnit}
             onValueChange={handleWorkUnitChange}
           >
             <SelectTrigger id="workUnit">
@@ -145,6 +145,6 @@ export const SchedulePreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

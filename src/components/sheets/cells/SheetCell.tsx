@@ -1,9 +1,9 @@
-import React from 'react';
-import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
-import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import { CellEditorFactory } from '../editors/CellEditorFactory';
-import { toPercent } from '@/utils/ProgressFormatter';
+import React from 'react'
+import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn'
+import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import { CellEditorFactory } from '../editors/CellEditorFactory'
+import { toPercent } from '@/utils/ProgressFormatter'
 
 interface SheetCellProps<T> {
   rowId: string;
@@ -39,38 +39,38 @@ export const SheetCell = <T,>({
   onCommit,
   onCancel,
   onContextMenu,
-  row
+  row,
 }: SheetCellProps<T>) => {
   const handleDoubleClick = () => {
     // Stage 8.20: Если задан onCustomEdit, используем его вместо inline-редактирования
     if (column.onCustomEdit) {
-      column.onCustomEdit(row, column.id);
-      return;
+      column.onCustomEdit(row, column.id)
+      return
     }
 
     // Stage 7.19: Поддержка функции-предиката для условного редактирования
-    const isEditable = typeof column.editable === 'function' 
-      ? column.editable(row) 
-      : column.editable;
-    
+    const isEditable = typeof column.editable === 'function'
+      ? column.editable(row)
+      : column.editable
+
     if (isEditable) {
       const editableValue: CellValue = column.type === SheetColumnType.PERCENT
         ? String(toPercent(Number(value) || 0))
-        : value;
-      onStartEdit({ rowId, columnId: column.id }, editableValue);
+        : value
+      onStartEdit({ rowId, columnId: column.id }, editableValue)
     }
-  };
+  }
 
   const handleContextMenu = (e: React.MouseEvent) => {
     if (onContextMenu) {
-      e.stopPropagation();
-      onContextMenu(e, row, column.id);
+      e.stopPropagation()
+      onContextMenu(e, row, column.id)
     }
-  };
+  }
 
   const renderContent = () => {
     if (isEditing) {
-      const Editor = CellEditorFactory.getEditor(column.type);
+      const Editor = CellEditorFactory.getEditor(column.type)
       return (
         <Editor
           value={editValue}
@@ -81,16 +81,16 @@ export const SheetCell = <T,>({
           errorMessage={errorMessage}
           options={column.options}
         />
-      );
+      )
     }
 
     if (column.formatter) {
-      return column.formatter(value, row);
+      return column.formatter(value, row)
     }
 
-    const displayValue = value === null || value === undefined ? '' : String(value);
-    return <span className="truncate">{displayValue}</span>;
-  };
+    const displayValue = value === null || value === undefined ? '' : String(value)
+    return <span className="truncate">{displayValue}</span>
+  }
 
   return (
     <td
@@ -102,7 +102,7 @@ export const SheetCell = <T,>({
     >
       {renderContent()}
     </td>
-  );
-};
+  )
+}
 
 

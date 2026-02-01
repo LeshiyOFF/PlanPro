@@ -1,6 +1,6 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { textFormattingService } from '@/services/TextFormattingService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { textFormattingService } from '@/services/TextFormattingService'
 
 /**
  * Действие для применения курсивного начертания текста
@@ -8,21 +8,21 @@ import { textFormattingService } from '@/services/TextFormattingService';
  */
 export class ItalicAction extends ToolbarAction {
   constructor() {
-    super('TF002', 'Курсив', 'I', 'Курсивный текст (Ctrl+I)', 'Ctrl+I');
+    super('TF002', 'Курсив', 'I', 'Курсивный текст (Ctrl+I)', 'Ctrl+I')
   }
 
   /**
    * Переключает курсивное начертание текста
    */
   override async execute(): Promise<void> {
-    textFormattingService.toggleStyle('italic');
+    textFormattingService.toggleStyle('italic')
   }
 
   /**
    * Проверяет, активно ли курсивное начертание
    */
   isActiveState(): boolean {
-    return textFormattingService.getStyleState('italic');
+    return textFormattingService.getStyleState('italic')
   }
 
   /**
@@ -39,11 +39,11 @@ export class ItalicAction extends ToolbarAction {
       onClick: () => this.execute(),
       onKeyDown: (event: KeyboardEvent) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'i') {
-          event.preventDefault();
-          this.execute();
+          event.preventDefault()
+          this.execute()
         }
-      }
-    };
+      },
+    }
   }
 }
 

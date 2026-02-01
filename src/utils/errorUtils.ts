@@ -10,18 +10,18 @@
  */
 export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
-    return error.message;
+    return error.message
   }
-  
+
   if (typeof error === 'string') {
-    return error;
+    return error
   }
-  
+
   if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message);
+    return String(error.message)
   }
-  
-  return 'Unknown error occurred';
+
+  return 'Unknown error occurred'
 }
 
 /**
@@ -31,10 +31,10 @@ export function getErrorMessage(error: unknown): string {
  */
 export function toError(error: unknown): Error {
   if (error instanceof Error) {
-    return error;
+    return error
   }
-  
-  return new Error(getErrorMessage(error));
+
+  return new Error(getErrorMessage(error))
 }
 
 /**
@@ -43,12 +43,12 @@ export function toError(error: unknown): Error {
  * @param error - Ошибка для логирования
  */
 export function logError(context: string, error: unknown): void {
-  const errorObj = toError(error);
+  const errorObj = toError(error)
   console.error(`[${context}] Error:`, {
     message: errorObj.message,
     stack: errorObj.stack,
-    name: errorObj.name
-  });
+    name: errorObj.name,
+  })
 }
 
 /**
@@ -56,5 +56,5 @@ export function logError(context: string, error: unknown): void {
  * @param error - Проверяемая ошибка
  */
 export function isError(error: unknown): error is Error {
-  return error instanceof Error;
+  return error instanceof Error
 }

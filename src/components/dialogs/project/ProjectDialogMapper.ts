@@ -3,10 +3,10 @@
  * Single Responsibility: преобразование ProjectDialogData → Partial<Project> для API.
  */
 
-import type { Project, ProjectStatus } from '@/types/project-types';
-import type { ProjectDialogData } from '@/types/calendar-types';
+import type { Project, ProjectStatus } from '@/types/project-types'
+import type { ProjectDialogData } from '@/types/calendar-types'
 
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000
 
 /** Маппинг числового статуса диалога в ProjectStatus. */
 export const PROJECT_STATUS_MAP: Record<number, ProjectStatus> = {
@@ -14,7 +14,7 @@ export const PROJECT_STATUS_MAP: Record<number, ProjectStatus> = {
   1: 'InProgress',
   2: 'Completed',
   3: 'OnHold',
-};
+}
 
 /**
  * Преобразует данные формы диалога в частичный проект для createProject/updateProject.
@@ -23,11 +23,11 @@ export const PROJECT_STATUS_MAP: Record<number, ProjectStatus> = {
 export function mapDialogDataToProject(dialogData: ProjectDialogData): Partial<Project> {
   const start = dialogData.startDate instanceof Date
     ? dialogData.startDate
-    : new Date(dialogData.startDate);
-  const finish = new Date(start.getTime() + ONE_YEAR_MS);
+    : new Date(dialogData.startDate)
+  const finish = new Date(start.getTime() + ONE_YEAR_MS)
 
   const status: ProjectStatus =
-    PROJECT_STATUS_MAP[dialogData.projectStatus] ?? 'Planning';
+    PROJECT_STATUS_MAP[dialogData.projectStatus] ?? 'Planning'
 
   return {
     name: dialogData.name.trim(),
@@ -41,5 +41,5 @@ export function mapDialogDataToProject(dialogData: ProjectDialogData): Partial<P
     tasks: [],
     resources: [],
     assignments: [],
-  };
+  }
 }

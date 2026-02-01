@@ -2,7 +2,7 @@
  * Контракты для проектных диалогов
  */
 
-import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry';
+import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry'
 
 /**
  * Проектные диалоги

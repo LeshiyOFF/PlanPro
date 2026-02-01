@@ -1,16 +1,16 @@
-import { 
+import {
   IGeneralPreferences,
   IUserPreferences,
-  Theme
-} from '../interfaces/UserPreferencesInterfaces';
-import { ViewType } from '@/types/ViewTypes';
-import type { Duration } from '@/types/Master_Functionality_Catalog';
+  Theme,
+} from '../interfaces/UserPreferencesInterfaces'
+import { ViewType } from '@/types/ViewTypes'
+import type { Duration } from '@/types/Master_Functionality_Catalog'
 
 /**
  * Фабрика настроек по умолчанию
  */
 export class PreferencesDefaultsFactory {
-  
+
   /**
    * Создает полный объект всех настроек по умолчанию
    */
@@ -24,7 +24,7 @@ export class PreferencesDefaultsFactory {
       schedule: this.getSchedulePreferences(),
       calendar: this.getCalendarPreferences(),
       gantt: this.getGanttPreferences(),
-    };
+    }
   }
 
   /**
@@ -43,8 +43,8 @@ export class PreferencesDefaultsFactory {
       currency: 'USD',
       language: 'ru-RU',
       defaultStandardRate: 0,
-      defaultOvertimeRate: 0
-    };
+      defaultOvertimeRate: 0,
+    }
   }
 
   /**
@@ -57,8 +57,8 @@ export class PreferencesDefaultsFactory {
       durationEnteredIn: 5, // Days
       workUnit: 4, // Hours
       newTasksStartToday: false,
-      honorRequiredDates: true
-    };
+      honorRequiredDates: true,
+    }
   }
 
   /**
@@ -68,8 +68,8 @@ export class PreferencesDefaultsFactory {
     return {
       hoursPerDay: 8,
       hoursPerWeek: 40,
-      daysPerMonth: 20
-    };
+      daysPerMonth: 20,
+    }
   }
 
   /**
@@ -84,8 +84,8 @@ export class PreferencesDefaultsFactory {
       fontSize: 14,
       fontFamily: 'Arial',
       theme: Theme.LIGHT,
-      accentColor: '#1F1F1F'
-    };
+      accentColor: '#1F1F1F',
+    }
   }
 
   /**
@@ -99,8 +99,8 @@ export class PreferencesDefaultsFactory {
       confirmDeletions: true,
       autoLinkTasks: false,
       splitTasksEnabled: true,
-      effortDriven: false
-    };
+      effortDriven: false,
+    }
   }
 
   /**
@@ -113,8 +113,8 @@ export class PreferencesDefaultsFactory {
       tasksAreCriticalIfSlackIsLessThan: { value: 0, unit: 'days' as Duration['unit'] },
       showEstimatedDurations: true,
       showActualWork: true,
-      showBaselineWork: false
-    };
+      showBaselineWork: false,
+    }
   }
 
   /**
@@ -130,9 +130,9 @@ export class PreferencesDefaultsFactory {
         enableAllMacros: false,
         disableAllMacros: false,
         trustVbaProjects: false,
-        trustedLocations: []
-      }
-    };
+        trustedLocations: [],
+      },
+    }
   }
 
   /**
@@ -150,8 +150,8 @@ export class PreferencesDefaultsFactory {
       labelMode: 'name' as const,
       accentColor: '#3b82f6',
       summaryColor: '#1e293b',
-      showDeltasInLabels: false
-    };
+      showDeltasInLabels: false,
+    }
   }
 }
 

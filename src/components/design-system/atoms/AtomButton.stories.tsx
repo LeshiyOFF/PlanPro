@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { AtomButton } from './AtomButton';
+import type { Meta, StoryObj } from '@storybook/react'
+import { AtomButton } from './AtomButton'
 
 const meta: Meta<typeof AtomButton> = {
   title: 'Design System/Atoms/AtomButton',
@@ -18,7 +18,7 @@ const meta: Meta<typeof AtomButton> = {
     color: { control: false },
     size: { control: false },
     state: { control: false },
-    
+
     // ОСТАВЛЯЕМ РАБОЧИЕ КОНТРОЛЫ
     disabled: {
       control: 'boolean',
@@ -38,42 +38,42 @@ const meta: Meta<typeof AtomButton> = {
       description: 'Test ID для автоматизации',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     children: 'Button',
   },
-};
+}
 
 export const Solid: Story = {
   args: {
     variant: 'solid',
     children: 'Solid Button',
   },
-};
+}
 
 export const Outline: Story = {
   args: {
     variant: 'outline',
     children: 'Outline Button',
   },
-};
+}
 
 export const Ghost: Story = {
   args: {
     variant: 'ghost',
     children: 'Ghost Button',
   },
-};
+}
 
 export const Soft: Story = {
   args: {
     variant: 'soft',
     children: 'Soft Button',
   },
-};
+}
 

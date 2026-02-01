@@ -1,23 +1,23 @@
-import React, { useMemo, useEffect, useRef, useState, useImperativeHandle, useCallback, forwardRef, ForwardRefRenderFunction } from 'react';
-import { createPortal } from 'react-dom';
-import { Gantt, Task as GanttTask, ViewMode } from 'gantt-task-react';
-import "gantt-task-react/dist/index.css";
-import { useTranslation } from 'react-i18next';
-import { Task } from '@/store/project/interfaces';
-import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
-import { useTaskEstimation } from '@/hooks/task/useTaskEstimation';
-import { useTaskWorkVisualization } from '@/hooks/task/useTaskWorkVisualization';
-import { ProfessionalTimelineHeader } from './ProfessionalTimelineHeader';
-import { CalendarDateService } from '@/services/CalendarDateService';
-import { GanttViewModeService } from '@/services/GanttViewModeService';
-import { GanttRangeService } from '@/services/GanttRangeService';
-import { GanttTaskMapper, ExtendedGanttTask } from '@/services/GanttTaskMapper';
-import { GanttScrollService } from '@/services/GanttScrollService';
-import { GanttNavigationService } from '@/services/GanttNavigationService';
-import { BaselineOverlay } from './BaselineOverlay';
-import { PulseOverlay } from './PulseOverlay';
-import { useAppStore } from '@/store/appStore';
-import { useProjectStore } from '@/store/projectStore';
+import React, { useMemo, useEffect, useRef, useState, useImperativeHandle, useCallback, forwardRef, ForwardRefRenderFunction } from 'react'
+import { createPortal } from 'react-dom'
+import { Gantt, Task as GanttTask, ViewMode } from 'gantt-task-react'
+import 'gantt-task-react/dist/index.css'
+import { useTranslation } from 'react-i18next'
+import { Task } from '@/store/project/interfaces'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
+import { useTaskEstimation } from '@/hooks/task/useTaskEstimation'
+import { useTaskWorkVisualization } from '@/hooks/task/useTaskWorkVisualization'
+import { ProfessionalTimelineHeader } from './ProfessionalTimelineHeader'
+import { CalendarDateService } from '@/services/CalendarDateService'
+import { GanttViewModeService } from '@/services/GanttViewModeService'
+import { GanttRangeService } from '@/services/GanttRangeService'
+import { GanttTaskMapper, ExtendedGanttTask } from '@/services/GanttTaskMapper'
+import { GanttScrollService } from '@/services/GanttScrollService'
+import { GanttNavigationService } from '@/services/GanttNavigationService'
+import { BaselineOverlay } from './BaselineOverlay'
+import { PulseOverlay } from './PulseOverlay'
+import { useAppStore } from '@/store/appStore'
+import { useProjectStore } from '@/store/projectStore'
 
 export interface ProfessionalGanttHandle {
   scrollToPosition: (position: number) => void;
@@ -38,27 +38,27 @@ interface ProfessionalGanttProps {
 }
 
 const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle, ProfessionalGanttProps> = (props: ProfessionalGanttProps, ref: React.ForwardedRef<ProfessionalGanttHandle>) => {
-  const { tasks, onTaskUpdate, onTaskSelect, onTaskDoubleClick, zoomLevel = 1, mode = 'standard', forcedEndDate, targetDate, onNavigationComplete } = props;
-  const { t } = useTranslation();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollServiceRef = useRef<GanttScrollService | null>(null);
-  const [scrollLeft, setScrollLeft] = useState(0);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [svgElement, setSvgElement] = useState<SVGElement | null>(null);
-  
-  const { preferences } = useUserPreferences();
-  const isPulseActive = useAppStore(state => state.ui.isPulseActive);
-  const { resources, calendars, baselines, activeBaselineId } = useProjectStore();
-  const activeBaseline = useMemo(() => baselines.find(b => b.id === activeBaselineId), [baselines, activeBaselineId]);
-  const { getFormattedName } = useTaskEstimation();
-  const { getVisualProgress, showBaseline } = useTaskWorkVisualization(mode as "standard" | "tracking");
+  const { tasks, onTaskUpdate, onTaskSelect, onTaskDoubleClick, zoomLevel = 1, mode = 'standard', forcedEndDate, targetDate, onNavigationComplete } = props
+  const { t } = useTranslation()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const scrollServiceRef = useRef<GanttScrollService | null>(null)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const [svgElement, setSvgElement] = useState<SVGElement | null>(null)
 
-  const viewMode = useMemo(() => GanttViewModeService.getViewMode(zoomLevel), [zoomLevel]);
-  const columnWidth = useMemo(() => GanttViewModeService.getColumnWidth(zoomLevel), [zoomLevel]);
+  const { preferences } = useUserPreferences()
+  const isPulseActive = useAppStore(state => state.ui.isPulseActive)
+  const { resources, calendars, baselines, activeBaselineId } = useProjectStore()
+  const activeBaseline = useMemo(() => baselines.find(b => b.id === activeBaselineId), [baselines, activeBaselineId])
+  const { getFormattedName } = useTaskEstimation()
+  const { getVisualProgress, showBaseline } = useTaskWorkVisualization(mode as 'standard' | 'tracking')
+
+  const viewMode = useMemo(() => GanttViewModeService.getViewMode(zoomLevel), [zoomLevel])
+  const columnWidth = useMemo(() => GanttViewModeService.getColumnWidth(zoomLevel), [zoomLevel])
   const projectRange = useMemo(() => {
-    return GanttRangeService.calculateRange(tasks, dimensions.width, zoomLevel, viewMode, forcedEndDate);
-  }, [tasks, dimensions.width, zoomLevel, viewMode, forcedEndDate]);
-  
+    return GanttRangeService.calculateRange(tasks, dimensions.width, zoomLevel, viewMode, forcedEndDate)
+  }, [tasks, dimensions.width, zoomLevel, viewMode, forcedEndDate])
+
   const ganttTasks = useMemo(() => {
     return GanttTaskMapper.mapToGanttTasks(
       tasks,
@@ -73,105 +73,105 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
       resources,
       calendars,
       activeBaseline,
-      t
-    );
-  }, [tasks, dimensions.height, projectRange, getVisualProgress, getFormattedName, showBaseline, mode, preferences.gantt, isPulseActive, resources, calendars, activeBaseline, t]);
+      t,
+    )
+  }, [tasks, dimensions.height, projectRange, getVisualProgress, getFormattedName, showBaseline, mode, preferences.gantt, isPulseActive, resources, calendars, activeBaseline, t])
 
   // Исполнение навигации через сервис (Лоск, пороги и DOM-прыжки)
   const executeScrollToDate = useCallback(async (date: Date) => {
-    if (!scrollServiceRef.current) return;
+    if (!scrollServiceRef.current) return
 
-    console.group(`[ProfessionalGantt] executeScrollToDate: ${date.toLocaleDateString()}`);
-    
+    console.group(`[ProfessionalGantt] executeScrollToDate: ${date.toLocaleDateString()}`)
+
     // ЭТАЛОННАЯ СТРАТЕГИЯ: Ищем ближайшую задачу для максимально точного прыжка по DOM
-    const nearestTaskId = GanttNavigationService.findNearestTaskId(date, tasks);
-    
+    const nearestTaskId = GanttNavigationService.findNearestTaskId(date, tasks)
+
     const scrollOpts = {
       containerWidth: dimensions.width,
       expansionTimeout: 5000,
       onRequireViewModeFallback: (mode: ViewMode) => {
         // Здесь можно добавить уведомление пользователю или автопереключение
-        console.warn(`[ProfessionalGantt] Navigation range too large. Recommended view mode: ${mode}`);
-      }
-    };
+        console.warn(`[ProfessionalGantt] Navigation range too large. Recommended view mode: ${mode}`)
+      },
+    }
 
-    let success = false;
+    let success = false
     if (nearestTaskId) {
-      console.log(`[ProfessionalGantt] Strategy: Element-based navigation to task ${nearestTaskId}`);
-      success = await scrollServiceRef.current.scrollToTaskByDataId(nearestTaskId, scrollOpts);
+      console.log(`[ProfessionalGantt] Strategy: Element-based navigation to task ${nearestTaskId}`)
+      success = await scrollServiceRef.current.scrollToTaskByDataId(nearestTaskId, scrollOpts)
     }
 
     if (!success) {
-      console.log(`[ProfessionalGantt] Strategy: Index-based navigation`);
-      const stepIndex = GanttNavigationService.dateToStepIndex(date, projectRange.start, viewMode);
-      await scrollServiceRef.current.scrollToIndex(stepIndex, columnWidth, 1, scrollOpts);
+      console.log('[ProfessionalGantt] Strategy: Index-based navigation')
+      const stepIndex = GanttNavigationService.dateToStepIndex(date, projectRange.start, viewMode)
+      await scrollServiceRef.current.scrollToIndex(stepIndex, columnWidth, 1, scrollOpts)
     }
 
-    console.groupEnd();
-  }, [tasks, projectRange.start, viewMode, columnWidth, dimensions.width]);
+    console.groupEnd()
+  }, [tasks, projectRange.start, viewMode, columnWidth, dimensions.width])
 
   useImperativeHandle(ref, () => ({
     scrollToPosition: (pos: number) => {
-      scrollServiceRef.current?.scrollToPosition(pos);
+      scrollServiceRef.current?.scrollToPosition(pos)
     },
-    scrollToDate: (date: Date) => { executeScrollToDate(date); },
-    getCurrentScroll: () => scrollLeft
-  }));
+    scrollToDate: (date: Date) => { executeScrollToDate(date) },
+    getCurrentScroll: () => scrollLeft,
+  }))
 
   // Инициализация сервиса и поиск SVG
   useEffect(() => {
     const findContainer = () => {
-      const el = containerRef.current?.querySelector('div[style*="overflow: auto"]') as HTMLElement;
+      const el = containerRef.current?.querySelector('div[style*="overflow: auto"]') as HTMLElement
       if (el) {
-        scrollServiceRef.current = new GanttScrollService(el);
-        const svg = el.querySelector('svg') as SVGElement;
-        if (svg) setSvgElement(svg);
-        console.log(`[ProfessionalGantt] GanttScrollService and SVG initialized`);
-        return true;
+        scrollServiceRef.current = new GanttScrollService(el)
+        const svg = el.querySelector('svg') as SVGElement
+        if (svg) setSvgElement(svg)
+        console.log('[ProfessionalGantt] GanttScrollService and SVG initialized')
+        return true
       }
-      return false;
-    };
+      return false
+    }
 
     if (!findContainer()) {
-      const interval = setInterval(() => { if (findContainer()) clearInterval(interval); }, 50);
-      return () => { clearInterval(interval); scrollServiceRef.current?.dispose(); };
+      const interval = setInterval(() => { if (findContainer()) clearInterval(interval) }, 50)
+      return () => { clearInterval(interval); scrollServiceRef.current?.dispose() }
     }
-    return () => scrollServiceRef.current?.dispose();
-  }, []);
+    return () => scrollServiceRef.current?.dispose()
+  }, [])
 
   // Реакция на targetDate
   useEffect(() => {
     if (targetDate && scrollServiceRef.current) {
-      executeScrollToDate(targetDate).then(() => onNavigationComplete?.());
+      executeScrollToDate(targetDate).then(() => onNavigationComplete?.())
     }
-  }, [targetDate, executeScrollToDate, onNavigationComplete]);
+  }, [targetDate, executeScrollToDate, onNavigationComplete])
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return
     const observer = new ResizeObserver(entries => {
-      for (const entry of entries) setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height });
-    });
-    observer.observe(containerRef.current);
-    
-    let scrollEl: HTMLElement | null = null, rafId = 0, lastScroll = 0;
-    const rafLoop = () => { 
-      if (!scrollEl) scrollEl = containerRef.current?.querySelector('div[style*="overflow: auto"]') as HTMLElement;
-      if (scrollEl && scrollEl.scrollLeft !== lastScroll) { 
-        lastScroll = scrollEl.scrollLeft; 
-        setScrollLeft(lastScroll); 
-      } 
-      rafId = requestAnimationFrame(rafLoop); 
-    };
-    rafId = requestAnimationFrame(rafLoop);
-    return () => { observer.disconnect(); cancelAnimationFrame(rafId); };
-  }, [ganttTasks.length]);
+      for (const entry of entries) setDimensions({ width: entry.contentRect.width, height: entry.contentRect.height })
+    })
+    observer.observe(containerRef.current)
+
+    let scrollEl: HTMLElement | null = null, rafId = 0, lastScroll = 0
+    const rafLoop = () => {
+      if (!scrollEl) scrollEl = containerRef.current?.querySelector('div[style*="overflow: auto"]') as HTMLElement
+      if (scrollEl && scrollEl.scrollLeft !== lastScroll) {
+        lastScroll = scrollEl.scrollLeft
+        setScrollLeft(lastScroll)
+      }
+      rafId = requestAnimationFrame(rafLoop)
+    }
+    rafId = requestAnimationFrame(rafLoop)
+    return () => { observer.disconnect(); cancelAnimationFrame(rafId) }
+  }, [ganttTasks.length])
 
   return (
     <div ref={containerRef} className={`professional-gantt-container w-full h-full bg-white relative gantt-modern-scrollbars ${showBaseline ? 'gantt-baseline-enabled' : ''} ${!preferences.gantt.showGridlines ? 'gantt-hide-grid' : ''} ${preferences.gantt.highlightWeekends ? 'gantt-highlight-weekends' : ''}`}>
       {dimensions.width > 0 && (
-        <ProfessionalTimelineHeader 
-          startDate={projectRange.start} endDate={projectRange.end} 
-          viewMode={viewMode} columnWidth={columnWidth} scrollLeft={scrollLeft} 
+        <ProfessionalTimelineHeader
+          startDate={projectRange.start} endDate={projectRange.end}
+          viewMode={viewMode} columnWidth={columnWidth} scrollLeft={scrollLeft}
           headerHeight={50} containerWidth={dimensions.width}
         />
       )}
@@ -179,31 +179,31 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
         <div className="absolute inset-0 top-[50px] gantt-hide-list">
           <Gantt tasks={ganttTasks} viewMode={viewMode} columnWidth={columnWidth} headerHeight={0} rowHeight={typeof preferences.gantt.rowHeight === 'number' ? preferences.gantt.rowHeight : 40} locale="ru-RU" listCellWidth="1"
             TaskListHeader={() => null} TaskListTable={() => null}
-            onDateChange={(t: GanttTask) => { const s = CalendarDateService.toLocalMidnight(t.start), e = CalendarDateService.toLocalMidnight(t.end); e.setHours(23, 59, 59, 999); onTaskUpdate?.(t.id, { startDate: s, endDate: e, progress: Math.round(t.progress) / 100 }); }}
+            onDateChange={(t: GanttTask) => { const s = CalendarDateService.toLocalMidnight(t.start), e = CalendarDateService.toLocalMidnight(t.end); e.setHours(23, 59, 59, 999); onTaskUpdate?.(t.id, { startDate: s, endDate: e, progress: Math.round(t.progress) / 100 }) }}
             onProgressChange={(t: GanttTask) => onTaskUpdate?.(t.id, { startDate: t.start, endDate: t.end, progress: Math.round(t.progress) / 100 })}
-            onSelect={(t: GanttTask, sel: boolean) => { const et = t as ExtendedGanttTask; if (sel && et.originalTask) onTaskSelect?.(et.originalTask); }}
-            onDoubleClick={(t: GanttTask) => { const et = t as ExtendedGanttTask; if (et.originalTask) onTaskDoubleClick?.(et.originalTask); }}
-            TooltipContent={({ task: gTask }: { task: GanttTask }) => { 
-              const et = gTask as ExtendedGanttTask; 
-              if (et.originalTask?.isFiller) return null; 
-              const bDates = et.baselineDates;
-              const diffDays = bDates ? Math.round((new Date(gTask.end).getTime() - new Date(bDates.endDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-              const conflict = et.calendarConflict;
-              
+            onSelect={(t: GanttTask, sel: boolean) => { const et = t as ExtendedGanttTask; if (sel && et.originalTask) onTaskSelect?.(et.originalTask) }}
+            onDoubleClick={(t: GanttTask) => { const et = t as ExtendedGanttTask; if (et.originalTask) onTaskDoubleClick?.(et.originalTask) }}
+            TooltipContent={({ task: gTask }: { task: GanttTask }) => {
+              const et = gTask as ExtendedGanttTask
+              if (et.originalTask?.isFiller) return null
+              const bDates = et.baselineDates
+              const diffDays = bDates ? Math.round((new Date(gTask.end).getTime() - new Date(bDates.endDate).getTime()) / (1000 * 60 * 60 * 24)) : 0
+              const conflict = et.calendarConflict
+
               return (
-                <div 
-                  className="bg-white p-3 border border-slate-200 rounded-lg shadow-xl text-xs border-l-4 whitespace-normal break-words" 
-                  style={{ 
+                <div
+                  className="bg-white p-3 border border-slate-200 rounded-lg shadow-xl text-xs border-l-4 whitespace-normal break-words"
+                  style={{
                     borderLeftColor: gTask.styles?.backgroundColor,
                     width: 'max-content',
                     minWidth: '280px',
                     maxWidth: '450px',
                     display: 'flex',
-                    flexDirection: 'column'
+                    flexDirection: 'column',
                   }}
                 >
                   <div className="font-bold text-slate-900 mb-2 text-sm leading-snug">{gTask.name}</div>
-                  
+
                   {/* Stage 8.20: Календарное предупреждение */}
                   {conflict?.hasConflict && (
                     <div className="mb-2 p-2 bg-orange-50 border-l-2 border-orange-400 rounded w-full">
@@ -226,7 +226,7 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
                     <span className="text-slate-700">{gTask.end.toLocaleDateString()}</span>
                     <span>{t('gantt.tooltip_progress', { defaultValue: 'Прогресс' })}:</span>
                     <span className="text-slate-700">{Math.round(gTask.progress)}%</span>
-                    
+
                     {isPulseActive && (
                       <>
                         <div className="col-span-2 my-1 border-t border-slate-100" />
@@ -256,19 +256,19 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
                     )}
                   </div>
                 </div>
-              );
+              )
             }}
           />
           {showBaseline && activeBaseline && svgElement && createPortal(
-            <BaselineOverlay 
-              tasks={ganttTasks} 
-              activeBaseline={activeBaseline} 
-              projectStartDate={projectRange.start} 
-              columnWidth={columnWidth} 
-              viewMode={viewMode} 
-              rowHeight={preferences.gantt.rowHeight} 
+            <BaselineOverlay
+              tasks={ganttTasks}
+              activeBaseline={activeBaseline}
+              projectStartDate={projectRange.start}
+              columnWidth={columnWidth}
+              viewMode={viewMode}
+              rowHeight={preferences.gantt.rowHeight}
             />,
-            svgElement
+            svgElement,
           )}
           {isPulseActive && svgElement && createPortal(
             <PulseOverlay
@@ -278,7 +278,7 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
               viewMode={viewMode}
               rowHeight={preferences.gantt.rowHeight}
             />,
-            svgElement
+            svgElement,
           )}
         </div>
       )}
@@ -357,7 +357,7 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 
-export const ProfessionalGantt = forwardRef(ProfessionalGanttRender);
+export const ProfessionalGantt = forwardRef(ProfessionalGanttRender)

@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface Calendar {
   id: string;
@@ -27,9 +27,9 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [mode, setMode] = React.useState<'new' | 'copy'>('new');
-  const [calendarName, setCalendarName] = React.useState('');
-  const [copyFromId, setCopyFromId] = React.useState('');
+  const [mode, setMode] = React.useState<'new' | 'copy'>('new')
+  const [calendarName, setCalendarName] = React.useState('')
+  const [copyFromId, setCopyFromId] = React.useState('')
 
   const { validate, errors, isValid } = useDialogValidation({
     calendarName: {
@@ -37,30 +37,30 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
       minLength: 1,
       maxLength: 255,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Calendar name is required';
-        if (!value.trim()) return 'Calendar name is required';
+        if (!value || typeof value !== 'string') return 'Calendar name is required'
+        if (!value.trim()) return 'Calendar name is required'
         if (existingCalendars.some(c => c.name === value.trim())) {
-          return 'Calendar with this name already exists';
+          return 'Calendar with this name already exists'
         }
-        return null;
-      }
+        return null
+      },
     },
     copyFromId: {
       required: mode === 'copy',
       custom: (value) => {
-        if (mode === 'copy' && !value) return 'Please select a calendar to copy';
-        return null;
-      }
-    }
-  });
+        if (mode === 'copy' && !value) return 'Please select a calendar to copy'
+        return null
+      },
+    },
+  })
 
   React.useEffect(() => {
-    validate('calendarName', calendarName);
-  }, [calendarName, existingCalendars]);
+    validate('calendarName', calendarName)
+  }, [calendarName, existingCalendars])
 
   React.useEffect(() => {
-    validate('copyFromId', copyFromId);
-  }, [copyFromId, mode]);
+    validate('copyFromId', copyFromId)
+  }, [copyFromId, mode])
 
   const handleCreate = () => {
     if (isValid()) {
@@ -68,19 +68,19 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
         name: calendarName.trim(),
         isBase: true,
         workingDays: [1, 2, 3, 4, 5], // Monday to Friday
-        workingHours: { start: '09:00', end: '17:00' }
-      };
+        workingHours: { start: '09:00', end: '17:00' },
+      }
 
-      onSave?.(calendarData, mode === 'copy' ? copyFromId : undefined);
-      onClose?.();
+      onSave?.(calendarData, mode === 'copy' ? copyFromId : undefined)
+      onClose?.()
     }
-  };
+  }
 
-  const canCreate = isValid();
+  const canCreate = isValid()
 
-  const availableCalendarsForCopy = existingCalendars.filter(c => c.isBase);
+  const availableCalendarsForCopy = existingCalendars.filter(c => c.isBase)
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -207,6 +207,6 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

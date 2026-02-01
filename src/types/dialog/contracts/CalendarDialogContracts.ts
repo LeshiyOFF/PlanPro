@@ -2,7 +2,7 @@
  * Контракты для календарных диалогов
  */
 
-import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry';
+import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry'
 
 export interface CalendarEditorDialogData extends BaseDialogData {
   readonly calendarId: string;

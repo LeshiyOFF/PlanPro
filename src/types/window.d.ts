@@ -3,7 +3,7 @@
  * В веб-сборке electronAPI отсутствует; в Electron — предоставляется preload.
  */
 
-import type { JsonValue, JsonArray, JsonObject } from './json-types';
+import type { JsonValue, JsonArray, JsonObject } from './json-types'
 
 export interface MessageBoxOptions {
   type?: 'none' | 'info' | 'error' | 'question' | 'warning';
@@ -92,4 +92,4 @@ declare global {
   }
 }
 
-export {};
+export {}

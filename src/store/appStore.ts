@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { devtools, subscribeWithSelector } from 'zustand/middleware';
+import { create } from 'zustand'
+import { devtools, subscribeWithSelector } from 'zustand/middleware'
 import {
   ExtendedAppState,
   ProjectState as CatalogProjectState,
@@ -14,9 +14,9 @@ import {
   TimeUnit,
   TaskType,
   ViewType,
-  Theme
-} from '../types/Master_Functionality_Catalog';
-import type { Project } from '@/types/project-types';
+  Theme,
+} from '../types/Master_Functionality_Catalog'
+import type { Project } from '@/types/project-types'
 
 /** Состояние проектов в сторе: current — project-types.Project (источник правды UI). */
 export type StoreProjectState = Omit<CatalogProjectState, 'current'> & { current: Project | null };
@@ -67,19 +67,19 @@ const initialState: StoreExtendedAppState = {
     loading: false,
     error: null,
     lastModified: null,
-    unsavedChanges: false
+    unsavedChanges: false,
   },
   tasks: {
     currentTask: null,
     selectedTasks: [],
     isLoading: false,
-    error: null
+    error: null,
   },
   resources: {
     currentResource: null,
     selectedResources: [],
     isLoading: false,
-    error: null
+    error: null,
   },
   ui: {
     currentView: null,
@@ -94,7 +94,7 @@ const initialState: StoreExtendedAppState = {
       zoomLevel: 1,
       showNonWorkingTime: true,
       showWeekNumbers: true,
-      fiscalYearStart: 1
+      fiscalYearStart: 1,
     },
     sidebarVisible: true,
     toolbarVisible: true,
@@ -102,7 +102,7 @@ const initialState: StoreExtendedAppState = {
     isPulseActive: false,
     isLoading: false,
     dialogs: [],
-    notifications: []
+    notifications: [],
   },
   preferences: {
     general: {
@@ -117,7 +117,7 @@ const initialState: StoreExtendedAppState = {
       currency: 'USD',
       language: 'en',
       defaultStandardRate: 60.0,
-      defaultOvertimeRate: 90.0
+      defaultOvertimeRate: 90.0,
     },
     display: {
       showTips: true,
@@ -126,7 +126,7 @@ const initialState: StoreExtendedAppState = {
       highContrast: false,
       fontSize: 14,
       fontFamily: 'Inter',
-      theme: Theme.LIGHT
+      theme: Theme.LIGHT,
     },
     editing: {
       autoCalculate: true,
@@ -135,7 +135,7 @@ const initialState: StoreExtendedAppState = {
       confirmDeletions: true,
       autoLinkTasks: true,
       splitTasksEnabled: true,
-      effortDriven: false
+      effortDriven: false,
     },
     calculations: {
       criticalSlack: { value: 0, unit: TimeUnit.DAYS },
@@ -143,7 +143,7 @@ const initialState: StoreExtendedAppState = {
       tasksAreCriticalIfSlackIsLessThan: { value: 0, unit: TimeUnit.DAYS },
       showEstimatedDurations: true,
       showActualWork: true,
-      showBaselineWork: true
+      showBaselineWork: true,
     },
     security: {
       passwordProtection: false,
@@ -154,8 +154,8 @@ const initialState: StoreExtendedAppState = {
         enableAllMacros: false,
         disableAllMacros: true,
         trustVbaProjects: false,
-        trustedLocations: []
-      }
+        trustedLocations: [],
+      },
     },
     schedule: {
       schedulingRule: TaskType.FIXED_UNITS,
@@ -163,15 +163,15 @@ const initialState: StoreExtendedAppState = {
       durationEnteredIn: TimeUnit.DAYS,
       workUnit: TimeUnit.HOURS,
       newTasksStartToday: true,
-      honorRequiredDates: true
+      honorRequiredDates: true,
     },
     calendar: {
       hoursPerDay: 8,
       hoursPerWeek: 40,
-      daysPerMonth: 20
-    }
-  }
-};
+      daysPerMonth: 20,
+    },
+  },
+}
 
 export const useAppStore = create<AppStore>()(
   devtools(
@@ -180,95 +180,95 @@ export const useAppStore = create<AppStore>()(
 
       // Project actions
       setProjectState: (projectState) => set((state) => ({
-        projects: { ...state.projects, ...projectState }
+        projects: { ...state.projects, ...projectState },
       }), false, 'setProjectState'),
 
       setCurrentProject: (project) => set((state) => ({
-        projects: { ...state.projects, current: project }
+        projects: { ...state.projects, current: project },
       }), false, 'setCurrentProject'),
 
       setProjectLoading: (loading) => set((state) => ({
-        projects: { ...state.projects, loading }
+        projects: { ...state.projects, loading },
       }), false, 'setProjectLoading'),
 
       setProjectError: (error) => set((state) => ({
-        projects: { ...state.projects, error }
+        projects: { ...state.projects, error },
       }), false, 'setProjectError'),
 
       updateProjectValidation: (errors) => set((state) => ({
-        projects: { ...state.projects, validationErrors: errors }
+        projects: { ...state.projects, validationErrors: errors },
       }), false, 'updateProjectValidation'),
 
       // User Preferences actions
       setUserPreferences: (preferences) => set((state) => ({
-        preferences: { ...state.preferences, ...preferences }
+        preferences: { ...state.preferences, ...preferences },
       }), false, 'setUserPreferences'),
 
       // Task actions
       setTaskState: (taskState) => set((state) => ({
-        tasks: { ...state.tasks, ...taskState }
+        tasks: { ...state.tasks, ...taskState },
       }), false, 'setTaskState'),
 
       setCurrentTask: (taskId) => set((state) => ({
-        tasks: { ...state.tasks, currentTask: taskId }
+        tasks: { ...state.tasks, currentTask: taskId },
       }), false, 'setCurrentTask'),
 
       setSelectedTasks: (taskIds) => set((state) => ({
-        tasks: { ...state.tasks, selectedTasks: taskIds }
+        tasks: { ...state.tasks, selectedTasks: taskIds },
       }), false, 'setSelectedTasks'),
 
       setTaskLoading: (loading) => set((state) => ({
-        tasks: { ...state.tasks, isLoading: loading }
+        tasks: { ...state.tasks, isLoading: loading },
       }), false, 'setTaskLoading'),
 
       setTaskError: (error) => set((state) => ({
-        tasks: { ...state.tasks, error }
+        tasks: { ...state.tasks, error },
       }), false, 'setTaskError'),
 
       // Resource actions
       setResourceState: (resourceState) => set((state) => ({
-        resources: { ...state.resources, ...resourceState }
+        resources: { ...state.resources, ...resourceState },
       }), false, 'setResourceState'),
 
       setCurrentResource: (resourceId) => set((state) => ({
-        resources: { ...state.resources, currentResource: resourceId }
+        resources: { ...state.resources, currentResource: resourceId },
       }), false, 'setCurrentResource'),
 
       setSelectedResources: (resourceIds) => set((state) => ({
-        resources: { ...state.resources, selectedResources: resourceIds }
+        resources: { ...state.resources, selectedResources: resourceIds },
       }), false, 'setSelectedResources'),
 
       setResourceLoading: (loading) => set((state) => ({
-        resources: { ...state.resources, isLoading: loading }
+        resources: { ...state.resources, isLoading: loading },
       }), false, 'setResourceLoading'),
 
       setResourceError: (error) => set((state) => ({
-        resources: { ...state.resources, error }
+        resources: { ...state.resources, error },
       }), false, 'setResourceError'),
 
       // UI actions
       setUIState: (uiState) => set((state) => ({
-        ui: { ...state.ui, ...uiState }
+        ui: { ...state.ui, ...uiState },
       }), false, 'setUIState'),
 
       setCurrentView: (view) => set((state) => ({
-        ui: { ...state.ui, currentView: view }
+        ui: { ...state.ui, currentView: view },
       }), false, 'setCurrentView'),
 
       setSidebarCollapsed: (collapsed) => set((state) => ({
-        ui: { ...state.ui, sidebarVisible: !collapsed }
+        ui: { ...state.ui, sidebarVisible: !collapsed },
       }), false, 'setSidebarCollapsed'),
 
       setLoading: (loading) => set((state) => ({
-        ui: { ...state.ui, isLoading: loading }
+        ui: { ...state.ui, isLoading: loading },
       }), false, 'setLoading'),
 
       setNotification: (notification) => set((state) => ({
-        ui: { ...state.ui, notifications: notification ? [notification] : [] }
+        ui: { ...state.ui, notifications: notification ? [notification] : [] },
       }), false, 'setNotification'),
 
       clearNotification: () => set((state) => ({
-        ui: { ...state.ui, notifications: [] }
+        ui: { ...state.ui, notifications: [] },
       }), false, 'clearNotification'),
 
       // Global actions
@@ -277,10 +277,10 @@ export const useAppStore = create<AppStore>()(
       initializeStore: (initialStateOverride) => set((state) => ({
         ...state,
         ...initialState,
-        ...initialStateOverride
-      }), false, 'initializeStore')
+        ...initialStateOverride,
+      }), false, 'initializeStore'),
     })),
-    { name: 'projectlibre-app-store' }
-  )
-);
+    { name: 'projectlibre-app-store' },
+  ),
+)
 

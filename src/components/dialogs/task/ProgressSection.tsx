@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Lock, Diamond, FolderTree, CheckCircle2 } from 'lucide-react';
-import { toPercent, toFraction } from '@/utils/ProgressFormatter';
+import React, { useState, useEffect } from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Slider } from '@/components/ui/slider'
+import { Lock, Diamond, FolderTree, CheckCircle2 } from 'lucide-react'
+import { toPercent, toFraction } from '@/utils/ProgressFormatter'
 
 export type TaskType = 'milestone' | 'summary' | 'regular';
 
@@ -16,55 +16,55 @@ interface ProgressSectionProps {
 
 /**
  * ProgressSection - Секция прогресса с учётом типа задачи
- * 
+ *
  * Clean Architecture: UI Component (Presentation Layer)
  * SOLID: Single Responsibility - управление прогрессом задачи
- * 
+ *
  * @version 1.0
  */
-export const ProgressSection: React.FC<ProgressSectionProps> = ({ 
-  taskType, progress, onProgressChange, t 
+export const ProgressSection: React.FC<ProgressSectionProps> = ({
+  taskType, progress, onProgressChange, t,
 }) => {
-  const [inputValue, setInputValue] = useState(String(toPercent(progress)));
+  const [inputValue, setInputValue] = useState(String(toPercent(progress)))
 
   useEffect(() => {
-    setInputValue(String(toPercent(progress)));
-  }, [progress]);
+    setInputValue(String(toPercent(progress)))
+  }, [progress])
 
   const handleInputChange = (val: string) => {
-    setInputValue(val);
-    const num = parseFloat(val);
+    setInputValue(val)
+    const num = parseFloat(val)
     if (!isNaN(num)) {
-      const limited = Math.max(0, Math.min(100, num));
-      onProgressChange(toFraction(limited));
+      const limited = Math.max(0, Math.min(100, num))
+      onProgressChange(toFraction(limited))
     }
-  };
+  }
 
   const handleSliderChange = (val: number[]) => {
-    onProgressChange(toFraction(val[0]));
-  };
+    onProgressChange(toFraction(val[0]))
+  }
 
   if (taskType === 'summary') {
-    return <SummaryProgress progress={progress} t={t} />;
+    return <SummaryProgress progress={progress} t={t} />
   }
 
   if (taskType === 'milestone') {
-    return <MilestoneProgress progress={progress} onProgressChange={onProgressChange} t={t} />;
+    return <MilestoneProgress progress={progress} onProgressChange={onProgressChange} t={t} />
   }
 
   return (
-    <RegularProgress 
+    <RegularProgress
       inputValue={inputValue}
       progress={progress}
       onInputChange={handleInputChange}
       onSliderChange={handleSliderChange}
       t={t}
     />
-  );
-};
+  )
+}
 
-const SummaryProgress: React.FC<{ progress: number; t: ProgressSectionProps['t'] }> = ({ 
-  progress, t 
+const SummaryProgress: React.FC<{ progress: number; t: ProgressSectionProps['t'] }> = ({
+  progress, t,
 }) => (
   <div className="space-y-4 p-6 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
     <div className="flex items-center gap-3 text-amber-700">
@@ -83,7 +83,7 @@ const SummaryProgress: React.FC<{ progress: number; t: ProgressSectionProps['t']
       {t('task_props.summary_hint', { defaultValue: 'Прогресс суммарной задачи рассчитывается автоматически' })}
     </p>
   </div>
-);
+)
 
 interface MilestoneProgressProps {
   progress: number;
@@ -92,14 +92,14 @@ interface MilestoneProgressProps {
 }
 
 const MilestoneProgress: React.FC<MilestoneProgressProps> = ({ progress, onProgressChange, t }) => {
-  const isCompleted = progress >= 0.5;
-  
+  const isCompleted = progress >= 0.5
+
   return (
     <div className="space-y-4 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
       <Label className="text-sm font-semibold text-slate-700 tracking-wide">
         {t('task_props.milestone_status', { defaultValue: 'Статус вехи' })}
       </Label>
-      <div 
+      <div
         className={`flex items-center gap-4 p-5 rounded-xl border-2 transition-all cursor-pointer ${
           isCompleted ? 'bg-green-50 border-green-300 hover:border-green-400' : 'bg-slate-50 border-slate-200 hover:border-slate-300'
         }`}
@@ -118,8 +118,8 @@ const MilestoneProgress: React.FC<MilestoneProgressProps> = ({ progress, onProgr
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface RegularProgressProps {
   inputValue: string;
@@ -129,8 +129,8 @@ interface RegularProgressProps {
   t: ProgressSectionProps['t'];
 }
 
-const RegularProgress: React.FC<RegularProgressProps> = ({ 
-  inputValue, progress, onInputChange, onSliderChange, t 
+const RegularProgress: React.FC<RegularProgressProps> = ({
+  inputValue, progress, onInputChange, onSliderChange, t,
 }) => (
   <div className="space-y-4 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
     <div className="flex justify-between items-center mb-2">
@@ -138,8 +138,8 @@ const RegularProgress: React.FC<RegularProgressProps> = ({
         {t('task_props.progress', { defaultValue: 'Прогресс выполнения' })}
       </Label>
       <div className="flex items-center gap-2">
-        <Input 
-          className="w-20 h-10 text-center font-bold text-base border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-white" 
+        <Input
+          className="w-20 h-10 text-center font-bold text-base border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-white"
           type="text" value={inputValue} onChange={(e) => onInputChange(e.target.value)}
         />
         <span className="text-base font-semibold text-slate-500">%</span>
@@ -152,4 +152,4 @@ const RegularProgress: React.FC<RegularProgressProps> = ({
       <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
     </div>
   </div>
-);
+)

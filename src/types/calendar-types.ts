@@ -32,7 +32,7 @@ export interface CalendarException {
   endTime?: string;
 }
 
-import { IDialogData } from './dialog/LegacyDialogTypes';
+import { IDialogData } from './dialog/LegacyDialogTypes'
 
 export interface CalendarDialogData extends Partial<IDialogData> {
   workingTime: Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>;

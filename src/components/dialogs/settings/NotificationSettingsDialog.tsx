@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface NotificationRule {
   id: string;
@@ -71,15 +71,15 @@ const NOTIFICATION_EVENTS = [
   { value: 'deadline_approaching', label: 'Deadline Approaching' },
   { value: 'overdue_task', label: 'Task Overdue' },
   { value: 'project_saved', label: 'Project Saved' },
-  { value: 'baseline_created', label: 'Baseline Created' }
-];
+  { value: 'baseline_created', label: 'Baseline Created' },
+]
 
 const NOTIFICATION_CHANNELS = [
   { value: 'email', label: 'Email' },
   { value: 'inapp', label: 'In-App' },
   { value: 'desktop', label: 'Desktop' },
-  { value: 'sms', label: 'SMS' }
-];
+  { value: 'sms', label: 'SMS' },
+]
 
 const TIMEZONES = [
   { value: 'UTC', label: 'UTC' },
@@ -89,15 +89,15 @@ const TIMEZONES = [
   { value: 'America/Los_Angeles', label: 'Pacific Time' },
   { value: 'Europe/London', label: 'London' },
   { value: 'Europe/Paris', label: 'Paris' },
-  { value: 'Asia/Tokyo', label: 'Tokyo' }
-];
+  { value: 'Asia/Tokyo', label: 'Tokyo' },
+]
 
 const DIGEST_FREQUENCIES = [
   { value: 'immediate', label: 'Immediate' },
   { value: 'hourly', label: 'Hourly Digest' },
   { value: 'daily', label: 'Daily Digest' },
-  { value: 'weekly', label: 'Weekly Digest' }
-];
+  { value: 'weekly', label: 'Weekly Digest' },
+]
 
 export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProps> = ({
   currentSettings,
@@ -120,13 +120,13 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
           enabled: false,
           start: '22:00',
           end: '08:00',
-          timezone: 'UTC'
+          timezone: 'UTC',
         },
         digestSettings: {
           enabled: false,
           frequency: 'daily',
-          maxItems: 50
-        }
+          maxItems: 50,
+        },
       },
       rules: [],
       emailSettings: {
@@ -137,58 +137,58 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
         fromAddress: '',
         fromName: '',
         useSSL: false,
-        useTLS: true
-      }
-    }
-  );
+        useTLS: true,
+      },
+    },
+  )
 
-  const [activeTab, setActiveTab] = React.useState<'global' | 'rules' | 'email'>('global');
+  const [activeTab, setActiveTab] = React.useState<'global' | 'rules' | 'email'>('global')
 
   const { validate, errors, isValid } = useDialogValidation({
     'emailSettings.smtpPort': {
       required: true,
       min: 1,
       max: 65535,
-      custom: (value) => (Number(value) > 0 && Number(value) <= 65535) ? null : 'Port must be between 1 and 65535'
+      custom: (value) => (Number(value) > 0 && Number(value) <= 65535) ? null : 'Port must be between 1 and 65535',
     },
     'global.digestSettings.maxItems': {
       required: true,
       min: 1,
       max: 1000,
-      custom: (value) => (Number(value) > 0 && Number(value) <= 1000) ? null : 'Max items must be between 1 and 1000'
-    }
-  });
+      custom: (value) => (Number(value) > 0 && Number(value) <= 1000) ? null : 'Max items must be between 1 and 1000',
+    },
+  })
 
   React.useEffect(() => {
     if (currentSettings) {
-      setSettings(currentSettings);
+      setSettings(currentSettings)
     }
-  }, [currentSettings]);
+  }, [currentSettings])
 
   React.useEffect(() => {
-    validate('emailSettings.smtpPort', settings.emailSettings.smtpPort);
-    validate('global.digestSettings.maxItems', settings.global.digestSettings.maxItems);
-  }, [settings.emailSettings.smtpPort, settings.global.digestSettings.maxItems]);
+    validate('emailSettings.smtpPort', settings.emailSettings.smtpPort)
+    validate('global.digestSettings.maxItems', settings.global.digestSettings.maxItems)
+  }, [settings.emailSettings.smtpPort, settings.global.digestSettings.maxItems])
 
   const handleGlobalChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       global: {
         ...prev.global,
-        [field]: value
-      }
-    } as NotificationSettings));
-  };
+        [field]: value,
+      },
+    } as NotificationSettings))
+  }
 
   const handleEmailChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       emailSettings: {
         ...prev.emailSettings,
-        [field]: value
-      }
-    } as NotificationSettings));
-  };
+        [field]: value,
+      },
+    } as NotificationSettings))
+  }
 
   const handleQuietHoursChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
@@ -197,11 +197,11 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
         ...prev.global,
         quietHours: {
           ...prev.global.quietHours,
-          [field]: value
-        }
-      }
-    } as NotificationSettings));
-  };
+          [field]: value,
+        },
+      },
+    } as NotificationSettings))
+  }
 
   const handleDigestChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
@@ -210,11 +210,11 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
         ...prev.global,
         digestSettings: {
           ...prev.global.digestSettings,
-          [field]: value
-        }
-      }
-    } as NotificationSettings));
-  };
+          [field]: value,
+        },
+      },
+    } as NotificationSettings))
+  }
 
   const addNotificationRule = () => {
     const newRule: NotificationRule = {
@@ -227,41 +227,41 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
       conditions: {
         priority: [],
         projects: [],
-        resources: []
-      }
-    };
+        resources: [],
+      },
+    }
     setSettings(prev => ({
       ...prev,
-      rules: [...prev.rules, newRule]
-    }));
-  };
+      rules: [...prev.rules, newRule],
+    }))
+  }
 
   const updateRule = (ruleId: string, updates: Partial<NotificationRule>) => {
     setSettings(prev => ({
       ...prev,
-      rules: prev.rules.map(rule => 
-        rule.id === ruleId ? { ...rule, ...updates } : rule
-      )
-    }));
-  };
+      rules: prev.rules.map(rule =>
+        rule.id === ruleId ? { ...rule, ...updates } : rule,
+      ),
+    }))
+  }
 
   const deleteRule = (ruleId: string) => {
     setSettings(prev => ({
       ...prev,
-      rules: prev.rules.filter(rule => rule.id !== ruleId)
-    }));
-  };
+      rules: prev.rules.filter(rule => rule.id !== ruleId),
+    }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(settings);
-      onClose?.();
+      onSave?.(settings)
+      onClose?.()
     }
-  };
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -539,13 +539,13 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
                                 checked={rule.events.includes(event.value)}
                                 onCheckedChange={(checked) => {
                                   if (checked) {
-                                    updateRule(rule.id, { 
-                                      events: [...rule.events, event.value] 
-                                    });
+                                    updateRule(rule.id, {
+                                      events: [...rule.events, event.value],
+                                    })
                                   } else {
-                                    updateRule(rule.id, { 
-                                      events: rule.events.filter(e => e !== event.value) 
-                                    });
+                                    updateRule(rule.id, {
+                                      events: rule.events.filter(e => e !== event.value),
+                                    })
                                   }
                                 }}
                               />
@@ -564,13 +564,13 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
                                 checked={rule.channels.includes(channel.value)}
                                 onCheckedChange={(checked) => {
                                   if (checked) {
-                                    updateRule(rule.id, { 
-                                      channels: [...rule.channels, channel.value] 
-                                    });
+                                    updateRule(rule.id, {
+                                      channels: [...rule.channels, channel.value],
+                                    })
                                   } else {
-                                    updateRule(rule.id, { 
-                                      channels: rule.channels.filter(c => c !== channel.value) 
-                                    });
+                                    updateRule(rule.id, {
+                                      channels: rule.channels.filter(c => c !== channel.value),
+                                    })
                                   }
                                 }}
                               />
@@ -688,6 +688,6 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

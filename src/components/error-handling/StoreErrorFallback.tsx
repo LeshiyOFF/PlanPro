@@ -1,6 +1,6 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 
 interface StoreErrorFallbackProps {
   error: Error;
@@ -17,15 +17,15 @@ interface StoreErrorFallbackProps {
 export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
   error,
   resetError,
-  errorInfo
+  errorInfo,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const handleReload = () => {
     // Сбрасываем Zustand store
     if (window.location) {
-      window.location.reload();
+      window.location.reload()
     }
-  };
+  }
 
   return (
     <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
@@ -35,21 +35,21 @@ export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
             <span className="text-white text-xl">!</span>
           </div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-medium text-red-900 mb-2">
             {t('errors.store_title')}
           </h3>
-          
+
           <p className="text-red-700 mb-4">
             {t('errors.store_desc')}
           </p>
-          
+
           <div className="space-y-2">
             <p className="text-sm text-red-600 font-mono">
               {error.name}: {error.message}
             </p>
-            
+
             {errorInfo?.componentStack && (
               <details className="text-xs">
                 <summary className="cursor-pointer text-red-600 hover:text-red-800">
@@ -61,7 +61,7 @@ export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
               </details>
             )}
           </div>
-          
+
           <div className="flex space-x-3 mt-4">
             <Button
               onClick={resetError}
@@ -70,7 +70,7 @@ export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
             >
               {t('errors.try_again')}
             </Button>
-            
+
             <Button
               onClick={handleReload}
               variant="default"
@@ -82,6 +82,6 @@ export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -3,8 +3,8 @@
  * Полностью Generic подход без any
  */
 
-import { ReactNode } from 'react';
-import type { JsonValue } from '../json-types';
+import { ReactNode } from 'react'
+import type { JsonValue } from '../json-types'
 
 /**
  * Базовый тип данных для таблицы
@@ -88,7 +88,7 @@ export interface ISelectionState {
 /**
  * Пропсы для DataTable
  */
-export interface IDataTableProps<TData extends ITableRowData> 
+export interface IDataTableProps<TData extends ITableRowData>
   extends IDataTableCallbacks<TData> {
   readonly data: ReadonlyArray<TData>;
   readonly columns: ReadonlyArray<ITableColumn<TData>>;

@@ -1,4 +1,4 @@
-import { Task } from '@/store/projectStore';
+import { Task } from '@/store/projectStore'
 
 /**
  * Интерфейс события календаря (адаптированная задача)

@@ -3,19 +3,19 @@
  * Пример сложного диалога с формой редактирования
  */
 
-import React, { useState } from 'react';
-import { TypedBaseDialog } from '../base/TypedBaseDialog';
-import { useDialog } from '../context/TypedDialogContext';
-import { TaskDetailsDialogData, TaskDetailsResult } from '@/types/dialog/IDialogRegistry';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import React, { useState } from 'react'
+import { TypedBaseDialog } from '../base/TypedBaseDialog'
+import { useDialog } from '../context/TypedDialogContext'
+import { TaskDetailsDialogData, TaskDetailsResult } from '@/types/dialog/IDialogRegistry'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 /**
  * Компонент диалога деталей задачи
  */
 export const TypedTaskDetailsDialog: React.FC = () => {
-  const { isOpen, state, close } = useDialog('task-details');
-  
+  const { isOpen, state, close } = useDialog('task-details')
+
   const [formData, setFormData] = useState<{
     name: string;
     duration: number;
@@ -23,11 +23,11 @@ export const TypedTaskDetailsDialog: React.FC = () => {
   }>({
     name: state?.data.name || '',
     duration: state?.data.duration || 0,
-    startDate: state?.data.startDate || new Date()
-  });
+    startDate: state?.data.startDate || new Date(),
+  })
 
   if (!state) {
-    return null;
+    return null
   }
 
   const handleSubmit = async (_data: TaskDetailsDialogData): Promise<TaskDetailsResult> => {
@@ -35,25 +35,25 @@ export const TypedTaskDetailsDialog: React.FC = () => {
       success: true,
       name: formData.name,
       duration: formData.duration,
-      startDate: formData.startDate
-    };
-    close(result);
-    return result;
-  };
+      startDate: formData.startDate,
+    }
+    close(result)
+    return result
+  }
 
   const handleCancel = (): void => {
-    close();
-  };
+    close()
+  }
 
   const handleValidate = (_data: TaskDetailsDialogData): boolean | string => {
     if (!formData.name.trim()) {
-      return 'Название задачи обязательно';
+      return 'Название задачи обязательно'
     }
     if (formData.duration <= 0) {
-      return 'Длительность должна быть больше нуля';
+      return 'Длительность должна быть больше нуля'
     }
-    return true;
-  };
+    return true
+  }
 
   return (
     <TypedBaseDialog
@@ -117,5 +117,5 @@ export const TypedTaskDetailsDialog: React.FC = () => {
         </div>
       </div>
     </TypedBaseDialog>
-  );
-};
+  )
+}

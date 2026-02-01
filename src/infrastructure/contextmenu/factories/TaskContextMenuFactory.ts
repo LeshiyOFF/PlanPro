@@ -1,9 +1,9 @@
-import { IContextMenu, IContextMenuContext } from '../../../domain/contextmenu/entities/ContextMenu';
-import { ContextMenuType, ContextMenuStatus } from '../../../domain/contextmenu/ContextMenuType';
-import { IMenuFactory } from '../../../domain/contextmenu/services/IContextMenuService';
-import { DeleteAction } from '../../../domain/contextmenu/actions/DeleteAction';
-import { logger } from '@/utils/logger';
-import type { JsonObject } from '@/types/json-types';
+import { IContextMenu, IContextMenuContext } from '../../../domain/contextmenu/entities/ContextMenu'
+import { ContextMenuType, ContextMenuStatus } from '../../../domain/contextmenu/ContextMenuType'
+import { IMenuFactory } from '../../../domain/contextmenu/services/IContextMenuService'
+import { DeleteAction } from '../../../domain/contextmenu/actions/DeleteAction'
+import { logger } from '@/utils/logger'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Фабрика контекстных меню для задач.
@@ -11,21 +11,21 @@ import type { JsonObject } from '@/types/json-types';
  */
 export class TaskContextMenuFactory implements IMenuFactory {
   canHandle(context: IContextMenuContext): boolean {
-    if (!context.target) return false;
-    const t = context.target as Record<string, JsonObject>;
-    const id = t.id;
+    if (!context.target) return false
+    const t = context.target as Record<string, JsonObject>
+    const id = t.id
     return (
       t.type === 'task' ||
       t.taskId !== undefined ||
       (typeof id === 'string' && id.startsWith('TASK-'))
-    );
+    )
   }
 
   async createMenu(context: IContextMenuContext): Promise<IContextMenu> {
-    logger.info('[TaskContextMenuFactory] Creating menu for:', context.target?.id);
+    logger.info('[TaskContextMenuFactory] Creating menu for:', context.target?.id)
 
-    const menuId = `task-menu-${Date.now()}`;
-    const { target } = context;
+    const menuId = `task-menu-${Date.now()}`
+    const { target } = context
 
     return {
       id: menuId,
@@ -40,40 +40,40 @@ export class TaskContextMenuFactory implements IMenuFactory {
           icon: 'ℹ️',
           action: {
             execute: async () => {
-              logger.info('[TaskContextMenuFactory] Properties action for:', target?.id);
+              logger.info('[TaskContextMenuFactory] Properties action for:', target?.id)
               if (target && typeof target === 'object' && 'onShowProperties' in target && typeof target.onShowProperties === 'function') {
-                await target.onShowProperties(target);
+                await target.onShowProperties(target)
               } else {
-                logger.warning('[TaskContextMenuFactory] No onShowProperties handler');
+                logger.warning('[TaskContextMenuFactory] No onShowProperties handler')
               }
             },
             canExecute: () => true,
             getLabel: () => 'Информация о задаче',
             getIcon: () => 'ℹ️',
-            getShortcut: () => ''
-          }
+            getShortcut: () => '',
+          },
         },
         {
           id: 'separator1',
           label: '',
-          separator: true
+          separator: true,
         },
         {
           id: 'delete',
           label: 'Удалить задачу',
           icon: '🗑️',
           action: new DeleteAction(target, async (t) => {
-            const taskId = typeof t === 'object' && t !== null && 'id' in t ? (t as { id: string }).id : undefined;
-            logger.info('[TaskContextMenuFactory] Delete action triggered for:', taskId);
+            const taskId = typeof t === 'object' && t !== null && 'id' in t ? (t as { id: string }).id : undefined
+            logger.info('[TaskContextMenuFactory] Delete action triggered for:', taskId)
             if (target && typeof target === 'object' && 'onDelete' in target && typeof target.onDelete === 'function') {
-              await target.onDelete(t);
-              logger.info('[TaskContextMenuFactory] Task deleted successfully');
+              await target.onDelete(t)
+              logger.info('[TaskContextMenuFactory] Task deleted successfully')
             } else {
-              logger.warning('[TaskContextMenuFactory] No onDelete handler provided');
+              logger.warning('[TaskContextMenuFactory] No onDelete handler provided')
             }
-          })
-        }
-      ]
-    };
+          }),
+        },
+      ],
+    }
   }
 }

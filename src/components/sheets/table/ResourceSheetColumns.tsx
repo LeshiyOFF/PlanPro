@@ -1,17 +1,17 @@
-import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
-import { Resource } from '@/types/resource-types';
-import { formatCurrency, formatRate, formatCalendarName } from '@/utils/formatUtils';
-import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
-import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
-import { SafeTooltip } from '@/components/ui/tooltip';
-import { CalendarPreview } from '@/components/calendar/CalendarPreview';
+import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn'
+import { Resource } from '@/types/resource-types'
+import { formatCurrency, formatRate, formatCalendarName } from '@/utils/formatUtils'
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
+import { SafeTooltip } from '@/components/ui/tooltip'
+import { CalendarPreview } from '@/components/calendar/CalendarPreview'
 
 /**
  * Функция для создания колонок таблицы ресурсов
  */
 export function createResourceColumns(
   t: (key: string) => string,
-  calendars: IWorkCalendar[]
+  calendars: IWorkCalendar[],
 ): ISheetColumn<Resource>[] {
   return [
     {
@@ -23,7 +23,7 @@ export function createResourceColumns(
       editable: true,
       visible: true,
       sortable: true,
-      resizable: true
+      resizable: true,
     },
     {
       id: 'type',
@@ -39,12 +39,12 @@ export function createResourceColumns(
       options: [
         { label: t('sheets.work'), value: 'Work' },
         { label: t('sheets.material'), value: 'Material' },
-        { label: t('sheets.cost'), value: 'Cost' }
+        { label: t('sheets.cost'), value: 'Cost' },
       ],
       formatter: (val, _row) => {
-        const typeKey = String(val).toLowerCase();
-        return t(`sheets.${typeKey}`) || String(val);
-      }
+        const typeKey = String(val).toLowerCase()
+        return t(`sheets.${typeKey}`) || String(val)
+      },
     },
     {
       id: 'materialLabel',
@@ -57,7 +57,7 @@ export function createResourceColumns(
       visible: true,
       sortable: true,
       resizable: true,
-      formatter: (val, row) => (row.type === 'Material' ? String(val ?? '') : '-')
+      formatter: (val, row) => (row.type === 'Material' ? String(val ?? '') : '-'),
     },
     {
       id: 'maxUnits',
@@ -73,10 +73,10 @@ export function createResourceColumns(
       valueGetter: (row) =>
         row.type === 'Work' ? (Number(row.maxUnits) || 0) * 100 : row.maxUnits,
       formatter: (val, row) => {
-        if (row.type === 'Cost') return <span className="text-slate-400">-</span>;
-        if (row.type === 'Work') return `${Math.round(Number(val))}%`;
-        return `${val || 0} ${row.materialLabel || ''}`.trim();
-      }
+        if (row.type === 'Cost') return <span className="text-slate-400">-</span>
+        if (row.type === 'Work') return `${Math.round(Number(val))}%`
+        return `${val || 0} ${row.materialLabel || ''}`.trim()
+      },
     },
     {
       id: 'standardRate',
@@ -91,14 +91,14 @@ export function createResourceColumns(
       resizable: true,
       valueGetter: (row) => row.standardRate,
       formatter: (val, row) => {
-        const amount = Number(val) || 0;
-        if (row.type === 'Cost') return formatCurrency(amount);
+        const amount = Number(val) || 0
+        if (row.type === 'Cost') return formatCurrency(amount)
         if (row.type === 'Material') {
-          const label = row.materialLabel ? ` / ${row.materialLabel}` : '';
-          return `${formatCurrency(amount)}${label}`;
+          const label = row.materialLabel ? ` / ${row.materialLabel}` : ''
+          return `${formatCurrency(amount)}${label}`
         }
-        return formatRate(amount);
-      }
+        return formatRate(amount)
+      },
     },
     {
       id: 'calendarId',
@@ -113,22 +113,22 @@ export function createResourceColumns(
       resizable: true,
       options: calendars.map((cal) => {
         const dynamicDesc =
-          CalendarTemplateService.getInstance().generateShortDescription(cal);
+          CalendarTemplateService.getInstance().generateShortDescription(cal)
         return {
           label: `${cal.name} (${dynamicDesc})`,
-          value: cal.id
-        };
+          value: cal.id,
+        }
       }),
       formatter: (val, row) => {
-        if (row.type !== 'Work') return <span className="text-slate-400">-</span>;
-        const calendar = calendars.find((c) => c.id === val);
+        if (row.type !== 'Work') return <span className="text-slate-400">-</span>
+        const calendar = calendars.find((c) => c.id === val)
 
         if (!calendar) {
           return (
             <span className="text-muted-foreground">
               {formatCalendarName(val as string)}
             </span>
-          );
+          )
         }
 
         return (
@@ -141,8 +141,8 @@ export function createResourceColumns(
               {calendar.name}
             </span>
           </SafeTooltip>
-        );
-      }
+        )
+      },
     },
     {
       id: 'group',
@@ -153,7 +153,7 @@ export function createResourceColumns(
       editable: true,
       visible: true,
       sortable: true,
-      resizable: true
-    }
-  ];
+      resizable: true,
+    },
+  ]
 }

@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface Task {
   id: string;
@@ -36,8 +36,8 @@ const DEPENDENCY_TYPES = [
   { value: 'FS', label: 'Finish-to-Start (FS)', description: 'Predecessor must finish before successor starts' },
   { value: 'SS', label: 'Start-to-Start (SS)', description: 'Predecessor must start before successor starts' },
   { value: 'FF', label: 'Finish-to-Finish (FF)', description: 'Predecessor must finish before successor finishes' },
-  { value: 'SF', label: 'Start-to-Finish (SF)', description: 'Predecessor must start before successor finishes' }
-];
+  { value: 'SF', label: 'Start-to-Finish (SF)', description: 'Predecessor must start before successor finishes' },
+]
 
 export const DependencyDialog: React.FC<DependencyDialogProps> = ({
   tasks = [],
@@ -59,23 +59,23 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
     predecessorId: predecessorId || '',
     successorId: successorId || '',
     type: 'FS',
-    lag: 0
-  });
+    lag: 0,
+  })
 
   const { validate, errors, isValid } = useDialogValidation({
     predecessorId: {
       required: true,
-      validate: (value) => value ? null : 'Predecessor task is required'
+      validate: (value) => value ? null : 'Predecessor task is required',
     },
     successorId: {
       required: true,
-      validate: (value) => value ? null : 'Successor task is required'
+      validate: (value) => value ? null : 'Successor task is required',
     },
     lag: {
       required: true,
-      validate: (value) => (typeof value === 'number' && !isNaN(value)) ? null : 'Lag must be a valid number'
-    }
-  });
+      validate: (value) => (typeof value === 'number' && !isNaN(value)) ? null : 'Lag must be a valid number',
+    },
+  })
 
   React.useEffect(() => {
     if (currentDependency) {
@@ -83,51 +83,51 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
         predecessorId: currentDependency.predecessorId,
         successorId: currentDependency.successorId,
         type: currentDependency.type,
-        lag: currentDependency.lag
-      });
+        lag: currentDependency.lag,
+      })
     }
-  }, [currentDependency]);
+  }, [currentDependency])
 
   React.useEffect(() => {
     Object.keys(dependency).forEach(key => {
-      validate(key, dependency[key as keyof typeof dependency]);
-    });
-  }, [dependency]);
+      validate(key, dependency[key as keyof typeof dependency])
+    })
+  }, [dependency])
 
   const handleFieldChange = (field: keyof typeof dependency, value: (typeof dependency)[keyof typeof dependency]) => {
-    setDependency(prev => ({ ...prev, [field]: value }));
-  };
+    setDependency(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(dependency);
-      onClose?.();
+      onSave?.(dependency)
+      onClose?.()
     }
-  };
+  }
 
   const handleDelete = () => {
     if (currentDependency?.id) {
-      onDelete?.(currentDependency.id);
-      onClose?.();
+      onDelete?.(currentDependency.id)
+      onClose?.()
     }
-  };
+  }
 
-  const canSave = isValid() && dependency.predecessorId && dependency.successorId;
-  const isEditing = !!currentDependency?.id;
-  const wouldCreateCycle = dependency.predecessorId === dependency.successorId;
+  const canSave = isValid() && dependency.predecessorId && dependency.successorId
+  const isEditing = !!currentDependency?.id
+  const wouldCreateCycle = dependency.predecessorId === dependency.successorId
 
   const getTaskInfo = (taskId: string) => {
-    return tasks.find(t => t.id === taskId);
-  };
+    return tasks.find(t => t.id === taskId)
+  }
 
   const getTypeDescription = (type: string) => {
-    return DEPENDENCY_TYPES.find(t => t.value === type)?.description || '';
-  };
+    return DEPENDENCY_TYPES.find(t => t.value === type)?.description || ''
+  }
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
-      title={isEditing ? "Edit Dependency" : "Create Dependency"}
+      title={isEditing ? 'Edit Dependency' : 'Create Dependency'}
       size="medium"
       {...dialogProps}
       onClose={onClose}
@@ -282,6 +282,6 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

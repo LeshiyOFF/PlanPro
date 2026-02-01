@@ -4,17 +4,17 @@
  */
 
 // Основной компонент
-export { UserPreferencesContainer } from './UserPreferencesContainer';
+export { UserPreferencesContainer } from './UserPreferencesContainer'
 
 // Интерфейсы
-export * from './interfaces/UserPreferencesInterfaces';
+export * from './interfaces/UserPreferencesInterfaces'
 
 // Сервисы
-export * from './services';
+export * from './services'
 
 // Хуки
-export * from './hooks';
+export * from './hooks'
 
 // Компоненты
-export * from './components';
+export * from './components'
 

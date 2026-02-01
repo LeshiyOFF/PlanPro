@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react'
 
 /** Допустимые типы аргументов колбэка (без any/unknown) */
 type CallbackArg = string | number | boolean | object | null | undefined;
@@ -10,21 +10,21 @@ type CallbackArg = string | number | boolean | object | null | undefined;
  */
 export function useDebouncedCallback<A extends readonly CallbackArg[], R>(
   callback: (...args: A) => R,
-  delay: number
+  delay: number,
 ): (...args: A) => void {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout>()
 
   return useCallback(
     (...args: A) => {
       if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+        clearTimeout(timeoutRef.current)
       }
 
       timeoutRef.current = setTimeout(() => {
-        callback(...args);
-      }, delay);
+        callback(...args)
+      }, delay)
     },
-    [callback, delay]
-  );
+    [callback, delay],
+  )
 }
 

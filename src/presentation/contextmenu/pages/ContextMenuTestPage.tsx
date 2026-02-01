@@ -1,42 +1,42 @@
-import React, { useState } from 'react';
-import { useContextMenu } from '../providers/ContextMenuProvider';
-import { ContextMenuType } from '../../../domain/contextmenu/ContextMenuType';
+import React, { useState } from 'react'
+import { useContextMenu } from '../providers/ContextMenuProvider'
+import { ContextMenuType } from '../../../domain/contextmenu/ContextMenuType'
 
 /**
  * Тестовая страница для демонстрации работы контекстных меню
  */
 export const ContextMenuTestPage: React.FC = () => {
-  const { showMenu } = useContextMenu();
-  const [testResults, setTestResults] = useState<string[]>([]);
+  const { showMenu } = useContextMenu()
+  const [testResults, setTestResults] = useState<string[]>([])
 
   const addResult = (message: string) => {
-    setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
-  };
+    setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
+  }
 
   const handleContextMenu = (
     event: React.MouseEvent,
     targetType: string,
-    targetData: Record<string, string | number | undefined>
+    targetData: Record<string, string | number | undefined>,
   ) => {
-    event.preventDefault();
-    
-    const position = { x: event.clientX, y: event.clientY };
+    event.preventDefault()
+
+    const position = { x: event.clientX, y: event.clientY }
     const context = {
       target: { ...targetData, type: targetType },
       position,
-      metadata: { source: 'test-page' }
-    };
+      metadata: { source: 'test-page' },
+    }
 
-    const menuType = targetType === 'task' ? ContextMenuType.TASK : ContextMenuType.RESOURCE;
-    
+    const menuType = targetType === 'task' ? ContextMenuType.TASK : ContextMenuType.RESOURCE
+
     showMenu(menuType, context)
       .then(() => addResult(`✅ Показано меню для ${targetType}`))
-      .catch(error => addResult(`❌ Ошибка меню: ${error.message}`));
-  };
+      .catch(error => addResult(`❌ Ошибка меню: ${error.message}`))
+  }
 
   const clearResults = () => {
-    setTestResults([]);
-  };
+    setTestResults([])
+  }
 
   return (
     <div style={{ padding: '20px', fontFamily: 'system-ui, sans-serif' }}>
@@ -52,14 +52,14 @@ export const ContextMenuTestPage: React.FC = () => {
             borderRadius: '8px',
             padding: '20px',
             backgroundColor: '#f8fafc',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
           onContextMenu={(e) => handleContextMenu(e, 'task', {
             id: 'TASK-001',
             name: 'Разработка интерфейса',
             duration: 5,
             progress: 75,
-            assignee: 'Иван Петров'
+            assignee: 'Иван Петров',
           })}
         >
           <h3 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>
@@ -84,7 +84,7 @@ export const ContextMenuTestPage: React.FC = () => {
             borderRadius: '8px',
             padding: '20px',
             backgroundColor: '#fefce8',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
           onContextMenu={(e) => handleContextMenu(e, 'resource', {
             id: 'RES-001',
@@ -92,7 +92,7 @@ export const ContextMenuTestPage: React.FC = () => {
             type: 'human',
             availability: 80,
             hourlyRate: 1500,
-            department: 'Разработка'
+            department: 'Разработка',
           })}
         >
           <h3 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>
@@ -126,13 +126,13 @@ export const ContextMenuTestPage: React.FC = () => {
               borderRadius: '4px',
               backgroundColor: 'white',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Очистить
           </button>
         </div>
-        
+
         <div
           style={{
             backgroundColor: '#f8fafc',
@@ -142,7 +142,7 @@ export const ContextMenuTestPage: React.FC = () => {
             overflowY: 'auto',
             fontFamily: 'monospace',
             fontSize: '12px',
-            lineHeight: '1.5'
+            lineHeight: '1.5',
           }}
         >
           {testResults.length === 0 ? (
@@ -176,6 +176,6 @@ export const ContextMenuTestPage: React.FC = () => {
         </ul>
       </div>
     </div>
-  );
-};
+  )
+}
 

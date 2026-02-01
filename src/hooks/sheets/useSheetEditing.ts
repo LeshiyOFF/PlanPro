@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import { ISheetCellAddress, ISheetEditState } from '@/domain/sheets/interfaces/ISheetCell';
-import { IValidationResult } from '@/domain/sheets/interfaces/IValidation';
-import { CellValue } from '@/types/sheet/CellValueTypes';
+import { useState, useCallback } from 'react'
+import { ISheetCellAddress, ISheetEditState } from '@/domain/sheets/interfaces/ISheetCell'
+import { IValidationResult } from '@/domain/sheets/interfaces/IValidation'
+import { CellValue } from '@/types/sheet/CellValueTypes'
 
 /**
  * Хук для управления логикой In-place редактирования.
@@ -9,47 +9,47 @@ import { CellValue } from '@/types/sheet/CellValueTypes';
  */
 export const useSheetEditing = (
   onCommit?: (rowId: string, columnId: string, value: CellValue) => void,
-  validate?: (value: CellValue, columnId: string, rowId: string) => IValidationResult
+  validate?: (value: CellValue, columnId: string, rowId: string) => IValidationResult,
 ) => {
-  const [editState, setEditState] = useState<ISheetEditState | null>(null);
+  const [editState, setEditState] = useState<ISheetEditState | null>(null)
 
   const startEditing = useCallback((address: ISheetCellAddress, value: CellValue) => {
     setEditState({
       address,
       originalValue: value,
       currentValue: value,
-      isValid: true
-    });
-  }, []);
+      isValid: true,
+    })
+  }, [])
 
   const updateEditValue = useCallback(
     (value: CellValue) => {
-      if (!editState) return;
+      if (!editState) return
 
-      let validation: IValidationResult = { isValid: true };
+      let validation: IValidationResult = { isValid: true }
       if (validate) {
-        validation = validate(value, editState.address.columnId, editState.address.rowId);
+        validation = validate(value, editState.address.columnId, editState.address.rowId)
       }
 
       setEditState((prev) =>
         prev
           ? {
-              ...prev,
-              currentValue: value,
-              isValid: validation.isValid,
-              errorMessage: validation.errorMessage
-            }
-          : null
-      );
+            ...prev,
+            currentValue: value,
+            isValid: validation.isValid,
+            errorMessage: validation.errorMessage,
+          }
+          : null,
+      )
     },
-    [editState, validate]
-  );
+    [editState, validate],
+  )
 
   const commitEditing = useCallback(
     (explicitValue?: CellValue) => {
       if (editState && editState.isValid) {
         let finalValue: CellValue =
-          explicitValue !== undefined ? explicitValue : editState.currentValue;
+          explicitValue !== undefined ? explicitValue : editState.currentValue
 
         if (
           finalValue &&
@@ -57,26 +57,26 @@ export const useSheetEditing = (
           finalValue !== null &&
           'nativeEvent' in finalValue
         ) {
-          finalValue = editState.currentValue;
+          finalValue = editState.currentValue
         }
 
-        onCommit?.(editState.address.rowId, editState.address.columnId, finalValue);
-        setEditState(null);
+        onCommit?.(editState.address.rowId, editState.address.columnId, finalValue)
+        setEditState(null)
       }
     },
-    [editState, onCommit]
-  );
+    [editState, onCommit],
+  )
 
   const cancelEditing = useCallback(() => {
-    setEditState(null);
-  }, []);
+    setEditState(null)
+  }, [])
 
   const isEditing = useCallback(
     (rowId: string, columnId: string) => {
-      return editState?.address.rowId === rowId && editState?.address.columnId === columnId;
+      return editState?.address.rowId === rowId && editState?.address.columnId === columnId
     },
-    [editState]
-  );
+    [editState],
+  )
 
   return {
     editState,
@@ -84,6 +84,6 @@ export const useSheetEditing = (
     updateEditValue,
     commitEditing,
     cancelEditing,
-    isEditing
-  };
-};
+    isEditing,
+  }
+}

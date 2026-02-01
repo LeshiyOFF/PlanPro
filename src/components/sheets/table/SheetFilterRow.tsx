@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
-import { FilterOperator } from '@/domain/sheets/interfaces/IDataProcessing';
-import type { JsonValue } from '@/types/json-types';
+import React, { useState, useEffect } from 'react'
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
+import { FilterOperator } from '@/domain/sheets/interfaces/IDataProcessing'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * Значение фильтра
@@ -17,21 +17,21 @@ interface SheetFilterRowProps {
  * Строка фильтрации для профессиональной таблицы с поддержкой debounce.
  */
 export const SheetFilterRow: React.FC<SheetFilterRowProps> = ({ columns, onFilter }) => {
-  const [filterValues, setFilterValues] = useState<Record<string, string>>({});
+  const [filterValues, setFilterValues] = useState<Record<string, string>>({})
 
   const handleFilterChange = (columnId: string, value: string) => {
-    setFilterValues((prev) => ({ ...prev, [columnId]: value }));
-  };
+    setFilterValues((prev) => ({ ...prev, [columnId]: value }))
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
       Object.entries(filterValues).forEach(([id, val]) => {
-        onFilter(id, FilterOperator.CONTAINS, val);
-      });
-    }, 300);
+        onFilter(id, FilterOperator.CONTAINS, val)
+      })
+    }, 300)
 
-    return () => clearTimeout(timer);
-  }, [filterValues, onFilter]);
+    return () => clearTimeout(timer)
+  }, [filterValues, onFilter])
 
   return (
     <tr className="bg-gray-50/50 border-b border-gray-100">
@@ -50,5 +50,5 @@ export const SheetFilterRow: React.FC<SheetFilterRowProps> = ({ columns, onFilte
         </td>
       ))}
     </tr>
-  );
-};
+  )
+}

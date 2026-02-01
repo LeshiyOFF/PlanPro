@@ -1,5 +1,5 @@
-import React from 'react';
-import { Resource } from '@/hooks/useJavaApi';
+import React from 'react'
+import { Resource } from '@/hooks/useJavaApi'
 
 interface ResourceCardProps {
   resource: Resource;
@@ -13,21 +13,21 @@ interface ResourceCardProps {
 export const ResourceCard: React.FC<ResourceCardProps> = ({
   resource,
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   const getAvailabilityColor = (availability: number) => {
-    if (availability >= 80) return '#28a745';
-    if (availability >= 50) return '#ffc107';
-    if (availability >= 20) return '#fd7e14';
-    return '#dc3545';
-  };
+    if (availability >= 80) return '#28a745'
+    if (availability >= 50) return '#ffc107'
+    if (availability >= 20) return '#fd7e14'
+    return '#dc3545'
+  }
 
   const getAvailabilityText = (availability: number) => {
-    if (availability >= 80) return 'Available';
-    if (availability >= 50) return 'Partially Available';
-    if (availability >= 20) return 'Limited';
-    return 'Unavailable';
-  };
+    if (availability >= 80) return 'Available'
+    if (availability >= 50) return 'Partially Available'
+    if (availability >= 20) return 'Limited'
+    return 'Unavailable'
+  }
 
   return (
     <div style={{
@@ -37,14 +37,14 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
       backgroundColor: 'white',
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
     }}>
       <div style={{ flex: 1 }}>
-        <div style={{ 
-          display: 'flex', 
+        <div style={{
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          marginBottom: '15px'
+          marginBottom: '15px',
         }}>
           <h3 style={{ margin: '0', color: '#333', fontSize: '18px' }}>
             {resource.name}
@@ -55,39 +55,39 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             fontSize: '12px',
             fontWeight: 'bold',
             backgroundColor: getAvailabilityColor(resource.availability || 0),
-            color: 'white'
+            color: 'white',
           }}>
             {getAvailabilityText(resource.availability || 0)}
           </span>
         </div>
-        
+
         {resource.email && (
-          <p style={{ 
-            margin: '0 0 10px 0', 
+          <p style={{
+            margin: '0 0 10px 0',
             color: '#666',
-            fontSize: '14px'
+            fontSize: '14px',
           }}>
             📧 {resource.email}
           </p>
         )}
-        
+
         {resource.role && (
-          <p style={{ 
-            margin: '0 0 15px 0', 
+          <p style={{
+            margin: '0 0 15px 0',
             color: '#333',
             fontSize: '14px',
-            fontWeight: '500'
+            fontWeight: '500',
           }}>
             💼 {resource.role}
           </p>
         )}
-        
-        <div style={{ 
-          display: 'grid', 
+
+        <div style={{
+          display: 'grid',
           gridTemplateColumns: '1fr 1fr',
           gap: '10px',
           fontSize: '14px',
-          color: '#666'
+          color: '#666',
         }}>
           <div>
             <strong>Availability:</strong>
@@ -96,19 +96,19 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
               height: '6px',
               backgroundColor: '#e9ecef',
               borderRadius: '3px',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}>
               <div style={{
                 width: `${resource.availability || 0}%`,
                 height: '100%',
-                backgroundColor: getAvailabilityColor(resource.availability || 0)
+                backgroundColor: getAvailabilityColor(resource.availability || 0),
               }} />
             </div>
             <span style={{ fontSize: '12px' }}>
               {resource.availability || 0}%
             </span>
           </div>
-          
+
           <div>
             <strong>Hourly Rate:</strong>
             <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#007acc' }}>
@@ -117,13 +117,13 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
           </div>
         </div>
       </div>
-      
-      <div style={{ 
-        display: 'flex', 
+
+      <div style={{
+        display: 'flex',
         gap: '10px',
         marginTop: '15px',
         paddingTop: '15px',
-        borderTop: '1px solid #eee'
+        borderTop: '1px solid #eee',
       }}>
         <button
           onClick={() => onEdit(resource)}
@@ -135,7 +135,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             border: 'none',
             borderRadius: '5px',
             cursor: 'pointer',
-            fontSize: '14px'
+            fontSize: '14px',
           }}
         >
           Edit
@@ -150,13 +150,13 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({
             border: 'none',
             borderRadius: '5px',
             cursor: 'pointer',
-            fontSize: '14px'
+            fontSize: '14px',
           }}
         >
           Delete
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 

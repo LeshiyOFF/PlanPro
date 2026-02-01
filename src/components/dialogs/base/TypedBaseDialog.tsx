@@ -3,10 +3,10 @@
  * Используется как основа для всех диалогов
  */
 
-import React, { ReactNode } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { DialogType, DialogData, DialogResult } from '@/types/dialog/IDialogRegistry';
+import React, { ReactNode } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { DialogType, DialogData, DialogResult } from '@/types/dialog/IDialogRegistry'
 
 /**
  * Пропсы базового диалога
@@ -42,18 +42,18 @@ export const TypedBaseDialog = <T extends DialogType>({
   cancelLabel = 'Отмена',
   onSubmit,
   onCancel,
-  onValidate
+  onValidate,
 }: TypedBaseDialogProps<T>): React.ReactElement => {
   const handleSubmit = async (): Promise<void> => {
     if (onValidate) {
-      const validationResult = onValidate(data);
+      const validationResult = onValidate(data)
       if (validationResult !== true) {
-        return;
+        return
       }
     }
 
-    await onSubmit(data);
-  };
+    await onSubmit(data)
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
@@ -94,5 +94,5 @@ export const TypedBaseDialog = <T extends DialogType>({
         )}
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

@@ -1,6 +1,6 @@
-import { ActionCategory } from '../ActionManager';
-import type { IActionManager } from '../ActionManagerTypes';
-import type { IAction } from '../BaseAction';
+import { ActionCategory } from '../ActionManager'
+import type { IActionManager } from '../ActionManagerTypes'
+import type { IAction } from '../BaseAction'
 
 /**
  * Сервис валидации регистрации действий
@@ -15,51 +15,51 @@ export class ActionRegistryValidator {
     isValid: boolean;
     errors: string[];
     warnings: string[];
-  } {
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    
+    } {
+    const errors: string[] = []
+    const warnings: string[] = []
+
     // Проверка наличия основных действий
     const requiredActions = [
       'new-project',
       'open-project',
       'save-project',
       'undo',
-      'redo'
-    ];
+      'redo',
+    ]
 
     requiredActions.forEach(actionId => {
       if (!this.actionManager.hasAction(actionId)) {
-        errors.push(`Required action ${actionId} is not registered`);
+        errors.push(`Required action ${actionId} is not registered`)
       }
-    });
+    })
 
     // Проверка конфликтов горячих клавиш
-    const allActions = this.actionManager.getAllActions();
-    const shortcuts = new Map<string, string[]>();
-    
+    const allActions = this.actionManager.getAllActions()
+    const shortcuts = new Map<string, string[]>()
+
     allActions.forEach((action: IAction) => {
       if (action.shortcut) {
         if (!shortcuts.has(action.shortcut)) {
-          shortcuts.set(action.shortcut, []);
+          shortcuts.set(action.shortcut, [])
         }
-        shortcuts.get(action.shortcut)!.push(action.id);
+        shortcuts.get(action.shortcut)!.push(action.id)
       }
-    });
+    })
 
     shortcuts.forEach((actionIds, shortcut) => {
       if (actionIds.length > 1) {
-        warnings.push(`Shortcut ${shortcut} is used by multiple actions: ${actionIds.join(', ')}`);
+        warnings.push(`Shortcut ${shortcut} is used by multiple actions: ${actionIds.join(', ')}`)
       }
-    });
+    })
 
-    const isValid = errors.length === 0;
-    
+    const isValid = errors.length === 0
+
     return {
       isValid,
       errors,
-      warnings
-    };
+      warnings,
+    }
   }
 
   /**
@@ -72,17 +72,17 @@ export class ActionRegistryValidator {
     viewActions: number;
     insertActions: number;
     toolsActions: number;
-  } {
-    const stats = this.actionManager.getStats();
-    
+    } {
+    const stats = this.actionManager.getStats()
+
     return {
       totalActions: stats.totalActions,
       fileActions: this.actionManager.getActionsByCategory(ActionCategory.FILE).length,
       editActions: this.actionManager.getActionsByCategory(ActionCategory.EDIT).length,
       viewActions: this.actionManager.getActionsByCategory(ActionCategory.VIEW).length,
       insertActions: this.actionManager.getActionsByCategory(ActionCategory.INSERT).length,
-      toolsActions: this.actionManager.getActionsByCategory(ActionCategory.TOOLS).length
-    };
+      toolsActions: this.actionManager.getActionsByCategory(ActionCategory.TOOLS).length,
+    }
   }
 }
 

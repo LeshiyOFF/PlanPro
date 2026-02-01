@@ -7,5 +7,5 @@ export type {
   JsonPrimitive,
   JsonObject,
   JsonValue,
-  JsonArray
+  JsonArray,
 } from './JsonValue'

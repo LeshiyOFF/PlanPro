@@ -1,56 +1,56 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { ICalendarPreferences } from '../interfaces/UserPreferencesInterfaces';
-import { useDebouncedCallback } from '@/hooks/useDebounce';
+import React, { useCallback, useState, useEffect } from 'react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { ICalendarPreferences } from '../interfaces/UserPreferencesInterfaces'
+import { useDebouncedCallback } from '@/hooks/useDebounce'
 
 /**
  * Компонент настроек календаря
  */
 export const CalendarPreferences: React.FC = () => {
-  const { preferences, updateCalendarPreferences } = useUserPreferences();
-  const calendarPrefs = preferences.calendar as ICalendarPreferences;
+  const { preferences, updateCalendarPreferences } = useUserPreferences()
+  const calendarPrefs = preferences.calendar as ICalendarPreferences
 
   // Локальное состояние для текстовых полей
-  const [localHoursPerDay, setLocalHoursPerDay] = useState((calendarPrefs.hoursPerDay ?? 8).toString());
-  const [localHoursPerWeek, setLocalHoursPerWeek] = useState((calendarPrefs.hoursPerWeek ?? 40).toString());
-  const [localDaysPerMonth, setLocalDaysPerMonth] = useState((calendarPrefs.daysPerMonth ?? 20).toString());
+  const [localHoursPerDay, setLocalHoursPerDay] = useState((calendarPrefs.hoursPerDay ?? 8).toString())
+  const [localHoursPerWeek, setLocalHoursPerWeek] = useState((calendarPrefs.hoursPerWeek ?? 40).toString())
+  const [localDaysPerMonth, setLocalDaysPerMonth] = useState((calendarPrefs.daysPerMonth ?? 20).toString())
 
   useEffect(() => {
-    setLocalHoursPerDay((calendarPrefs.hoursPerDay ?? 8).toString());
-    setLocalHoursPerWeek((calendarPrefs.hoursPerWeek ?? 40).toString());
-    setLocalDaysPerMonth((calendarPrefs.daysPerMonth ?? 20).toString());
-  }, [calendarPrefs.hoursPerDay, calendarPrefs.hoursPerWeek, calendarPrefs.daysPerMonth]);
+    setLocalHoursPerDay((calendarPrefs.hoursPerDay ?? 8).toString())
+    setLocalHoursPerWeek((calendarPrefs.hoursPerWeek ?? 40).toString())
+    setLocalDaysPerMonth((calendarPrefs.daysPerMonth ?? 20).toString())
+  }, [calendarPrefs.hoursPerDay, calendarPrefs.hoursPerWeek, calendarPrefs.daysPerMonth])
 
   const debouncedUpdate = useDebouncedCallback((updates: Partial<ICalendarPreferences>) => {
-    updateCalendarPreferences(updates);
-  }, 500);
+    updateCalendarPreferences(updates)
+  }, 500)
 
   const handleHoursPerDayChange = useCallback((value: string) => {
-    setLocalHoursPerDay(value);
-    const val = parseFloat(value);
+    setLocalHoursPerDay(value)
+    const val = parseFloat(value)
     if (!isNaN(val) && val > 0 && val <= 24) {
-      debouncedUpdate({ hoursPerDay: val });
+      debouncedUpdate({ hoursPerDay: val })
     }
-  }, [debouncedUpdate]);
+  }, [debouncedUpdate])
 
   const handleHoursPerWeekChange = useCallback((value: string) => {
-    setLocalHoursPerWeek(value);
-    const val = parseFloat(value);
+    setLocalHoursPerWeek(value)
+    const val = parseFloat(value)
     if (!isNaN(val) && val > 0 && val <= 168) {
-      debouncedUpdate({ hoursPerWeek: val });
+      debouncedUpdate({ hoursPerWeek: val })
     }
-  }, [debouncedUpdate]);
+  }, [debouncedUpdate])
 
   const handleDaysPerMonthChange = useCallback((value: string) => {
-    setLocalDaysPerMonth(value);
-    const val = parseFloat(value);
+    setLocalDaysPerMonth(value)
+    const val = parseFloat(value)
     if (!isNaN(val) && val > 0 && val <= 31) {
-      debouncedUpdate({ daysPerMonth: val });
+      debouncedUpdate({ daysPerMonth: val })
     }
-  }, [debouncedUpdate]);
+  }, [debouncedUpdate])
 
   return (
     <PreferencesSection
@@ -93,6 +93,6 @@ export const CalendarPreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

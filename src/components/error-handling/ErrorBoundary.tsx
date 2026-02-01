@@ -1,5 +1,5 @@
-import { Component, ErrorInfo, ReactNode } from 'react';
-import { logger } from '@/utils/logger';
+import { Component, ErrorInfo, ReactNode } from 'react'
+import { logger } from '@/utils/logger'
 
 interface Props {
   children: ReactNode;
@@ -18,31 +18,31 @@ interface State {
  */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
+    super(props)
+    this.state = { hasError: false }
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   private resetError = () => {
-    this.setState({ hasError: false, error: undefined });
-  };
+    this.setState({ hasError: false, error: undefined })
+  }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('Error Boundary caught an error:', { 
-      message: error.message, 
+    logger.error('Error Boundary caught an error:', {
+      message: error.message,
       stack: error.stack || '',
-      componentStack: errorInfo.componentStack || ''
-    });
+      componentStack: errorInfo.componentStack || '',
+    })
 
     if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+      this.props.onError(error, errorInfo)
     }
 
     // Интеграция с Sentry при наличии глобального объекта
-    const win = window as Window & { sentry?: { captureException: (err: Error, opts?: { contexts?: Record<string, object> }) => void } };
+    const win = window as Window & { sentry?: { captureException: (err: Error, opts?: { contexts?: Record<string, object> }) => void } }
     if (win.sentry) {
       win.sentry.captureException(error, {
         contexts: {
@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
             componentStack: errorInfo.componentStack,
           },
         },
-      });
+      })
     }
   }
 
@@ -58,9 +58,9 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) {
         if (typeof this.props.fallback === 'function') {
-          return this.props.fallback(this.state.error!, this.resetError);
+          return this.props.fallback(this.state.error!, this.resetError)
         }
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       return (
@@ -89,10 +89,10 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
           </div>
         </div>
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 

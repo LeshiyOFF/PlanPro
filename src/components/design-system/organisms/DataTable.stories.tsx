@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { DataTable } from './DataTable';
+import type { Meta, StoryObj } from '@storybook/react'
+import { DataTable } from './DataTable'
 
 // Mock data
 const sampleData = [
@@ -8,7 +8,7 @@ const sampleData = [
   { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'Inactive', joinDate: '2023-03-10' },
   { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', status: 'Active', joinDate: '2023-04-05' },
   { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'User', status: 'Active', joinDate: '2023-05-12' },
-];
+]
 
 const meta: Meta<typeof DataTable> = {
   title: 'Design System/Organisms/DataTable',
@@ -51,9 +51,9 @@ const meta: Meta<typeof DataTable> = {
       description: 'Размер таблицы',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
@@ -66,7 +66,7 @@ export const Default: Story = {
       { key: 'status', title: 'Status', sortable: true },
     ],
   },
-};
+}
 
 export const Selectable: Story = {
   args: {
@@ -79,7 +79,7 @@ export const Selectable: Story = {
     ],
     selectable: true,
   },
-};
+}
 
 export const WithPagination: Story = {
   args: {
@@ -97,13 +97,13 @@ export const WithPagination: Story = {
       itemsPerPage: 10,
     },
   },
-};
+}
 
 export const Loading: Story = {
   args: {
     loading: true,
   },
-};
+}
 
 export const Empty: Story = {
   args: {
@@ -115,5 +115,5 @@ export const Empty: Story = {
     ],
     emptyMessage: 'No users found',
   },
-};
+}
 

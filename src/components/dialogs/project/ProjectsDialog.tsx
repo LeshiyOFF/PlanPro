@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export interface ProjectSummary {
   id: string;
@@ -36,35 +36,35 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedProjectId, setSelectedProjectId] = React.useState<string>('');
+  const [searchTerm, setSearchTerm] = React.useState('')
+  const [selectedProjectId, setSelectedProjectId] = React.useState<string>('')
 
   const filteredProjects = React.useMemo(() => {
     return projects.filter(project =>
-      project.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [projects, searchTerm]);
+      project.name.toLowerCase().includes(searchTerm.toLowerCase()),
+    )
+  }, [projects, searchTerm])
 
   const handleProjectSelect = (projectId: string) => {
-    setSelectedProjectId(projectId);
-    onSelectProject?.(projectId);
-  };
+    setSelectedProjectId(projectId)
+    onSelectProject?.(projectId)
+  }
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
       planning: 'outline',
       active: 'default',
       completed: 'secondary',
-      archived: 'outline'
-    };
-    return variants[status] || 'outline';
-  };
+      archived: 'outline',
+    }
+    return variants[status] || 'outline'
+  }
 
-  const totalProjects = projects.length;
-  const activeProjects = projects.filter(p => p.status === 'active').length;
-  const completedProjects = projects.filter(p => p.status === 'completed').length;
+  const totalProjects = projects.length
+  const activeProjects = projects.filter(p => p.status === 'active').length
+  const completedProjects = projects.filter(p => p.status === 'completed').length
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -149,7 +149,7 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
             </TableHeader>
             <TableBody>
               {filteredProjects.map(project => (
-                <TableRow 
+                <TableRow
                   key={project.id}
                   className={`cursor-pointer hover:bg-muted/50 ${
                     selectedProjectId === project.id ? 'bg-muted' : ''
@@ -163,7 +163,7 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <div className="w-16 h-2 bg-gray-200 rounded-full">
-                        <div 
+                        <div
                           className="h-2 bg-primary rounded-full"
                           style={{ width: `${project.progress}%` }}
                         />
@@ -185,8 +185,8 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
                         size="sm"
                         variant="outline"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenProject?.(project.id);
+                          e.stopPropagation()
+                          onOpenProject?.(project.id)
                         }}
                       >
                         Open
@@ -195,8 +195,8 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
                         size="sm"
                         variant="destructive"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteProject?.(project.id);
+                          e.stopPropagation()
+                          onDeleteProject?.(project.id)
                         }}
                       >
                         Delete
@@ -210,6 +210,6 @@ export const ProjectsDialog: React.FC<ProjectsDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

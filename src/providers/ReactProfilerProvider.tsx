@@ -1,5 +1,5 @@
-import React, { Profiler } from 'react';
-import { ReactProfilerService, type ProfilerConfig } from '@/services/ReactProfilerService';
+import React, { Profiler } from 'react'
+import { ReactProfilerService, type ProfilerConfig } from '@/services/ReactProfilerService'
 
 interface ReactProfilerProviderProps {
   children: React.ReactNode;
@@ -17,58 +17,58 @@ interface ReactProfilerProviderProps {
 export const ReactProfilerProvider: React.FC<ReactProfilerProviderProps> = ({
   children,
   config,
-  id = 'root'
+  id = 'root',
 }) => {
   // Инициализация сервиса с конфигурацией
-  const profilerService = ReactProfilerService.getInstance(config);
+  const profilerService = ReactProfilerService.getInstance(config)
 
   // Callback для профилирования
-  const onRender = profilerService.getProfilerCallback(id);
+  const onRender = profilerService.getProfilerCallback(id)
 
   // Если профилирование выключено, возвращаем children без обертки
   if (!profilerService.isEnabled()) {
-    return <>{children}</>;
+    return <>{children}</>
   }
 
   return (
     <Profiler id={id} onRender={onRender}>
       {children}
     </Profiler>
-  );
-};
+  )
+}
 
 /**
  * HOC для профилирования конкретного компонента
  */
 export const withProfiler = <P extends object>(
   WrappedComponent: React.ComponentType<P>,
-  profilerId?: string
+  profilerId?: string,
 ) => {
   const WithProfilerComponent = (props: P) => {
-    const id = profilerId || WrappedComponent.name || 'UnknownComponent';
-    const profilerService = ReactProfilerService.getInstance();
-    const onRender = profilerService.getProfilerCallback(id);
+    const id = profilerId || WrappedComponent.name || 'UnknownComponent'
+    const profilerService = ReactProfilerService.getInstance()
+    const onRender = profilerService.getProfilerCallback(id)
 
     if (!profilerService.isEnabled()) {
-      return <WrappedComponent {...props} />;
+      return <WrappedComponent {...props} />
     }
 
     return (
       <Profiler id={id} onRender={onRender}>
         <WrappedComponent {...props} />
       </Profiler>
-    );
-  };
+    )
+  }
 
-  WithProfilerComponent.displayName = `withProfiler(${WrappedComponent.displayName || WrappedComponent.name})`;
-  return WithProfilerComponent;
-};
+  WithProfilerComponent.displayName = `withProfiler(${WrappedComponent.displayName || WrappedComponent.name})`
+  return WithProfilerComponent
+}
 
 /**
  * Hook для доступа к профилировщику
  */
 export const useProfiler = () => {
-  const profilerService = ReactProfilerService.getInstance();
+  const profilerService = ReactProfilerService.getInstance()
 
   return {
     /**
@@ -110,10 +110,10 @@ export const useProfiler = () => {
      * Проверить включено ли профилирование
      */
     isEnabled: () => profilerService.isEnabled(),
-  };
-};
+  }
+}
 
 // Экспортируем класс для использования в других компонентах
-export { ReactProfilerService };
-export { PerformanceMetricsCollector } from '@/services/PerformanceMetricsCollector';
+export { ReactProfilerService }
+export { PerformanceMetricsCollector } from '@/services/PerformanceMetricsCollector'
 

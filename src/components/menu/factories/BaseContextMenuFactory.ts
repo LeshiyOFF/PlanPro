@@ -1,10 +1,10 @@
-import { ContextMenuItem } from '@/providers/MenuProvider';
+import { ContextMenuItem } from '@/providers/MenuProvider'
 
 /**
  * Фабрика контекстных меню - базовый класс
  */
 export abstract class BaseContextMenuFactory {
-  
+
   /**
    * Создать базовые элементы редактирования
    */
@@ -15,23 +15,23 @@ export abstract class BaseContextMenuFactory {
         label: 'Вырезать',
         icon: '✂️',
         shortcut: 'Ctrl+X',
-        handler: () => onAction('cut')
+        handler: () => onAction('cut'),
       },
       {
         id: 'copy',
         label: 'Копировать',
         icon: '📋',
         shortcut: 'Ctrl+C',
-        handler: () => onAction('copy')
+        handler: () => onAction('copy'),
       },
       {
         id: 'paste',
         label: 'Вставить',
         icon: '📋',
         shortcut: 'Ctrl+V',
-        handler: () => onAction('paste')
-      }
-    ];
+        handler: () => onAction('paste'),
+      },
+    ]
   }
 
   /**
@@ -43,28 +43,28 @@ export abstract class BaseContextMenuFactory {
         id: 'info',
         label: 'Информация',
         icon: 'ℹ️',
-        handler: () => onAction('info')
+        handler: () => onAction('info'),
       },
       {
         id: 'worktime',
         label: 'Рабочее время',
         icon: '⏰',
-        handler: () => onAction('worktime')
+        handler: () => onAction('worktime'),
       },
       {
         id: 'notes',
         label: 'Заметки',
         icon: '📝',
-        handler: () => onAction('notes')
-      }
-    ];
+        handler: () => onAction('notes'),
+      },
+    ]
   }
 
   /**
    * Создать разделитель (экземплярный метод для наследников)
    */
   protected createSeparator(): ContextMenuItem {
-    return BaseContextMenuFactory.createSeparator();
+    return BaseContextMenuFactory.createSeparator()
   }
 
   /**
@@ -75,8 +75,8 @@ export abstract class BaseContextMenuFactory {
       id: `separator-${Date.now()}`,
       label: '',
       separator: true,
-      handler: () => {}
-    };
+      handler: () => {},
+    }
   }
 }
 

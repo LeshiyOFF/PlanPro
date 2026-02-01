@@ -1,7 +1,7 @@
-import React from 'react';
-import { FormField } from '../components/FormField';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from 'react'
+import { FormField } from '../components/FormField'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface SessionPolicyData {
   timeoutMinutes: number;
@@ -21,12 +21,12 @@ interface SessionPolicySectionProps {
 export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
   data,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Политика сессий</h3>
-      
+
       <div className="grid grid-cols-2 gap-4">
         <FormField
           label="Таймаут неактивности (минут)"
@@ -43,8 +43,8 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
           type="number"
           value={data.maxConcurrentSessions}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxConcurrentSessions;
-            onChange('maxConcurrentSessions', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxConcurrentSessions
+            onChange('maxConcurrentSessions', num)
           }}
           error={errors.maxConcurrentSessions}
           min="1"
@@ -85,6 +85,6 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 

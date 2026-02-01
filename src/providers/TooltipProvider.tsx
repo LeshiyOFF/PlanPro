@@ -1,5 +1,5 @@
-import React from 'react';
-import { TooltipProvider as RadixTooltipProvider } from '@/components/ui/tooltip';
+import React from 'react'
+import { TooltipProvider as RadixTooltipProvider } from '@/components/ui/tooltip'
 
 interface TooltipProviderProps {
   children: React.ReactNode;
@@ -13,6 +13,6 @@ export const TooltipProvider: React.FC<TooltipProviderProps> = ({ children }) =>
     <RadixTooltipProvider delayDuration={400}>
       {children}
     </RadixTooltipProvider>
-  );
-};
+  )
+}
 

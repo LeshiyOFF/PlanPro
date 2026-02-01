@@ -1,10 +1,10 @@
-import { EnvironmentConfig } from '@/config/EnvironmentConfig';
-import { StrictData } from '@/types/Master_Functionality_Catalog';
-import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError';
+import { EnvironmentConfig } from '@/config/EnvironmentConfig'
+import { StrictData } from '@/types/Master_Functionality_Catalog'
+import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError'
 
 // Master Functionality Catalog типы
 import type {
-  ValidationError
+  ValidationError,
 } from '../types/Master_Functionality_Catalog'
 
 /**
@@ -43,9 +43,9 @@ export interface PaginationParams {
  * Реализует паттерн Repository и следует SOLID принципам
  */
 export abstract class BaseAPIClient {
-  protected readonly config: APIClientConfig;
-  protected readonly baseURL: string;
-  protected readonly defaultHeaders: Record<string, string>;
+  protected readonly config: APIClientConfig
+  protected readonly baseURL: string
+  protected readonly defaultHeaders: Record<string, string>
 
   constructor(config: APIClientConfig = {}) {
     this.config = {
@@ -55,17 +55,17 @@ export abstract class BaseAPIClient {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
-      ...config
-    };
-    
+      ...config,
+    }
+
     // Приоритет: config.baseURL -> EnvironmentConfig -> fallback
-    const base = config.baseURL || `${EnvironmentConfig.getApiBaseUrl()}/api`;
-    this.baseURL = base.replace(/\/$/, '');
-    
+    const base = config.baseURL || `${EnvironmentConfig.getApiBaseUrl()}/api`
+    this.baseURL = base.replace(/\/$/, '')
+
     this.defaultHeaders = {
       ...this.config.headers,
-      ...config.headers
-    };
+      ...config.headers,
+    }
   }
 
   /**
@@ -74,67 +74,67 @@ export abstract class BaseAPIClient {
    */
   protected async request<T = StrictData>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
   ): Promise<APIResponse<T>> {
-    const url = `${this.baseURL}${endpoint}`;
-    
+    const url = `${this.baseURL}${endpoint}`
+
     try {
-      const controller = new AbortController();
+      const controller = new AbortController()
       const timeoutId = setTimeout(
         () => controller.abort(),
-        this.config.timeout
-      );
+        this.config.timeout,
+      )
 
       const requestOptions = {
         ...options,
         headers: { ...this.defaultHeaders, ...options.headers },
-        signal: controller.signal
-      };
+        signal: controller.signal,
+      }
 
       // Детальное логирование для диагностики
       console.log('[BaseAPIClient] Sending request:', {
         url,
         method: requestOptions.method || 'GET',
         headers: requestOptions.headers,
-        body: requestOptions.body
-      });
+        body: requestOptions.body,
+      })
 
-      const response = await fetch(url, requestOptions);
+      const response = await fetch(url, requestOptions)
 
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId)
 
       console.log('[BaseAPIClient] Response received:', {
         status: response.status,
         statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
-      });
+        headers: Object.fromEntries(response.headers.entries()),
+      })
 
       if (!response.ok) {
         // Пытаемся получить тело ответа для диагностики
-        let errorBody: StrictData;
+        let errorBody: StrictData
         try {
-          const text = await response.text();
-          console.error('[BaseAPIClient] Error response body:', text);
-          errorBody = JSON.parse(text) as StrictData;
+          const text = await response.text()
+          console.error('[BaseAPIClient] Error response body:', text)
+          errorBody = JSON.parse(text) as StrictData
         } catch (e) {
-          console.error('[BaseAPIClient] Could not parse error response body');
-          errorBody = { message: 'Could not parse error response body' };
+          console.error('[BaseAPIClient] Could not parse error response body')
+          errorBody = { message: 'Could not parse error response body' }
         }
-        
+
         throw new APIError(
           `HTTP ${response.status}: ${response.statusText}`,
           response.status,
           response.statusText,
-          errorBody
-        );
+          errorBody,
+        )
       }
 
-      const result = await response.json() as APIResponse<T>;
-      console.log('[BaseAPIClient] Response data:', result);
-      return result;
+      const result = await response.json() as APIResponse<T>
+      console.log('[BaseAPIClient] Response data:', result)
+      return result
     } catch (error) {
-      console.error('[BaseAPIClient] Request failed:', error);
-      throw this.handleRequestError(toCaughtError(error));
+      console.error('[BaseAPIClient] Request failed:', error)
+      throw this.handleRequestError(toCaughtError(error))
     }
   }
 
@@ -143,10 +143,10 @@ export abstract class BaseAPIClient {
    */
   private handleRequestError(error: CaughtError): APIError {
     if (error instanceof APIError) {
-      return error;
+      return error
     }
 
-    return new APIError(getErrorMessage(error), 0, 'Unknown');
+    return new APIError(getErrorMessage(error), 0, 'Unknown')
   }
 
   /**
@@ -154,23 +154,23 @@ export abstract class BaseAPIClient {
    */
   protected async get<T = StrictData>(
     endpoint: string,
-    params?: Record<string, string | number | boolean | undefined>
+    params?: Record<string, string | number | boolean | undefined>,
   ): Promise<APIResponse<T>> {
-    let url = endpoint;
+    let url = endpoint
     if (params) {
-      const searchParams = new URLSearchParams();
+      const searchParams = new URLSearchParams()
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
-          searchParams.append(key, String(value));
+          searchParams.append(key, String(value))
         }
-      });
-      const queryString = searchParams.toString();
+      })
+      const queryString = searchParams.toString()
       if (queryString) {
-        url += `?${queryString}`;
+        url += `?${queryString}`
       }
     }
 
-    return this.request<T>(url);
+    return this.request<T>(url)
   }
 
   /**
@@ -178,12 +178,12 @@ export abstract class BaseAPIClient {
    */
   protected async post<T = StrictData>(
     endpoint: string,
-    data?: StrictData
+    data?: StrictData,
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    })
   }
 
   /**
@@ -191,23 +191,23 @@ export abstract class BaseAPIClient {
    */
   protected async put<T = StrictData>(
     endpoint: string,
-    data?: StrictData
+    data?: StrictData,
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    })
   }
 
   /**
    * DELETE запрос
    */
   protected async delete<T = StrictData>(
-    endpoint: string
+    endpoint: string,
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'DELETE',
-    });
+    })
   }
 
   /**
@@ -216,21 +216,21 @@ export abstract class BaseAPIClient {
   protected async upload<T = StrictData>(
     endpoint: string,
     file: File,
-    additionalData?: Record<string, string>
+    additionalData?: Record<string, string>,
   ): Promise<APIResponse<T>> {
-    const formData = new FormData();
-    formData.append('file', file);
-    
+    const formData = new FormData()
+    formData.append('file', file)
+
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {
-        formData.append(key, value);
-      });
+        formData.append(key, value)
+      })
     }
 
     return this.request<T>(endpoint, {
       method: 'POST',
-      body: formData
-    });
+      body: formData,
+    })
   }
 
   /**
@@ -238,35 +238,35 @@ export abstract class BaseAPIClient {
    */
   protected async download(
     endpoint: string,
-    params?: Record<string, string | number | boolean | undefined>
+    params?: Record<string, string | number | boolean | undefined>,
   ): Promise<Blob> {
-    let url = endpoint;
+    let url = endpoint
     if (params) {
-      const searchParams = new URLSearchParams();
+      const searchParams = new URLSearchParams()
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined) {
-          searchParams.append(key, String(value));
+          searchParams.append(key, String(value))
         }
-      });
-      const queryString = searchParams.toString();
+      })
+      const queryString = searchParams.toString()
       if (queryString) {
-        url += `?${queryString}`;
+        url += `?${queryString}`
       }
     }
 
     const response = await fetch(`${this.baseURL}${url}`, {
-      headers: this.defaultHeaders
-    });
+      headers: this.defaultHeaders,
+    })
 
     if (!response.ok) {
       throw new APIError(
         `Download failed: ${response.statusText}`,
         response.status,
-        response.statusText
-      );
+        response.statusText,
+      )
     }
 
-    return response.blob();
+    return response.blob()
   }
 }
 
@@ -279,10 +279,10 @@ export class APIError extends Error {
     message: string,
     public readonly status?: number,
     public readonly statusText?: string,
-    public readonly details?: StrictData
+    public readonly details?: StrictData,
   ) {
-    super(message);
-    this.name = 'APIError';
+    super(message)
+    this.name = 'APIError'
   }
 }
 

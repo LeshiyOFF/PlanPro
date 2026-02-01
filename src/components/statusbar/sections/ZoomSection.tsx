@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 /**
  * Секция масштаба
@@ -11,18 +11,18 @@ interface ZoomSectionProps {
 
 export const ZoomSection: React.FC<ZoomSectionProps> = ({ zoom, onZoomChange }) => {
   const handleZoomIn = React.useCallback(() => {
-    const newZoom = Math.min(500, zoom + 10);
-    onZoomChange?.(newZoom);
-  }, [zoom, onZoomChange]);
+    const newZoom = Math.min(500, zoom + 10)
+    onZoomChange?.(newZoom)
+  }, [zoom, onZoomChange])
 
   const handleZoomOut = React.useCallback(() => {
-    const newZoom = Math.max(10, zoom - 10);
-    onZoomChange?.(newZoom);
-  }, [zoom, onZoomChange]);
+    const newZoom = Math.max(10, zoom - 10)
+    onZoomChange?.(newZoom)
+  }, [zoom, onZoomChange])
 
   const handleZoomReset = React.useCallback(() => {
-    onZoomChange?.(100);
-  }, [onZoomChange]);
+    onZoomChange?.(100)
+  }, [onZoomChange])
 
   return (
     <div className="flex items-center gap-2 text-sm">
@@ -52,6 +52,6 @@ export const ZoomSection: React.FC<ZoomSectionProps> = ({ zoom, onZoomChange }) 
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 

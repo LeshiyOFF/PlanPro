@@ -1,10 +1,10 @@
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next'
 
 /**
  * Хук для получения локализованного контента справки.
  */
 export const useHelpContent = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return {
     GANTT: {
@@ -20,7 +20,7 @@ export const useHelpContent = () => {
           </ul>
           <p className="mt-2 text-[10px] italic">{t('help.gantt_tip', 'Совет: Перетаскивайте края полосок для изменения длительности.')}</p>
         </>
-      )
+      ),
     },
     NETWORK: {
       title: t('help.network_title'),
@@ -34,7 +34,7 @@ export const useHelpContent = () => {
           </ul>
           <p className="mt-2 text-[10px] italic">{t('help.network_tip', 'Совет: Используйте этот вид для анализа «узких мест» в логике проекта.')}</p>
         </>
-      )
+      ),
     },
     WBS: {
       title: t('help.wbs_title'),
@@ -47,7 +47,7 @@ export const useHelpContent = () => {
             <li>{t('help.wbs_item_2', 'Нижние уровни — конкретные пакеты работ.')}</li>
           </ul>
         </>
-      )
+      ),
     },
     RESOURCE_USAGE: {
       title: t('help.resource_usage_title'),
@@ -57,7 +57,7 @@ export const useHelpContent = () => {
           <p>{t('help.resource_usage_desc_2', 'Красные индикаторы сигнализируют о <strong>перегрузке</strong> (overallocation).')}</p>
           <p className="mt-1">{t('help.resource_usage_desc_3', 'Позволяет увидеть распределение трудозатрат по времени.')}</p>
         </>
-      )
+      ),
     },
     TASK_USAGE: {
       title: t('help.task_usage_title'),
@@ -70,7 +70,7 @@ export const useHelpContent = () => {
             <li><strong>{t('help.task_usage_item_2_bold', 'Ресурсы:')}</strong> {t('help.task_usage_item_2_text', 'список всех назначений для каждой задачи.')}</li>
           </ul>
         </>
-      )
+      ),
     },
     TRACKING: {
       title: t('help.tracking_title'),
@@ -84,7 +84,7 @@ export const useHelpContent = () => {
           </ul>
           <p className="mt-2 text-[10px] italic">{t('help.tracking_tip', 'Совет: Это лучший вид для выявления отклонений от графика.')}</p>
         </>
-      )
+      ),
     },
     CALENDAR: {
       title: t('help.calendar_title', 'Календарь'),
@@ -93,7 +93,7 @@ export const useHelpContent = () => {
           <p>{t('help.calendar_desc_1', 'Отображение задач в виде календарной сетки по датам.')}</p>
           <p>{t('help.calendar_desc_2', 'Удобно для просмотра сроков и пересечений.')}</p>
         </>
-      )
+      ),
     },
     REPORTS: {
       title: t('help.reports_title', 'Отчёты'),
@@ -102,7 +102,7 @@ export const useHelpContent = () => {
           <p>{t('help.reports_desc_1', 'Сводные отчёты по проекту: затраты, загрузка ресурсов, статус.')}</p>
           <p>{t('help.reports_desc_2', 'Экспорт в PDF и другие форматы.')}</p>
         </>
-      )
+      ),
     },
     SETTINGS: {
       title: t('help.settings_title', 'Настройки'),
@@ -110,7 +110,7 @@ export const useHelpContent = () => {
         <>
           <p>{t('help.settings_desc_1', 'Общие настройки приложения, тема, единицы измерения.')}</p>
         </>
-      )
+      ),
     },
     TASK_SHEET: {
       title: t('help.task_sheet_title', 'Таблица задач'),
@@ -119,7 +119,7 @@ export const useHelpContent = () => {
           <p>{t('help.task_sheet_desc_1', 'Табличное представление списка задач проекта.')}</p>
           <p>{t('help.task_sheet_desc_2', 'Редактирование названий, дат, прогресса и связей.')}</p>
         </>
-      )
+      ),
     },
     RESOURCE_SHEET: {
       title: t('help.resource_sheet_title', 'Таблица ресурсов'),
@@ -128,8 +128,8 @@ export const useHelpContent = () => {
           <p>{t('help.resource_sheet_desc_1', 'Список ресурсов проекта: люди, оборудование, материалы.')}</p>
           <p>{t('help.resource_sheet_desc_2', 'Настройка календарей и ставок.')}</p>
         </>
-      )
-    }
-  };
-};
+      ),
+    },
+  }
+}
 

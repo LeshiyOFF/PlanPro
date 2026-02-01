@@ -1,13 +1,13 @@
-import * as React from "react"
-import { DayPicker } from "react-day-picker"
-import type { DayPickerProps } from "react-day-picker"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useTranslation } from "react-i18next"
-import { ru } from "date-fns/locale"
-import { format, startOfToday } from "date-fns"
-import { motion, AnimatePresence } from "framer-motion"
+import * as React from 'react'
+import { DayPicker } from 'react-day-picker'
+import type { DayPickerProps } from 'react-day-picker'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ru } from 'date-fns/locale'
+import { format, startOfToday } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 /** Обёртка над AnimatePresence с корректным типом возврата (React допускает null, не undefined). */
 const CalendarAnimatePresence = AnimatePresence as React.ComponentType<{ mode?: 'wait' | 'sync'; children: React.ReactNode }>
@@ -29,9 +29,9 @@ function Calendar({
 }: CalendarProps) {
   const { t } = useTranslation()
   const today = startOfToday()
-  
+
   const [month, setMonth] = React.useState<Date>(
-    (Array.isArray(selected) ? selected[0] : selected instanceof Date ? selected : null) || today
+    (Array.isArray(selected) ? selected[0] : selected instanceof Date ? selected : null) || today,
   )
 
   const handleTodayClick = () => {
@@ -41,8 +41,8 @@ function Calendar({
 
   return (
     <div className={cn(
-      "overflow-hidden rounded-[32px] bg-primary select-none w-[360px] shadow-[0_30px_100px_-15px_rgba(0,0,0,0.3)] relative flex flex-col antialiased border-none",
-      className
+      'overflow-hidden rounded-[32px] bg-primary select-none w-[360px] shadow-[0_30px_100px_-15px_rgba(0,0,0,0.3)] relative flex flex-col antialiased border-none',
+      className,
     )}>
       {/* Изолированные стили для DayPicker v9 */}
       <style>{`
@@ -143,17 +143,17 @@ function Calendar({
       {/* Акцентная шапочка (Header) */}
       <div className="bg-primary p-7 pb-9 text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-        
+
         <div className="relative z-10 flex flex-col gap-1">
           <span className="text-[10px] font-black uppercase tracking-[0.4em] opacity-60">
             {t('common.calendar', 'Календарь')}
           </span>
           <div className="flex items-baseline gap-2 mt-1">
             <h2 className="text-4xl font-bold tracking-tight first-letter:uppercase">
-              {format(month, "LLLL", { locale: ru })}
+              {format(month, 'LLLL', { locale: ru })}
             </h2>
             <span className="text-2xl font-light opacity-50">
-              {format(month, "yyyy")}
+              {format(month, 'yyyy')}
             </span>
           </div>
         </div>
@@ -163,29 +163,29 @@ function Calendar({
       <div className="bg-white px-6 py-6 pb-10 flex-1 flex flex-col gap-6 rounded-b-[32px]">
         {/* Навигация */}
         <div className="flex items-center justify-between px-1">
-          <button 
+          <button
             onClick={() => {
-              const prev = new Date(month);
-              prev.setMonth(prev.getMonth() - 1);
-              setMonth(prev);
+              const prev = new Date(month)
+              prev.setMonth(prev.getMonth() - 1)
+              setMonth(prev)
             }}
             className="p-2.5 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-primary border border-slate-100 hover:border-primary/20"
           >
             <ChevronLeft className="w-5 h-5 stroke-[2.5px]" />
           </button>
-          
-          <button 
+
+          <button
             onClick={handleTodayClick}
             className="px-5 py-2 text-[11px] font-bold uppercase tracking-widest text-primary bg-primary/5 hover:bg-primary/10 rounded-full transition-all border border-primary/10"
           >
             {t('common.today', 'Сегодня')}
           </button>
 
-          <button 
+          <button
             onClick={() => {
-              const next = new Date(month);
-              next.setMonth(next.getMonth() + 1);
-              setMonth(next);
+              const next = new Date(month)
+              next.setMonth(next.getMonth() + 1)
+              setMonth(next)
             }}
             className="p-2.5 hover:bg-slate-50 rounded-2xl transition-all text-slate-400 hover:text-primary border border-slate-100 hover:border-primary/20"
           >
@@ -213,15 +213,15 @@ function Calendar({
               selected={selected}
               onSelect={onSelect ? (selectedVal: Date | undefined) => onSelect(selectedVal) : undefined}
               classNames={{
-                months: "w-full",
-                month: "w-full",
-                month_caption: "hidden",
-                nav: "hidden",
-                weekdays: "rdp-weekdays",
-                weekday: "rdp-weekday",
-                weeks: "rdp-weeks",
-                day: "rdp-day",
-                ...classNames
+                months: 'w-full',
+                month: 'w-full',
+                month_caption: 'hidden',
+                nav: 'hidden',
+                weekdays: 'rdp-weekdays',
+                weekday: 'rdp-weekday',
+                weeks: 'rdp-weeks',
+                day: 'rdp-day',
+                ...classNames,
               }}
               {...(props as Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect' | 'month' | 'onMonthChange' | 'locale' | 'className' | 'classNames' | 'showOutsideDays'>)}
             />
@@ -232,6 +232,6 @@ function Calendar({
   )
 }
 
-Calendar.displayName = "Calendar"
+Calendar.displayName = 'Calendar'
 
 export { Calendar }

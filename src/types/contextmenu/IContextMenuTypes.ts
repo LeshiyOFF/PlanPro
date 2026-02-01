@@ -3,8 +3,8 @@
  * Устраняет использование any в обработчиках меню
  */
 
-import { Task, Resource } from '@/store/project/interfaces';
-import { ICalendarEvent } from '@/types/views/IViewTypes';
+import { Task, Resource } from '@/store/project/interfaces'
+import { ICalendarEvent } from '@/types/views/IViewTypes'
 
 /**
  * Действия контекстного меню для задачи

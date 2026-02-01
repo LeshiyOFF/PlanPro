@@ -1,12 +1,12 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface ProjectOptions {
   general: {
@@ -53,23 +53,23 @@ const DATE_FORMATS = [
   { value: 'MM/DD/YYYY', label: '01/31/2024' },
   { value: 'DD/MM/YYYY', label: '31/01/2024' },
   { value: 'YYYY-MM-DD', label: '2024-01-31' },
-  { value: 'DD.MM.YYYY', label: '31.01.2024' }
-];
+  { value: 'DD.MM.YYYY', label: '31.01.2024' },
+]
 
 const CURRENCIES = [
   { value: 'USD', label: 'USD ($)' },
   { value: 'EUR', label: 'EUR (€)' },
   { value: 'GBP', label: 'GBP (£)' },
   { value: 'JPY', label: 'JPY (¥)' },
-  { value: 'CNY', label: 'CNY (¥)' }
-];
+  { value: 'CNY', label: 'CNY (¥)' },
+]
 
 const LEVELING_ORDERS = [
   { value: 'priority', label: 'Priority' },
   { value: 'duration', label: 'Duration' },
   { value: 'id', label: 'ID' },
-  { value: 'name', label: 'Name' }
-];
+  { value: 'name', label: 'Name' },
+]
 
 export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
   currentOptions,
@@ -87,7 +87,7 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
         autoSave: true,
         autoSaveInterval: 10,
         showSummaryTask: false,
-        criticalSlack: 0
+        criticalSlack: 0,
       },
       display: {
         dateFormat: 'MM/DD/YYYY',
@@ -96,89 +96,89 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
         timeFormat: '12h',
         weekStartDay: 1,
         showTips: true,
-        showGridlines: true
+        showGridlines: true,
       },
       calculation: {
         type: 'automatic',
         effortDriven: false,
         fixedDuration: false,
         levelingOrder: 'priority',
-        allowOverallocation: false
+        allowOverallocation: false,
       },
       collaboration: {
         enableVersioning: true,
         maxVersions: 10,
         enableComments: true,
         enableNotifications: true,
-        sharedResources: false
-      }
-    }
-  );
+        sharedResources: false,
+      },
+    },
+  )
 
   const { errors, isValid } = useDialogValidation({
     'general.defaultDuration': {
       required: true,
       min: 0.1,
       max: 1000,
-      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0'
+      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0',
     },
     'general.autoSaveInterval': {
       required: true,
       min: 1,
       max: 60,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Auto-save interval must be at least 1 minute'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Auto-save interval must be at least 1 minute',
     },
     'general.criticalSlack': {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 0) ? null : 'Critical slack must be non-negative'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0) ? null : 'Critical slack must be non-negative',
     },
     'display.decimalPlaces': {
       required: true,
       min: 0,
       max: 4,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 4) ? null : 'Decimal places must be between 0 and 4'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 4) ? null : 'Decimal places must be between 0 and 4',
     },
     'collaboration.maxVersions': {
       required: true,
       min: 1,
       max: 50,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Maximum versions must be at least 1'
-    }
-  });
+      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Maximum versions must be at least 1',
+    },
+  })
 
   React.useEffect(() => {
     if (currentOptions) {
-      setOptions(currentOptions);
+      setOptions(currentOptions)
     }
-  }, [currentOptions]);
+  }, [currentOptions])
 
   const handleOptionChange = (category: keyof ProjectOptions, field: string, value: string | number | boolean) => {
     setOptions(prev => ({
       ...prev,
       [category]: {
         ...prev[category],
-        [field]: value
-      }
-    }));
-  };
+        [field]: value,
+      },
+    }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(options);
-      onClose?.();
+      onSave?.(options)
+      onClose?.()
     }
-  };
+  }
 
   const handleReset = () => {
-    onReset?.();
-    onClose?.();
-  };
+    onReset?.()
+    onClose?.()
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -601,6 +601,6 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
         </TabsContent>
       </Tabs>
     </BaseDialog>
-  );
-};
+  )
+}
 

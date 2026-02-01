@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
 
 /**
  * Интерфейс для ViewHeader (Tier 1: Title Bar)
@@ -7,19 +7,19 @@ import { ReactNode } from 'react';
 export interface ViewHeaderProps {
   /** Заголовок представления (обязательно) */
   title: string;
-  
+
   /** Краткое описание под заголовком (опционально) */
   description?: string;
-  
+
   /** Иконка слева от заголовка (опционально) */
   icon?: ReactNode;
-  
+
   /** Контекстная помощь (опционально) */
   help?: {
     title: string;
     content: ReactNode;
   };
-  
+
   /** Дополнительные CSS классы */
   className?: string;
 }
@@ -30,19 +30,19 @@ export interface ViewHeaderProps {
 export interface ActionButton {
   /** Текст кнопки */
   label: string;
-  
+
   /** Обработчик клика */
   onClick: () => void;
-  
+
   /** Иконка перед текстом (опционально) */
   icon?: ReactNode;
-  
+
   /** Вариант кнопки (для secondary actions) */
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
-  
+
   /** Отключить кнопку */
   disabled?: boolean;
-  
+
   /** Tooltip при наведении */
   title?: string;
 }
@@ -54,13 +54,13 @@ export interface ActionButton {
 export interface ActionBarProps {
   /** Основное действие (одна кнопка с акцентом) */
   primaryAction?: ActionButton;
-  
+
   /** Вторичные действия (2-3 кнопки) */
   secondaryActions?: ActionButton[];
-  
+
   /** Кастомные контролы справа (фильтры, zoom и т.д.) */
   controls?: ReactNode;
-  
+
   /** Дополнительные CSS классы */
   className?: string;
 }

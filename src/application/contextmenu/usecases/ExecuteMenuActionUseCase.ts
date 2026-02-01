@@ -1,5 +1,5 @@
-import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu';
-import { getErrorMessage } from '@/utils/errorUtils';
+import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu'
+import { getErrorMessage } from '@/utils/errorUtils'
 
 /**
  * Тип для подменю
@@ -30,34 +30,34 @@ export class ExecuteMenuActionUseCase {
    */
   async execute(menu: IContextMenu, actionId: string): Promise<void> {
     // Найти пункт меню по actionId
-    const menuItem = this.findMenuItem(menu, actionId);
-    
+    const menuItem = this.findMenuItem(menu, actionId)
+
     if (!menuItem) {
-      throw new Error(`Menu action not found: ${actionId}`);
+      throw new Error(`Menu action not found: ${actionId}`)
     }
 
     if (menuItem.separator) {
-      throw new Error(`Cannot execute separator action: ${actionId}`);
+      throw new Error(`Cannot execute separator action: ${actionId}`)
     }
 
     if (menuItem.disabled) {
-      throw new Error(`Menu action is disabled: ${actionId}`);
+      throw new Error(`Menu action is disabled: ${actionId}`)
     }
 
     if (!menuItem.action) {
-      throw new Error(`Menu action has no executor: ${actionId}`);
+      throw new Error(`Menu action has no executor: ${actionId}`)
     }
 
     // Проверить можно ли выполнить действие
     if (!menuItem.action.canExecute()) {
-      throw new Error(`Menu action cannot be executed: ${actionId}`);
+      throw new Error(`Menu action cannot be executed: ${actionId}`)
     }
 
     // Выполнить действие
     try {
-      await menuItem.action.execute();
+      await menuItem.action.execute()
     } catch (error) {
-      throw new Error(`Failed to execute menu action ${actionId}: ${getErrorMessage(error)}`);
+      throw new Error(`Failed to execute menu action ${actionId}: ${getErrorMessage(error)}`)
     }
   }
 
@@ -66,18 +66,18 @@ export class ExecuteMenuActionUseCase {
    */
   private findMenuItem(menu: IContextMenu, actionId: string): IMenuItem | null {
     // Поиск в основных пунктах меню
-    const item = menu.items.find(item => item.id === actionId);
-    if (item) return item;
+    const item = menu.items.find(item => item.id === actionId)
+    if (item) return item
 
     // Рекурсивный поиск в подменю
     for (const mainItem of menu.items) {
       if (mainItem.submenu) {
-        const subItem = this.searchInSubmenu(mainItem.submenu, actionId);
-        if (subItem) return subItem;
+        const subItem = this.searchInSubmenu(mainItem.submenu, actionId)
+        if (subItem) return subItem
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -85,14 +85,14 @@ export class ExecuteMenuActionUseCase {
    */
   private searchInSubmenu(submenu: ISubmenu, actionId: string): IMenuItem | null {
     for (const item of submenu) {
-      if (item.id === actionId) return item;
-      
+      if (item.id === actionId) return item
+
       if (item.submenu) {
-        const subItem = this.searchInSubmenu(item.submenu, actionId);
-        if (subItem) return subItem;
+        const subItem = this.searchInSubmenu(item.submenu, actionId)
+        if (subItem) return subItem
       }
     }
-    return null;
+    return null
   }
 }
 

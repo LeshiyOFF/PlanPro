@@ -1,19 +1,19 @@
-import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
+import React from 'react'
+import {
+  Dialog,
+  DialogContent,
   DialogFooter,
   DialogTitle,
   DialogDescription,
-  Button 
-} from '@/components/ui';
-import { 
-  FolderTree, 
-  FileText, 
+  Button,
+} from '@/components/ui'
+import {
+  FolderTree,
+  FileText,
   Lock,
   ShieldCheck,
-  X
-} from 'lucide-react';
+  X,
+} from 'lucide-react'
 
 interface SummaryTaskDialogProps {
   isOpen: boolean;
@@ -30,18 +30,18 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
   isOpen,
   onClose,
   parentTaskName,
-  subtaskName
+  subtaskName,
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose(false)}>
-      <DialogContent 
+      <DialogContent
         className="p-0 border-none overflow-hidden max-w-[480px] rounded-2xl shadow-2xl bg-[hsl(var(--primary))] gap-0"
         hideClose={true}
       >
         {/* Акцентная шапка */}
         <div className="p-8 pb-6 text-white relative">
-          <button 
-            onClick={() => onClose(false)} 
+          <button
+            onClick={() => onClose(false)}
             className="absolute right-4 top-4 opacity-70 hover:opacity-100 transition-all p-2 rounded-full hover:bg-white/10 z-50"
           >
             <X size={20} />
@@ -54,7 +54,7 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
 
         {/* Основной контент в белом блоке - углы синхронизированы с внешним контейнером */}
         <div className="bg-white rounded-t-2xl p-8 space-y-8">
-          
+
           {/* Визуализация иерархического дерева - ЦЕНТРИРОВАННАЯ */}
           <div className="flex flex-col items-center py-2">
             <div className="relative inline-flex flex-col items-start">
@@ -82,7 +82,7 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
                   <span className="text-xs font-black text-slate-900 truncate max-w-[180px]">{subtaskName}</span>
                 </div>
               </div>
-              
+
               {/* Текст внизу - КОНТРАСТНЫЙ */}
               <div className="ml-[72px] mt-3 text-[10px] font-black text-slate-600 uppercase tracking-widest italic opacity-80">
                 ...и другие вложенные работы
@@ -94,11 +94,11 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
           <div className="space-y-6">
             <div className="p-5 rounded-2xl border border-slate-100 bg-slate-50/50 text-center shadow-inner">
               <p className="text-[13px] text-slate-600 leading-relaxed font-medium">
-                Задача <span className="font-black text-slate-900 underline decoration-[hsl(var(--primary)/0.3)] decoration-2 underline-offset-4">"{parentTaskName}"</span> становится суммарной. 
+                Задача <span className="font-black text-slate-900 underline decoration-[hsl(var(--primary)/0.3)] decoration-2 underline-offset-4">"{parentTaskName}"</span> становится суммарной.
                 Теперь её параметры будут зависеть от <span className="font-black text-slate-900">всех вложенных подзадач</span>.
               </p>
             </div>
-            
+
             <div className="space-y-5 px-1">
               <div className="flex items-start gap-4 group">
                 <div className="mt-1 text-[hsl(var(--primary))] flex-shrink-0 bg-[hsl(var(--primary)/0.1)] p-2 rounded-xl transition-colors group-hover:bg-[hsl(var(--primary)/0.2)]">
@@ -129,15 +129,15 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
 
         {/* Футер с кнопками */}
         <DialogFooter className="p-8 pt-4 bg-white flex flex-row gap-4 sm:space-x-0">
-          <Button 
-            variant="ghost" 
-            onClick={() => onClose(false)} 
+          <Button
+            variant="ghost"
+            onClick={() => onClose(false)}
             className="flex-1 h-12 text-slate-400 font-bold hover:bg-slate-50 hover:text-slate-900 transition-all rounded-xl"
           >
             Отмена
           </Button>
-          <Button 
-            onClick={() => onClose(true)} 
+          <Button
+            onClick={() => onClose(true)}
             className="flex-1 h-12 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary-hover))] text-white font-black uppercase tracking-wider shadow-xl shadow-[hsl(var(--primary)/0.25)] transition-all active:scale-[0.97] rounded-xl"
           >
             Подтвердить
@@ -145,5 +145,5 @@ export const SummaryTaskDialog: React.FC<SummaryTaskDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

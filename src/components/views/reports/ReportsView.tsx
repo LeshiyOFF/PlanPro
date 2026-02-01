@@ -1,20 +1,20 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { ViewType, ViewSettings } from '@/types/ViewTypes';
-import { TwoTierHeader } from '@/components/layout/ViewHeader';
-import { ReportService } from '@/domain/reporting/services/ReportService';
-import { PdfExportService } from '@/domain/reporting/services/PdfExportService';
-import { ReportType } from '@/domain/reporting/interfaces/IReport';
-import { useProjectStore } from '@/store/projectStore';
-import { useHelpContent } from '@/hooks/useHelpContent';
-import { useToast } from '@/hooks/use-toast';
-import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
-import { ReportViewer } from './ReportViewer';
-import { BarChart3, ListTodo, Users, Milestone, DollarSign, FileText, ArrowLeft, Printer, Download, UserCog } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import '@/styles/reports.css';
+import React, { useState, useMemo, useRef, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
+import { ViewType, ViewSettings } from '@/types/ViewTypes'
+import { TwoTierHeader } from '@/components/layout/ViewHeader'
+import { ReportService } from '@/domain/reporting/services/ReportService'
+import { PdfExportService } from '@/domain/reporting/services/PdfExportService'
+import { ReportType } from '@/domain/reporting/interfaces/IReport'
+import { useProjectStore } from '@/store/projectStore'
+import { useHelpContent } from '@/hooks/useHelpContent'
+import { useToast } from '@/hooks/use-toast'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
+import { ReportViewer } from './ReportViewer'
+import { BarChart3, ListTodo, Users, Milestone, DollarSign, FileText, ArrowLeft, Printer, Download, UserCog } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import '@/styles/reports.css'
 
 /**
  * ReportsView - Система отчетов с полной локализацией
@@ -22,83 +22,83 @@ import '@/styles/reports.css';
  * @version 10.0 - Добавлена интернационализация и ручное назначение менеджера
  */
 export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = () => {
-  const { t } = useTranslation();
-  const { toast } = useToast();
-  const helpContent = useHelpContent();
-  const { preferences } = useUserPreferences();
-  const { tasks, resources, currentFilePath, projectManager, setProjectManager } = useProjectStore();
-  
-  const [selectedReportType, setSelectedReportType] = useState<ReportType | null>(null);
-  const [isEditingManager, setIsEditingManager] = useState(false);
-  const [managerInput, setManagerInput] = useState(projectManager || '');
-  const reportRef = useRef<HTMLDivElement>(null);
-  
-  const reportService = useMemo(() => new ReportService(), []);
-  const pdfExportService = useMemo(() => new PdfExportService(), []);
+  const { t } = useTranslation()
+  const { toast } = useToast()
+  const helpContent = useHelpContent()
+  const { preferences } = useUserPreferences()
+  const { tasks, resources, currentFilePath, projectManager, setProjectManager } = useProjectStore()
+
+  const [selectedReportType, setSelectedReportType] = useState<ReportType | null>(null)
+  const [isEditingManager, setIsEditingManager] = useState(false)
+  const [managerInput, setManagerInput] = useState(projectManager || '')
+  const reportRef = useRef<HTMLDivElement>(null)
+
+  const reportService = useMemo(() => new ReportService(), [])
+  const pdfExportService = useMemo(() => new PdfExportService(), [])
 
   // Определяем символ валюты на основе настроек
   const currencySymbol = useMemo(() => {
-    const currency = preferences.general?.currency || 'RUB';
-    const symbols: Record<string, string> = { 'RUB': '₽', 'USD': '$', 'EUR': '€' };
-    return symbols[currency] || currency;
-  }, [preferences.general?.currency]);
+    const currency = preferences.general?.currency || 'RUB'
+    const symbols: Record<string, string> = { 'RUB': '₽', 'USD': '$', 'EUR': '€' }
+    return symbols[currency] || currency
+  }, [preferences.general?.currency])
 
   // Извлекаем имя проекта из пути к файлу
   const projectName = useMemo(() => {
-    if (!currentFilePath) return t('reports.untitled_project');
-    const fileName = currentFilePath.split(/[/\\]/).pop() || '';
-    return fileName.replace(/\.(pod|mpp|xml)$/i, '') || t('reports.untitled_project');
-  }, [currentFilePath, t]);
+    if (!currentFilePath) return t('reports.untitled_project')
+    const fileName = currentFilePath.split(/[/\\]/).pop() || ''
+    return fileName.replace(/\.(pod|mpp|xml)$/i, '') || t('reports.untitled_project')
+  }, [currentFilePath, t])
 
   const reportData = useMemo(() => {
-    if (!selectedReportType) return null;
+    if (!selectedReportType) return null
     return reportService.generateReportData(selectedReportType, tasks, resources, {
       projectName,
       projectManager,
       t: (key, defaultValue) => t(key, { defaultValue }) as string,
-      currencySymbol
-    });
-  }, [selectedReportType, tasks, resources, reportService, projectName, projectManager, t, currencySymbol]);
+      currencySymbol,
+    })
+  }, [selectedReportType, tasks, resources, reportService, projectName, projectManager, t, currencySymbol])
 
   const handleSaveManager = useCallback(() => {
-    setProjectManager(managerInput.trim());
-    setIsEditingManager(false);
+    setProjectManager(managerInput.trim())
+    setIsEditingManager(false)
     toast({
       title: t('common.success'),
-      description: t('reports.manager_saved', 'Менеджер проекта сохранён')
-    });
-  }, [managerInput, setProjectManager, toast, t]);
+      description: t('reports.manager_saved', 'Менеджер проекта сохранён'),
+    })
+  }, [managerInput, setProjectManager, toast, t])
 
   const reportCards = [
-    { type: ReportType.PROJECT_SUMMARY, title: t('reports.project_summary'), 
+    { type: ReportType.PROJECT_SUMMARY, title: t('reports.project_summary'),
       desc: t('reports.project_summary_desc'), icon: BarChart3, color: 'bg-primary' },
-    { type: ReportType.CRITICAL_TASKS, title: t('reports.critical_tasks'), 
+    { type: ReportType.CRITICAL_TASKS, title: t('reports.critical_tasks'),
       desc: t('reports.critical_tasks_desc'), icon: ListTodo, color: 'bg-red-500' },
-    { type: ReportType.RESOURCE_USAGE, title: t('reports.resources'), 
+    { type: ReportType.RESOURCE_USAGE, title: t('reports.resources'),
       desc: t('reports.resources_desc'), icon: Users, color: 'bg-green-500' },
-    { type: ReportType.MILESTONE_REPORT, title: t('reports.milestones'), 
+    { type: ReportType.MILESTONE_REPORT, title: t('reports.milestones'),
       desc: t('reports.milestones_desc'), icon: Milestone, color: 'bg-purple-500' },
-    { type: ReportType.COST_ANALYSIS, title: t('reports.costs'), 
-      desc: t('reports.costs_desc'), icon: DollarSign, color: 'bg-amber-500' }
-  ];
+    { type: ReportType.COST_ANALYSIS, title: t('reports.costs'),
+      desc: t('reports.costs_desc'), icon: DollarSign, color: 'bg-amber-500' },
+  ]
 
-  const handlePrint = useCallback(() => window.print(), []);
+  const handlePrint = useCallback(() => window.print(), [])
 
   const handleExport = useCallback(async () => {
-    if (!reportRef.current || !reportData) return;
-    
+    if (!reportRef.current || !reportData) return
+
     try {
-      const filename = `${projectName}_${reportData.type}_${new Date().toISOString().split('T')[0]}`;
-      const success = await pdfExportService.exportAndSave(reportRef.current, filename);
-      
+      const filename = `${projectName}_${reportData.type}_${new Date().toISOString().split('T')[0]}`
+      const success = await pdfExportService.exportAndSave(reportRef.current, filename)
+
       if (success) {
-        toast({ title: t('common.success'), description: t('reports.export_success') });
+        toast({ title: t('common.success'), description: t('reports.export_success') })
       }
     } catch (error) {
-      console.error('[ReportsView] PDF export failed:', error);
-      toast({ variant: 'destructive', title: t('common.error'), description: t('reports.export_error') });
+      console.error('[ReportsView] PDF export failed:', error)
+      toast({ variant: 'destructive', title: t('common.error'), description: t('reports.export_error') })
     }
-  }, [reportData, projectName, pdfExportService, toast, t]);
+  }, [reportData, projectName, pdfExportService, toast, t])
 
   const reportViewControls = selectedReportType ? (
     <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
         {t('common.export')}
       </Button>
     </div>
-  ) : null;
+  ) : null
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
@@ -125,9 +125,9 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
             label: t('errors.back'),
             onClick: () => setSelectedReportType(null),
             icon: <ArrowLeft className="w-4 h-4" />,
-            variant: 'outline'
+            variant: 'outline',
           },
-          controls: reportViewControls
+          controls: reportViewControls,
         } : undefined}
       />
 
@@ -167,12 +167,12 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
                   </div>
                 </div>
                 {!isEditingManager && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => {
-                      setManagerInput(projectManager || '');
-                      setIsEditingManager(true);
+                      setManagerInput(projectManager || '')
+                      setIsEditingManager(true)
                     }}
                     className="h-8"
                   >
@@ -188,15 +188,15 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reportCards.map((card) => (
-                <div 
+                <div
                   key={card.type}
                   className="cursor-pointer bg-white rounded-xl border shadow-lg hover:shadow-xl hover:border-primary/30 transition-all duration-300 group p-2 soft-border"
                   onClick={() => setSelectedReportType(card.type)}
                 >
                   <div className="flex items-center gap-5 p-4">
                     <div className={cn(
-                      "p-4 rounded-2xl text-white shadow-xl transition-transform group-hover:scale-110 duration-300",
-                      card.type === ReportType.PROJECT_SUMMARY ? "bg-primary shadow-primary/30" : `${card.color} shadow-black/10`
+                      'p-4 rounded-2xl text-white shadow-xl transition-transform group-hover:scale-110 duration-300',
+                      card.type === ReportType.PROJECT_SUMMARY ? 'bg-primary shadow-primary/30' : `${card.color} shadow-black/10`,
                     )}>
                       <card.icon className="h-7 w-7" />
                     </div>
@@ -222,6 +222,6 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 

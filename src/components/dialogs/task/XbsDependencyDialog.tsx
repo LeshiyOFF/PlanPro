@@ -1,12 +1,12 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
 export interface ExtendedDependency {
   id: string;
@@ -37,8 +37,8 @@ const DEPENDENCY_TYPES = [
   { value: 'FS', label: 'Finish-to-Start' },
   { value: 'SS', label: 'Start-to-Start' },
   { value: 'FF', label: 'Finish-to-Finish' },
-  { value: 'SF', label: 'Start-to-Finish' }
-];
+  { value: 'SF', label: 'Start-to-Finish' },
+]
 
 export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
   tasks = [],
@@ -49,29 +49,29 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
   ...props
 }) => {
   const [selectedDependencies, setSelectedDependencies] = React.useState<string[]>(
-    dependencies.map(d => d.id)
-  );
-  const [showAdvanced, setShowAdvanced] = React.useState(false);
+    dependencies.map(d => d.id),
+  )
+  const [showAdvanced, setShowAdvanced] = React.useState(false)
   const [bulkUpdate, setBulkUpdate] = React.useState({
     type: 'FS' as const,
     leadTime: 0,
     critical: false,
-    calendar: ''
-  });
+    calendar: '',
+  })
 
   const handleDependencyToggle = (dependencyId: string) => {
-    setSelectedDependencies(prev => 
+    setSelectedDependencies(prev =>
       prev.includes(dependencyId)
         ? prev.filter(id => id !== dependencyId)
-        : [...prev, dependencyId]
-    );
-  };
+        : [...prev, dependencyId],
+    )
+  }
 
   const handleBulkApply = () => {
     // Apply bulk updates to selected dependencies
     // This would be implemented in the actual business logic
-    console.log('Bulk update applied to:', selectedDependencies, bulkUpdate);
-  };
+    console.log('Bulk update applied to:', selectedDependencies, bulkUpdate)
+  }
 
   const handleSave = () => {
     const updatedDependencies = dependencies
@@ -82,29 +82,29 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
           type: bulkUpdate.type,
           leadTime: bulkUpdate.leadTime,
           critical: bulkUpdate.critical,
-          calendar: bulkUpdate.calendar
-        })
-      }));
-    
-    onSave?.(updatedDependencies);
-    onClose?.();
-  };
+          calendar: bulkUpdate.calendar,
+        }),
+      }))
+
+    onSave?.(updatedDependencies)
+    onClose?.()
+  }
 
   const getTaskName = (taskId: string) => {
-    return tasks.find(t => t.id === taskId)?.name || 'Unknown';
-  };
+    return tasks.find(t => t.id === taskId)?.name || 'Unknown'
+  }
 
   const getTypeBadgeVariant = (type: string) => {
     const variants: Record<string, 'default' | 'secondary' | 'outline'> = {
       'FS': 'default',
       'SS': 'secondary',
       'FF': 'outline',
-      'SF': 'outline'
-    };
-    return variants[type] || 'outline';
-  };
+      'SF': 'outline',
+    }
+    return variants[type] || 'outline'
+  }
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       title="Extended Dependencies Management"
@@ -164,7 +164,7 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
             </TableHeader>
             <TableBody>
               {dependencies.map(dependency => (
-                <TableRow 
+                <TableRow
                   key={dependency.id}
                   className={selectedDependencies.includes(dependency.id) ? 'bg-muted/50' : ''}
                 >
@@ -240,9 +240,9 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
                   type="number"
                   step="0.1"
                   value={bulkUpdate.leadTime}
-                  onChange={(e) => setBulkUpdate(prev => ({ 
-                    ...prev, 
-                    leadTime: parseFloat(e.target.value) || 0 
+                  onChange={(e) => setBulkUpdate(prev => ({
+                    ...prev,
+                    leadTime: parseFloat(e.target.value) || 0,
                   }))}
                 />
               </div>
@@ -253,9 +253,9 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
                   <Checkbox
                     id="critical"
                     checked={bulkUpdate.critical}
-                    onCheckedChange={(checked) => setBulkUpdate(prev => ({ 
-                      ...prev, 
-                      critical: checked as boolean 
+                    onCheckedChange={(checked) => setBulkUpdate(prev => ({
+                      ...prev,
+                      critical: checked as boolean,
                     }))}
                   />
                   <Label htmlFor="critical">Mark as Critical</Label>
@@ -310,6 +310,6 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

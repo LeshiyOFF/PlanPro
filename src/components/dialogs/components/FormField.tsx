@@ -1,10 +1,10 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import type { JsonObject } from '@/types/json-types';
+import React from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Типы для значений форм
@@ -59,7 +59,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   className = '',
   min,
   max,
-  helper
+  helper,
 }) => {
   const renderInput = () => {
     switch (type) {
@@ -72,7 +72,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       case 'select':
         return (
           <Select value={String(value)} onValueChange={onChange} disabled={disabled}>
@@ -88,7 +88,7 @@ export const FormField: React.FC<FormFieldProps> = ({
               ))}
             </SelectContent>
           </Select>
-        );
+        )
       case 'checkbox':
         return (
           <Checkbox
@@ -97,7 +97,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       case 'date':
         return (
           <Input
@@ -107,7 +107,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       case 'number':
         return (
           <Input
@@ -120,7 +120,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             max={max !== undefined ? Number(max) : undefined}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       case 'email':
         return (
           <Input
@@ -131,7 +131,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       case 'password':
         return (
           <Input
@@ -142,7 +142,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
       default:
         return (
           <Input
@@ -152,9 +152,9 @@ export const FormField: React.FC<FormFieldProps> = ({
             disabled={disabled}
             className={`${error ? 'border-red-500' : ''} ${className}`}
           />
-        );
+        )
     }
-  };
+  }
 
   return (
     <div className={`space-y-2 ${className}`}>
@@ -172,5 +172,5 @@ export const FormField: React.FC<FormFieldProps> = ({
         <div className="text-sm text-red-500">{error}</div>
       )}
     </div>
-  );
-};
+  )
+}

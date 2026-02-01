@@ -1,5 +1,5 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { Button } from '@/components/ui/button'
 
 interface WebImportDialogProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface WebImportDialogProps {
  * Вынесен в отдельный компонент для соблюдения лимита строк в родительском контейнере.
  */
 export const WebImportDialog: React.FC<WebImportDialogProps> = ({ isOpen, onClose, onImport }) => {
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -32,6 +32,6 @@ export const WebImportDialog: React.FC<WebImportDialogProps> = ({ isOpen, onClos
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

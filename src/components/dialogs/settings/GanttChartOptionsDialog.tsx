@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface GanttChartOptions {
   display: {
@@ -54,15 +54,15 @@ const TIMESCALES = [
   { value: 'days', label: 'Дни' },
   { value: 'weeks', label: 'Недели' },
   { value: 'months', label: 'Месяцы' },
-  { value: 'quarters', label: 'Кварталы' }
-];
+  { value: 'quarters', label: 'Кварталы' },
+]
 
 const DATE_FORMATS = [
   { value: 'MM/DD', label: '01/31' },
   { value: 'DD/MM', label: '31/01' },
   { value: 'MM/DD/YY', label: '01/31/24' },
-  { value: 'DD/MM/YY', label: '31/01/24' }
-];
+  { value: 'DD/MM/YY', label: '31/01/24' },
+]
 
 const PRESET_COLORS = {
   critical: '#FF4444',
@@ -71,8 +71,8 @@ const PRESET_COLORS = {
   milestone: '#FF9800',
   dependency: '#9C27B0',
   baseline: '#607D8B',
-  slack: '#FFC107'
-};
+  slack: '#FFC107',
+}
 
 export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = ({
   currentOptions,
@@ -91,7 +91,7 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
         showDependencies: true,
         showCriticalPath: true,
         showSlack: false,
-        showBaseline: false
+        showBaseline: false,
       },
       colors: {
         criticalTask: PRESET_COLORS.critical,
@@ -100,7 +100,7 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
         milestone: PRESET_COLORS.milestone,
         dependency: PRESET_COLORS.dependency,
         baseline: PRESET_COLORS.baseline,
-        slack: PRESET_COLORS.slack
+        slack: PRESET_COLORS.slack,
       },
       formatting: {
         barHeight: 20,
@@ -108,85 +108,85 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
         dateFormat: 'MM/DD',
         showTaskNames: true,
         showTaskIds: false,
-        showDuration: true
+        showDuration: true,
       },
       behavior: {
         enableDragDrop: true,
         enableZoom: true,
         enablePan: true,
         autoFit: true,
-        snapToGrid: false
-      }
-    }
-  );
+        snapToGrid: false,
+      },
+    },
+  )
 
   const { validate, errors, isValid } = useDialogValidation({
     'formatting.barHeight': {
       required: true,
       min: 10,
       max: 50,
-      custom: (value) => (Number(value) >= 10 && Number(value) <= 50) ? null : 'Высота полосы должна быть от 10 до 50'
+      custom: (value) => (Number(value) >= 10 && Number(value) <= 50) ? null : 'Высота полосы должна быть от 10 до 50',
     },
     'formatting.fontSize': {
       required: true,
       min: 8,
       max: 24,
-      custom: (value) => (Number(value) >= 8 && Number(value) <= 24) ? null : 'Размер шрифта должен быть от 8 до 24'
-    }
-  });
+      custom: (value) => (Number(value) >= 8 && Number(value) <= 24) ? null : 'Размер шрифта должен быть от 8 до 24',
+    },
+  })
 
   React.useEffect(() => {
     if (currentOptions) {
-      setOptions(currentOptions);
+      setOptions(currentOptions)
     }
-  }, [currentOptions]);
+  }, [currentOptions])
 
   React.useEffect(() => {
-    validate('formatting.barHeight', options.formatting.barHeight);
-    validate('formatting.fontSize', options.formatting.fontSize);
-  }, [options.formatting]);
+    validate('formatting.barHeight', options.formatting.barHeight)
+    validate('formatting.fontSize', options.formatting.fontSize)
+  }, [options.formatting])
 
   const handleOptionChange = (category: keyof GanttChartOptions, field: string, value: string | number | boolean) => {
     setOptions(prev => {
-      const categoryData = prev[category];
+      const categoryData = prev[category]
       if (typeof categoryData !== 'object' || categoryData === null) {
-        return prev;
+        return prev
       }
       return {
         ...prev,
         [category]: {
           ...categoryData,
-          [field]: value
-        }
-      };
-    });
-  };
+          [field]: value,
+        },
+      }
+    })
+  }
 
   const handleColorChange = (field: keyof GanttChartOptions['colors'], value: string) => {
     setOptions(prev => ({
       ...prev,
       colors: {
         ...prev.colors,
-        [field]: value
-      }
-    }));
-  };
+        [field]: value,
+      },
+    }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(options);
-      onClose?.();
+      onSave?.(options)
+      onClose?.()
     }
-  };
+  }
 
   const handleReset = () => {
-    onReset?.();
-    onClose?.();
-  };
+    onReset?.()
+    onClose?.()
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -308,12 +308,12 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
               <div key={key} className="space-y-2">
                 <Label htmlFor={key} className="capitalize">
                   {key === 'criticalTask' ? 'Критическая задача' :
-                   key === 'normalTask' ? 'Обычная задача' :
-                   key === 'completedTask' ? 'Завершенная задача' :
-                   key === 'milestone' ? 'Веха' :
-                   key === 'dependency' ? 'Связь' :
-                   key === 'baseline' ? 'Базовый план' :
-                   key === 'slack' ? 'Резерв' : key}
+                    key === 'normalTask' ? 'Обычная задача' :
+                      key === 'completedTask' ? 'Завершенная задача' :
+                        key === 'milestone' ? 'Веха' :
+                          key === 'dependency' ? 'Связь' :
+                            key === 'baseline' ? 'Базовый план' :
+                              key === 'slack' ? 'Резерв' : key}
                 </Label>
                 <div className="flex items-center space-x-2">
                   <Input
@@ -486,11 +486,11 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
               <div className="flex items-center space-x-4">
                 <div className="text-sm font-medium">Пример задачи</div>
                 <div className="flex-1">
-                  <div 
+                  <div
                     className="h-4 rounded"
-                    style={{ 
+                    style={{
                       backgroundColor: options.colors.normalTask,
-                      height: `${options.formatting.barHeight}px`
+                      height: `${options.formatting.barHeight}px`,
                     }}
                   />
                 </div>
@@ -503,6 +503,6 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

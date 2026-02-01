@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface TaskData {
   id: string;
@@ -27,8 +27,8 @@ export interface UpdateTaskDialogProps extends Omit<BaseDialogProps, 'children'>
 const PRIORITY_OPTIONS = [
   { value: 'low', label: 'Low' },
   { value: 'normal', label: 'Normal' },
-  { value: 'high', label: 'High' }
-];
+  { value: 'high', label: 'High' },
+]
 
 export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   tasks = [],
@@ -37,62 +37,62 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [selectedTasks, setSelectedTasks] = React.useState<string[]>(selectedTaskIds);
+  const [selectedTasks, setSelectedTasks] = React.useState<string[]>(selectedTaskIds)
   const [updates, setUpdates] = React.useState<Partial<TaskData>>({
     priority: 'normal',
     complete: 0,
-    duration: 1
-  });
+    duration: 1,
+  })
 
   const { validate, errors, isValid } = useDialogValidation({
     duration: {
       required: true,
       min: 0.1,
-      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0'
+      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0',
     },
     complete: {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Complete must be between 0 and 100'
-    }
-  });
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Complete must be between 0 and 100',
+    },
+  })
 
   React.useEffect(() => {
-    setSelectedTasks(selectedTaskIds);
-  }, [selectedTaskIds]);
+    setSelectedTasks(selectedTaskIds)
+  }, [selectedTaskIds])
 
   React.useEffect(() => {
     Object.keys(updates).forEach(key => {
       if (updates[key as keyof TaskData] !== undefined) {
-        validate(key, updates[key as keyof TaskData]);
+        validate(key, updates[key as keyof TaskData])
       }
-    });
-  }, [updates]);
+    })
+  }, [updates])
 
   const handleTaskToggle = (taskId: string) => {
-    setSelectedTasks(prev => 
+    setSelectedTasks(prev =>
       prev.includes(taskId)
         ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
+        : [...prev, taskId],
+    )
+  }
 
   const handleUpdateChange = (field: keyof TaskData, value: TaskData[keyof TaskData]) => {
-    setUpdates(prev => ({ ...prev, [field]: value }));
-  };
+    setUpdates(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleUpdate = () => {
     if (isValid() && selectedTasks.length > 0) {
-      onUpdate?.(selectedTasks, updates);
-      onClose?.();
+      onUpdate?.(selectedTasks, updates)
+      onClose?.()
     }
-  };
+  }
 
-  const canUpdate = isValid() && selectedTasks.length > 0;
-  const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id));
+  const canUpdate = isValid() && selectedTasks.length > 0
+  const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id))
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -212,7 +212,7 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
             <div className="text-sm space-y-1">
               {selectedTasksData.map(task => (
                 <div key={task.id} className="text-muted-foreground">
-                  {task.name} → 
+                  {task.name} →
                   {updates.priority && ` Priority: ${updates.priority}`}
                   {updates.duration && ` Duration: ${updates.duration}d`}
                   {updates.complete !== undefined && ` Complete: ${updates.complete}%`}
@@ -223,6 +223,6 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

@@ -3,14 +3,14 @@
  * Определяет строгие типы для всех IPC вызовов и событий.
  */
 
-import { IpcChannels } from './IpcChannels';
+import { IpcChannels } from './IpcChannels'
 import {
   JavaProcessStartedEvent,
   JavaProcessStoppedEvent,
   JavaStatusChangeEvent,
   JavaProcessErrorEvent,
-  JavaErrorDetailsEvent
-} from './JavaProcessEvents';
+  JavaErrorDetailsEvent,
+} from './JavaProcessEvents'
 import {
   JavaApiResponse,
   JavaApiResponseBase,
@@ -22,16 +22,16 @@ import {
   BinaryFileSaveResponse,
   UserPreferences,
   PreferencesResponse,
-  PreferencesFileResponse
-} from './JavaApiTypes';
+  PreferencesFileResponse,
+} from './JavaApiTypes'
 import {
   MessageBoxOptions,
   MessageBoxResult,
   OpenDialogOptions,
   OpenDialogResult,
   SaveDialogOptions,
-  SaveDialogResult
-} from './DialogTypes';
+  SaveDialogResult,
+} from './DialogTypes'
 
 export type {
   MessageBoxOptions,
@@ -39,8 +39,8 @@ export type {
   OpenDialogOptions,
   OpenDialogResult,
   SaveDialogOptions,
-  SaveDialogResult
-};
+  SaveDialogResult,
+}
 
 /**
  * Карта типов IPC invoke вызовов

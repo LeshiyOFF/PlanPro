@@ -1,7 +1,7 @@
-import { Component, ReactNode, ErrorInfo } from 'react';
-import { NetworkErrorFallback } from './NetworkErrorFallback';
-import { GeneralErrorFallback } from './GeneralErrorFallback';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { Component, ReactNode, ErrorInfo } from 'react'
+import { NetworkErrorFallback } from './NetworkErrorFallback'
+import { GeneralErrorFallback } from './GeneralErrorFallback'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
 
 interface Props {
   children: ReactNode;
@@ -22,42 +22,42 @@ interface State {
  */
 export class RetryErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false, retries: 0 };
+    super(props)
+    this.state = { hasError: false, retries: 0 }
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> {
-    return { hasError: true, error };
+    return { hasError: true, error }
   }
 
   public override componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
-    const { handleError } = useErrorHandler();
-    
+    const { handleError } = useErrorHandler()
+
     this.setState(prev => ({
       error,
-      retries: prev.retries + 1
-    }));
+      retries: prev.retries + 1,
+    }))
 
-    handleError(error, 'RetryErrorBoundary');
+    handleError(error, 'RetryErrorBoundary')
 
     // Auto retry если позволяет и не превышен лимит
-    if (this.props.onRetry && 
+    if (this.props.onRetry &&
         this.state.retries < (this.props.maxRetries || 3)) {
       setTimeout(() => {
         if (this.props.onRetry) {
-          this.props.onRetry();
+          this.props.onRetry()
         }
-      }, 1000 * this.state.retries);
+      }, 1000 * this.state.retries)
     }
   }
 
   public override render(): ReactNode {
     if (this.state.hasError) {
       const isNetworkError = this.state.error?.message.includes('fetch') ||
-                             this.state.error?.message.includes('network');
+                             this.state.error?.message.includes('network')
 
       if (this.props.fallback) {
-        return this.props.fallback;
+        return this.props.fallback
       }
 
       if (isNetworkError) {
@@ -67,7 +67,7 @@ export class RetryErrorBoundary extends Component<Props, State> {
             resetError={() => this.setState({ hasError: false, retries: 0 })}
             retry={this.props.onRetry}
           />
-        );
+        )
       }
 
       return (
@@ -77,10 +77,10 @@ export class RetryErrorBoundary extends Component<Props, State> {
           title={`Ошибка загрузки данных (попытка ${this.state.retries})`}
           description="Не удалось загрузить данные. Проверьте подключение и попробуйте еще раз."
         />
-      );
+      )
     }
 
-    return this.props.children;
+    return this.props.children
   }
 }
 

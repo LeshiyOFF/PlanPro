@@ -1,16 +1,16 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogTitle 
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { FilePlus, FolderOpen, History, Info } from 'lucide-react';
-import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
-import { AboutDialog } from '@/components/dialogs/information/AboutDialog';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { FilePlus, FolderOpen, History, Info } from 'lucide-react'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
+import { AboutDialog } from '@/components/dialogs/information/AboutDialog'
 
 interface WelcomeDialogProps {
   open: boolean;
@@ -29,33 +29,33 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({
   onOpenChange,
   onCreateNew,
   onOpenExisting,
-  onShowRecent
+  onShowRecent,
 }) => {
-  const { t } = useTranslation();
-  const { preferences, updateDisplayPreferences } = useUserPreferences();
-  const [showAgain, setShowAgain] = React.useState(preferences.display.showWelcomeScreen);
-  const [isAboutOpen, setIsAboutOpen] = React.useState(false);
+  const { t } = useTranslation()
+  const { preferences, updateDisplayPreferences } = useUserPreferences()
+  const [showAgain, setShowAgain] = React.useState(preferences.display.showWelcomeScreen)
+  const [isAboutOpen, setIsAboutOpen] = React.useState(false)
 
   const handleShowAgainChange = (checked: boolean) => {
-    setShowAgain(checked);
-    updateDisplayPreferences({ showWelcomeScreen: checked });
-  };
+    setShowAgain(checked)
+    updateDisplayPreferences({ showWelcomeScreen: checked })
+  }
 
   const handleAction = (callback?: () => void) => {
-    onOpenChange(false);
-    if (callback) callback();
-  };
+    onOpenChange(false)
+    if (callback) callback()
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className="sm:max-w-[500px] p-0 overflow-hidden border-none shadow-2xl bg-primary"
         closeClassName="text-primary-foreground opacity-80 hover:opacity-100 transition-opacity"
         aria-describedby={undefined}
       >
         {/* Невидимый заголовок для Radix UI */}
         <DialogTitle className="sr-only">ПланПро Welcome</DialogTitle>
-        
+
         <div className="bg-primary p-8 text-primary-foreground relative overflow-hidden">
           <div className="relative z-10">
             <h2 className="text-3xl font-bold mb-2 tracking-tight">ПланПро</h2>
@@ -111,22 +111,22 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({
 
           <div className="flex items-center justify-between pt-4 border-t border-border/30">
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="welcome-show-again" 
-                checked={showAgain} 
+              <Checkbox
+                id="welcome-show-again"
+                checked={showAgain}
                 onCheckedChange={(checked) => handleShowAgainChange(!!checked)}
               />
-              <Label 
-                htmlFor="welcome-show-again" 
+              <Label
+                htmlFor="welcome-show-again"
                 className="text-xs text-slate-500 cursor-pointer select-none"
               >
                 {t('welcome.showAtStartup')}
               </Label>
             </div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
+
+            <Button
+              variant="ghost"
+              size="sm"
               className="text-xs text-slate-400 hover:text-primary"
               onClick={() => setIsAboutOpen(true)}
             >
@@ -137,6 +137,6 @@ export const WelcomeDialog: React.FC<WelcomeDialogProps> = ({
         <AboutDialog isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 

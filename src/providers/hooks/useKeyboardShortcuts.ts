@@ -1,51 +1,51 @@
-import { useEffect, useCallback } from 'react';
-import type { IActionManager } from '@/services/actions/ActionManager';
-import { logger } from '@/utils/logger';
+import { useEffect, useCallback } from 'react'
+import type { IActionManager } from '@/services/actions/ActionManager'
+import { logger } from '@/utils/logger'
 
 /**
  * Хук для обработки горячих клавиш
  */
 export const useKeyboardShortcuts = (
   actionManager: IActionManager,
-  executeAction: (actionId: string) => Promise<void>
+  executeAction: (actionId: string) => Promise<void>,
 ) => {
   const handleKeyDown = useCallback(async (event: KeyboardEvent): Promise<void> => {
     // Обработка Ctrl+короткие клавиши
     if (event.ctrlKey || event.metaKey) {
-      let shortcut = '';
-      
+      let shortcut = ''
+
       if (event.key === 'Control' || event.key === 'Meta') {
-        return; // Игнорируем отдельное нажатие Ctrl/Meta
+        return // Игнорируем отдельное нажатие Ctrl/Meta
       }
 
       // Формирование строки горячей клавиши
-      shortcut = 'Ctrl+';
-      
+      shortcut = 'Ctrl+'
+
       switch (event.key) {
         case '+':
         case '=':
-          shortcut += '+';
-          break;
+          shortcut += '+'
+          break
         case '-':
-          shortcut += '-';
-          break;
+          shortcut += '-'
+          break
         default:
-          shortcut += event.key.toUpperCase();
-          break;
+          shortcut += event.key.toUpperCase()
+          break
       }
 
-      const actions = actionManager.getActionsByShortcut(shortcut);
-      
+      const actions = actionManager.getActionsByShortcut(shortcut)
+
       if (actions.length > 0) {
-        event.preventDefault();
-        
+        event.preventDefault()
+
         for (const action of actions) {
           if (action.canExecute()) {
             try {
-              await executeAction(action.id);
-              break; // Выполняем только первое доступное действие
+              await executeAction(action.id)
+              break // Выполняем только первое доступное действие
             } catch (error) {
-              logger.error(`Failed to execute shortcut action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) });
+              logger.error(`Failed to execute shortcut action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) })
             }
           }
         }
@@ -54,31 +54,31 @@ export const useKeyboardShortcuts = (
 
     // Обработка Ins для новой задачи
     if (event.key === 'Insert') {
-      const insertActions = actionManager.getActionsByShortcut('Ins');
-      
+      const insertActions = actionManager.getActionsByShortcut('Ins')
+
       if (insertActions.length > 0) {
-        event.preventDefault();
-        
+        event.preventDefault()
+
         for (const action of insertActions) {
           if (action.canExecute()) {
             try {
-              await executeAction(action.id);
-              break;
+              await executeAction(action.id)
+              break
             } catch (error) {
-              logger.error(`Failed to execute Insert action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) });
+              logger.error(`Failed to execute Insert action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) })
             }
           }
         }
       }
     }
-  }, [actionManager, executeAction]);
+  }, [actionManager, executeAction])
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    
+    document.addEventListener('keydown', handleKeyDown)
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleKeyDown]);
-};
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [handleKeyDown])
+}
 

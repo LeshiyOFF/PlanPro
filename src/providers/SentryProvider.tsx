@@ -1,7 +1,7 @@
-import React, { useEffect, ReactNode } from 'react';
-import { SentryService } from '@/services/SentryService';
-import { PerformanceMonitor } from '@/services/PerformanceMonitor';
-import { EnvironmentConfig } from '@/config';
+import React, { useEffect, ReactNode } from 'react'
+import { SentryService } from '@/services/SentryService'
+import { PerformanceMonitor } from '@/services/PerformanceMonitor'
+import { EnvironmentConfig } from '@/config'
 
 interface SentryProviderProps {
   children: ReactNode;
@@ -20,24 +20,24 @@ interface SentryProviderProps {
 export const SentryProvider: React.FC<SentryProviderProps> = ({
   children,
   user,
-  tags
+  tags,
 }) => {
-  let sentryService: SentryService;
-  let performanceMonitor: PerformanceMonitor;
+  let sentryService: SentryService
+  let performanceMonitor: PerformanceMonitor
 
   useEffect(() => {
     try {
       // Инициализация Sentry с конфигурацией из окружения
-      const config = EnvironmentConfig.getSentryConfig();
-      sentryService = SentryService.getInstance(config);
-      sentryService.initialize();
+      const config = EnvironmentConfig.getSentryConfig()
+      sentryService = SentryService.getInstance(config)
+      sentryService.initialize()
 
       // Инициализация Performance Monitor
-      performanceMonitor = new PerformanceMonitor(sentryService);
+      performanceMonitor = new PerformanceMonitor(sentryService)
 
       // Установка пользовательского контекста
       if (user) {
-        sentryService.setUser(user);
+        sentryService.setUser(user)
       }
 
       // Установка глобальных тегов
@@ -46,64 +46,64 @@ export const SentryProvider: React.FC<SentryProviderProps> = ({
         environment: EnvironmentConfig.getEnvironment(),
         application: 'ProjectLibre',
         version: EnvironmentConfig.getRelease(),
-      };
+      }
 
-      sentryService.setTags(globalTags);
+      sentryService.setTags(globalTags)
 
       // Начать мониторинг производительности
-      performanceMonitor.trackNetworkRequests();
+      performanceMonitor.trackNetworkRequests()
 
       // Установка интервала для мониторинга памяти
       const memoryInterval = setInterval(() => {
-        performanceMonitor.measureMemoryUsage();
-      }, 30000); // Каждые 30 секунд
+        performanceMonitor.measureMemoryUsage()
+      }, 30000) // Каждые 30 секунд
 
       return () => {
-        clearInterval(memoryInterval);
-      };
+        clearInterval(memoryInterval)
+      }
     } catch (error) {
-      console.error('Failed to initialize Sentry provider:', error);
-      return undefined;
+      console.error('Failed to initialize Sentry provider:', error)
+      return undefined
     }
-  }, []);
+  }, [])
 
   // Обновление пользователя при изменении
   useEffect(() => {
     if (sentryService?.isInitialized() && user) {
-      sentryService.setUser(user);
+      sentryService.setUser(user)
     }
-  }, [user]);
+  }, [user])
 
   // Обновление тегов при изменении
   useEffect(() => {
     if (sentryService?.isInitialized() && tags) {
-      sentryService.setTags(tags);
+      sentryService.setTags(tags)
     }
-  }, [tags]);
+  }, [tags])
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}
 
 /**
  * Hook для использования Sentry функциональности
  */
 export const useSentry = () => {
-  const sentryService = SentryService.getInstance();
-  const performanceMonitor = new PerformanceMonitor(sentryService);
+  const sentryService = SentryService.getInstance()
+  const performanceMonitor = new PerformanceMonitor(sentryService)
 
   return {
     /**
      * Отправить ошибку в Sentry
      */
     captureError: (error: Error, context?: Record<string, string | number | boolean | null | undefined>) => {
-      sentryService.captureException(error, context);
+      sentryService.captureException(error, context)
     },
 
     /**
      * Отправить сообщение в Sentry
      */
     captureMessage: (message: string, level: 'error' | 'warning' | 'info' | 'debug' = 'info') => {
-      sentryService.captureMessage(message, level);
+      sentryService.captureMessage(message, level)
     },
 
     /**
@@ -112,37 +112,37 @@ export const useSentry = () => {
     startTransaction: (name: string, operation?: string) => {
       return performanceMonitor.startTransaction({
         name,
-        operation: operation || 'custom'
-      });
+        operation: operation || 'custom',
+      })
     },
 
     /**
      * Измерить производительность компонента
      */
     measurePerformance: (componentName: string, callback: () => void) => {
-      return performanceMonitor.measureRenderTime(componentName, callback);
+      return performanceMonitor.measureRenderTime(componentName, callback)
     },
 
     /**
      * Установить пользователя
      */
     setUser: (user: { id?: string; email?: string; username?: string }) => {
-      sentryService.setUser(user);
+      sentryService.setUser(user)
     },
 
     /**
      * Очистить пользователя
      */
     clearUser: () => {
-      sentryService.clearUser();
+      sentryService.clearUser()
     },
 
     /**
      * Установить теги
      */
     setTags: (tags: Record<string, string>) => {
-      sentryService.setTags(tags);
-    }
-  };
-};
+      sentryService.setTags(tags)
+    },
+  }
+}
 

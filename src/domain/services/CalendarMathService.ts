@@ -1,6 +1,6 @@
-import { Duration, CalendarPreferences } from '@/types/Master_Functionality_Catalog';
-import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
-import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
+import { Duration, CalendarPreferences } from '@/types/Master_Functionality_Catalog'
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
 
 /**
  * Сервис для выполнения расчетов, связанных с календарем и длительностью.
@@ -11,7 +11,7 @@ import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemp
 export class CalendarMathService {
   /**
    * Преобразует длительность из одних единиц в другие с учетом настроек календаря.
-   * 
+   *
    * @param duration Исходная длительность
    * @param toUnit Целевые единицы измерения
    * @param prefs Настройки календаря
@@ -20,20 +20,20 @@ export class CalendarMathService {
   public static convertDuration(
     duration: Duration,
     toUnit: Duration['unit'],
-    prefs: CalendarPreferences
+    prefs: CalendarPreferences,
   ): Duration {
-    if (duration.unit === toUnit) return duration;
+    if (duration.unit === toUnit) return duration
 
     // Сначала переводим всё в базовую единицу - миллисекунды
-    const ms = this.durationToMs(duration, prefs);
-    
+    const ms = this.durationToMs(duration, prefs)
+
     // Затем переводим из миллисекунд в целевую единицу
-    const newValue = this.msToUnit(ms, toUnit, prefs);
+    const newValue = this.msToUnit(ms, toUnit, prefs)
 
     return {
       value: newValue,
-      unit: toUnit
-    };
+      unit: toUnit,
+    }
   }
 
   /**
@@ -42,10 +42,10 @@ export class CalendarMathService {
   public static calculateFinishDate(
     startDate: Date,
     duration: Duration,
-    prefs: CalendarPreferences
+    prefs: CalendarPreferences,
   ): Date {
-    const ms = this.durationToMs(duration, prefs);
-    return new Date(startDate.getTime() + ms);
+    const ms = this.durationToMs(duration, prefs)
+    return new Date(startDate.getTime() + ms)
   }
 
   /**
@@ -55,33 +55,33 @@ export class CalendarMathService {
     startDate: Date,
     endDate: Date,
     unit: Duration['unit'],
-    prefs: CalendarPreferences
+    prefs: CalendarPreferences,
   ): Duration {
-    const ms = endDate.getTime() - startDate.getTime();
-    const value = this.msToUnit(ms, unit, prefs);
-    
+    const ms = endDate.getTime() - startDate.getTime()
+    const value = this.msToUnit(ms, unit, prefs)
+
     return {
       value,
-      unit
-    };
+      unit,
+    }
   }
 
   /**
    * Вспомогательный метод: перевод длительности в миллисекунды.
    */
   private static durationToMs(duration: Duration, prefs: CalendarPreferences): number {
-    const { value, unit } = duration;
-    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs;
+    const { value, unit } = duration
+    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs
 
     switch (unit) {
-      case 'milliseconds': return value;
-      case 'seconds': return value * 1000;
-      case 'minutes': return value * 60 * 1000;
-      case 'hours': return value * 60 * 60 * 1000;
-      case 'days': return value * hoursPerDay * 60 * 60 * 1000;
-      case 'weeks': return value * hoursPerWeek * 60 * 60 * 1000;
-      case 'months': return value * daysPerMonth * hoursPerDay * 60 * 60 * 1000;
-      default: return value;
+      case 'milliseconds': return value
+      case 'seconds': return value * 1000
+      case 'minutes': return value * 60 * 1000
+      case 'hours': return value * 60 * 60 * 1000
+      case 'days': return value * hoursPerDay * 60 * 60 * 1000
+      case 'weeks': return value * hoursPerWeek * 60 * 60 * 1000
+      case 'months': return value * daysPerMonth * hoursPerDay * 60 * 60 * 1000
+      default: return value
     }
   }
 
@@ -89,25 +89,25 @@ export class CalendarMathService {
    * Вспомогательный метод: перевод из миллисекунд в указанную единицу.
    */
   private static msToUnit(ms: number, unit: Duration['unit'], prefs: CalendarPreferences): number {
-    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs;
-    const hourMs = 60 * 60 * 1000;
+    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs
+    const hourMs = 60 * 60 * 1000
 
     switch (unit) {
-      case 'milliseconds': return ms;
-      case 'seconds': return ms / 1000;
-      case 'minutes': return ms / (60 * 1000);
-      case 'hours': return ms / hourMs;
-      case 'days': return ms / (hoursPerDay * hourMs);
-      case 'weeks': return ms / (hoursPerWeek * hourMs);
-      case 'months': return ms / (daysPerMonth * hoursPerDay * hourMs);
-      default: return ms;
+      case 'milliseconds': return ms
+      case 'seconds': return ms / 1000
+      case 'minutes': return ms / (60 * 1000)
+      case 'hours': return ms / hourMs
+      case 'days': return ms / (hoursPerDay * hourMs)
+      case 'weeks': return ms / (hoursPerWeek * hourMs)
+      case 'months': return ms / (daysPerMonth * hoursPerDay * hourMs)
+      default: return ms
     }
   }
 
   /**
    * Рассчитывает длительность между двумя датами с учетом конкретного рабочего календаря
    * Stage 8.15: Точный расчет с учетом рабочих/выходных дней
-   * 
+   *
    * @param startDate Дата начала
    * @param endDate Дата окончания
    * @param calendar Рабочий календарь ресурса
@@ -118,45 +118,45 @@ export class CalendarMathService {
     startDate: Date,
     endDate: Date,
     calendar: IWorkCalendar,
-    unit: Duration['unit']
+    unit: Duration['unit'],
   ): Duration {
-    const templateService = CalendarTemplateService.getInstance();
-    let totalWorkingHours = 0;
-    
+    const templateService = CalendarTemplateService.getInstance()
+    let totalWorkingHours = 0
+
     // Перебираем все дни в диапазоне
-    const current = new Date(startDate);
+    const current = new Date(startDate)
     while (current <= endDate) {
-      const hours = templateService.getWorkingHours(calendar, current);
-      totalWorkingHours += hours;
-      current.setDate(current.getDate() + 1);
+      const hours = templateService.getWorkingHours(calendar, current)
+      totalWorkingHours += hours
+      current.setDate(current.getDate() + 1)
     }
 
     // Преобразуем часы в нужные единицы
-    let value: number;
+    let value: number
     switch (unit) {
       case 'hours':
-        value = totalWorkingHours;
-        break;
+        value = totalWorkingHours
+        break
       case 'days':
-        value = totalWorkingHours / calendar.hoursPerDay;
-        break;
+        value = totalWorkingHours / calendar.hoursPerDay
+        break
       case 'weeks':
-        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek);
-        break;
+        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek)
+        break
       case 'months':
-        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek * 4.33); // Среднее кол-во недель в месяце
-        break;
+        value = totalWorkingHours / (calendar.hoursPerDay * calendar.workingDaysPerWeek * 4.33) // Среднее кол-во недель в месяце
+        break
       default:
-        value = totalWorkingHours;
+        value = totalWorkingHours
     }
 
-    return { value, unit };
+    return { value, unit }
   }
 
   /**
    * Рассчитывает дату окончания на основе даты начала, длительности и календаря
    * Stage 8.15: Точное планирование с пропуском выходных
-   * 
+   *
    * @param startDate Дата начала
    * @param duration Длительность работы
    * @param calendar Рабочий календарь
@@ -165,29 +165,29 @@ export class CalendarMathService {
   public static calculateFinishDateWithCalendar(
     startDate: Date,
     duration: Duration,
-    calendar: IWorkCalendar
+    calendar: IWorkCalendar,
   ): Date {
-    const templateService = CalendarTemplateService.getInstance();
-    
+    const templateService = CalendarTemplateService.getInstance()
+
     // Переводим длительность в часы
-    let remainingHours = duration.value;
+    let remainingHours = duration.value
     if (duration.unit === 'days') {
-      remainingHours = duration.value * calendar.hoursPerDay;
+      remainingHours = duration.value * calendar.hoursPerDay
     } else if (duration.unit === 'weeks') {
-      remainingHours = duration.value * calendar.hoursPerDay * calendar.workingDaysPerWeek;
+      remainingHours = duration.value * calendar.hoursPerDay * calendar.workingDaysPerWeek
     }
 
     // Идем вперед по рабочим дням, вычитая часы
-    const current = new Date(startDate);
+    const current = new Date(startDate)
     while (remainingHours > 0) {
-      const hours = templateService.getWorkingHours(calendar, current);
-      remainingHours -= hours;
+      const hours = templateService.getWorkingHours(calendar, current)
+      remainingHours -= hours
       if (remainingHours > 0) {
-        current.setDate(current.getDate() + 1);
+        current.setDate(current.getDate() + 1)
       }
     }
 
-    return current;
+    return current
   }
 }
 

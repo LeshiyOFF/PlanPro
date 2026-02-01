@@ -1,6 +1,6 @@
-import React, { KeyboardEvent } from 'react';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import { ICellEditorProps } from './ICellEditorProps';
+import React, { KeyboardEvent } from 'react'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import { ICellEditorProps } from './ICellEditorProps'
 
 /**
  * Редактор ячеек типа SELECT (выпадающий список)
@@ -14,17 +14,17 @@ export const SelectCellEditor: React.FC<ICellEditorProps> = ({
   autoFocus = true,
   isValid = true,
   errorMessage,
-  options = []
+  options = [],
 }) => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      onCommit();
+      onCommit()
     } else if (e.key === 'Escape') {
-      onCancel();
+      onCancel()
     }
-  };
+  }
 
-  const selectValue = typeof value === 'string' || typeof value === 'number' ? value : '';
+  const selectValue = typeof value === 'string' || typeof value === 'number' ? value : ''
   return (
     <div className="relative w-full h-full">
       <select
@@ -33,13 +33,13 @@ export const SelectCellEditor: React.FC<ICellEditorProps> = ({
         }`}
         value={selectValue}
         onChange={(e) => {
-          const newValue: CellValue = e.target.value;
-          onChange(newValue);
-          onCommit(newValue);
+          const newValue: CellValue = e.target.value
+          onChange(newValue)
+          onCommit(newValue)
         }}
         onBlur={() => {
           if (typeof value !== 'object') {
-            onCommit();
+            onCommit()
           }
         }}
         onKeyDown={handleKeyDown}
@@ -58,5 +58,5 @@ export const SelectCellEditor: React.FC<ICellEditorProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

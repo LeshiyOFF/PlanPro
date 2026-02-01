@@ -4,18 +4,18 @@
  */
 
 // Основные компоненты
-export { StatusBar } from './StatusBar';
-export { StatusBarContainer } from './StatusBarContainer';
+export { StatusBar } from './StatusBar'
+export { StatusBarContainer } from './StatusBarContainer'
 
 // Интерфейсы и типы
-export * from './interfaces/StatusBarInterfaces';
+export * from './interfaces/StatusBarInterfaces'
 
 // Сервисы
-export { StatusBarService } from './services/StatusBarService';
+export { StatusBarService } from './services/StatusBarService'
 
 // Хуки
-export { useStatusBar, useStatusBarState } from './hooks/useStatusBar';
+export { useStatusBar, useStatusBarState } from './hooks/useStatusBar'
 
 // Секции
-export * from './sections';
+export * from './sections'
 

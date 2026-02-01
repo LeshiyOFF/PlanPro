@@ -8,8 +8,8 @@ import {
   HitTestTarget,
   TypedCanvasRenderStrategy,
   TypedCanvasEventHandlers,
-  TypedCanvasLayer
-} from '@/types/gantt/CanvasRenderTypes';
+  TypedCanvasLayer,
+} from '@/types/gantt/CanvasRenderTypes'
 
 /**
  * Base canvas rendering context

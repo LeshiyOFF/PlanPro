@@ -1,7 +1,7 @@
-import React, { KeyboardEvent } from 'react';
-import { Input } from '@/components/ui/input';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import { ICellEditorProps } from './ICellEditorProps';
+import React, { KeyboardEvent } from 'react'
+import { Input } from '@/components/ui/input'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import { ICellEditorProps } from './ICellEditorProps'
 
 /**
  * Редактор текстовых ячеек
@@ -13,17 +13,17 @@ export const TextCellEditor: React.FC<ICellEditorProps> = ({
   onCancel,
   autoFocus = true,
   isValid = true,
-  errorMessage
+  errorMessage,
 }) => {
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      onCommit();
+      onCommit()
     } else if (e.key === 'Escape') {
-      onCancel();
+      onCancel()
     }
-  };
+  }
 
-  const inputValue = typeof value === 'string' ? value : value != null ? String(value) : '';
+  const inputValue = typeof value === 'string' ? value : value != null ? String(value) : ''
   return (
     <div className="relative w-full h-full">
       <Input
@@ -42,7 +42,7 @@ export const TextCellEditor: React.FC<ICellEditorProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 

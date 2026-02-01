@@ -1,6 +1,6 @@
-import { ipcService } from './IpcService';
-import type { JavaCommandArgs } from '@/types/ipc';
-import type { JsonObject } from '@/types/json-types';
+import { ipcService } from './IpcService'
+import type { JavaCommandArgs } from '@/types/ipc'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Базовый класс для Java API сервисов.
@@ -17,22 +17,22 @@ export abstract class BaseJavaService {
   protected async executeApiCommand<T = JsonObject>(
     command: string,
     args: JavaCommandArgs[] = [],
-    silent: boolean = false
+    silent: boolean = false,
   ): Promise<T | undefined> {
     try {
-      const result = await ipcService.executeJavaApiRequest(command, args);
-      
+      const result = await ipcService.executeJavaApiRequest(command, args)
+
       // Если запрос успешен на уровне API, возвращаем данные из поля 'data'
       if (result.success) {
-        return result.data;
+        return result.data
       }
-      
-      throw new Error(result.error || `Java API command failed: ${command}`);
+
+      throw new Error(result.error || `Java API command failed: ${command}`)
     } catch (error) {
       if (!silent) {
-        console.error(`[BaseJavaService] Command ${command} failed:`, error);
+        console.error(`[BaseJavaService] Command ${command} failed:`, error)
       }
-      throw error;
+      throw error
     }
   }
 }

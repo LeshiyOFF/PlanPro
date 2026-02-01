@@ -3,8 +3,8 @@
  * Соответствует ROADMAP: интерфейс приведён к типизированным контрактам.
  */
 
-import type { FileSaveRequest, FileLoadRequest } from './request-types';
-import type { FileSaveResponse, FileLoadResponse, FileListResponse } from './response-types';
+import type { FileSaveRequest, FileLoadRequest } from './request-types'
+import type { FileSaveResponse, FileLoadResponse, FileListResponse } from './response-types'
 
 export interface FileAPI {
   saveProject(request: FileSaveRequest): Promise<FileSaveResponse>;

@@ -2,13 +2,13 @@ import {
   Task as CatalogTask,
   ProjectPriority,
   TaskStatus,
-  TaskType
-} from '@/types/Master_Functionality_Catalog';
-import { Resource } from '@/types/resource-types';
-import type { TaskSegment } from '@/types/task-types';
-import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
+  TaskType,
+} from '@/types/Master_Functionality_Catalog'
+import { Resource } from '@/types/resource-types'
+import type { TaskSegment } from '@/types/task-types'
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
 
-export type { Resource, TaskSegment };
+export type { Resource, TaskSegment }
 
 /**
  * Назначение ресурса на задачу с указанием процента загрузки.
@@ -29,9 +29,9 @@ export interface TaskWithResourceAssignments {
  * Унифицированный доступ для стора и каталога.
  */
 export function getTaskResourceIds(task: TaskWithResourceAssignments): string[] {
-  const assignments = task.resourceAssignments;
-  if (!assignments || !Array.isArray(assignments)) return [];
-  return assignments.map((a) => (typeof a.resourceId === 'string' ? a.resourceId : String(a.resourceId)));
+  const assignments = task.resourceAssignments
+  if (!assignments || !Array.isArray(assignments)) return []
+  return assignments.map((a) => (typeof a.resourceId === 'string' ? a.resourceId : String(a.resourceId)))
 }
 
 /**
@@ -77,10 +77,10 @@ export type TaskCreatePayload = Pick<Task, 'id' | 'name' | 'startDate' | 'endDat
  * Подставляет значения по умолчанию для обязательных полей каталога.
  */
 export function createTaskFromView(payload: TaskCreatePayload): Task {
-  const start = payload.startDate;
-  const end = payload.endDate;
-  const durationMs = end.getTime() - start.getTime();
-  const durationDays = Math.max(1, Math.round(durationMs / (24 * 60 * 60 * 1000)));
+  const start = payload.startDate
+  const end = payload.endDate
+  const durationMs = end.getTime() - start.getTime()
+  const durationDays = Math.max(1, Math.round(durationMs / (24 * 60 * 60 * 1000)))
   return {
     ...payload,
     type: TaskType.FIXED_DURATION,
@@ -102,8 +102,8 @@ export function createTaskFromView(payload: TaskCreatePayload): Task {
     resourceAssignments: payload.resourceAssignments ?? [],
     startDate: start,
     endDate: end,
-    progress: payload.progress ?? 0
-  };
+    progress: payload.progress ?? 0,
+  }
 }
 
 export interface ProjectBaseline {

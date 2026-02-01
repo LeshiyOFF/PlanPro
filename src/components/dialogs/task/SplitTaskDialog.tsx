@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/date-picker';
-import { 
-  SplitTaskData, 
-  IDialogActions, 
-  DialogResult 
-} from '@/types/dialog/DialogTypes';
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { BaseDialog } from '@/components/dialogs/base/BaseDialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
+import {
+  SplitTaskData,
+  IDialogActions,
+  DialogResult,
+} from '@/types/dialog/DialogTypes'
 
 export interface SplitTaskDialogProps {
   isOpen: boolean;
@@ -27,9 +27,9 @@ export interface SplitTaskDialogProps {
 export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
   isOpen,
   onClose,
-  data
+  data,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const [splitData, setSplitData] = useState<SplitTaskData>({
     id: `split_${Date.now()}`,
     title: t('dialogs.split_task.title') || 'Прерывание задачи',
@@ -37,15 +37,15 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
     taskName: data.taskName,
     splitDate: new Date(data.startDate.getTime() + (data.endDate.getTime() - data.startDate.getTime()) / 2),
     gapDays: 1,
-    timestamp: new Date()
-  });
+    timestamp: new Date(),
+  })
 
   const actions: IDialogActions = {
     onOk: async () => {
-      onClose({ success: true, data: splitData });
+      onClose({ success: true, data: splitData })
     },
-    onCancel: () => onClose({ success: false, action: 'cancel' })
-  };
+    onCancel: () => onClose({ success: false, action: 'cancel' }),
+  }
 
   return (
     <BaseDialog<SplitTaskData>
@@ -62,8 +62,8 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
 
         <div className="grid gap-2">
           <Label htmlFor="split-date">{t('dialogs.split_task.split_date') || 'Дата прерывания'}</Label>
-          <DatePicker 
-            date={splitData.splitDate} 
+          <DatePicker
+            date={splitData.splitDate}
             onChange={(date) => date && setSplitData((prev: SplitTaskData) => ({ ...prev, splitDate: date }))}
           />
           <p className="text-[10px] text-slate-500">
@@ -73,7 +73,7 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
 
         <div className="grid gap-2">
           <Label htmlFor="gap-days">{t('dialogs.split_task.gap_duration') || 'Длительность паузы (дни)'}</Label>
-          <Input 
+          <Input
             id="gap-days"
             type="number"
             min={1}
@@ -83,6 +83,6 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import React from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 
 interface LinksTabProps {
   predecessorsInput: string;
@@ -11,31 +11,31 @@ interface LinksTabProps {
 
 /**
  * LinksTab - Вкладка связей задачи
- * 
+ *
  * Clean Architecture: UI Component (Presentation Layer)
  * SOLID: Single Responsibility - управление связями (predecessors/successors)
- * 
+ *
  * @version 1.0
  */
-export const LinksTab: React.FC<LinksTabProps> = ({ 
-  predecessorsInput, setPredecessorsInput, successors, t 
+export const LinksTab: React.FC<LinksTabProps> = ({
+  predecessorsInput, setPredecessorsInput, successors, t,
 }) => (
   <>
     <div className="space-y-3 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
       <Label className="text-sm font-semibold text-slate-700">
         {t('task_props.predecessors', { defaultValue: 'Предшественники' })}
       </Label>
-      <Input 
-        value={predecessorsInput} 
-        onChange={(e) => setPredecessorsInput(e.target.value)} 
-        placeholder="TASK-1, TASK-2" 
-        className="h-11 font-mono" 
+      <Input
+        value={predecessorsInput}
+        onChange={(e) => setPredecessorsInput(e.target.value)}
+        placeholder="TASK-1, TASK-2"
+        className="h-11 font-mono"
       />
       <p className="text-xs text-slate-500">
         {t('task_props.predecessors_hint', { defaultValue: 'ID задач через запятую' })}
       </p>
     </div>
-    
+
     <div className="space-y-3 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
       <Label className="text-sm font-semibold text-slate-700">
         {t('task_props.successors', { defaultValue: 'Последователи' })}
@@ -54,4 +54,4 @@ export const LinksTab: React.FC<LinksTabProps> = ({
       </p>
     </div>
   </>
-);
+)

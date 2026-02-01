@@ -1,4 +1,4 @@
-import type { JsonObject } from '@/types/json-types';
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Интерфейс IPC сервиса для взаимодействия с Electron main процессом.
@@ -12,16 +12,16 @@ import {
   JavaCommandResponse,
   JavaEventSubscriptionResponse,
   AppInfo,
-  UserPreferences
-} from '@/types/ipc';
+  UserPreferences,
+} from '@/types/ipc'
 import {
   MessageBoxOptions,
   MessageBoxResult,
   OpenDialogOptions,
   OpenDialogResult,
   SaveDialogOptions,
-  SaveDialogResult
-} from '@/types/ipc/DialogTypes';
+  SaveDialogResult,
+} from '@/types/ipc/DialogTypes'
 
 /**
  * Интерфейс IPC сервиса
@@ -62,8 +62,8 @@ export interface IIpcService {
  */
 export const DEFAULT_ERROR_RESPONSE: JavaApiResponseBase = {
   success: false,
-  error: 'Electron API not available'
-};
+  error: 'Electron API not available',
+}
 
 /**
  * Информация о приложении по умолчанию
@@ -78,5 +78,5 @@ export const DEFAULT_APP_INFO: AppInfo = {
   arch: 'unknown',
   locale: 'en',
   resourcesPath: '',
-  userDataPath: ''
-};
+  userDataPath: '',
+}

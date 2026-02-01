@@ -1,27 +1,27 @@
-import { BaseAction } from './BaseAction';
-import { EventType } from '@/types/Master_Functionality_Catalog';
-import { logger } from '@/utils/logger';
+import { BaseAction } from './BaseAction'
+import { EventType } from '@/types/Master_Functionality_Catalog'
+import { logger } from '@/utils/logger'
 
 /**
  * Action для поиска
  */
 export class SearchAction extends BaseAction {
-  public readonly id = 'search';
-  public readonly name = 'Поиск';
-  public readonly description = 'Найти задачи или ресурсы';
+  public readonly id = 'search'
+  public readonly name = 'Поиск'
+  public readonly description = 'Найти задачи или ресурсы'
 
   constructor() {
-    super({ shortcut: 'Ctrl+F', icon: 'search' });
+    super({ shortcut: 'Ctrl+F', icon: 'search' })
   }
 
   public canExecute(): boolean {
-    return true;
+    return true
   }
 
   public async execute(): Promise<void> {
-    this.logAction(EventType.SEARCH_ACTION, { query: '' });
-    window.dispatchEvent(new CustomEvent('search:open'));
-    logger.info('Search dialog opened');
+    this.logAction(EventType.SEARCH_ACTION, { query: '' })
+    window.dispatchEvent(new CustomEvent('search:open'))
+    logger.info('Search dialog opened')
   }
 }
 

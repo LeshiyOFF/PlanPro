@@ -1,5 +1,5 @@
-import { logger } from '@/utils/logger';
-import type { JsonValue } from '@/types/json-types';
+import { logger } from '@/utils/logger'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * Конфигурация настроек приложения
@@ -17,16 +17,16 @@ export interface AppSettings {
  * Управляет сохранением и загрузкой пользовательских настроек
  */
 class SettingsImportExportService {
-  private static instance: SettingsImportExportService;
-  private readonly SETTINGS_VERSION = '1.0.0';
+  private static instance: SettingsImportExportService
+  private readonly SETTINGS_VERSION = '1.0.0'
 
   private constructor() {}
 
   static getInstance(): SettingsImportExportService {
     if (!SettingsImportExportService.instance) {
-      SettingsImportExportService.instance = new SettingsImportExportService();
+      SettingsImportExportService.instance = new SettingsImportExportService()
     }
-    return SettingsImportExportService.instance;
+    return SettingsImportExportService.instance
   }
 
   /**
@@ -34,23 +34,23 @@ class SettingsImportExportService {
    */
   async exportSettings(): Promise<void> {
     try {
-      const settings = this.collectSettings();
-      const json = JSON.stringify(settings, null, 2);
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `planpro-settings-${Date.now()}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const settings = this.collectSettings()
+      const json = JSON.stringify(settings, null, 2)
+      const blob = new Blob([json], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
 
-      logger.dialog('Settings exported', { timestamp: settings.timestamp } as JsonValue, 'Settings');
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `planpro-settings-${Date.now()}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      logger.dialog('Settings exported', { timestamp: settings.timestamp } as JsonValue, 'Settings')
     } catch (error) {
-      logger.dialogError('Export failed', error instanceof Error ? error : String(error), 'Settings');
-      throw error;
+      logger.dialogError('Export failed', error instanceof Error ? error : String(error), 'Settings')
+      throw error
     }
   }
 
@@ -59,16 +59,16 @@ class SettingsImportExportService {
    */
   async importSettings(file: File): Promise<void> {
     try {
-      const text = await file.text();
-      const settings: AppSettings = JSON.parse(text);
+      const text = await file.text()
+      const settings: AppSettings = JSON.parse(text)
 
-      this.validateSettings(settings);
-      this.applySettings(settings);
+      this.validateSettings(settings)
+      this.applySettings(settings)
 
-      logger.dialog('Settings imported', { version: settings.version } as JsonValue, 'Settings');
+      logger.dialog('Settings imported', { version: settings.version } as JsonValue, 'Settings')
     } catch (error) {
-      logger.dialogError('Import failed', error instanceof Error ? error : String(error), 'Settings');
-      throw error;
+      logger.dialogError('Import failed', error instanceof Error ? error : String(error), 'Settings')
+      throw error
     }
   }
 
@@ -76,26 +76,26 @@ class SettingsImportExportService {
    * Собирает текущие настройки
    */
   private collectSettings(): AppSettings {
-    const preferences: Record<string, JsonValue> = {};
-    const hotkeys: Record<string, string> = {};
-    const ui: Record<string, JsonValue> = {};
+    const preferences: Record<string, JsonValue> = {}
+    const hotkeys: Record<string, string> = {}
+    const ui: Record<string, JsonValue> = {}
 
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+      const key = localStorage.key(i)
       if (key) {
-        const value = localStorage.getItem(key);
+        const value = localStorage.getItem(key)
         if (value) {
           try {
-            const parsed = JSON.parse(value);
+            const parsed = JSON.parse(value)
             if (key.startsWith('hotkey_')) {
-              hotkeys[key] = value;
+              hotkeys[key] = value
             } else if (key.startsWith('ui_')) {
-              ui[key] = parsed;
+              ui[key] = parsed
             } else {
-              preferences[key] = parsed;
+              preferences[key] = parsed
             }
           } catch {
-            preferences[key] = value;
+            preferences[key] = value
           }
         }
       }
@@ -106,8 +106,8 @@ class SettingsImportExportService {
       preferences,
       hotkeys,
       ui,
-      timestamp: new Date().toISOString()
-    };
+      timestamp: new Date().toISOString(),
+    }
   }
 
   /**
@@ -115,10 +115,10 @@ class SettingsImportExportService {
    */
   private validateSettings(settings: AppSettings): void {
     if (!settings.version) {
-      throw new Error('Invalid settings file: missing version');
+      throw new Error('Invalid settings file: missing version')
     }
     if (!settings.timestamp) {
-      throw new Error('Invalid settings file: missing timestamp');
+      throw new Error('Invalid settings file: missing timestamp')
     }
   }
 
@@ -127,18 +127,18 @@ class SettingsImportExportService {
    */
   private applySettings(settings: AppSettings): void {
     Object.entries(settings.preferences).forEach(([key, value]) => {
-      localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
-    });
+      localStorage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value))
+    })
 
     Object.entries(settings.hotkeys).forEach(([key, value]) => {
-      localStorage.setItem(key, value);
-    });
+      localStorage.setItem(key, value)
+    })
 
     Object.entries(settings.ui).forEach(([key, value]) => {
-      localStorage.setItem(key, JSON.stringify(value));
-    });
+      localStorage.setItem(key, JSON.stringify(value))
+    })
 
-    window.location.reload();
+    window.location.reload()
   }
 
   /**
@@ -146,12 +146,12 @@ class SettingsImportExportService {
    */
   resetToDefaults(): void {
     if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
-      localStorage.clear();
-      logger.dialog('Settings reset to defaults', {}, 'Settings');
-      window.location.reload();
+      localStorage.clear()
+      logger.dialog('Settings reset to defaults', {}, 'Settings')
+      window.location.reload()
     }
   }
 }
 
-export { SettingsImportExportService };
-export const settingsImportExportService = SettingsImportExportService.getInstance();
+export { SettingsImportExportService }
+export const settingsImportExportService = SettingsImportExportService.getInstance()

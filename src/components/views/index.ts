@@ -1,12 +1,12 @@
-export { GanttView } from './GanttView';
-export { NetworkViewComponent } from './NetworkViewComponent';
-export { TaskSheetComponent } from './TaskSheetComponent';
-export { ResourceSheetComponent } from './ResourceSheetComponent';
-export { SettingsViewComponent } from './SettingsView';
-export { TaskUsageView } from './TaskUsageView';
-export { ResourceUsageView } from './ResourceUsageView';
-export { WBSViewComponent } from './WBSViewComponent';
-export { TrackingGanttViewComponent } from './TrackingGanttViewComponent';
-export { CalendarView } from './calendar/CalendarView';
-export { ReportsView } from './reports/ReportsView';
+export { GanttView } from './GanttView'
+export { NetworkViewComponent } from './NetworkViewComponent'
+export { TaskSheetComponent } from './TaskSheetComponent'
+export { ResourceSheetComponent } from './ResourceSheetComponent'
+export { SettingsViewComponent } from './SettingsView'
+export { TaskUsageView } from './TaskUsageView'
+export { ResourceUsageView } from './ResourceUsageView'
+export { WBSViewComponent } from './WBSViewComponent'
+export { TrackingGanttViewComponent } from './TrackingGanttViewComponent'
+export { CalendarView } from './calendar/CalendarView'
+export { ReportsView } from './reports/ReportsView'
 

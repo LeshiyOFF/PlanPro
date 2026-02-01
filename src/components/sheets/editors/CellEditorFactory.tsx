@@ -1,9 +1,9 @@
-import React from 'react';
-import { SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
-import { TextCellEditor } from './TextCellEditor';
-import { DateCellEditor } from './DateCellEditor';
-import { SelectCellEditor } from './SelectCellEditor';
-import { ICellEditorProps } from './ICellEditorProps';
+import React from 'react'
+import { SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn'
+import { TextCellEditor } from './TextCellEditor'
+import { DateCellEditor } from './DateCellEditor'
+import { SelectCellEditor } from './SelectCellEditor'
+import { ICellEditorProps } from './ICellEditorProps'
 
 /**
  * Фабрика редакторов ячеек.
@@ -19,16 +19,16 @@ export class CellEditorFactory {
       case SheetColumnType.NUMBER:
       case SheetColumnType.PERCENT:
       case SheetColumnType.DURATION:
-        return TextCellEditor;
-      
+        return TextCellEditor
+
       case SheetColumnType.DATE:
-        return DateCellEditor;
-      
+        return DateCellEditor
+
       case SheetColumnType.SELECT:
-        return SelectCellEditor;
-      
+        return SelectCellEditor
+
       default:
-        return TextCellEditor;
+        return TextCellEditor
     }
   }
 }

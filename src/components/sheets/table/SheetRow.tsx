@@ -1,9 +1,9 @@
-import React from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
-import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import { SheetCell } from '../cells/SheetCell';
-import type { JsonValue } from '@/types/json-types';
+import React from 'react'
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
+import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import { SheetCell } from '../cells/SheetCell'
+import type { JsonValue } from '@/types/json-types'
 
 interface SheetRowProps<T extends Record<string, JsonValue>> {
   row: T;
@@ -41,22 +41,22 @@ export const SheetRow = <T extends Record<string, JsonValue>>({
   onCommit,
   onCancel,
   onContextMenu,
-  isDisabled = false
+  isDisabled = false,
 }: SheetRowProps<T>) => {
   const handleClick = (e: React.MouseEvent) => {
-    if (isDisabled) return;
-    onRowClick(rowId, e.ctrlKey || e.metaKey, e.shiftKey);
-  };
+    if (isDisabled) return
+    onRowClick(rowId, e.ctrlKey || e.metaKey, e.shiftKey)
+  }
 
   const handleContextMenu = (e: React.MouseEvent) => {
     if (isDisabled) {
-      e.preventDefault();
-      return;
+      e.preventDefault()
+      return
     }
     if (onContextMenu) {
-      onContextMenu(e, row);
+      onContextMenu(e, row)
     }
-  };
+  }
 
   return (
     <tr
@@ -89,5 +89,5 @@ export const SheetRow = <T extends Record<string, JsonValue>>({
         />
       ))}
     </tr>
-  );
-};
+  )
+}

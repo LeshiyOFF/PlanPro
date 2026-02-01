@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface ResourceMapping {
   id: string;
@@ -29,14 +29,14 @@ const EDITOR_TYPES = [
   { value: 'text', label: 'Text Input' },
   { value: 'number', label: 'Number Input' },
   { value: 'date', label: 'Date Picker' },
-  { value: 'select', label: 'Dropdown Select' }
-];
+  { value: 'select', label: 'Dropdown Select' },
+]
 
 const ACCESS_LEVELS = [
   { value: 'read', label: 'Read Only' },
   { value: 'write', label: 'Read/Write' },
-  { value: 'admin', label: 'Administrator' }
-];
+  { value: 'admin', label: 'Administrator' },
+]
 
 export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
   mappings = [],
@@ -49,38 +49,38 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [currentMappings, setCurrentMappings] = React.useState<ResourceMapping[]>(mappings);
+  const [currentMappings, setCurrentMappings] = React.useState<ResourceMapping[]>(mappings)
   const [newMapping, setNewMapping] = React.useState<Partial<ResourceMapping>>({
     sourceField: '',
     targetField: '',
     editorType: 'text',
-    accessLevel: 'read'
-  });
+    accessLevel: 'read',
+  })
 
   const { errors } = useDialogValidation({
     sourceField: {
       required: true,
       validate: (value) => {
-        const str = typeof value === 'string' ? value : String(value ?? '');
-        if (!str.trim()) return 'Source field is required';
+        const str = typeof value === 'string' ? value : String(value ?? '')
+        if (!str.trim()) return 'Source field is required'
         if (currentMappings.some(m => m.sourceField === str)) {
-          return 'Source field already mapped';
+          return 'Source field already mapped'
         }
-        return null;
-      }
+        return null
+      },
     },
     targetField: {
       required: true,
       validate: (value) => {
-        const str = typeof value === 'string' ? value : String(value ?? '');
-        if (!str.trim()) return 'Target field is required';
+        const str = typeof value === 'string' ? value : String(value ?? '')
+        if (!str.trim()) return 'Target field is required'
         if (currentMappings.some(m => m.targetField === str)) {
-          return 'Target field already mapped';
+          return 'Target field already mapped'
         }
-        return null;
-      }
-    }
-  });
+        return null
+      },
+    },
+  })
 
   const handleAddMapping = () => {
     if (newMapping.sourceField && newMapping.targetField) {
@@ -89,39 +89,39 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
         sourceField: newMapping.sourceField!,
         targetField: newMapping.targetField!,
         editorType: (newMapping.editorType ?? 'text') as ResourceMapping['editorType'],
-        accessLevel: (newMapping.accessLevel ?? 'read') as ResourceMapping['accessLevel']
-      };
-      
-      setCurrentMappings(prev => [...prev, mapping]);
+        accessLevel: (newMapping.accessLevel ?? 'read') as ResourceMapping['accessLevel'],
+      }
+
+      setCurrentMappings(prev => [...prev, mapping])
       setNewMapping({
         sourceField: '',
         targetField: '',
         editorType: 'text',
-        accessLevel: 'read'
-      });
+        accessLevel: 'read',
+      })
     }
-  };
+  }
 
   const handleRemoveMapping = (mappingId: string) => {
-    setCurrentMappings(prev => prev.filter(m => m.id !== mappingId));
-  };
+    setCurrentMappings(prev => prev.filter(m => m.id !== mappingId))
+  }
 
   const handleMappingChange = (mappingId: string, field: keyof ResourceMapping, value: string | number | boolean | string[]) => {
-    setCurrentMappings(prev => 
-      prev.map(m => m.id === mappingId ? { ...m, [field]: value } : m)
-    );
-  };
+    setCurrentMappings(prev =>
+      prev.map(m => m.id === mappingId ? { ...m, [field]: value } : m),
+    )
+  }
 
   const handleSave = () => {
-    onSave?.(currentMappings);
-    onClose?.();
-  };
+    onSave?.(currentMappings)
+    onClose?.()
+  }
 
-  const canAddMapping = newMapping.sourceField?.trim() && newMapping.targetField?.trim() && 
+  const canAddMapping = newMapping.sourceField?.trim() && newMapping.targetField?.trim() &&
     !currentMappings.some(m => m.sourceField === newMapping.sourceField) &&
-    !currentMappings.some(m => m.targetField === newMapping.targetField);
+    !currentMappings.some(m => m.targetField === newMapping.targetField)
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -346,6 +346,6 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

@@ -1,17 +1,17 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { logger } from '@/utils/logger';
-import { useTranslation } from 'react-i18next';
-import { 
+import React, { useState, useCallback, useEffect } from 'react'
+import { BaseDialog } from '@/components/dialogs/base/BaseDialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
+import { logger } from '@/utils/logger'
+import { useTranslation } from 'react-i18next'
+import {
   TypedDialogActions,
   DialogResult,
-  IDialogData
-} from '@/types/dialog/DialogTypes';
-import { CalendarException } from '@/types/calendar-types';
-import { TypedWorkingTimeDialog as WorkingTimeForm } from './components/WorkingTimeForm';
-import { CalendarExceptions } from './components/CalendarExceptions';
+  IDialogData,
+} from '@/types/dialog/DialogTypes'
+import { CalendarException } from '@/types/calendar-types'
+import { TypedWorkingTimeDialog as WorkingTimeForm } from './components/WorkingTimeForm'
+import { CalendarExceptions } from './components/CalendarExceptions'
 
 /**
  * Типизированные данные для диалога рабочего времени
@@ -44,78 +44,78 @@ export const ChangeWorkingTimeDialog: React.FC<{
   isOpen: boolean;
   data?: ChangeWorkingTimeDialogData;
   onClose: () => void;
-}> = ({ 
-  isOpen, 
-  data, 
-  onClose 
+}> = ({
+  isOpen,
+  data,
+  onClose,
 }) => {
-  const { t } = useTranslation();
-  const [exceptions, setExceptions] = useState<CalendarException[]>([]);
-  const [activeTab, setActiveTab] = useState('working-time');
-  const [workingTime, setWorkingTime] = useState<Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>>({});
+  const { t } = useTranslation()
+  const [exceptions, setExceptions] = useState<CalendarException[]>([])
+  const [activeTab, setActiveTab] = useState('working-time')
+  const [workingTime, setWorkingTime] = useState<Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>>({})
 
   useEffect(() => {
-    if (!isOpen || !data) return;
-    
-    const saved = localStorage.getItem('calendar-working-time');
+    if (!isOpen || !data) return
+
+    const saved = localStorage.getItem('calendar-working-time')
     if (saved) {
       try {
-        const parsed = JSON.parse(saved);
+        const parsed = JSON.parse(saved)
         if (parsed?.workingTime) {
-          setWorkingTime(parsed.workingTime);
-          setExceptions(parsed.exceptions || []);
+          setWorkingTime(parsed.workingTime)
+          setExceptions(parsed.exceptions || [])
         }
       } catch (error) {
-        logger.error('Failed to load working time settings', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to load working time settings', error instanceof Error ? error : new Error(String(error)))
       }
     } else if (data.workingTime) {
-      setWorkingTime(data.workingTime);
-      setExceptions(data.exceptions || []);
+      setWorkingTime(data.workingTime)
+      setExceptions(data.exceptions || [])
     }
-  }, [isOpen, data]);
+  }, [isOpen, data])
 
   const calculateTotalHours = useCallback((): number => {
     return Object.values(workingTime).reduce((total, day) => {
-      if (!day.isWorkingDay || !day.startTime || !day.endTime) return total;
-      const start = new Date(`2000-01-01T${day.startTime}`);
-      const end = new Date(`2000-01-01T${day.endTime}`);
-      return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    }, 0);
-  }, [workingTime]);
+      if (!day.isWorkingDay || !day.startTime || !day.endTime) return total
+      const start = new Date(`2000-01-01T${day.startTime}`)
+      const end = new Date(`2000-01-01T${day.endTime}`)
+      return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+    }, 0)
+  }, [workingTime])
 
   const actions: WorkingTimeActions = {
     onOk: async (_data?: ChangeWorkingTimeDialogData): Promise<void> => {
       try {
-        const calendarData = { workingTime, exceptions, lastUpdated: new Date().toISOString() };
-        localStorage.setItem('calendar-working-time', JSON.stringify(calendarData));
-        logger.info('Working time saved successfully');
+        const calendarData = { workingTime, exceptions, lastUpdated: new Date().toISOString() }
+        localStorage.setItem('calendar-working-time', JSON.stringify(calendarData))
+        logger.info('Working time saved successfully')
       } catch (error) {
-        logger.error('Failed to save working time', error instanceof Error ? error : new Error(String(error)));
+        logger.error('Failed to save working time', error instanceof Error ? error : new Error(String(error)))
       }
     },
     onCancel: () => {
-      logger.info('Working time dialog cancelled');
-      onClose();
+      logger.info('Working time dialog cancelled')
+      onClose()
     },
     onValidate: (_data: ChangeWorkingTimeDialogData): boolean => {
-      return true;
-    }
-  };
+      return true
+    },
+  }
 
   return (
-    <BaseDialog 
-      isOpen={isOpen} 
-      onClose={onClose} 
+    <BaseDialog
+      isOpen={isOpen}
+      onClose={onClose}
       data={{
         id: 'change-working-time',
         title: t('working_time.title'),
         timestamp: new Date(),
         workingTime,
-        exceptions
+        exceptions,
       }}
       config={{
         width: 800,
-        modal: true
+        modal: true,
       }}
       actions={actions}
     >
@@ -128,15 +128,15 @@ export const ChangeWorkingTimeDialog: React.FC<{
           <TabsTrigger value="summary">{t('working_time.tab_summary')}</TabsTrigger>
         </TabsList>
         <TabsContent value="working-time" className="space-y-4">
-          <WorkingTimeForm 
-            isOpen={isOpen} 
+          <WorkingTimeForm
+            isOpen={isOpen}
             data={{
               id: 'working-time-form',
               title: '',
               timestamp: new Date(),
-              workingTime
-            }} 
-            onClose={() => {}} 
+              workingTime,
+            }}
+            onClose={() => {}}
           />
         </TabsContent>
         <TabsContent value="exceptions" className="space-y-4">
@@ -155,5 +155,5 @@ export const ChangeWorkingTimeDialog: React.FC<{
         </TabsContent>
       </Tabs>
     </BaseDialog>
-  );
-};
+  )
+}

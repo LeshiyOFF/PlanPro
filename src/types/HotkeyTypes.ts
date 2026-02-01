@@ -24,7 +24,7 @@ export interface HotkeyConfig {
 
 export enum HotkeyCategory {
   FILE = 'file',
-  EDIT = 'edit', 
+  EDIT = 'edit',
   VIEW = 'view',
   TASK = 'task',
   RESOURCE = 'resource',
@@ -81,7 +81,7 @@ export const DEFAULT_HOTKEYS: Record<string, Hotkey> = {
   'SAVE_AS': { key: 'S', ctrl: true, shift: true },
   'PRINT': { key: 'P', ctrl: true },
   'EXIT': { key: 'F4', alt: true },
-  
+
   // Task operations
   'INSERT_TASK': { key: 'K', ctrl: true },
   'DELETE_TASK': { key: 'Delete' },
@@ -89,69 +89,69 @@ export const DEFAULT_HOTKEYS: Record<string, Hotkey> = {
   'OUTDENT_TASK': { key: 'Tab', shift: true },
   'FIND_TASK': { key: 'F', ctrl: true },
   'GOTO_TASK': { key: 'F3' },
-  
+
   // Edit operations
   'UNDO': { key: 'Z', ctrl: true },
   'REDO': { key: 'Y', ctrl: true },
   'CUT': { key: 'X', ctrl: true },
   'COPY': { key: 'C', ctrl: true },
   'PASTE': { key: 'V', ctrl: true },
-  
+
   // View operations
   'ZOOM_IN': { key: '+', ctrl: true },
   'ZOOM_OUT': { key: '-', ctrl: true },
   'FIT_TO_WIDTH': { key: '0', ctrl: true },
   'TASK_INFO': { key: 'F9' },
-  
+
   // Resource operations
   'ASSIGN_RESOURCES': { key: 'F10', alt: true },
-  'RESOURCE_INFO': { key: 'F10' }
-};
+  'RESOURCE_INFO': { key: 'F10' },
+}
 
 // Функции для работы с hotkey
 export const hotkeyToString = (hotkey: Hotkey): string => {
-  const parts: string[] = [];
-  
-  if (hotkey.ctrl) parts.push('Ctrl');
-  if (hotkey.alt) parts.push('Alt');
-  if (hotkey.shift) parts.push('Shift');
-  if (hotkey.meta) parts.push('Meta');
-  
-  parts.push(hotkey.key);
-  return parts.join('+');
-};
+  const parts: string[] = []
+
+  if (hotkey.ctrl) parts.push('Ctrl')
+  if (hotkey.alt) parts.push('Alt')
+  if (hotkey.shift) parts.push('Shift')
+  if (hotkey.meta) parts.push('Meta')
+
+  parts.push(hotkey.key)
+  return parts.join('+')
+}
 
 export const hotkeyFromString = (str: string): Hotkey => {
-  const parts = str.split('+').map(p => p.trim());
+  const parts = str.split('+').map(p => p.trim())
   const hotkey: Hotkey = {
-    key: parts[parts.length - 1] || ''
-  };
-  
+    key: parts[parts.length - 1] || '',
+  }
+
   parts.slice(0, -1).forEach(part => {
     switch (part.toLowerCase()) {
       case 'ctrl':
-        hotkey.ctrl = true;
-        break;
+        hotkey.ctrl = true
+        break
       case 'alt':
-        hotkey.alt = true;
-        break;
+        hotkey.alt = true
+        break
       case 'shift':
-        hotkey.shift = true;
-        break;
+        hotkey.shift = true
+        break
       case 'meta':
-        hotkey.meta = true;
-        break;
+        hotkey.meta = true
+        break
     }
-  });
-  
-  return hotkey;
-};
+  })
+
+  return hotkey
+}
 
 export const hotkeyEquals = (a: Hotkey, b: Hotkey): boolean => {
   return a.key === b.key &&
     a.ctrl === b.ctrl &&
     a.alt === b.alt &&
     a.shift === b.shift &&
-    a.meta === b.meta;
-};
+    a.meta === b.meta
+}
 

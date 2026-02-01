@@ -2,8 +2,8 @@
  * Типы для задач ProjectLibre
  */
 
-import type { ReactNode } from 'react';
-import type { JsonValue } from '@/types/json-types';
+import type { ReactNode } from 'react'
+import type { JsonValue } from '@/types/json-types'
 
 export interface Task {
   id: string

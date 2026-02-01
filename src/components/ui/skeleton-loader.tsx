@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface SkeletonLoaderProps {
   count?: number;
@@ -19,30 +19,30 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   width = '100%',
   variant = 'text',
   animation = 'pulse',
-  style: styleProp
+  style: styleProp,
 }) => {
   const getSkeletonStyle = () => {
     const baseStyle = {
       backgroundColor: '#e5e7eb',
       borderRadius: variant === 'circular' ? '50%' : '4px',
       width,
-      height
-    };
+      height,
+    }
 
-    if (!animation) return baseStyle;
+    if (!animation) return baseStyle
 
-    const animationStyle = animation === 'wave' 
+    const animationStyle = animation === 'wave'
       ? {
-          background: 'linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)',
-          backgroundSize: '200% 100%',
-          animation: 'wave 1.5s infinite'
-        }
+        background: 'linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)',
+        backgroundSize: '200% 100%',
+        animation: 'wave 1.5s infinite',
+      }
       : {
-          animation: 'pulse 1.5s ease-in-out infinite'
-        };
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }
 
-    return { ...baseStyle, ...animationStyle };
-  };
+    return { ...baseStyle, ...animationStyle }
+  }
 
   const renderSkeleton = (index: number) => (
     <div
@@ -50,10 +50,10 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
       style={{
         ...getSkeletonStyle(),
         marginBottom: index < count - 1 ? '10px' : '0',
-        ...styleProp
+        ...styleProp,
       }}
     />
-  );
+  )
 
   return (
     <>
@@ -70,8 +70,8 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
         }
       `}</style>
     </>
-  );
-};
+  )
+}
 
 /**
  * Компонент для skeleton loading карточки проекта
@@ -81,7 +81,7 @@ export const ProjectCardSkeleton: React.FC = () => (
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     padding: '20px',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
       <SkeletonLoader width="150px" height="24px" />
@@ -89,7 +89,7 @@ export const ProjectCardSkeleton: React.FC = () => (
     </div>
     <SkeletonLoader height="16px" width="100%" count={2} />
   </div>
-);
+)
 
 /**
  * Компонент для skeleton loading карточки задачи
@@ -99,7 +99,7 @@ export const TaskCardSkeleton: React.FC = () => (
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     padding: '20px',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
       <SkeletonLoader width="120px" height="20px" />
@@ -113,7 +113,7 @@ export const TaskCardSkeleton: React.FC = () => (
       <SkeletonLoader width="100%" height="8px" />
     </div>
   </div>
-);
+)
 
 /**
  * Компонент для skeleton loading карточки ресурса
@@ -123,7 +123,7 @@ export const ResourceCardSkeleton: React.FC = () => (
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
     padding: '20px',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
       <SkeletonLoader width="120px" height="18px" />
@@ -141,5 +141,5 @@ export const ResourceCardSkeleton: React.FC = () => (
       </div>
     </div>
   </div>
-);
+)
 

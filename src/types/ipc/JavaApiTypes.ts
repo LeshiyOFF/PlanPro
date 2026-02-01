@@ -3,8 +3,8 @@
  * Заменяет использование `any` в Promise<any>.
  */
 
-import { JavaProcessStatus } from './JavaProcessEvents';
-import { StrictData } from '../Master_Functionality_Catalog';
+import { JavaProcessStatus } from './JavaProcessEvents'
+import { StrictData } from '../Master_Functionality_Catalog'
 
 /**
  * Базовый ответ Java API

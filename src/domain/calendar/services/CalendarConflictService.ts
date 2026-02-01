@@ -1,7 +1,7 @@
-import { Task, getTaskResourceIds } from '@/store/project/interfaces';
-import { Resource } from '@/types/resource-types';
-import { IWorkCalendar } from '../interfaces/IWorkCalendar';
-import { CalendarTemplateService } from './CalendarTemplateService';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces'
+import { Resource } from '@/types/resource-types'
+import { IWorkCalendar } from '../interfaces/IWorkCalendar'
+import { CalendarTemplateService } from './CalendarTemplateService'
 
 /**
  * Результат проверки календарного конфликта
@@ -21,18 +21,18 @@ export interface CalendarConflictResult {
  * Stage 8.20: Валидация назначений задач относительно графиков ресурсов
  */
 export class CalendarConflictService {
-  private static instance: CalendarConflictService;
+  private static instance: CalendarConflictService
 
   public static getInstance(): CalendarConflictService {
     if (!CalendarConflictService.instance) {
-      CalendarConflictService.instance = new CalendarConflictService();
+      CalendarConflictService.instance = new CalendarConflictService()
     }
-    return CalendarConflictService.instance;
+    return CalendarConflictService.instance
   }
 
   /**
    * Проверяет, есть ли конфликт между задачей и календарями назначенных ресурсов
-   * 
+   *
    * @param task Задача для проверки
    * @param resources Все ресурсы проекта
    * @param calendars Все календари проекта
@@ -41,49 +41,49 @@ export class CalendarConflictService {
   public checkTaskConflict(
     task: Task,
     resources: Resource[],
-    calendars: IWorkCalendar[]
+    calendars: IWorkCalendar[],
   ): CalendarConflictResult {
     // Если задача не имеет назначенных ресурсов или это summary/milestone - конфликта нет
-    const resourceIds = getTaskResourceIds(task);
+    const resourceIds = getTaskResourceIds(task)
     if (resourceIds.length === 0 || task.isSummary || task.isMilestone) {
-      return { hasConflict: false, conflictingResources: [] };
+      return { hasConflict: false, conflictingResources: [] }
     }
 
-    const conflictingResources: CalendarConflictResult['conflictingResources'] = [];
-    const templateService = CalendarTemplateService.getInstance();
+    const conflictingResources: CalendarConflictResult['conflictingResources'] = []
+    const templateService = CalendarTemplateService.getInstance()
 
     // Проверяем каждого назначенного работника
     for (const resourceId of resourceIds) {
-      const resource = resources.find(r => String(r.id) === resourceId);
-      
-      // Проверяем только ресурсы типа "Труд" (у них есть рабочие календари)
-      if (!resource || resource.type !== 'Work') continue;
+      const resource = resources.find(r => String(r.id) === resourceId)
 
-      const calendar = calendars.find(c => c.id === resource.calendarId);
-      if (!calendar) continue;
+      // Проверяем только ресурсы типа "Труд" (у них есть рабочие календари)
+      if (!resource || resource.type !== 'Work') continue
+
+      const calendar = calendars.find(c => c.id === resource.calendarId)
+      if (!calendar) continue
 
       // Проверяем, есть ли хотя бы один нерабочий день в интервале задачи
       const hasNonWorkingDay = this.hasNonWorkingDaysInRange(
         task.startDate,
         task.endDate,
         calendar,
-        templateService
-      );
+        templateService,
+      )
 
       if (hasNonWorkingDay) {
         conflictingResources.push({
           resourceId: resource.id,
           resourceName: resource.name,
           calendarName: calendar.name,
-          reason: this.getConflictReason(task.startDate, task.endDate, calendar, templateService)
-        });
+          reason: this.getConflictReason(task.startDate, task.endDate, calendar, templateService),
+        })
       }
     }
 
     return {
       hasConflict: conflictingResources.length > 0,
-      conflictingResources
-    };
+      conflictingResources,
+    }
   }
 
   /**
@@ -93,18 +93,18 @@ export class CalendarConflictService {
     startDate: Date,
     endDate: Date,
     calendar: IWorkCalendar,
-    templateService: CalendarTemplateService
+    templateService: CalendarTemplateService,
   ): boolean {
-    const current = new Date(startDate);
-    
+    const current = new Date(startDate)
+
     while (current <= endDate) {
       if (!templateService.isWorkingDay(calendar, current)) {
-        return true;
+        return true
       }
-      current.setDate(current.getDate() + 1);
+      current.setDate(current.getDate() + 1)
     }
-    
-    return false;
+
+    return false
   }
 
   /**
@@ -114,33 +114,33 @@ export class CalendarConflictService {
     _startDate: Date,
     _endDate: Date,
     calendar: IWorkCalendar,
-    templateService: CalendarTemplateService
+    templateService: CalendarTemplateService,
   ): string {
-    const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const nonWorkingDays: string[] = [];
-    
+    const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+    const nonWorkingDays: string[] = []
+
     // Stage 8.21: Анализируем типичную рабочую неделю (7 дней)
     // Это позволит показать все выходные дни, даже если задача короткая
-    const baseDate = new Date(2024, 0, 1); // Понедельник
+    const baseDate = new Date(2024, 0, 1) // Понедельник
     for (let i = 0; i < 7; i++) {
-      const testDate = new Date(baseDate);
-      testDate.setDate(baseDate.getDate() + i);
-      
+      const testDate = new Date(baseDate)
+      testDate.setDate(baseDate.getDate() + i)
+
       if (!templateService.isWorkingDay(calendar, testDate)) {
-        nonWorkingDays.push(dayNames[testDate.getDay()]);
+        nonWorkingDays.push(dayNames[testDate.getDay()])
       }
     }
 
-    if (nonWorkingDays.length === 0) return 'График не соответствует';
-    if (nonWorkingDays.length === 7) return 'Все дни недели нерабочие';
-    
+    if (nonWorkingDays.length === 0) return 'График не соответствует'
+    if (nonWorkingDays.length === 7) return 'Все дни недели нерабочие'
+
     // Сортируем дни недели начиная с Пн (индекс 1)
     const sortedDays = nonWorkingDays.sort((a, b) => {
-      const order = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-      return order.indexOf(a) - order.indexOf(b);
-    });
+      const order = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+      return order.indexOf(a) - order.indexOf(b)
+    })
 
-    return `Выходные дни: ${sortedDays.join(', ')}`;
+    return `Выходные дни: ${sortedDays.join(', ')}`
   }
 
   /**
@@ -148,17 +148,17 @@ export class CalendarConflictService {
    */
   public getActualWorkingHours(
     task: Task,
-    calendar: IWorkCalendar
+    calendar: IWorkCalendar,
   ): number {
-    const templateService = CalendarTemplateService.getInstance();
-    let totalHours = 0;
+    const templateService = CalendarTemplateService.getInstance()
+    let totalHours = 0
 
-    const current = new Date(task.startDate);
+    const current = new Date(task.startDate)
     while (current <= task.endDate) {
-      totalHours += templateService.getWorkingHours(calendar, current);
-      current.setDate(current.getDate() + 1);
+      totalHours += templateService.getWorkingHours(calendar, current)
+      current.setDate(current.getDate() + 1)
     }
 
-    return totalHours;
+    return totalHours
   }
 }

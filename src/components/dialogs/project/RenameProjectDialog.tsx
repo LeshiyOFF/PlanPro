@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface RenameProjectDialogProps extends Omit<BaseDialogProps, 'children'> {
   projectName?: string;
@@ -20,43 +20,43 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [newName, setNewName] = React.useState(projectName);
-  const [saveAs, setSaveAs] = React.useState(false);
-  
+  const [newName, setNewName] = React.useState(projectName)
+  const [saveAs, setSaveAs] = React.useState(false)
+
   const { validate, errors, isValid } = useDialogValidation({
     newName: {
       required: true,
       minLength: 1,
       maxLength: 255,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Project name is required';
-        if (!value.trim()) return 'Project name is required';
+        if (!value || typeof value !== 'string') return 'Project name is required'
+        if (!value.trim()) return 'Project name is required'
         if (existingNames.includes(value.trim()) && !saveAs) {
-          return 'Project with this name already exists';
+          return 'Project with this name already exists'
         }
-        return null;
-      }
-    }
-  });
+        return null
+      },
+    },
+  })
 
   React.useEffect(() => {
-    setNewName(projectName);
-  }, [projectName]);
+    setNewName(projectName)
+  }, [projectName])
 
   React.useEffect(() => {
-    validate({ newName });
-  }, [newName, saveAs, existingNames]);
+    validate({ newName })
+  }, [newName, saveAs, existingNames])
 
   const handleRename = () => {
     if (isValid()) {
-      onRename?.(newName.trim(), saveAs);
-      onClose?.();
+      onRename?.(newName.trim(), saveAs)
+      onClose?.()
     }
-  };
+  }
 
-  const canRename = isValid() && newName.trim() !== projectName;
+  const canRename = isValid() && newName.trim() !== projectName
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -69,8 +69,8 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
       footer={
         <div className="flex justify-between">
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="saveAs" 
+            <Checkbox
+              id="saveAs"
               checked={saveAs}
               onCheckedChange={(checked) => setSaveAs(checked as boolean)}
             />
@@ -125,6 +125,6 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

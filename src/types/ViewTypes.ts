@@ -1,5 +1,5 @@
-import type { ComponentType } from 'react';
-import { ViewType } from './Master_Functionality_Catalog';
+import type { ComponentType } from 'react'
+import { ViewType } from './Master_Functionality_Catalog'
 
 /**
  * Типы представлений для ProjectLibre
@@ -9,7 +9,7 @@ import { ViewType } from './Master_Functionality_Catalog';
 /**
  * Enum типов представлений - Re-exported from Master_Functionality_Catalog
  */
-export { ViewType };
+export { ViewType }
 
 /**
  * Интерфейс настроек представления
@@ -30,7 +30,7 @@ export interface ViewSettings {
  */
 export enum Timescale {
   DAYS = 'days',
-  WEEKS = 'weeks', 
+  WEEKS = 'weeks',
   MONTHS = 'months',
   QUARTERS = 'quarters'
 }
@@ -82,7 +82,7 @@ export enum SortDirection {
  */
 export enum TaskStatus {
   NOT_STARTED = 'not-started',
-  IN_PROGRESS = 'in-progress', 
+  IN_PROGRESS = 'in-progress',
   COMPLETED = 'completed',
   DELAYED = 'delayed'
 }

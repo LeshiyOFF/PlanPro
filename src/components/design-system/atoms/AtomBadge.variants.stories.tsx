@@ -1,5 +1,5 @@
-import type { StoryObj, Meta } from '@storybook/react';
-import { AtomBadge } from './AtomBadge';
+import type { StoryObj, Meta } from '@storybook/react'
+import { AtomBadge } from './AtomBadge'
 
 const meta: Meta<typeof AtomBadge> = {
   title: 'Design System/Atoms/AtomBadge/Variants',
@@ -11,11 +11,11 @@ const meta: Meta<typeof AtomBadge> = {
       },
     },
   },
-};
+}
 
 type Story = StoryObj<typeof meta>;
 
-export default meta;
+export default meta
 
 export const Colors: Story = {
   render: () => (
@@ -29,7 +29,7 @@ export const Colors: Story = {
       <meta.component variant="solid" color="neutral">Neutral</meta.component>
     </div>
   ),
-};
+}
 
 export const Sizes: Story = {
   render: () => (
@@ -41,14 +41,14 @@ export const Sizes: Story = {
       <meta.component size="xl">XL</meta.component>
     </div>
   ),
-};
+}
 
 export const Square: Story = {
   args: {
     rounded: false,
     children: 'Square Badge',
   },
-};
+}
 
 export const WithNumbers: Story = {
   render: () => (
@@ -59,7 +59,7 @@ export const WithNumbers: Story = {
       <meta.component color="info">99+</meta.component>
     </div>
   ),
-};
+}
 
 export const WithIcons: Story = {
   render: () => (
@@ -70,5 +70,5 @@ export const WithIcons: Story = {
       <meta.component color="info">ℹ</meta.component>
     </div>
   ),
-};
+}
 

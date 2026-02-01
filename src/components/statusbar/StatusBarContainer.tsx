@@ -1,15 +1,15 @@
-import React, { useEffect, useCallback, useState } from 'react';
-import { StatusBarService } from './services/StatusBarService';
-import { IStatusBarProps, IStatusBarState } from './interfaces/StatusBarInterfaces';
+import React, { useEffect, useCallback, useState } from 'react'
+import { StatusBarService } from './services/StatusBarService'
+import { IStatusBarProps, IStatusBarState } from './interfaces/StatusBarInterfaces'
 import {
   ViewInfoSection,
   ProjectInfoSection,
   MessageSection,
   TimeSection,
-  ZoomSection
-} from './sections';
-import { Separator } from '@/components/ui/separator';
-import './StatusBarStyles.css';
+  ZoomSection,
+} from './sections'
+import { Separator } from '@/components/ui/separator'
+import './StatusBarStyles.css'
 
 /**
  * Контейнер статусбара с полной функциональностью
@@ -19,45 +19,45 @@ import './StatusBarStyles.css';
 export const StatusBarContainer: React.FC<IStatusBarProps> = ({
   className = '',
   config,
-  onSectionClick
+  onSectionClick,
 }) => {
-  const statusBarService = React.useMemo(() => StatusBarService.getInstance(), []);
-  const [state, setState] = useState<IStatusBarState>(statusBarService.getState());
+  const statusBarService = React.useMemo(() => StatusBarService.getInstance(), [])
+  const [state, setState] = useState<IStatusBarState>(statusBarService.getState())
 
   /**
    * Подписка на изменения состояния сервис
    */
   useEffect(() => {
-    const unsubscribe = statusBarService.subscribe(setState);
-    
+    const unsubscribe = statusBarService.subscribe(setState)
+
     return () => {
-      unsubscribe();
-    };
-  }, [statusBarService]);
+      unsubscribe()
+    }
+  }, [statusBarService])
 
   /**
    * Обработчик изменения масштаба
    */
   const handleZoomChange = useCallback((zoom: number) => {
-    statusBarService.updateZoom(zoom);
-  }, [statusBarService]);
+    statusBarService.updateZoom(zoom)
+  }, [statusBarService])
 
   /**
    * Обработчик клика по секции
    */
   const handleSectionClick = useCallback((sectionId: string) => {
-    onSectionClick?.(sectionId);
-  }, [onSectionClick]);
+    onSectionClick?.(sectionId)
+  }, [onSectionClick])
 
   /**
    * Обработчик переключения видимости
    */
   const handleToggleVisibility = useCallback(() => {
-    statusBarService.toggleVisibility();
-  }, [statusBarService]);
+    statusBarService.toggleVisibility()
+  }, [statusBarService])
 
   if (!state.isVisible && config?.visible !== true) {
-    return null;
+    return null
   }
 
   return (
@@ -65,16 +65,16 @@ export const StatusBarContainer: React.FC<IStatusBarProps> = ({
       <div className="statusbar-content">
         {/* Левая секция */}
         <div className="statusbar-left">
-          <div 
+          <div
             className="statusbar-section"
             onClick={() => handleSectionClick('view-info')}
           >
             <ViewInfoSection />
           </div>
-          
+
           <Separator orientation="vertical" className="statusbar-separator" />
-          
-          <div 
+
+          <div
             className="statusbar-section"
             onClick={() => handleSectionClick('project-info')}
           >
@@ -84,7 +84,7 @@ export const StatusBarContainer: React.FC<IStatusBarProps> = ({
 
         {/* Центральная секция */}
         <div className="statusbar-center">
-          <div 
+          <div
             className="statusbar-section statusbar-message"
             onClick={() => handleSectionClick('message')}
           >
@@ -94,25 +94,25 @@ export const StatusBarContainer: React.FC<IStatusBarProps> = ({
 
         {/* Правая секция */}
         <div className="statusbar-right">
-          <div 
+          <div
             className="statusbar-section"
             onClick={() => handleSectionClick('zoom')}
           >
             <ZoomSection zoom={state.zoom} onZoomChange={handleZoomChange} />
           </div>
-          
+
           <Separator orientation="vertical" className="statusbar-separator" />
-          
-          <div 
+
+          <div
             className="statusbar-section"
             onClick={() => handleSectionClick('time')}
           >
             <TimeSection />
           </div>
-          
+
           <Separator orientation="vertical" className="statusbar-separator" />
-          
-          <div 
+
+          <div
             className="statusbar-section statusbar-toggle"
             onClick={handleToggleVisibility}
             title="Скрыть/показать статусбар"
@@ -122,6 +122,6 @@ export const StatusBarContainer: React.FC<IStatusBarProps> = ({
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 

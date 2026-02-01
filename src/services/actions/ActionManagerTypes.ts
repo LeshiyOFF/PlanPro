@@ -1,4 +1,4 @@
-import type { IAction } from './BaseAction';
+import type { IAction } from './BaseAction'
 
 /**
  * Категории действий

@@ -1,25 +1,25 @@
-import { ActionManagerFactory } from './ActionManagerFactory';
-import { ActionCategory, IActionManager } from './ActionManagerTypes';
+import { ActionManagerFactory } from './ActionManagerFactory'
+import { ActionCategory, IActionManager } from './ActionManagerTypes'
 
 /**
  * Singleton экземпляр Action Manager
  */
-let actionManagerInstance: IActionManager | null = null;
+let actionManagerInstance: IActionManager | null = null
 
 export const getActionManager = (): IActionManager => {
   if (!actionManagerInstance) {
-    actionManagerInstance = ActionManagerFactory.create();
+    actionManagerInstance = ActionManagerFactory.create()
   }
-  return actionManagerInstance;
-};
+  return actionManagerInstance
+}
 
 /**
  * Сброс singleton экземпляра (для тестов)
  */
 export const resetActionManager = (): void => {
-  actionManagerInstance = null;
-};
+  actionManagerInstance = null
+}
 
-export { ActionManagerFactory as ActionManager } from './ActionManagerFactory';
-export { ActionCategory, type IActionManager };
+export { ActionManagerFactory as ActionManager } from './ActionManagerFactory'
+export { ActionCategory, type IActionManager }
 

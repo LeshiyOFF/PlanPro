@@ -1,6 +1,6 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 
 interface NetworkErrorFallbackProps {
   error: Error;
@@ -15,12 +15,12 @@ interface NetworkErrorFallbackProps {
 export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
   error,
   resetError,
-  retry
+  retry,
 }) => {
-  const { t } = useTranslation();
-  const isNetworkError = error.message.includes('fetch') || 
+  const { t } = useTranslation()
+  const isNetworkError = error.message.includes('fetch') ||
                          error.message.includes('network') ||
-                         error.message.includes('ECONNREFUSED');
+                         error.message.includes('ECONNREFUSED')
 
   return (
     <div className="p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -30,25 +30,25 @@ export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
             <span className="text-white text-xl">🌐</span>
           </div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-medium text-yellow-900 mb-2">
             {isNetworkError ? t('errors.network_title') : t('errors.data_load_error')}
           </h3>
-          
+
           <p className="text-yellow-700 mb-4">
-            {isNetworkError 
+            {isNetworkError
               ? t('errors.network_desc')
               : t('errors.data_desc')
             }
           </p>
-          
+
           <div className="space-y-2 mb-4">
             <p className="text-sm text-yellow-600 font-mono">
               {error.name}: {error.message}
             </p>
           </div>
-          
+
           <div className="flex space-x-3">
             {retry && (
               <Button
@@ -59,7 +59,7 @@ export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
                 {t('errors.retry')}
               </Button>
             )}
-            
+
             <Button
               onClick={resetError}
               variant="secondary"
@@ -71,6 +71,6 @@ export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

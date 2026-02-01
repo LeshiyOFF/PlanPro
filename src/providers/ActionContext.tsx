@@ -1,11 +1,11 @@
-import React, { createContext, useContext } from 'react';
-import type { IActionManager } from '@/services/actions/ActionManager';
-import type { IAction } from '@/services/actions/BaseAction';
+import React, { createContext, useContext } from 'react'
+import type { IActionManager } from '@/services/actions/ActionManager'
+import type { IAction } from '@/services/actions/BaseAction'
 
 /**
  * Контекст для Action Manager
  */
-export const ActionContext = createContext<ActionContextType | undefined>(undefined);
+export const ActionContext = createContext<ActionContextType | undefined>(undefined)
 
 /**
  * Интерфейс контекста для Action Manager
@@ -23,46 +23,46 @@ export interface ActionContextType {
  * Hook для использования Action Manager
  */
 export const useActionManager = (): ActionContextType => {
-  const context = useContext(ActionContext);
-  
+  const context = useContext(ActionContext)
+
   if (context === undefined) {
-    throw new Error('useActionManager must be used within an ActionProvider');
+    throw new Error('useActionManager must be used within an ActionProvider')
   }
-  
-  return context;
-};
+
+  return context
+}
 
 /**
  * Hook для получения действий по категории
  */
 export const useActionsByCategory = (category: string) => {
-  const { getActionsByCategory, updateActionStates } = useActionManager();
-  
+  const { getActionsByCategory, updateActionStates } = useActionManager()
+
   const actions = React.useMemo(() => {
-    return getActionsByCategory(category);
-  }, [getActionsByCategory, category]);
+    return getActionsByCategory(category)
+  }, [getActionsByCategory, category])
 
   React.useEffect(() => {
-    updateActionStates();
-  }, [updateActionStates]);
+    updateActionStates()
+  }, [updateActionStates])
 
-  return actions;
-};
+  return actions
+}
 
 /**
  * Hook для получения всех действий
  */
 export const useAllActions = () => {
-  const { getAllActions, updateActionStates } = useActionManager();
-  
+  const { getAllActions, updateActionStates } = useActionManager()
+
   const actions = React.useMemo(() => {
-    return getAllActions();
-  }, [getAllActions]);
+    return getAllActions()
+  }, [getAllActions])
 
   React.useEffect(() => {
-    updateActionStates();
-  }, [updateActionStates]);
+    updateActionStates()
+  }, [updateActionStates])
 
-  return actions;
-};
+  return actions
+}
 

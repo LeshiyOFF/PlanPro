@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ProjectAutoSaveService } from '../services/ProjectAutoSaveService';
+import { useEffect } from 'react'
+import { ProjectAutoSaveService } from '../services/ProjectAutoSaveService'
 
 /**
  * Хук для инициализации сервиса автосохранения.
@@ -7,12 +7,12 @@ import { ProjectAutoSaveService } from '../services/ProjectAutoSaveService';
  */
 export const useAutoSave = () => {
   useEffect(() => {
-    const autoSaveService = ProjectAutoSaveService.getInstance();
-    autoSaveService.start();
+    const autoSaveService = ProjectAutoSaveService.getInstance()
+    autoSaveService.start()
 
     return () => {
-      autoSaveService.stop();
-    };
-  }, []);
-};
+      autoSaveService.stop()
+    }
+  }, [])
+}
 

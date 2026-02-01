@@ -4,8 +4,8 @@
  * Следует SOLID принципам и обеспечивает полную типизацию ошибок
  */
 
-import { isError } from '@/utils/errorUtils';
-import { ValidationException } from './ValidationError';
+import { isError } from '@/utils/errorUtils'
+import { ValidationException } from './ValidationError'
 
 /**
  * Тип для перехваченных ошибок в catch блоках
@@ -30,7 +30,7 @@ export type CaughtError =
  */
 export function isCaughtError(error: unknown): error is CaughtError {
   if (isError(error)) {
-    return true;
+    return true
   }
 
   if (
@@ -43,10 +43,10 @@ export function isCaughtError(error: unknown): error is CaughtError {
     error instanceof DOMException ||
     error instanceof ValidationException
   ) {
-    return true;
+    return true
   }
 
-  return false;
+  return false
 }
 
 /**
@@ -57,18 +57,18 @@ export function isCaughtError(error: unknown): error is CaughtError {
  */
 export function toCaughtError(error: unknown): CaughtError {
   if (isCaughtError(error)) {
-    return error;
+    return error
   }
 
   if (typeof error === 'string') {
-    return new Error(error);
+    return new Error(error)
   }
 
   if (error && typeof error === 'object' && 'message' in error) {
-    return new Error(String((error as { message: unknown }).message));
+    return new Error(String((error as { message: unknown }).message))
   }
 
-  return new Error('Unknown error occurred');
+  return new Error('Unknown error occurred')
 }
 
 /**
@@ -78,10 +78,10 @@ export function toCaughtError(error: unknown): CaughtError {
  */
 export function getCaughtErrorMessage(error: CaughtError): string {
   if (error instanceof ValidationException) {
-    return error.formatErrors();
+    return error.formatErrors()
   }
-  return error.message || 'Unknown error';
+  return error.message || 'Unknown error'
 }
 
 /** Алиас для импорта из @/errors/CaughtError (совместимость с API-клиентами) */
-export const getErrorMessage = getCaughtErrorMessage;
+export const getErrorMessage = getCaughtErrorMessage

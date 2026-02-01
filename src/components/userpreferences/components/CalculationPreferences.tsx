@@ -1,54 +1,54 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { ICalculationPreferences } from '../interfaces/UserPreferencesInterfaces';
-import { Duration } from '@/types/Master_Functionality_Catalog';
+import React from 'react'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { ICalculationPreferences } from '../interfaces/UserPreferencesInterfaces'
+import { Duration } from '@/types/Master_Functionality_Catalog'
 
 /**
  * Компонент настроек расчетов
  * Управляет параметрами критического пути и логикой пересчета
  */
 export const CalculationPreferences: React.FC = () => {
-  const { preferences, updateCalculationPreferences } = useUserPreferences();
-  const calcPrefs = preferences.calculations as ICalculationPreferences;
+  const { preferences, updateCalculationPreferences } = useUserPreferences()
+  const calcPrefs = preferences.calculations as ICalculationPreferences
 
   const handleCriticalSlackValueChange = (value: string) => {
-    const val = parseFloat(value) || 0;
-    updateCalculationPreferences({ 
-      criticalSlack: { ...calcPrefs.criticalSlack, value: val } 
-    });
-  };
+    const val = parseFloat(value) || 0
+    updateCalculationPreferences({
+      criticalSlack: { ...calcPrefs.criticalSlack, value: val },
+    })
+  }
 
   const handleCriticalSlackUnitChange = (unit: string) => {
-    updateCalculationPreferences({ 
-      criticalSlack: { ...calcPrefs.criticalSlack, unit: unit as Duration['unit'] } 
-    });
-  };
+    updateCalculationPreferences({
+      criticalSlack: { ...calcPrefs.criticalSlack, unit: unit as Duration['unit'] },
+    })
+  }
 
   const handleMultipleCriticalPathsChange = (checked: boolean) => {
-    updateCalculationPreferences({ calculateMultipleCriticalPaths: checked });
-  };
+    updateCalculationPreferences({ calculateMultipleCriticalPaths: checked })
+  }
 
   const handleCriticalSlackLessThanValueChange = (value: string) => {
-    const val = parseFloat(value) || 0;
-    updateCalculationPreferences({ 
-      tasksAreCriticalIfSlackIsLessThan: { ...calcPrefs.tasksAreCriticalIfSlackIsLessThan, value: val } 
-    });
-  };
+    const val = parseFloat(value) || 0
+    updateCalculationPreferences({
+      tasksAreCriticalIfSlackIsLessThan: { ...calcPrefs.tasksAreCriticalIfSlackIsLessThan, value: val },
+    })
+  }
 
   const handleCriticalSlackLessThanUnitChange = (unit: string) => {
-    updateCalculationPreferences({ 
-      tasksAreCriticalIfSlackIsLessThan: { ...calcPrefs.tasksAreCriticalIfSlackIsLessThan, unit: unit as Duration['unit'] } 
-    });
-  };
+    updateCalculationPreferences({
+      tasksAreCriticalIfSlackIsLessThan: { ...calcPrefs.tasksAreCriticalIfSlackIsLessThan, unit: unit as Duration['unit'] },
+    })
+  }
 
   const handleShowEstimatedChange = (checked: boolean) => {
-    updateCalculationPreferences({ showEstimatedDurations: checked });
-  };
+    updateCalculationPreferences({ showEstimatedDurations: checked })
+  }
 
   return (
     <PreferencesSection
@@ -61,14 +61,14 @@ export const CalculationPreferences: React.FC = () => {
             <div className="space-y-2">
               <Label>Считать задачи критическими, если резерв меньше или равен:</Label>
               <div className="flex space-x-2">
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   value={calcPrefs.criticalSlack.value}
                   onChange={(e) => handleCriticalSlackValueChange(e.target.value)}
                   className="w-24"
                 />
-                <Select 
-                  value={calcPrefs.criticalSlack.unit} 
+                <Select
+                  value={calcPrefs.criticalSlack.unit}
                   onValueChange={handleCriticalSlackUnitChange}
                 >
                   <SelectTrigger className="w-32">
@@ -96,14 +96,14 @@ export const CalculationPreferences: React.FC = () => {
             <div className="space-y-2 pt-2">
               <Label>Считать задачи критическими, если резерв меньше:</Label>
               <div className="flex space-x-2">
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   value={calcPrefs.tasksAreCriticalIfSlackIsLessThan?.value || 0}
                   onChange={(e) => handleCriticalSlackLessThanValueChange(e.target.value)}
                   className="w-24 h-8 text-xs"
                 />
-                <Select 
-                  value={calcPrefs.tasksAreCriticalIfSlackIsLessThan?.unit || 'days'} 
+                <Select
+                  value={calcPrefs.tasksAreCriticalIfSlackIsLessThan?.unit || 'days'}
                   onValueChange={handleCriticalSlackLessThanUnitChange}
                 >
                   <SelectTrigger className="w-32 h-8 text-xs">
@@ -152,12 +152,12 @@ export const CalculationPreferences: React.FC = () => {
 
         <div className="pt-4 border-t">
           <p className="text-sm text-muted-foreground">
-            Критический путь — это последовательность задач, которая определяет дату завершения проекта. 
+            Критический путь — это последовательность задач, которая определяет дату завершения проекта.
             Изменение этих параметров мгновенно отразится на визуализации в диаграмме Ганта.
           </p>
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

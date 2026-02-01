@@ -3,7 +3,7 @@
  * Part of Canvas Gantt Chart System
  */
 
-import React from 'react';
+import React from 'react'
 
 export interface EnhancedToastProps {
   message: string;
@@ -16,24 +16,24 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
   message,
   type = 'info',
   duration = 3000,
-  onClose
+  onClose,
 }) => {
   React.useEffect(() => {
     if (duration > 0 && onClose) {
-      const timer = setTimeout(onClose, duration);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(onClose, duration)
+      return () => clearTimeout(timer)
     }
-    return undefined;
-  }, [duration, onClose]);
+    return undefined
+  }, [duration, onClose])
 
   const getBackgroundColor = () => {
     switch (type) {
-      case 'success': return '#4A4A4A';
-      case 'warning': return '#f59e0b';
-      case 'error': return '#ef4444';
-      default: return 'hsl(var(--primary))';
+      case 'success': return '#4A4A4A'
+      case 'warning': return '#f59e0b'
+      case 'error': return '#ef4444'
+      default: return 'hsl(var(--primary))'
     }
-  };
+  }
 
   return (
     <div
@@ -47,7 +47,7 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
         borderRadius: '6px',
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         zIndex: 1000,
-        maxWidth: '300px'
+        maxWidth: '300px',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -61,7 +61,7 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
               color: 'white',
               fontSize: '16px',
               cursor: 'pointer',
-              marginLeft: '12px'
+              marginLeft: '12px',
             }}
           >
             ×
@@ -69,8 +69,8 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
@@ -79,15 +79,15 @@ export interface LoadingSpinnerProps {
 
 export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
-  color = 'hsl(var(--primary))'
+  color = 'hsl(var(--primary))',
 }) => {
   const getSize = () => {
     switch (size) {
-      case 'small': return 16;
-      case 'large': return 32;
-      default: return 24;
+      case 'small': return 16
+      case 'large': return 32
+      default: return 24
     }
-  };
+  }
 
   return (
     <div
@@ -97,11 +97,11 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         border: `2px solid ${color}20`,
         borderTop: `2px solid ${color}`,
         borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
+        animation: 'spin 1s linear infinite',
       }}
     />
-  );
-};
+  )
+}
 
 export interface ButtonProps {
   children: React.ReactNode;
@@ -116,7 +116,7 @@ export const Button: React.FC<ButtonProps> = ({
   onClick,
   variant = 'primary',
   disabled = false,
-  size = 'medium'
+  size = 'medium',
 }) => {
   const getStyles = () => {
     const baseStyles = {
@@ -125,23 +125,23 @@ export const Button: React.FC<ButtonProps> = ({
       cursor: disabled ? 'not-allowed' : 'pointer',
       fontSize: size === 'small' ? '12px' : size === 'large' ? '16px' : '14px',
       padding: size === 'small' ? '6px 12px' : size === 'large' ? '12px 24px' : '8px 16px',
-      opacity: disabled ? 0.6 : 1
-    };
+      opacity: disabled ? 0.6 : 1,
+    }
 
     switch (variant) {
       case 'secondary':
-        return { ...baseStyles, backgroundColor: '#6b7280', color: 'white' };
+        return { ...baseStyles, backgroundColor: '#6b7280', color: 'white' }
       case 'danger':
-        return { ...baseStyles, backgroundColor: '#ef4444', color: 'white' };
+        return { ...baseStyles, backgroundColor: '#ef4444', color: 'white' }
       default:
-        return { ...baseStyles, backgroundColor: 'hsl(var(--primary))', color: 'white' };
+        return { ...baseStyles, backgroundColor: 'hsl(var(--primary))', color: 'white' }
     }
-  };
+  }
 
   return (
     <button onClick={onClick} disabled={disabled} style={getStyles()}>
       {children}
     </button>
-  );
-};
+  )
+}
 

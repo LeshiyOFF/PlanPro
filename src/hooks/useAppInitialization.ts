@@ -1,22 +1,22 @@
-import React, { useEffect, useCallback } from 'react';
-import { PerformanceMetricsCollector } from '@/providers/ReactProfilerProvider';
-import { useErrorHandler } from '@/hooks/useErrorHandler';
-import { useSentry } from '@/providers/SentryProvider';
-import { logger } from '@/utils/logger';
-import { RecalculationEngine } from '@/services/RecalculationEngine';
-import { useIpcService } from '@/hooks/useIpcService';
-import { useAutoSave } from '@/hooks/useAutoSave';
+import React, { useEffect, useCallback } from 'react'
+import { PerformanceMetricsCollector } from '@/providers/ReactProfilerProvider'
+import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { useSentry } from '@/providers/SentryProvider'
+import { logger } from '@/utils/logger'
+import { RecalculationEngine } from '@/services/RecalculationEngine'
+import { useIpcService } from '@/hooks/useIpcService'
+import { useAutoSave } from '@/hooks/useAutoSave'
 
 /**
  * Хук для инициализации системных сервисов приложения
  */
 export const useAppInitialization = () => {
-  const { handleError } = useErrorHandler();
-  const { captureError } = useSentry();
-  const ipcService = useIpcService();
+  const { handleError } = useErrorHandler()
+  const { captureError } = useSentry()
+  const ipcService = useIpcService()
 
   // Инициализация автосохранения
-  useAutoSave();
+  useAutoSave()
 
   // Инициализация Profiler и Metrics Collector
   useEffect(() => {
@@ -29,39 +29,39 @@ export const useAppInitialization = () => {
         memoryUsage: 100,
         score: 80,
       },
-    });
+    })
 
-    metricsCollector.start();
-    return () => metricsCollector.stop();
-  }, []);
+    metricsCollector.start()
+    return () => metricsCollector.stop()
+  }, [])
 
   // Инициализация движка пересчета и Java событий
   useEffect(() => {
-    RecalculationEngine.getInstance();
-    
+    RecalculationEngine.getInstance()
+
     const initializeJavaEvents = async () => {
       try {
-        await ipcService.subscribeToJavaEvents();
-        logger.info('Subscribed to Java events via IPC service');
+        await ipcService.subscribeToJavaEvents()
+        logger.info('Subscribed to Java events via IPC service')
       } catch (error) {
         logger.error('Failed to subscribe to Java events:', {
           message: error instanceof Error ? error.message : String(error),
-        });
+        })
       }
-    };
+    }
 
-    initializeJavaEvents();
-  }, [ipcService]);
+    initializeJavaEvents()
+  }, [ipcService])
 
   const handleGlobalError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
-    handleError(error, 'App Root');
+    handleError(error, 'App Root')
     captureError(error, {
       component: 'App',
       errorBoundary: true,
       errorInfo,
-    });
-  }, [handleError, captureError]);
+    })
+  }, [handleError, captureError])
 
-  return { handleGlobalError };
-};
+  return { handleGlobalError }
+}
 

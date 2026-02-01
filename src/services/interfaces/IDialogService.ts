@@ -3,7 +3,7 @@
  * Следует SOLID принципам (Interface Segregation Principle)
  */
 
-import { DialogType, DialogData, DialogResult } from '@/types/dialog/IDialogRegistry';
+import { DialogType, DialogData, DialogResult } from '@/types/dialog/IDialogRegistry'
 
 /**
  * Состояние диалога с типизацией

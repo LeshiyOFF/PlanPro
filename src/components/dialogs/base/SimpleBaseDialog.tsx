@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Dialog,
   DialogContent,
@@ -6,8 +6,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 export interface SimpleBaseDialogProps {
   open: boolean;
@@ -50,56 +50,56 @@ export const SimpleBaseDialog: React.FC<SimpleBaseDialogProps> = ({
   maxWidth = '90vw',
   className = '',
   footer,
-  size = 'medium'
+  size = 'medium',
 }) => {
   const getWidth = () => {
-    if (size === 'fullscreen') return '95vw';
-    if (width !== '600px') return width;
+    if (size === 'fullscreen') return '95vw'
+    if (width !== '600px') return width
     switch (size) {
-      case 'small': return '400px';
-      case 'large': return '800px';
-      default: return '600px';
+      case 'small': return '400px'
+      case 'large': return '800px'
+      default: return '600px'
     }
-  };
+  }
 
   const getHeight = () => {
-    if (size === 'fullscreen') return '95vh';
-    return height;
-  };
+    if (size === 'fullscreen') return '95vh'
+    return height
+  }
 
   const handleCancel = () => {
     if (onCancel) {
-      onCancel();
+      onCancel()
     }
     if (onClose) {
-      onClose();
+      onClose()
     }
-    onOpenChange(false);
-  };
+    onOpenChange(false)
+  }
 
   const handleConfirm = () => {
     if (isValid && onConfirm) {
-      onConfirm();
+      onConfirm()
     }
-  };
+  }
 
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
-      handleCancel();
+      handleCancel()
     } else {
-      onOpenChange(newOpen);
+      onOpenChange(newOpen)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent 
+      <DialogContent
         className={className}
         aria-describedby={description ? undefined : undefined}
         style={{
           width: getWidth(),
           height: getHeight(),
-          maxWidth
+          maxWidth,
         }}
       >
         <DialogHeader>
@@ -108,11 +108,11 @@ export const SimpleBaseDialog: React.FC<SimpleBaseDialogProps> = ({
             <DialogDescription>{description}</DialogDescription>
           )}
         </DialogHeader>
-        
+
         <div className="flex-1 overflow-auto">
           {children}
         </div>
-        
+
         {footer ? (
           <DialogFooter>
             {footer}
@@ -123,8 +123,8 @@ export const SimpleBaseDialog: React.FC<SimpleBaseDialogProps> = ({
               {cancelLabel}
             </Button>
             {onConfirm && (
-              <Button 
-                onClick={handleConfirm} 
+              <Button
+                onClick={handleConfirm}
                 disabled={!isValid}
               >
                 {confirmLabel}
@@ -134,10 +134,10 @@ export const SimpleBaseDialog: React.FC<SimpleBaseDialogProps> = ({
         )}
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
 // Алиас для обратной совместимости
-export const BaseDialog = SimpleBaseDialog;
+export const BaseDialog = SimpleBaseDialog
 export type BaseDialogProps = SimpleBaseDialogProps;
 

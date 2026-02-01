@@ -1,5 +1,5 @@
-import React from 'react';
-import { useStatusMonitor } from '@/hooks/useStatusMonitor';
+import React from 'react'
+import { useStatusMonitor } from '@/hooks/useStatusMonitor'
 
 /**
  * Компонент для отображения истории статуса
@@ -10,30 +10,30 @@ export const StatusHistory: React.FC = () => {
     monitoringErrors,
     getStatistics,
     clearHistory,
-    hasErrors
-  } = useStatusMonitor(5000);
+    hasErrors,
+  } = useStatusMonitor(5000)
 
-  const statistics = getStatistics();
+  const statistics = getStatistics()
 
   const formatDuration = (timestamp: Date) => {
-    const now = new Date();
-    const diff = now.getTime() - timestamp.getTime();
-    
-    if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`;
-    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
-    return `${Math.floor(diff / 86400000)}d ago`;
-  };
+    const now = new Date()
+    const diff = now.getTime() - timestamp.getTime()
+
+    if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`
+    return `${Math.floor(diff / 86400000)}d ago`
+  }
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'running': return '🟢';
-      case 'stopped': return '🔴';
-      case 'starting': return '🟡';
-      case 'error': return '❌';
-      default: return '⚪';
+      case 'running': return '🟢'
+      case 'stopped': return '🔴'
+      case 'starting': return '🟡'
+      case 'error': return '❌'
+      default: return '⚪'
     }
-  };
+  }
 
   if (statusHistory.length === 0 && !hasErrors) {
     return (
@@ -43,12 +43,12 @@ export const StatusHistory: React.FC = () => {
         color: '#6b7280',
         border: '2px dashed #d1d5db',
         borderRadius: '10px',
-        backgroundColor: '#f9fafb'
+        backgroundColor: '#f9fafb',
       }}>
         <h3>No Status History</h3>
         <p>Status monitoring will begin when Java backend is started</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -57,7 +57,7 @@ export const StatusHistory: React.FC = () => {
       borderRadius: '12px',
       padding: '20px',
       margin: '10px 0',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     }}>
       {/* Заголовок и статистика */}
       <div style={{
@@ -66,12 +66,12 @@ export const StatusHistory: React.FC = () => {
         alignItems: 'center',
         marginBottom: '20px',
         paddingBottom: '15px',
-        borderBottom: '1px solid #e5e7eb'
+        borderBottom: '1px solid #e5e7eb',
       }}>
         <h3 style={{ margin: 0, color: '#1f2937' }}>
           Status History & Statistics
         </h3>
-        
+
         <button
           onClick={clearHistory}
           style={{
@@ -81,7 +81,7 @@ export const StatusHistory: React.FC = () => {
             border: 'none',
             borderRadius: '6px',
             fontSize: '12px',
-            cursor: 'pointer'
+            cursor: 'pointer',
           }}
         >
           Clear History
@@ -94,13 +94,13 @@ export const StatusHistory: React.FC = () => {
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: '15px',
-          marginBottom: '20px'
+          marginBottom: '20px',
         }}>
           <div style={{
             backgroundColor: '#f0f9ff',
             padding: '15px',
             borderRadius: '8px',
-            border: '1px solid #38bdf8'
+            border: '1px solid #38bdf8',
           }}>
             <div style={{ fontSize: '12px', color: '#0c4a6e', marginBottom: '5px' }}>
               Total Checks
@@ -115,7 +115,7 @@ export const StatusHistory: React.FC = () => {
               backgroundColor: '#f0fdf4',
               padding: '15px',
               borderRadius: '8px',
-              border: '1px solid #22c55e'
+              border: '1px solid #22c55e',
             }}>
               <div style={{ fontSize: '12px', color: '#166534', marginBottom: '5px' }}>
                 Avg Uptime
@@ -131,7 +131,7 @@ export const StatusHistory: React.FC = () => {
               backgroundColor: '#fefce8',
               padding: '15px',
               borderRadius: '8px',
-              border: '1px solid #eab308'
+              border: '1px solid #eab308',
             }}>
               <div style={{ fontSize: '12px', color: '#713f12', marginBottom: '5px' }}>
                 Avg Memory
@@ -146,7 +146,7 @@ export const StatusHistory: React.FC = () => {
             backgroundColor: hasErrors ? '#fef2f2' : '#f0fdf4',
             padding: '15px',
             borderRadius: '8px',
-            border: `1px solid ${hasErrors ? '#ef4444' : '#22c55e'}`
+            border: `1px solid ${hasErrors ? '#ef4444' : '#22c55e'}`,
           }}>
             <div style={{ fontSize: '12px', color: hasErrors ? '#991b1b' : '#166534', marginBottom: '5px' }}>
               Error Rate
@@ -165,7 +165,7 @@ export const StatusHistory: React.FC = () => {
           border: '1px solid #fca5a5',
           borderRadius: '8px',
           padding: '15px',
-          marginBottom: '20px'
+          marginBottom: '20px',
         }}>
           <h4 style={{ margin: '0 0 10px 0', color: '#991b1b' }}>
             Recent Monitoring Errors
@@ -177,7 +177,7 @@ export const StatusHistory: React.FC = () => {
               marginBottom: '5px',
               padding: '5px',
               backgroundColor: '#fee2e2',
-              borderRadius: '4px'
+              borderRadius: '4px',
             }}>
               {error}
             </div>
@@ -190,7 +190,7 @@ export const StatusHistory: React.FC = () => {
         <h4 style={{ margin: '0 0 15px 0', color: '#374151' }}>
           Recent Status Changes
         </h4>
-        
+
         {statusHistory.length === 0 ? (
           <p style={{ color: '#6b7280', textAlign: 'center', padding: '20px' }}>
             No status changes recorded yet
@@ -205,7 +205,7 @@ export const StatusHistory: React.FC = () => {
               backgroundColor: index % 2 === 0 ? '#f9fafb' : 'white',
               border: '1px solid #e5e7eb',
               borderRadius: '6px',
-              marginBottom: '8px'
+              marginBottom: '8px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <span style={{ fontSize: '20px' }}>
@@ -220,7 +220,7 @@ export const StatusHistory: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div style={{ fontSize: '12px', color: '#6b7280' }}>
                 {entry.timestamp.toLocaleString()}
               </div>
@@ -229,6 +229,6 @@ export const StatusHistory: React.FC = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 

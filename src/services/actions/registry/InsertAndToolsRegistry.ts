@@ -1,11 +1,11 @@
-import { BaseActionRegistry } from './BaseActionRegistry';
-import { ActionCategory } from '../ActionManager';
+import { BaseActionRegistry } from './BaseActionRegistry'
+import { ActionCategory } from '../ActionManager'
 import {
   NewTaskAction,
-  NewResourceAction
-} from '../InsertActions';
-import { SearchAction } from '../ToolsActions';
-import { logger } from '@/utils/logger';
+  NewResourceAction,
+} from '../InsertActions'
+import { SearchAction } from '../ToolsActions'
+import { logger } from '@/utils/logger'
 
 /**
  * Реестр действий вставки
@@ -17,14 +17,14 @@ export class InsertActionRegistry extends BaseActionRegistry {
   public registerAllActions(): void {
     const insertActions = [
       new NewTaskAction(this.dependencies.projectProvider),
-      new NewResourceAction(this.dependencies.projectProvider)
-    ];
+      new NewResourceAction(this.dependencies.projectProvider),
+    ]
 
     insertActions.forEach(action => {
-      this.actionManager.registerAction(action, ActionCategory.INSERT);
-    });
+      this.actionManager.registerAction(action, ActionCategory.INSERT)
+    })
 
-    logger.info(`Registered ${insertActions.length} insert actions`);
+    logger.info(`Registered ${insertActions.length} insert actions`)
   }
 }
 
@@ -37,14 +37,14 @@ export class ToolsActionRegistry extends BaseActionRegistry {
    */
   public registerAllActions(): void {
     const toolsActions = [
-      new SearchAction()
-    ];
+      new SearchAction(),
+    ]
 
     toolsActions.forEach(action => {
-      this.actionManager.registerAction(action, ActionCategory.TOOLS);
-    });
+      this.actionManager.registerAction(action, ActionCategory.TOOLS)
+    })
 
-    logger.info(`Registered ${toolsActions.length} tools actions`);
+    logger.info(`Registered ${toolsActions.length} tools actions`)
   }
 }
 

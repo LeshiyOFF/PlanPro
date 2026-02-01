@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface ProjectData {
   [key: string]: string | number | boolean | undefined;
@@ -25,16 +25,16 @@ export interface UpdateProjectDialogProps extends Omit<BaseDialogProps, 'childre
 const PROJECT_TYPES = [
   { value: 0, label: 'Standard' },
   { value: 1, label: 'Template' },
-  { value: 2, label: 'Master' }
-];
+  { value: 2, label: 'Master' },
+]
 
 const PROJECT_STATUS = [
   { value: 0, label: 'Planning' },
   { value: 1, label: 'Active' },
   { value: 2, label: 'On Hold' },
   { value: 3, label: 'Completed' },
-  { value: 4, label: 'Archived' }
-];
+  { value: 4, label: 'Archived' },
+]
 
 export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
   projectData,
@@ -49,55 +49,55 @@ export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
       notes: '',
       startDate: new Date().toISOString().split('T')[0],
       projectType: 0,
-      projectStatus: 0
-    }
-  );
+      projectStatus: 0,
+    },
+  )
 
   const { validate, errors, isValid } = useDialogValidation({
     name: {
       required: true,
       minLength: 1,
-      maxLength: 255
+      maxLength: 255,
     },
     manager: {
       required: true,
       minLength: 1,
-      maxLength: 100
+      maxLength: 100,
     },
     startDate: {
       required: true,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Invalid date format';
-        const date = new Date(value);
-        return !isNaN(date.getTime()) ? null : 'Invalid date format';
-      }
-    }
-  });
+        if (!value || typeof value !== 'string') return 'Invalid date format'
+        const date = new Date(value)
+        return !isNaN(date.getTime()) ? null : 'Invalid date format'
+      },
+    },
+  })
 
   React.useEffect(() => {
     if (projectData) {
-      setFormData(projectData);
+      setFormData(projectData)
     }
-  }, [projectData]);
+  }, [projectData])
 
   React.useEffect(() => {
-    validate(formData);
-  }, [formData]);
+    validate(formData)
+  }, [formData])
 
   const handleFieldChange = (field: keyof ProjectData, value: ProjectData[keyof ProjectData]) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleUpdate = () => {
     if (isValid()) {
-      onUpdate?.(formData);
-      onClose?.();
+      onUpdate?.(formData)
+      onClose?.()
     }
-  };
+  }
 
-  const canUpdate = isValid();
+  const canUpdate = isValid()
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -211,6 +211,6 @@ export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface LoadingSpinnerProps {
   size?: 'small' | 'medium' | 'large';
@@ -14,7 +14,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'medium',
   message,
   overlay = false,
-  color = '#007acc'
+  color = '#007acc',
 }) => {
   const getSizeStyles = () => {
     switch (size) {
@@ -22,22 +22,22 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         return {
           width: '20px',
           height: '20px',
-          borderWidth: '2px'
-        };
+          borderWidth: '2px',
+        }
       case 'large':
         return {
           width: '40px',
           height: '40px',
-          borderWidth: '4px'
-        };
+          borderWidth: '4px',
+        }
       default:
         return {
           width: '24px',
           height: '24px',
-          borderWidth: '3px'
-        };
+          borderWidth: '3px',
+        }
     }
-  };
+  }
 
   const spinnerStyles = {
     border: `${getSizeStyles().borderWidth} solid rgba(0, 0, 0, 0.1)`,
@@ -45,8 +45,8 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     borderRadius: '50%',
     width: getSizeStyles().width,
     height: getSizeStyles().height,
-    animation: 'spin 1s linear infinite'
-  };
+    animation: 'spin 1s linear infinite',
+  }
 
   const containerStyles = overlay ? {
     position: 'fixed' as const,
@@ -59,13 +59,13 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     flexDirection: 'column' as const,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 9999
+    zIndex: 9999,
   } : {
     display: 'flex',
     flexDirection: 'column' as const,
     alignItems: 'center',
-    gap: '10px'
-  };
+    gap: '10px',
+  }
 
   return (
     <div style={containerStyles}>
@@ -75,7 +75,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           color: overlay ? 'white' : color,
           fontSize: '14px',
           fontWeight: '500',
-          marginTop: '10px'
+          marginTop: '10px',
         }}>
           {message}
         </div>
@@ -87,6 +87,6 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         }
       `}</style>
     </div>
-  );
-};
+  )
+}
 

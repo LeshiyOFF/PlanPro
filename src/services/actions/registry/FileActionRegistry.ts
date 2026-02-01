@@ -1,13 +1,13 @@
-import { BaseActionRegistry } from './BaseActionRegistry';
-import { ActionCategory } from '../ActionManager';
+import { BaseActionRegistry } from './BaseActionRegistry'
+import { ActionCategory } from '../ActionManager'
 import {
   NewProjectAction,
   OpenProjectAction,
   SaveProjectAction,
   SaveProjectAsAction,
-  PrintAction
-} from '../FileActions';
-import { logger } from '@/utils/logger';
+  PrintAction,
+} from '../FileActions'
+import { logger } from '@/utils/logger'
 
 /**
  * Реестр файловых действий
@@ -22,14 +22,14 @@ export class FileActionRegistry extends BaseActionRegistry {
       new OpenProjectAction(this.dependencies),
       new SaveProjectAction(this.dependencies),
       new SaveProjectAsAction(this.dependencies),
-      new PrintAction()
-    ];
+      new PrintAction(),
+    ]
 
     fileActions.forEach(action => {
-      this.actionManager.registerAction(action, ActionCategory.FILE);
-    });
+      this.actionManager.registerAction(action, ActionCategory.FILE)
+    })
 
-    logger.info(`Registered ${fileActions.length} file actions`);
+    logger.info(`Registered ${fileActions.length} file actions`)
   }
 }
 

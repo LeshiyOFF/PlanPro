@@ -42,7 +42,7 @@ export type { MessageBoxOptions as MessageBoxOptionsFromUi } from './ui/message-
 export * from './api/request-types'
 
 // Типизированный контракт FileAPI (из api)
-export type { FileAPI } from './api/file-api.types';
+export type { FileAPI } from './api/file-api.types'
 
 // Экспорт типов из Master Catalog (для обратной совместимости)
 export type {
@@ -60,7 +60,7 @@ export type {
   ProjectAPI,
   TaskAPI,
   ResourceAPI,
-  DependencyType
+  DependencyType,
 } from './Master_Functionality_Catalog'
 
 // Конфигурация API-клиентов (используется хуками useProjectAPI, useTaskAPI и т.д.)

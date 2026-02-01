@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
-import { ViewMode } from 'gantt-task-react';
-import { TimelineFormatService } from '@/services/TimelineFormatService';
-import { GanttNavigationService } from '@/services/GanttNavigationService';
+import React, { useMemo } from 'react'
+import { ViewMode } from 'gantt-task-react'
+import { TimelineFormatService } from '@/services/TimelineFormatService'
+import { GanttNavigationService } from '@/services/GanttNavigationService'
 
 interface ProfessionalTimelineHeaderProps {
   startDate: Date;
@@ -24,56 +24,56 @@ export const ProfessionalTimelineHeader: React.FC<ProfessionalTimelineHeaderProp
   columnWidth,
   scrollLeft,
   headerHeight,
-  containerWidth
+  containerWidth,
 }) => {
-  const allIntervals = useMemo(() => 
+  const allIntervals = useMemo(() =>
     TimelineFormatService.generateIntervals(startDate, endDate, viewMode),
-    [startDate, endDate, viewMode]
-  );
+  [startDate, endDate, viewMode],
+  )
 
   // Виртуализация: вычисляем только видимые интервалы
-  const { startIndex, endIndex } = useMemo(() => 
+  const { startIndex, endIndex } = useMemo(() =>
     GanttNavigationService.getVisibleRangeIndices(scrollLeft, containerWidth, columnWidth, allIntervals.length),
-    [scrollLeft, containerWidth, columnWidth, allIntervals.length]
-  );
+  [scrollLeft, containerWidth, columnWidth, allIntervals.length],
+  )
 
-  const visibleIntervals = useMemo(() => 
+  const visibleIntervals = useMemo(() =>
     allIntervals.slice(startIndex, endIndex),
-    [allIntervals, startIndex, endIndex]
-  );
+  [allIntervals, startIndex, endIndex],
+  )
 
   // Группировка видимых интервалов для верхнего уровня
   const topLevelGroups = useMemo(() => {
-    const groups: { date: Date; width: number }[] = [];
-    if (visibleIntervals.length === 0) return groups;
+    const groups: { date: Date; width: number }[] = []
+    if (visibleIntervals.length === 0) return groups
 
-    let currentGroup = { date: visibleIntervals[0], width: columnWidth };
-    
+    let currentGroup = { date: visibleIntervals[0], width: columnWidth }
+
     for (let i = 1; i < visibleIntervals.length; i++) {
-      const date = visibleIntervals[i];
-      const isSameGroup = viewMode === ViewMode.Month 
+      const date = visibleIntervals[i]
+      const isSameGroup = viewMode === ViewMode.Month
         ? date.getFullYear() === currentGroup.date.getFullYear()
-        : (date.getMonth() === currentGroup.date.getMonth() && date.getFullYear() === currentGroup.date.getFullYear());
+        : (date.getMonth() === currentGroup.date.getMonth() && date.getFullYear() === currentGroup.date.getFullYear())
 
       if (isSameGroup) {
-        currentGroup.width += columnWidth;
+        currentGroup.width += columnWidth
       } else {
-        groups.push(currentGroup);
-        currentGroup = { date, width: columnWidth };
+        groups.push(currentGroup)
+        currentGroup = { date, width: columnWidth }
       }
     }
-    groups.push(currentGroup);
-    return groups;
-  }, [visibleIntervals, columnWidth, viewMode]);
+    groups.push(currentGroup)
+    return groups
+  }, [visibleIntervals, columnWidth, viewMode])
 
-  const leftOffset = startIndex * columnWidth;
+  const leftOffset = startIndex * columnWidth
 
   return (
-    <div 
+    <div
       className="professional-timeline-header select-none border-b border-slate-200 bg-slate-50/80 backdrop-blur-sm sticky top-0 z-20 overflow-hidden"
       style={{ height: headerHeight, width: '100%' }}
     >
-      <div 
+      <div
         className="flex flex-col h-full transition-transform duration-0"
         style={{ transform: `translateX(${leftOffset - scrollLeft}px)`, width: 'max-content' }}
       >
@@ -104,5 +104,5 @@ export const ProfessionalTimelineHeader: React.FC<ProfessionalTimelineHeaderProp
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { CalendarDialogData, IDialogData } from '@/types/dialog/DialogTypes';
-import { TypedDialogActions } from '@/types/dialog/DialogStateTypes';
-import { logger } from '@/utils/logger';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { CalendarDialogData, IDialogData } from '@/types/dialog/DialogTypes'
+import { TypedDialogActions } from '@/types/dialog/DialogStateTypes'
+import { logger } from '@/utils/logger'
+import { Button } from '@/components/ui/button'
 
 /**
  * Типизированный интерфейс для данных рабочего времени
@@ -35,13 +35,13 @@ const WorkingTimeFormComponent: React.FC<{
   workingTime: Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>;
   onChange: (day: number, field: string, value: string) => void;
 }> = ({ workingTime, onChange }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-7 gap-2">
         {[0, 1, 2, 3, 4, 5, 6].map(day => {
-          const dayData = workingTime[`day${day}`] || { startTime: '09:00', endTime: '17:00', isWorkingDay: true };
+          const dayData = workingTime[`day${day}`] || { startTime: '09:00', endTime: '17:00', isWorkingDay: true }
           return (
             <div key={day} className="border rounded-lg p-3 space-y-2">
               <div className="text-xs font-semibold uppercase text-slate-500">
@@ -64,12 +64,12 @@ const WorkingTimeFormComponent: React.FC<{
                 />
               </div>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
-};
+  )
+}
 
 // export const WorkingTimeForm = WorkingTimeFormComponent; // Removed to avoid redeclaration conflict
 
@@ -81,43 +81,43 @@ export const TypedWorkingTimeDialog: React.FC<{
   data?: CalendarDialogData;
   onClose: () => void;
 }> = ({ data, onClose }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const [workingTime, setWorkingTime] = useState<Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>>(() => {
-    return data?.workingTime ?? {};
-  });
-  const [isSaving, setIsSaving] = useState(false);
+    return data?.workingTime ?? {}
+  })
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
-    setIsSaving(true);
+    setIsSaving(true)
     try {
-      localStorage.setItem('calendar-working-time', JSON.stringify({ workingTime }));
-      onClose();
+      localStorage.setItem('calendar-working-time', JSON.stringify({ workingTime }))
+      onClose()
     } catch (error) {
-      logger.error('Failed to save working time settings:', error instanceof Error ? error : new Error(String(error)));
+      logger.error('Failed to save working time settings:', error instanceof Error ? error : new Error(String(error)))
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
-  if (!data) return null;
+  if (!data) return null
 
   return (
     <div className="p-4">
-      <WorkingTimeFormComponent 
-        workingTime={workingTime} 
+      <WorkingTimeFormComponent
+        workingTime={workingTime}
         onChange={(day: number, field: string, value: string) => {
           setWorkingTime((prev: Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>) => {
-            const dayKey = `day${day}`;
-            const currentDay = prev[dayKey] || { startTime: '09:00', endTime: '17:00', isWorkingDay: true };
+            const dayKey = `day${day}`
+            const currentDay = prev[dayKey] || { startTime: '09:00', endTime: '17:00', isWorkingDay: true }
             return {
               ...prev,
               [dayKey]: {
                 ...currentDay,
-                [field === 'start' ? 'startTime' : 'endTime']: value
-              }
-            };
-          });
-        }} 
+                [field === 'start' ? 'startTime' : 'endTime']: value,
+              },
+            }
+          })
+        }}
       />
       <div className="flex justify-end space-x-2 mt-6">
         <Button variant="outline" onClick={onClose} disabled={isSaving}>
@@ -128,11 +128,11 @@ export const TypedWorkingTimeDialog: React.FC<{
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
 /**
  * Экспорт для обратной совместимости
  */
-export const WorkingTimeFormLegacy = TypedWorkingTimeDialog;
+export const WorkingTimeFormLegacy = TypedWorkingTimeDialog
 export type WorkingTimeFormProps = React.ComponentProps<typeof TypedWorkingTimeDialog>;

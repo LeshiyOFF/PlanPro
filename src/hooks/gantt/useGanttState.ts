@@ -3,7 +3,7 @@
  * Выделен для соблюдения принципа Single Responsibility
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react'
 
 /**
  * Результат хука состояния Gantt
@@ -34,31 +34,31 @@ interface IUseGanttStateParams {
  * Хук управления состоянием Gantt
  */
 export const useGanttState = ({
-  initialDate
+  initialDate,
 }: IUseGanttStateParams = {}): IUseGanttStateResult => {
-  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
-  const [showToday, setShowToday] = useState(true);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [currentDate, setCurrentDate] = useState(initialDate || new Date());
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
+  const [showToday, setShowToday] = useState(true)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [currentDate, setCurrentDate] = useState(initialDate || new Date())
 
   const handleViewModeChange = useCallback((mode: 'day' | 'week' | 'month') => {
-    setViewMode(mode);
-    setZoomLevel(mode === 'day' ? 1.5 : mode === 'week' ? 1 : 0.8);
-  }, []);
+    setViewMode(mode)
+    setZoomLevel(mode === 'day' ? 1.5 : mode === 'week' ? 1 : 0.8)
+  }, [])
 
   const handleZoomIn = useCallback(() => {
-    setZoomLevel(prev => Math.min(prev + 0.1, 3));
-  }, []);
+    setZoomLevel(prev => Math.min(prev + 0.1, 3))
+  }, [])
 
   const handleZoomOut = useCallback(() => {
-    setZoomLevel(prev => Math.max(prev - 0.1, 0.5));
-  }, []);
+    setZoomLevel(prev => Math.max(prev - 0.1, 0.5))
+  }, [])
 
   const handleFitToScreen = useCallback(() => {
-    setZoomLevel(1);
-    setCurrentDate(new Date());
-    setShowToday(true);
-  }, []);
+    setZoomLevel(1)
+    setCurrentDate(new Date())
+    setShowToday(true)
+  }, [])
 
   return {
     viewMode,
@@ -72,6 +72,6 @@ export const useGanttState = ({
     handleViewModeChange,
     handleZoomIn,
     handleZoomOut,
-    handleFitToScreen
-  };
-};
+    handleFitToScreen,
+  }
+}

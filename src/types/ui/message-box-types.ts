@@ -3,7 +3,7 @@
  * Заменяют использование `any` для строгой типизации
  */
 
-import type { JsonObject } from '../json-types';
+import type { JsonObject } from '../json-types'
 
 // Базовые типы диалогов
 export interface BaseDialogOptions {

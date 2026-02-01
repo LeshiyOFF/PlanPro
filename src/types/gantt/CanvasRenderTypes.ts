@@ -3,8 +3,8 @@
  * Заменяет использование `any` в render функциях.
  */
 
-import { CanvasContext, CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas';
-import { GanttTask } from './GanttTaskTypes';
+import { CanvasContext, CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas'
+import { GanttTask } from './GanttTaskTypes'
 
 /**
  * Данные для рендеринга Gantt задачи

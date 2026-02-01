@@ -3,7 +3,7 @@
  * Следует SOLID принципам
  */
 
-import { ReactNode } from 'react';
+import { ReactNode } from 'react'
 
 // Базовые пропсы для всех atomic компонентов
 export interface BaseAtomicProps {

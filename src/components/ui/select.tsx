@@ -1,5 +1,5 @@
-import React, { createContext, useContext } from 'react';
-import { cn } from '@/utils/cn';
+import React, { createContext, useContext } from 'react'
+import { cn } from '@/utils/cn'
 
 /**
  * Контекст для Select
@@ -13,7 +13,7 @@ interface SelectContextValue {
   disabled?: boolean;
 }
 
-const SelectContext = createContext<SelectContextValue | undefined>(undefined);
+const SelectContext = createContext<SelectContextValue | undefined>(undefined)
 
 /**
  * Компонент Select
@@ -35,47 +35,47 @@ export const Select: React.FC<SelectProps> = ({
   placeholder: _placeholder,
   disabled = false,
   className,
-  children
+  children,
 }) => {
-  const [open, setOpen] = React.useState(false);
-  const [displayValue, setDisplayValue] = React.useState<React.ReactNode>(null);
+  const [open, setOpen] = React.useState(false)
+  const [displayValue, setDisplayValue] = React.useState<React.ReactNode>(null)
 
   // Эффект для поиска текстового представления значения при изменении value или children
   React.useEffect(() => {
     if (!value) {
-      setDisplayValue(null);
-      return;
+      setDisplayValue(null)
+      return
     }
 
     // Ищем SelectItem с нужным value среди children
-    let foundLabel: React.ReactNode = null;
-    
+    let foundLabel: React.ReactNode = null
+
     const findLabel = (nodes: React.ReactNode) => {
       React.Children.forEach(nodes, (child) => {
-        if (foundLabel) return;
-        if (!React.isValidElement(child)) return;
+        if (foundLabel) return
+        if (!React.isValidElement(child)) return
 
         // Если это SelectItem и его value совпадает
         if (child.props.value === value) {
-          foundLabel = child.props.children;
-          return;
+          foundLabel = child.props.children
+          return
         }
 
         // Если у элемента есть свои children (например, SelectContent), ищем в них
         if (child.props.children) {
-          findLabel(child.props.children);
+          findLabel(child.props.children)
         }
-      });
-    };
+      })
+    }
 
-    findLabel(children);
-    setDisplayValue(foundLabel);
-  }, [value, children]);
+    findLabel(children)
+    setDisplayValue(foundLabel)
+  }, [value, children])
 
   const handleValueChange = (newValue: string) => {
-    onValueChange?.(newValue);
-    setOpen(false);
-  };
+    onValueChange?.(newValue)
+    setOpen(false)
+  }
 
   const contextValue = {
     value,
@@ -83,8 +83,8 @@ export const Select: React.FC<SelectProps> = ({
     onValueChange: handleValueChange,
     open,
     onOpenChange: setOpen,
-    disabled
-  };
+    disabled,
+  }
 
   return (
     <SelectContext.Provider value={contextValue}>
@@ -92,8 +92,8 @@ export const Select: React.FC<SelectProps> = ({
         {children}
       </div>
     </SelectContext.Provider>
-  );
-};
+  )
+}
 
 /**
  * Компонент SelectTrigger
@@ -106,13 +106,13 @@ interface SelectTriggerProps {
 }
 
 export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, children, id }) => {
-  const context = useContext(SelectContext);
+  const context = useContext(SelectContext)
 
   const handleClick = () => {
     if (!context?.disabled) {
-      context?.onOpenChange?.(!context?.open);
+      context?.onOpenChange?.(!context?.open)
     }
-  };
+  }
 
   return (
     <button
@@ -122,7 +122,7 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, childre
       disabled={context?.disabled}
       className={cn(
         'flex h-10 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-colors soft-border',
-        className
+        className,
       )}
     >
       {children}
@@ -130,8 +130,8 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, childre
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     </button>
-  );
-};
+  )
+}
 
 /**
  * Компонент SelectValue
@@ -142,16 +142,16 @@ interface SelectValueProps {
 }
 
 export const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className }) => {
-  const context = useContext(SelectContext);
-  
+  const context = useContext(SelectContext)
+
   // Если у нас есть выбранный текст (displayValue), показываем его.
   // Иначе пытаемся показать сырое значение или placeholder.
   return (
     <span className={cn('block truncate', className)}>
       {context?.displayValue || context?.value || placeholder}
     </span>
-  );
-};
+  )
+}
 
 /**
  * Компонент SelectContent
@@ -162,21 +162,21 @@ interface SelectContentProps {
 }
 
 export const SelectContent: React.FC<SelectContentProps> = ({ className, children }) => {
-  const context = useContext(SelectContext);
+  const context = useContext(SelectContext)
 
   if (!context?.open) {
-    return null;
+    return null
   }
 
   return (
     <div className={cn(
       'absolute top-full left-0 right-0 z-50 mt-1 w-full rounded-md border bg-popover p-1 text-popover-foreground shadow-lg soft-border',
-      className
+      className,
     )}>
       {children}
     </div>
-  );
-};
+  )
+}
 
 /**
  * Компонент SelectItem
@@ -188,15 +188,15 @@ interface SelectItemProps {
 }
 
 export const SelectItem: React.FC<SelectItemProps> = ({ value, className, children }) => {
-  const context = useContext(SelectContext);
-  
+  const context = useContext(SelectContext)
+
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    context?.onValueChange?.(value);
-  };
+    e.stopPropagation()
+    context?.onValueChange?.(value)
+  }
 
   // Подсветка выбранного элемента
-  const isSelected = context?.value === value;
+  const isSelected = context?.value === value
 
   return (
     <div
@@ -204,11 +204,11 @@ export const SelectItem: React.FC<SelectItemProps> = ({ value, className, childr
       className={cn(
         'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 px-2.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
         isSelected && 'bg-accent text-accent-foreground',
-        className
+        className,
       )}
     >
       {children}
     </div>
-  );
-};
+  )
+}
 

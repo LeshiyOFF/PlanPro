@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { 
+import React, { useState, useEffect } from 'react'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Separator } from '@/components/ui/separator'
+import {
   HotkeyProvider,
   HotkeyDisplay,
   HotkeyList,
@@ -13,43 +13,43 @@ import {
   useHotkeyAction,
   useFileHotkeys,
   useNavigationHotkeys,
-  hotkeyService
-} from '@/components/hotkey';
-import type { HotkeyStatusBarBridge } from '@/services/HotkeyStatusBarBridge';
-import type { HotkeyConfig } from '@/types/HotkeyTypes';
-import { HotkeyCategory } from '@/types/HotkeyTypes';
-import { logger } from '@/utils/logger';
+  hotkeyService,
+} from '@/components/hotkey'
+import type { HotkeyStatusBarBridge } from '@/services/HotkeyStatusBarBridge'
+import type { HotkeyConfig } from '@/types/HotkeyTypes'
+import { HotkeyCategory } from '@/types/HotkeyTypes'
+import { logger } from '@/utils/logger'
 
 /**
  * Демонстрационная страница системы горячих клавиш
  */
 const HotkeyDemoPage: React.FC = () => {
-  const [showSettings, setShowSettings] = useState(false);
-  const [message, setMessage] = useState('');
-  const [count, setCount] = useState(0);
-  const { isEnabled, toggleEnabled } = useGlobalHotkey();
-  const [, setHotkeyStatusBarBridge] = useState<HotkeyStatusBarBridge | null>(null);
+  const [showSettings, setShowSettings] = useState(false)
+  const [message, setMessage] = useState('')
+  const [count, setCount] = useState(0)
+  const { isEnabled, toggleEnabled } = useGlobalHotkey()
+  const [, setHotkeyStatusBarBridge] = useState<HotkeyStatusBarBridge | null>(null)
 
   // Глобальные горячие клавиши
-  useFileHotkeys();
-  useNavigationHotkeys();
+  useFileHotkeys()
+  useNavigationHotkeys()
 
   // Динамическая загрузка моста
   useEffect(() => {
     import('@/services/HotkeyStatusBarBridge').then(({ hotkeyStatusBarBridge: bridge }) => {
-      setHotkeyStatusBarBridge(bridge);
-      bridge.addCustomHotkeyListener('DEMO_HELP', 'Демонстрация помощи', 'message');
-      bridge.addCustomHotkeyListener('DEMO_COUNTER', 'Счетчик увеличен', 'success');
-    });
-  }, []);
+      setHotkeyStatusBarBridge(bridge)
+      bridge.addCustomHotkeyListener('DEMO_HELP', 'Демонстрация помощи', 'message')
+      bridge.addCustomHotkeyListener('DEMO_COUNTER', 'Счетчик увеличен', 'success')
+    })
+  }, [])
 
   // Пользовательские горячие клавиши с интеграцией статусбара
-  const { getService } = useGlobalHotkey();
+  const { getService } = useGlobalHotkey()
 
   // Регистрация кастомных действий
   useEffect(() => {
-    const service = getService();
-    
+    const service = getService()
+
     // Регистрация действия помощи
     service.registerAction({
       id: 'DEMO_HELP',
@@ -57,9 +57,9 @@ const HotkeyDemoPage: React.FC = () => {
       description: 'Показать помощь по горячим клавишам',
       category: HotkeyCategory.NAVIGATION,
       execute: () => {
-        logger.dialog('Help hotkey triggered', {}, 'HotkeyDemo');
-      }
-    });
+        logger.dialog('Help hotkey triggered', {}, 'HotkeyDemo')
+      },
+    })
 
     // Регистрация счетчика
     service.registerAction({
@@ -68,39 +68,39 @@ const HotkeyDemoPage: React.FC = () => {
       description: 'Увеличить счетчик',
       category: HotkeyCategory.NAVIGATION,
       execute: () => {
-        setCount(prev => prev + 1);
-      }
-    });
+        setCount(prev => prev + 1)
+      },
+    })
 
     // Привязка горячих клавиш
-    service.registerBinding('DEMO_HELP', { key: 'h', ctrl: true });
-    service.registerBinding('DEMO_COUNTER', { key: 'c', ctrl: true, shift: true });
-  }, [getService]);
+    service.registerBinding('DEMO_HELP', { key: 'h', ctrl: true })
+    service.registerBinding('DEMO_COUNTER', { key: 'c', ctrl: true, shift: true })
+  }, [getService])
 
   // Слушатели действий
   useHotkeyAction('NEW_PROJECT', () => {
-    setMessage('Создание нового проекта');
-  });
+    setMessage('Создание нового проекта')
+  })
 
   useHotkeyAction('SAVE_PROJECT', () => {
-    setMessage('Сохранение проекта');
-  });
+    setMessage('Сохранение проекта')
+  })
 
   useHotkeyAction('UNDO', () => {
-    setMessage('Отмена действия');
-  });
+    setMessage('Отмена действия')
+  })
 
   useHotkeyAction('FIND_TASK', () => {
-    setMessage('Поиск задачи');
-  });
+    setMessage('Поиск задачи')
+  })
 
   // Получение данных из сервиса
-  const bindings = hotkeyService.getAllBindings();
-  const actions = hotkeyService.getAllActions();
+  const bindings = hotkeyService.getAllBindings()
+  const actions = hotkeyService.getAllActions()
 
   // Создание конфигов для отображения
   const hotkeyConfigs: HotkeyConfig[] = bindings.map(binding => {
-    const action = actions.find(a => a.id === binding.actionId);
+    const action = actions.find(a => a.id === binding.actionId)
     return {
       id: binding.actionId,
       keys: binding.keys,
@@ -108,14 +108,14 @@ const HotkeyDemoPage: React.FC = () => {
       category: action?.category || HotkeyCategory.EDIT,
       enabled: binding.enabled,
       action: binding.actionId,
-      icon: action?.id.includes('TASK') ? '📋' : action?.id.includes('PROJECT') ? '📁' : '⚙️'
-    };
-  });
+      icon: action?.id.includes('TASK') ? '📋' : action?.id.includes('PROJECT') ? '📁' : '⚙️',
+    }
+  })
 
   const showMessage = (msg: string) => {
-    setMessage(msg);
-    setTimeout(() => setMessage(''), 3000);
-  };
+    setMessage(msg)
+    setTimeout(() => setMessage(''), 3000)
+  }
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -157,13 +157,13 @@ const HotkeyDemoPage: React.FC = () => {
             <Card className="p-6">
               <h3 className="text-xl font-semibold mb-4">Быстрые действия</h3>
               <div className="space-y-3">
-                <Button 
+                <Button
                   onClick={() => setShowSettings(true)}
                   className="w-full"
                 >
                   Настройка горячих клавиш
                 </Button>
-                <Button 
+                <Button
                   onClick={() => showMessage('Простое действие')}
                   variant="outline"
                   className="w-full"
@@ -224,8 +224,8 @@ const HotkeyDemoPage: React.FC = () => {
           {/* Список всех горячих клавиш */}
           <Card className="p-6">
             <h3 className="text-2xl font-semibold mb-6">Все горячие клавиши</h3>
-            <HotkeyList 
-              configs={hotkeyConfigs} 
+            <HotkeyList
+              configs={hotkeyConfigs}
               groupBy="category"
               size="md"
             />
@@ -265,13 +265,13 @@ const HotkeyDemoPage: React.FC = () => {
           open={showSettings}
           onOpenChange={setShowSettings}
           onSave={() => {
-            showMessage('Настройки сохранены');
+            showMessage('Настройки сохранены')
           }}
         />
       </HotkeyProvider>
     </div>
-  );
-};
+  )
+}
 
-export default HotkeyDemoPage;
+export default HotkeyDemoPage
 

@@ -1,12 +1,12 @@
-import React from 'react';
-import { ViewType, ViewSettings } from '@/types/ViewTypes';
-import { NetworkView } from './NetworkView';
+import React from 'react'
+import { ViewType, ViewSettings } from '@/types/ViewTypes'
+import { NetworkView } from './NetworkView'
 
 /**
  * Network View компонент (обертка)
  * Использует новую Canvas-based сетевую диаграмму
  */
 export const NetworkViewComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = () => {
-  return <NetworkView />;
-};
+  return <NetworkView />
+}
 

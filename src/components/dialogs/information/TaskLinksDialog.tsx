@@ -1,12 +1,12 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface TaskLink {
   id: string;
@@ -38,8 +38,8 @@ const LINK_TYPES = [
   { value: 'hyperlink', label: 'Hyperlink', description: 'Link to website or external resource' },
   { value: 'document', label: 'Document', description: 'Link to project document or file' },
   { value: 'webpage', label: 'Web Page', description: 'Link to internal web page' },
-  { value: 'email', label: 'Email', description: 'Link to email address' }
-];
+  { value: 'email', label: 'Email', description: 'Link to email address' },
+]
 
 export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
   currentTaskId,
@@ -52,8 +52,8 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view');
-  const [selectedLink, setSelectedLink] = React.useState<TaskLink | null>(null);
+  const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view')
+  const [selectedLink, setSelectedLink] = React.useState<TaskLink | null>(null)
   const [linkData, setLinkData] = React.useState<{
     taskId: string;
     taskName: string;
@@ -65,118 +65,118 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
     taskName: currentTaskName,
     linkType: 'hyperlink',
     url: '',
-    description: ''
-  });
+    description: '',
+  })
 
   const { validate, errors, isValid } = useDialogValidation({
     url: {
       required: true,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'URL is required';
-        if (!value.trim()) return 'URL is required';
-        
+        if (!value || typeof value !== 'string') return 'URL is required'
+        if (!value.trim()) return 'URL is required'
+
         // Basic URL validation
         try {
           if (linkData.linkType === 'email') {
             // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(value) ? null : 'Invalid email format';
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            return emailRegex.test(value) ? null : 'Invalid email format'
           } else {
             // URL validation
-            new URL(value);
-            return null;
+            new URL(value)
+            return null
           }
         } catch {
-          return 'Invalid URL format';
+          return 'Invalid URL format'
         }
-      }
+      },
     },
     description: {
       required: true,
       minLength: 1,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Description is required';
-        return value.trim() ? null : 'Description is required';
-      }
-    }
-  });
+        if (!value || typeof value !== 'string') return 'Description is required'
+        return value.trim() ? null : 'Description is required'
+      },
+    },
+  })
 
   React.useEffect(() => {
     Object.keys(linkData).forEach(key => {
-      validate({ [key]: linkData[key as keyof typeof linkData] });
-    });
-  }, [linkData]);
+      validate({ [key]: linkData[key as keyof typeof linkData] })
+    })
+  }, [linkData])
 
   type LinkDataField = keyof typeof linkData;
   type LinkDataValue = string | 'hyperlink' | 'document' | 'webpage' | 'email';
-  
+
   const handleFieldChange = (field: LinkDataField, value: LinkDataValue) => {
-    setLinkData(prev => ({ ...prev, [field]: value }));
-  };
+    setLinkData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleAddLink = () => {
     if (isValid()) {
       onSave?.({
         ...linkData,
-        lastModified: new Date().toISOString()
-      });
-      
+        lastModified: new Date().toISOString(),
+      })
+
       // Reset form
       setLinkData({
         taskId: currentTaskId || '',
         taskName: currentTaskName,
         linkType: 'hyperlink',
         url: '',
-        description: ''
-      });
-      setMode('view');
+        description: '',
+      })
+      setMode('view')
     }
-  };
+  }
 
   const handleEditLink = (link: TaskLink) => {
-    setSelectedLink(link);
+    setSelectedLink(link)
     setLinkData({
       taskId: link.taskId,
       taskName: link.taskName,
       linkType: link.linkType,
       url: link.url,
-      description: link.description
-    });
-    setMode('edit');
-  };
+      description: link.description,
+    })
+    setMode('edit')
+  }
 
   const handleUpdateLink = () => {
     if (isValid() && selectedLink) {
       onUpdate?.({
         ...selectedLink,
         ...linkData,
-        lastModified: new Date().toISOString()
-      });
-      setMode('view');
-      setSelectedLink(null);
+        lastModified: new Date().toISOString(),
+      })
+      setMode('view')
+      setSelectedLink(null)
     }
-  };
+  }
 
   const handleDeleteLink = (linkId: string) => {
-    onDelete?.(linkId);
-  };
+    onDelete?.(linkId)
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
   const getTypeDescription = (type: string) => {
-    return LINK_TYPES.find(t => t.value === type)?.description || '';
-  };
+    return LINK_TYPES.find(t => t.value === type)?.description || ''
+  }
 
   const getLinkIcon = (type: string) => {
     switch (type) {
-      case 'hyperlink': return '🔗';
-      case 'document': return '📄';
-      case 'webpage': return '🌐';
-      case 'email': return '📧';
-      default: return '🔗';
+      case 'hyperlink': return '🔗'
+      case 'document': return '📄'
+      case 'webpage': return '🌐'
+      case 'email': return '📧'
+      default: return '🔗'
     }
-  };
+  }
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -221,7 +221,7 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
             <Label className="text-sm font-medium mb-3">
               {mode === 'add' ? 'Add New Link' : 'Edit Link'}
             </Label>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="linkType">Link Type</Label>
@@ -256,8 +256,8 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
                   value={linkData.url}
                   onChange={(e) => handleFieldChange('url', e.target.value)}
                   placeholder={
-                    linkData.linkType === 'email' 
-                      ? 'email@example.com' 
+                    linkData.linkType === 'email'
+                      ? 'email@example.com'
                       : 'https://example.com'
                   }
                   className={errors.url ? 'border-red-500' : ''}
@@ -295,7 +295,7 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
                     Type: {linkData.linkType} - {getTypeDescription(linkData.linkType)}
                   </div>
                   <div className="text-primary truncate">
-                    {linkData.linkType === 'email' 
+                    {linkData.linkType === 'email'
                       ? `mailto:${linkData.url}`
                       : linkData.url
                     }
@@ -337,7 +337,7 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
                       </TableCell>
                       <TableCell>
                         <div className="text-sm text-primary truncate max-w-xs">
-                          {link.linkType === 'email' 
+                          {link.linkType === 'email'
                             ? `mailto:${link.url}`
                             : link.url
                           }
@@ -414,6 +414,6 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

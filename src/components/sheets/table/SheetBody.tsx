@@ -1,9 +1,9 @@
-import React from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
-import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import { SheetRow } from './SheetRow';
-import type { JsonValue } from '@/types/json-types';
+import React from 'react'
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
+import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import { SheetRow } from './SheetRow'
+import type { JsonValue } from '@/types/json-types'
 
 export interface SheetBodyProps<T extends Record<string, JsonValue>> {
   data: T[];
@@ -41,13 +41,13 @@ export const SheetBody = <T extends Record<string, JsonValue>>({
   onCommit,
   onCancel,
   onContextMenu,
-  disabledRowIds = []
+  disabledRowIds = [],
 }: SheetBodyProps<T>) => {
   return (
     <tbody className="divide-y divide-gray-100">
       {data.map((row) => {
-        const rowId = String(row[rowIdField]);
-        const isDisabled = disabledRowIds.includes(rowId);
+        const rowId = String(row[rowIdField])
+        const isDisabled = disabledRowIds.includes(rowId)
 
         return (
           <SheetRow
@@ -68,8 +68,8 @@ export const SheetBody = <T extends Record<string, JsonValue>>({
             onCancel={onCancel}
             onContextMenu={(e, r, cid) => !isDisabled && onContextMenu?.(e, r, cid)}
           />
-        );
+        )
       })}
     </tbody>
-  );
-};
+  )
+}

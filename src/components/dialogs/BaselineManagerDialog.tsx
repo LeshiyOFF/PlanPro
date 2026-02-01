@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useProjectStore } from '@/store/projectStore';
-import { useTranslation } from 'react-i18next';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { History, Save, Trash2, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useProjectStore } from '@/store/projectStore'
+import { useTranslation } from 'react-i18next'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
+import { History, Save, Trash2, CheckCircle2 } from 'lucide-react'
 
 interface BaselineManagerDialogProps {
   isOpen: boolean;
@@ -14,24 +14,24 @@ interface BaselineManagerDialogProps {
 }
 
 export const BaselineManagerDialog: React.FC<BaselineManagerDialogProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
-  const { baselines, activeBaselineId, saveBaseline, deleteBaseline, setActiveBaseline, tasks } = useProjectStore();
-  const [newBaselineName, setNewBaselineName] = useState('');
+  const { t } = useTranslation()
+  const { baselines, activeBaselineId, saveBaseline, deleteBaseline, setActiveBaseline, tasks } = useProjectStore()
+  const [newBaselineName, setNewBaselineName] = useState('')
 
   const handleSave = () => {
-    saveBaseline(newBaselineName || undefined);
-    setNewBaselineName('');
-  };
+    saveBaseline(newBaselineName || undefined)
+    setNewBaselineName('')
+  }
 
   const getDiffCount = (baselineId: string) => {
-    const baseline = baselines.find(b => b.id === baselineId);
-    if (!baseline) return 0;
+    const baseline = baselines.find(b => b.id === baselineId)
+    if (!baseline) return 0
     return tasks.filter(t => {
-      const bDate = baseline.taskDates[t.id];
-      if (!bDate) return false;
-      return new Date(t.endDate).getTime() !== new Date(bDate.endDate).getTime();
-    }).length;
-  };
+      const bDate = baseline.taskDates[t.id]
+      if (!bDate) return false
+      return new Date(t.endDate).getTime() !== new Date(bDate.endDate).getTime()
+    }).length
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -48,7 +48,7 @@ export const BaselineManagerDialog: React.FC<BaselineManagerDialogProps> = ({ is
 
         <div className="space-y-4 py-4">
           <div className="flex gap-2">
-            <Input 
+            <Input
               placeholder={t('baseline.new_name_placeholder', { defaultValue: 'Название нового снимка...' })}
               value={newBaselineName}
               onChange={(e) => setNewBaselineName(e.target.value)}
@@ -96,17 +96,17 @@ export const BaselineManagerDialog: React.FC<BaselineManagerDialogProps> = ({ is
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-1">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant={activeBaselineId === b.id ? 'secondary' : 'ghost'}
                           onClick={() => setActiveBaseline(activeBaselineId === b.id ? undefined : b.id)}
                           title={t('baseline.toggle_compare', { defaultValue: 'Сравнить' })}
                         >
                           <CheckCircle2 className={`h-4 w-4 ${activeBaselineId === b.id ? 'text-green-500' : ''}`} />
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
+                        <Button
+                          size="sm"
+                          variant="ghost"
                           onClick={() => deleteBaseline(b.id)}
                           className="text-destructive hover:text-destructive"
                         >
@@ -126,5 +126,5 @@ export const BaselineManagerDialog: React.FC<BaselineManagerDialogProps> = ({ is
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

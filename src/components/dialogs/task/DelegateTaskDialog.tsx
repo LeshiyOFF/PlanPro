@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface Resource {
   id: string;
@@ -37,45 +37,45 @@ export const DelegateTaskDialog: React.FC<DelegateTaskDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [selectedTasks, setSelectedTasks] = React.useState<string[]>(selectedTaskIds);
-  const [assigneeId, setAssigneeId] = React.useState('');
-  const [note, setNote] = React.useState('');
+  const [selectedTasks, setSelectedTasks] = React.useState<string[]>(selectedTaskIds)
+  const [assigneeId, setAssigneeId] = React.useState('')
+  const [note, setNote] = React.useState('')
 
   const { validate, errors, isValid } = useDialogValidation({
     assigneeId: {
       required: true,
-      validate: (value) => value ? null : 'Please select an assignee'
-    }
-  });
+      validate: (value) => value ? null : 'Please select an assignee',
+    },
+  })
 
   React.useEffect(() => {
-    setSelectedTasks(selectedTaskIds);
-  }, [selectedTaskIds]);
+    setSelectedTasks(selectedTaskIds)
+  }, [selectedTaskIds])
 
   React.useEffect(() => {
-    validate('assigneeId', assigneeId);
-  }, [assigneeId]);
+    validate('assigneeId', assigneeId)
+  }, [assigneeId])
 
   const handleTaskToggle = (taskId: string) => {
-    setSelectedTasks(prev => 
+    setSelectedTasks(prev =>
       prev.includes(taskId)
         ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
+        : [...prev, taskId],
+    )
+  }
 
   const handleDelegate = () => {
     if (isValid() && selectedTasks.length > 0) {
-      onDelegate?.(selectedTasks, assigneeId, note.trim());
-      onClose?.();
+      onDelegate?.(selectedTasks, assigneeId, note.trim())
+      onClose?.()
     }
-  };
+  }
 
-  const canDelegate = isValid() && selectedTasks.length > 0;
-  const availableResources = resources.filter(r => r.available);
-  const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id));
+  const canDelegate = isValid() && selectedTasks.length > 0
+  const availableResources = resources.filter(r => r.available)
+  const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id))
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -187,6 +187,6 @@ export const DelegateTaskDialog: React.FC<DelegateTaskDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

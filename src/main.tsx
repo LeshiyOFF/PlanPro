@@ -10,10 +10,10 @@ import { EnvironmentConfig } from './config/EnvironmentConfig'
 /**
  * Инициализация порта API из параметров URL (передаются из Electron)
  */
-const params = new URLSearchParams(window.location.search);
-const apiPort = params.get('apiPort');
+const params = new URLSearchParams(window.location.search)
+const apiPort = params.get('apiPort')
 if (apiPort) {
-  EnvironmentConfig.setApiPort(parseInt(apiPort, 10));
+  EnvironmentConfig.setApiPort(parseInt(apiPort, 10))
 }
 
 /**

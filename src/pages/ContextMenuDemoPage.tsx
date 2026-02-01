@@ -1,8 +1,8 @@
-import React from 'react';
-import { NavigationProvider } from '@/providers/NavigationProvider';
-import { ThemeProvider } from '@/providers/ThemeProvider';
-import { ErrorBoundary } from '@/components/error-handling';
-import { ContextMenuExample } from '@/presentation/contextmenu';
+import React from 'react'
+import { NavigationProvider } from '@/providers/NavigationProvider'
+import { ThemeProvider } from '@/providers/ThemeProvider'
+import { ErrorBoundary } from '@/components/error-handling'
+import { ContextMenuExample } from '@/presentation/contextmenu'
 
 /**
  * Страница демонстрации Context Menu системы
@@ -16,6 +16,6 @@ export const ContextMenuDemoPage: React.FC = () => {
         </NavigationProvider>
       </ThemeProvider>
     </ErrorBoundary>
-  );
-};
+  )
+}
 

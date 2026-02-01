@@ -1,39 +1,39 @@
-import { 
-  CalendarDialogData, 
-  TaskInformationData, 
-  ProjectDialogData, 
-  WorkingTimeDialogData, 
+import {
+  CalendarDialogData,
+  TaskInformationData,
+  ProjectDialogData,
+  WorkingTimeDialogData,
   HolidayDialogData,
   ResourceInformationData,
   FindDialogData,
   SettingsDialogData,
   LoginDialogData,
   SplitTaskData,
-  NewBaseCalendarDialogData
-} from '../calendar-types';
+  NewBaseCalendarDialogData,
+} from '../calendar-types'
 
-import type { JsonValue } from '@/types/json-types';
-import type { 
+import type { JsonValue } from '@/types/json-types'
+import type {
   DialogResult as TypedDialogResult,
   TypedDialogActions,
   TypedDialogProps,
   DialogState as TypedDialogState,
-  DialogContextType as TypedDialogContextType
-} from './DialogStateTypes';
+  DialogContextType as TypedDialogContextType,
+} from './DialogStateTypes'
 
-export { DialogStatus as TypedDialogStatus } from './LegacyDialogTypes';
-export type { 
-  TypedDialogResult, 
-  TypedDialogActions, 
-  TypedDialogProps, 
-  TypedDialogState, 
-  TypedDialogContextType 
-};
+export { DialogStatus as TypedDialogStatus } from './LegacyDialogTypes'
+export type {
+  TypedDialogResult,
+  TypedDialogActions,
+  TypedDialogProps,
+  TypedDialogState,
+  TypedDialogContextType,
+}
 
 /**
  * Legacy типы для обратной совместимости
  */
-export { DialogStatus } from './LegacyDialogTypes';
+export { DialogStatus } from './LegacyDialogTypes'
 export type {
   IDialogData,
   IDialogActions,
@@ -41,17 +41,17 @@ export type {
   DialogResult,
   DialogEvent,
   ValidationRule,
-  DialogDataValue
-} from './LegacyDialogTypes';
+  DialogDataValue,
+} from './LegacyDialogTypes'
 export type {
   FindDialogData,
   SettingsDialogData,
   CalendarDialogData,
   LoginDialogData,
-  SplitTaskData
-} from '../calendar-types';
+  SplitTaskData,
+} from '../calendar-types'
 
-export type { LoginDialogData as ILoginDialogData } from '../calendar-types';
+export type { LoginDialogData as ILoginDialogData } from '../calendar-types'
 
 /**
  * Конкретные типы для каждого диалога

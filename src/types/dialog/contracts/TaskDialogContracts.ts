@@ -2,7 +2,7 @@
  * Контракты для задачных диалогов
  */
 
-import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry';
+import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry'
 
 export interface UpdateTaskDialogData extends BaseDialogData {
   readonly taskId: string;

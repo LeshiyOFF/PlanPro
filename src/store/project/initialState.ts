@@ -1,7 +1,7 @@
-import { INITIAL_TASKS } from '../../data/projectData';
-import { Resource } from '@/types/resource-types';
-import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
-import { ProjectStore, Task } from './interfaces';
+import { INITIAL_TASKS } from '../../data/projectData'
+import { Resource } from '@/types/resource-types'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
+import { ProjectStore, Task } from './interfaces'
 
 export const initialResources: Resource[] = [
   {
@@ -12,9 +12,9 @@ export const initialResources: Resource[] = [
     standardRate: 50,
     overtimeRate: 75,
     costPerUse: 0,
-    available: true
-  }
-];
+    available: true,
+  },
+]
 
 /**
  * Начальное состояние с демо-данными для первого запуска
@@ -29,8 +29,8 @@ export const initialProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInf
   currentProjectId: undefined,
   currentFilePath: undefined,
   projectManager: undefined,
-  isDirty: false
-};
+  isDirty: false,
+}
 
 /**
  * Пустое состояние для нового/загруженного проекта
@@ -45,6 +45,6 @@ export const emptyProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo'
   currentProjectId: undefined,
   currentFilePath: undefined,
   projectManager: undefined,
-  isDirty: false
-};
+  isDirty: false,
+}
 

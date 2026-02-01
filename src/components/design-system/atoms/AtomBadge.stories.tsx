@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { AtomBadge } from './AtomBadge';
+import type { Meta, StoryObj } from '@storybook/react'
+import { AtomBadge } from './AtomBadge'
 
 const meta: Meta<typeof AtomBadge> = {
   title: 'Design System/Atoms/AtomBadge',
@@ -17,7 +17,7 @@ const meta: Meta<typeof AtomBadge> = {
     color: { control: false },
     size: { control: false },
     variant: { control: false },
-    
+
     // ОСТАВЛЯЕМ РАБОЧИЕ КОНТРОЛЫ
     children: {
       control: 'text',
@@ -29,35 +29,35 @@ const meta: Meta<typeof AtomBadge> = {
       description: 'Скругленные углы',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
     children: 'Badge',
   },
-};
+}
 
 export const Solid: Story = {
   args: {
     variant: 'solid',
     children: 'Solid Badge',
   },
-};
+}
 
 export const Outline: Story = {
   args: {
     variant: 'outline',
     children: 'Outline Badge',
   },
-};
+}
 
 export const Soft: Story = {
   args: {
     variant: 'soft',
     children: 'Soft Badge',
   },
-};
+}
 

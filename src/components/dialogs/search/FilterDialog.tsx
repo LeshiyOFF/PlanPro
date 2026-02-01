@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export interface FilterField {
   id: string;
@@ -48,8 +48,8 @@ const TEXT_OPERATORS = [
   { value: 'starts-with', label: 'Starts with' },
   { value: 'ends-with', label: 'Ends with' },
   { value: 'equals', label: 'Equals' },
-  { value: 'not-equals', label: 'Not equals' }
-];
+  { value: 'not-equals', label: 'Not equals' },
+]
 
 const NUMBER_OPERATORS = [
   { value: 'equals', label: 'Equals' },
@@ -57,21 +57,21 @@ const NUMBER_OPERATORS = [
   { value: 'greater', label: 'Greater than' },
   { value: 'less', label: 'Less than' },
   { value: 'greater-equal', label: 'Greater or equal' },
-  { value: 'less-equal', label: 'Less or equal' }
-];
+  { value: 'less-equal', label: 'Less or equal' },
+]
 
 const DATE_OPERATORS = [
   { value: 'equals', label: 'On' },
   { value: 'greater', label: 'After' },
   { value: 'less', label: 'Before' },
   { value: 'greater-equal', label: 'On or after' },
-  { value: 'less-equal', label: 'On or before' }
-];
+  { value: 'less-equal', label: 'On or before' },
+]
 
 const BOOLEAN_OPERATORS = [
   { value: 'equals', label: 'Is' },
-  { value: 'not-equals', label: 'Is not' }
-];
+  { value: 'not-equals', label: 'Is not' },
+]
 
 export const FilterDialog: React.FC<FilterDialogProps> = ({
   availableFields = [],
@@ -83,10 +83,10 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [activeTab, setActiveTab] = React.useState('create');
-  const [filters, setFilters] = React.useState<FilterCondition[]>(currentFilters);
-  const [saveFilterName, setSaveFilterName] = React.useState('');
-  const [saveFilterDescription, setSaveFilterDescription] = React.useState('');
+  const [activeTab, setActiveTab] = React.useState('create')
+  const [filters, setFilters] = React.useState<FilterCondition[]>(currentFilters)
+  const [saveFilterName, setSaveFilterName] = React.useState('')
+  const [saveFilterDescription, setSaveFilterDescription] = React.useState('')
 
   const addFilter = () => {
     const newFilter: FilterCondition = {
@@ -94,44 +94,44 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
       field: availableFields[0]?.id || '',
       operator: 'equals',
       value: '',
-      enabled: true
-    };
-    setFilters(prev => [...prev, newFilter]);
-  };
+      enabled: true,
+    }
+    setFilters(prev => [...prev, newFilter])
+  }
 
   const updateFilter = (filterId: string, updates: Partial<FilterCondition>) => {
-    setFilters(prev => 
-      prev.map(filter => 
-        filter.id === filterId ? { ...filter, ...updates } : filter
-      )
-    );
-  };
+    setFilters(prev =>
+      prev.map(filter =>
+        filter.id === filterId ? { ...filter, ...updates } : filter,
+      ),
+    )
+  }
 
   const removeFilter = (filterId: string) => {
-    setFilters(prev => prev.filter(filter => filter.id !== filterId));
-  };
+    setFilters(prev => prev.filter(filter => filter.id !== filterId))
+  }
 
   const toggleFilter = (filterId: string) => {
-    setFilters(prev => 
-      prev.map(filter => 
-        filter.id === filterId ? { ...filter, enabled: !filter.enabled } : filter
-      )
-    );
-  };
+    setFilters(prev =>
+      prev.map(filter =>
+        filter.id === filterId ? { ...filter, enabled: !filter.enabled } : filter,
+      ),
+    )
+  }
 
   const getOperatorsForField = (field: FilterField) => {
     switch (field.type) {
-      case 'text': return TEXT_OPERATORS;
-      case 'number': return NUMBER_OPERATORS;
-      case 'date': return DATE_OPERATORS;
-      case 'boolean': return BOOLEAN_OPERATORS;
-      default: return TEXT_OPERATORS;
+      case 'text': return TEXT_OPERATORS
+      case 'number': return NUMBER_OPERATORS
+      case 'date': return DATE_OPERATORS
+      case 'boolean': return BOOLEAN_OPERATORS
+      default: return TEXT_OPERATORS
     }
-  };
+  }
 
   const renderValueInput = (filter: FilterCondition) => {
-    const field = availableFields.find(f => f.id === filter.field);
-    if (!field) return null;
+    const field = availableFields.find(f => f.id === filter.field)
+    if (!field) return null
 
     switch (field.type) {
       case 'select':
@@ -151,7 +151,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
               ))}
             </SelectContent>
           </Select>
-        );
+        )
       case 'boolean':
         return (
           <Select
@@ -166,7 +166,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
               <SelectItem value="false">False</SelectItem>
             </SelectContent>
           </Select>
-        );
+        )
       case 'number':
         return (
           <Input
@@ -174,7 +174,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
             value={filter.value}
             onChange={(e) => updateFilter(filter.id, { value: parseFloat(e.target.value) || 0 })}
           />
-        );
+        )
       case 'date':
         return (
           <Input
@@ -182,44 +182,44 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
             value={filter.value}
             onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
           />
-        );
+        )
       default:
         return (
           <Input
             value={filter.value}
             onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
           />
-        );
+        )
     }
-  };
+  }
 
   const handleSave = () => {
-    const activeFilters = filters.filter(f => f.enabled);
-    onSave?.(activeFilters);
-    onClose?.();
-  };
+    const activeFilters = filters.filter(f => f.enabled)
+    onSave?.(activeFilters)
+    onClose?.()
+  }
 
   const handleLoadFilter = (filterId: string) => {
-    const filter = savedFilters.find(f => f.id === filterId);
+    const filter = savedFilters.find(f => f.id === filterId)
     if (filter) {
-      setFilters(filter.conditions);
-      onLoadFilter?.(filterId);
+      setFilters(filter.conditions)
+      onLoadFilter?.(filterId)
     }
-  };
+  }
 
   const handleSaveAsNew = () => {
     if (saveFilterName.trim()) {
-      const activeFilters = filters.filter(f => f.enabled);
-      onSaveAsNew?.(saveFilterName.trim(), saveFilterDescription.trim(), activeFilters);
-      setSaveFilterName('');
-      setSaveFilterDescription('');
-      setActiveTab('saved');
+      const activeFilters = filters.filter(f => f.enabled)
+      onSaveAsNew?.(saveFilterName.trim(), saveFilterDescription.trim(), activeFilters)
+      setSaveFilterName('')
+      setSaveFilterDescription('')
+      setActiveTab('saved')
     }
-  };
+  }
 
-  const activeFiltersCount = filters.filter(f => f.enabled).length;
+  const activeFiltersCount = filters.filter(f => f.enabled).length
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -273,8 +273,8 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
           ) : (
             <div className="space-y-3">
               {filters.map((filter, index) => {
-                const field = availableFields.find(f => f.id === filter.field);
-                const operators = field ? getOperatorsForField(field) : [];
+                const field = availableFields.find(f => f.id === filter.field)
+                const operators = field ? getOperatorsForField(field) : []
 
                 return (
                   <div key={filter.id} className="border rounded-lg p-4">
@@ -344,7 +344,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                       </div>
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           )}
@@ -373,7 +373,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
                         {filter.description}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {filter.conditions.filter(c => c.enabled).length} condition(s) • 
+                        {filter.conditions.filter(c => c.enabled).length} condition(s) •
                         {filter.shared ? ' Shared' : ' Private'}
                       </div>
                     </div>
@@ -425,8 +425,8 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
             </div>
 
             <div className="text-center pt-4">
-              <Button 
-                onClick={handleSaveAsNew} 
+              <Button
+                onClick={handleSaveAsNew}
                 disabled={!saveFilterName.trim() || activeFiltersCount === 0}
               >
                 Save Filter
@@ -441,6 +441,6 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
         </TabsContent>
       </Tabs>
     </BaseDialog>
-  );
-};
+  )
+}
 

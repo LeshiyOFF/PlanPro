@@ -1,12 +1,12 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface Holiday {
   id: string;
@@ -36,13 +36,13 @@ export interface HolidayDialogProps extends Omit<BaseDialogProps, 'children'> {
 const HOLIDAY_TYPES = [
   { value: 'holiday', label: 'Holiday', description: 'Non-working day with holiday pay' },
   { value: 'nonworking', label: 'Non-working', description: 'Non-working day without holiday pay' },
-  { value: 'working', label: 'Working', description: 'Working day (override default schedule)' }
-];
+  { value: 'working', label: 'Working', description: 'Working day (override default schedule)' },
+]
 
 const RECURRING_OPTIONS = [
   { value: false, label: 'One-time', description: 'Occurs only on specified date' },
-  { value: true, label: 'Recurring', description: 'Occurs every year on same date' }
-];
+  { value: true, label: 'Recurring', description: 'Occurs every year on same date' },
+]
 
 export const HolidayDialog: React.FC<HolidayDialogProps> = ({
   calendars = [],
@@ -55,7 +55,7 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
   ...props
 }) => {
   type HolidayType = 'holiday' | 'nonworking' | 'working';
-  
+
   const [holiday, setHoliday] = React.useState<{
     name: string;
     date: string;
@@ -67,10 +67,10 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
     date: new Date().toISOString().split('T')[0],
     type: 'holiday',
     recurring: false,
-    calendarIds: calendars.filter(c => c.isBase).map(c => c.id)
-  });
+    calendarIds: calendars.filter(c => c.isBase).map(c => c.id),
+  })
 
-  const isEditing = !!currentHoliday?.id;
+  const isEditing = !!currentHoliday?.id
 
   const { validate, errors, isValid } = useDialogValidation({
     name: {
@@ -78,26 +78,26 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
       minLength: 1,
       maxLength: 255,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Holiday name is required';
-        return value.trim() ? null : 'Holiday name is required';
-      }
+        if (!value || typeof value !== 'string') return 'Holiday name is required'
+        return value.trim() ? null : 'Holiday name is required'
+      },
     },
     date: {
       required: true,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Date is required';
-        const date = new Date(value);
-        return !isNaN(date.getTime()) ? null : 'Invalid date format';
-      }
+        if (!value || typeof value !== 'string') return 'Date is required'
+        const date = new Date(value)
+        return !isNaN(date.getTime()) ? null : 'Invalid date format'
+      },
     },
     calendarIds: {
       required: true,
       custom: (value) => {
-        if (!value || !Array.isArray(value)) return 'At least one calendar must be selected';
-        return value.length > 0 ? null : 'At least one calendar must be selected';
-      }
-    }
-  });
+        if (!value || !Array.isArray(value)) return 'At least one calendar must be selected'
+        return value.length > 0 ? null : 'At least one calendar must be selected'
+      },
+    },
+  })
 
   React.useEffect(() => {
     if (currentHoliday) {
@@ -106,32 +106,32 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
         date: currentHoliday.date,
         type: currentHoliday.type,
         recurring: currentHoliday.recurring,
-        calendarIds: currentHoliday.calendarIds
-      });
+        calendarIds: currentHoliday.calendarIds,
+      })
     }
-  }, [currentHoliday]);
+  }, [currentHoliday])
 
   React.useEffect(() => {
     Object.keys(holiday).forEach(key => {
-      validate(key, holiday[key as keyof typeof holiday]);
-    });
-  }, [holiday]);
+      validate(key, holiday[key as keyof typeof holiday])
+    })
+  }, [holiday])
 
   type HolidayField = keyof typeof holiday;
   type HolidayFieldValue = string | boolean | string[];
-  
+
   const handleFieldChange = (field: HolidayField, value: HolidayFieldValue) => {
-    setHoliday(prev => ({ ...prev, [field]: value }));
-  };
+    setHoliday(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleCalendarToggle = (calendarId: string) => {
     setHoliday(prev => ({
       ...prev,
       calendarIds: prev.calendarIds.includes(calendarId)
         ? prev.calendarIds.filter(id => id !== calendarId)
-        : [...prev.calendarIds, calendarId]
-    }));
-  };
+        : [...prev.calendarIds, calendarId],
+    }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
@@ -140,37 +140,37 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
         date: holiday.date,
         type: holiday.type,
         recurring: holiday.recurring,
-        calendarIds: holiday.calendarIds
-      };
+        calendarIds: holiday.calendarIds,
+      }
 
       if (isEditing) {
-        onUpdate?.({ ...currentHoliday, ...holidayData });
+        onUpdate?.({ ...currentHoliday, ...holidayData })
       } else {
-        onSave?.(holidayData);
+        onSave?.(holidayData)
       }
-      onClose?.();
+      onClose?.()
     }
-  };
+  }
 
   const handleDelete = () => {
     if (currentHoliday?.id) {
-      onDelete?.(currentHoliday.id);
-      onClose?.();
+      onDelete?.(currentHoliday.id)
+      onClose?.()
     }
-  };
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
   const getTypeDescription = (type: string) => {
-    return HOLIDAY_TYPES.find(t => t.value === type)?.description || '';
-  };
+    return HOLIDAY_TYPES.find(t => t.value === type)?.description || ''
+  }
 
-  const selectedCalendars = calendars.filter(c => holiday.calendarIds.includes(c.id));
+  const selectedCalendars = calendars.filter(c => holiday.calendarIds.includes(c.id))
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
-      title={isEditing ? "Edit Holiday" : "Add Holiday"}
+      title={isEditing ? 'Edit Holiday' : 'Add Holiday'}
       size="large"
       open={props.open}
       onOpenChange={props.onOpenChange}
@@ -337,8 +337,8 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
                       <TableCell>
                         <span className={`px-2 py-1 rounded text-xs ${
                           holiday.type === 'holiday' ? 'bg-red-100 text-red-800' :
-                          holiday.type === 'nonworking' ? 'bg-gray-100 text-gray-800' :
-                          'bg-green-100 text-green-800'
+                            holiday.type === 'nonworking' ? 'bg-gray-100 text-gray-800' :
+                              'bg-green-100 text-green-800'
                         }`}>
                           {holiday.type}
                         </span>
@@ -358,6 +358,6 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

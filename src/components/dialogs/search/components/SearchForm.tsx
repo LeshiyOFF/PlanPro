@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Search, RotateCcw, Filter } from 'lucide-react';
+import React, { useState } from 'react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Search, RotateCcw, Filter } from 'lucide-react'
 
 export interface SearchFormProps {
   searchText: string;
@@ -22,29 +22,29 @@ export const SearchForm: React.FC<SearchFormProps> = ({
   onSearchTextChange,
   onSearchTypeChange,
   onSearch,
-  onClear
+  onClear,
 }) => {
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false)
 
   const searchTypes = [
     { value: 'all', label: 'Все типы' },
     { value: 'task', label: 'Задачи' },
     { value: 'resource', label: 'Ресурсы' },
     { value: 'project', label: 'Проекты' },
-    { value: 'document', label: 'Документы' }
-  ];
+    { value: 'document', label: 'Документы' },
+  ]
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
     if (searchText.trim()) {
-      onSearch();
+      onSearch()
     }
-  };
+  }
 
   const handleClear = () => {
-    onSearchTextChange('');
-    onClear();
-  };
+    onSearchTextChange('')
+    onClear()
+  }
 
   return (
     <div className="space-y-4">
@@ -78,8 +78,8 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         <div className="flex items-center space-x-4">
           <div className="space-y-2">
             <Label htmlFor="searchType">Тип поиска</Label>
-            <Select 
-              value={searchType} 
+            <Select
+              value={searchType}
               onValueChange={onSearchTypeChange}
               disabled={isSearching}
             >
@@ -134,6 +134,6 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         )}
       </form>
     </div>
-  );
-};
+  )
+}
 

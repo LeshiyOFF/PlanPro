@@ -6,7 +6,7 @@
 /**
  * Тип сообщения статусбара
  */
-export type StatusBarMessageType = 
+export type StatusBarMessageType =
   | 'info'
   | 'success'
   | 'warning'
@@ -109,7 +109,7 @@ export interface IStatusBarProps extends IStatusBarContainer {
 /**
  * Тип позиции элемента в статусбаре
  */
-export type StatusBarSectionPosition = 
+export type StatusBarSectionPosition =
   | 'left'
   | 'center'
   | 'right';

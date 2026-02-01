@@ -1,4 +1,4 @@
-import { CellValue } from '@/types/sheet/CellValueTypes';
+import { CellValue } from '@/types/sheet/CellValueTypes'
 
 /**
  * Интерфейс пакетной операции
@@ -22,16 +22,16 @@ export class SheetBatchService {
     ids: string[],
     field: string,
     value: CellValue,
-    onUpdate: UpdateCallback
+    onUpdate: UpdateCallback,
   ): void {
-    if (!ids || ids.length === 0) return;
+    if (!ids || ids.length === 0) return
 
     ids.forEach((id) => {
-      onUpdate(id, field, value);
-    });
+      onUpdate(id, field, value)
+    })
   }
 
   public createBatchUpdate(ids: string[], field: string, value: CellValue): IBatchUpdate {
-    return { ids, field, value };
+    return { ids, field, value }
   }
 }

@@ -1,8 +1,8 @@
-import React from 'react';
-import { FormField } from '../components/FormField';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React from 'react'
+import { FormField } from '../components/FormField'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface AuditPolicyData {
   enabled: boolean;
@@ -23,22 +23,22 @@ interface AuditPolicySectionProps {
 export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
   data,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   const getLogLevelDescription = (level: string) => {
     switch (level) {
-      case 'error': return 'Только критические ошибки';
-      case 'warning': return 'Ошибки и предупреждения';
-      case 'info': return 'Все важные события';
-      case 'debug': return 'Все события (рекомендуется для отладки)';
-      default: return '';
+      case 'error': return 'Только критические ошибки'
+      case 'warning': return 'Ошибки и предупреждения'
+      case 'info': return 'Все важные события'
+      case 'debug': return 'Все события (рекомендуется для отладки)'
+      default: return ''
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Политика аудита</h3>
-      
+
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -61,7 +61,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
               value={data.logLevel}
               onChange={(value) => {
                 if (value != null && typeof value === 'string' && ['error', 'warning', 'info', 'debug'].includes(value)) {
-                  onChange('logLevel', value as AuditPolicyData['logLevel']);
+                  onChange('logLevel', value as AuditPolicyData['logLevel'])
                 }
               }}
               error={errors.logLevel}
@@ -69,7 +69,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
                 { value: 'error', label: 'Ошибка' },
                 { value: 'warning', label: 'Предупреждение' },
                 { value: 'info', label: 'Информация' },
-                { value: 'debug', label: 'Отладка' }
+                { value: 'debug', label: 'Отладка' },
               ]}
             />
 
@@ -78,8 +78,8 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
               type="number"
               value={data.retentionDays}
               onChange={(value) => {
-                const num = typeof value === 'number' && !isNaN(value) ? value : data.retentionDays;
-                onChange('retentionDays', num);
+                const num = typeof value === 'number' && !isNaN(value) ? value : data.retentionDays
+                onChange('retentionDays', num)
               }}
               error={errors.retentionDays}
               min="7"
@@ -95,7 +95,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
 
           <div className="space-y-3">
             <h4 className="font-medium">Уведомления о событиях безопасности</h4>
-            
+
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -141,6 +141,6 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
         </>
       )}
     </div>
-  );
-};
+  )
+}
 

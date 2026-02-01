@@ -1,82 +1,82 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DialogService } from '@/services/DialogService';
-import { ProjectDialog, TaskPropertiesDialog, ResourceInformationDialog } from '@/components/dialogs';
-import type { JsonObject } from '@/types/json-types';
+import React, { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { DialogService } from '@/services/DialogService'
+import { ProjectDialog, TaskPropertiesDialog, ResourceInformationDialog } from '@/components/dialogs'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Тестовая страница для проверки диалоговых компонентов
  */
 export const DialogTestPage: React.FC = () => {
-  const [testResults, setTestResults] = useState<string[]>([]);
+  const [testResults, setTestResults] = useState<string[]>([])
 
   const addResult = (message: string) => {
-    setTestResults(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`]);
-  };
+    setTestResults(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${message}`])
+  }
 
   const testProjectDialog = async () => {
     try {
-      addResult('🚀 Тестирование ProjectDialog...');
-      
+      addResult('🚀 Тестирование ProjectDialog...')
+
       // Для демонстрации просто проверим регистрацию и создание компонента
-      const isRegistered = DialogService.getInstance().getDialog('project') !== null;
+      const isRegistered = DialogService.getInstance().getDialog('project') !== null
       if (isRegistered) {
-        addResult('✅ ProjectDialog успешно зарегистрирован');
-        addResult('📝 Данные проекта: {name: "Тестовый проект", manager: "Тестовый менеджер"}');
-        addResult('🎯 Категория: project');
-        addResult('📏 Размер: 800x600px');
-        addResult('🔒 Модальный: true');
+        addResult('✅ ProjectDialog успешно зарегистрирован')
+        addResult('📝 Данные проекта: {name: "Тестовый проект", manager: "Тестовый менеджер"}')
+        addResult('🎯 Категория: project')
+        addResult('📏 Размер: 800x600px')
+        addResult('🔒 Модальный: true')
       } else {
-        addResult('❌ ProjectDialog не зарегистрирован');
+        addResult('❌ ProjectDialog не зарегистрирован')
       }
     } catch (error) {
-      addResult(`❌ Ошибка в ProjectDialog: ${error}`);
+      addResult(`❌ Ошибка в ProjectDialog: ${error}`)
     }
-  };
+  }
 
   const testTaskDialog = async () => {
     try {
-      addResult('🚀 Тестирование TaskPropertiesDialog...');
-      
-      const isRegistered = DialogService.getInstance().getDialog('task-properties') !== null;
+      addResult('🚀 Тестирование TaskPropertiesDialog...')
+
+      const isRegistered = DialogService.getInstance().getDialog('task-properties') !== null
       if (isRegistered) {
-        addResult('✅ TaskPropertiesDialog успешно зарегистрирован');
-        addResult('📝 Данные задачи: {taskId: "TASK-001", progress: 0.5}');
-        addResult('🎯 Категория: task');
-        addResult('📏 Размер: 550x auto');
-        addResult('🔒 Модальный: true');
+        addResult('✅ TaskPropertiesDialog успешно зарегистрирован')
+        addResult('📝 Данные задачи: {taskId: "TASK-001", progress: 0.5}')
+        addResult('🎯 Категория: task')
+        addResult('📏 Размер: 550x auto')
+        addResult('🔒 Модальный: true')
       } else {
-        addResult('❌ TaskPropertiesDialog не зарегистрирован');
+        addResult('❌ TaskPropertiesDialog не зарегистрирован')
       }
     } catch (error) {
-      addResult(`❌ Ошибка в TaskPropertiesDialog: ${error}`);
+      addResult(`❌ Ошибка в TaskPropertiesDialog: ${error}`)
     }
-  };
+  }
 
   const testResourceDialog = async () => {
     try {
-      addResult('🚀 Тестирование ResourceInformationDialog...');
-      
-      const isRegistered = DialogService.getInstance().getDialog('resource-information') !== null;
+      addResult('🚀 Тестирование ResourceInformationDialog...')
+
+      const isRegistered = DialogService.getInstance().getDialog('resource-information') !== null
       if (isRegistered) {
-        addResult('✅ ResourceInformationDialog успешно зарегистрирован');
-        addResult('📝 Данные ресурса: {resourceId: "RES-001", type: "human"}');
-        addResult('🎯 Категория: resource');
-        addResult('📏 Размер: 600x500px');
-        addResult('🔒 Модальный: true');
+        addResult('✅ ResourceInformationDialog успешно зарегистрирован')
+        addResult('📝 Данные ресурса: {resourceId: "RES-001", type: "human"}')
+        addResult('🎯 Категория: resource')
+        addResult('📏 Размер: 600x500px')
+        addResult('🔒 Модальный: true')
       } else {
-        addResult('❌ ResourceInformationDialog не зарегистрирован');
+        addResult('❌ ResourceInformationDialog не зарегистрирован')
       }
     } catch (error) {
-      addResult(`❌ Ошибка в ResourceInformationDialog: ${error}`);
+      addResult(`❌ Ошибка в ResourceInformationDialog: ${error}`)
     }
-  };
+  }
 
   const testDialogService = () => {
     try {
-      addResult('🔍 Тестирование DialogService...');
-      const dialogService = DialogService.getInstance();
+      addResult('🔍 Тестирование DialogService...')
+      const dialogService = DialogService.getInstance()
 
       // Регистрация диалогов
       dialogService.registerDialog({
@@ -86,9 +86,9 @@ export const DialogTestPage: React.FC = () => {
         config: {
           width: 800,
           height: 600,
-          modal: true
-        }
-      });
+          modal: true,
+        },
+      })
 
       dialogService.registerDialog({
         id: 'task-properties',
@@ -97,9 +97,9 @@ export const DialogTestPage: React.FC = () => {
         config: {
           width: 550,
           height: 600,
-          modal: true
-        }
-      });
+          modal: true,
+        },
+      })
 
       dialogService.registerDialog({
         id: 'resource-information',
@@ -108,31 +108,31 @@ export const DialogTestPage: React.FC = () => {
         config: {
           width: 600,
           height: 500,
-          modal: true
-        }
-      });
+          modal: true,
+        },
+      })
 
-      addResult('✅ Все диалоги успешно зарегистрированы в DialogService');
+      addResult('✅ Все диалоги успешно зарегистрированы в DialogService')
 
       // Проверка получения диалогов
-      const projectDialog = dialogService.getDialog('project');
-      const taskDialog = dialogService.getDialog('task-properties');
-      const resourceDialog = dialogService.getDialog('resource-information');
-      
+      const projectDialog = dialogService.getDialog('project')
+      const taskDialog = dialogService.getDialog('task-properties')
+      const resourceDialog = dialogService.getDialog('resource-information')
+
       if (projectDialog && taskDialog && resourceDialog) {
-        addResult('✅ Все диалоги успешно получены из DialogService');
+        addResult('✅ Все диалоги успешно получены из DialogService')
       } else {
-        addResult('❌ Некоторые диалоги не найдены в DialogService');
+        addResult('❌ Некоторые диалоги не найдены в DialogService')
       }
-      
+
     } catch (error) {
-      addResult(`❌ Ошибка в DialogService: ${error}`);
+      addResult(`❌ Ошибка в DialogService: ${error}`)
     }
-  };
+  }
 
   const clearResults = () => {
-    setTestResults([]);
-  };
+    setTestResults([])
+  }
 
   return (
     <div className="container mx-auto p-6">
@@ -216,5 +216,5 @@ export const DialogTestPage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
+  )
+}

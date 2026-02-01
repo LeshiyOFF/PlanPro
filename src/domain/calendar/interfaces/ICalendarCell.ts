@@ -1,4 +1,4 @@
-import { ICalendarEvent } from './ICalendarEvent';
+import { ICalendarEvent } from './ICalendarEvent'
 
 /**
  * Интерфейс ячейки календаря (дня)

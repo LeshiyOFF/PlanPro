@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { BaseDialog, BaseDialogProps } from '../dialogs/base/SimpleBaseDialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { hotkeyService } from '@/services/HotkeyService';
-import { hotkeyFromString, hotkeyEquals, HotkeyCategory, type Hotkey, type HotkeyBinding, type HotkeyConflict } from '@/types/HotkeyTypes';
-import { HotkeyBindingList } from './HotkeyBindingList';
-import { EditingBinding } from './HotkeyBindingEditor';
-import { logger } from '@/utils/logger';
+import React, { useState, useEffect } from 'react'
+import { BaseDialog, BaseDialogProps } from '../dialogs/base/SimpleBaseDialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card } from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { hotkeyService } from '@/services/HotkeyService'
+import { hotkeyFromString, hotkeyEquals, HotkeyCategory, type Hotkey, type HotkeyBinding, type HotkeyConflict } from '@/types/HotkeyTypes'
+import { HotkeyBindingList } from './HotkeyBindingList'
+import { EditingBinding } from './HotkeyBindingEditor'
+import { logger } from '@/utils/logger'
 
 interface HotkeySettingsProps extends Omit<BaseDialogProps, 'children'> {
   onSave?: () => void;
@@ -24,76 +24,76 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
   onOpenChange,
   ...props
 }) => {
-  const [bindings, setBindings] = useState<HotkeyBinding[]>([]);
-  const [editingBinding, setEditingBinding] = useState<EditingBinding | null>(null);
-  const [conflicts, setConflicts] = useState<HotkeyConflict[]>([]);
-  const [filter, setFilter] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [bindings, setBindings] = useState<HotkeyBinding[]>([])
+  const [editingBinding, setEditingBinding] = useState<EditingBinding | null>(null)
+  const [conflicts, setConflicts] = useState<HotkeyConflict[]>([])
+  const [filter, setFilter] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   useEffect(() => {
     if (open) {
-      loadBindings();
+      loadBindings()
     }
-  }, [open]);
+  }, [open])
 
   const loadBindings = () => {
-    const allBindings = hotkeyService.getAllBindings();
-    setBindings(allBindings);
-    setEditingBinding(null);
-    setConflicts([]);
-  };
+    const allBindings = hotkeyService.getAllBindings()
+    setBindings(allBindings)
+    setEditingBinding(null)
+    setConflicts([])
+  }
 
   const startEditing = (actionId: string, keys: string) => {
     setEditingBinding({
       actionId,
       keys,
       originalKeys: keys,
-      isEditing: true
-    });
-  };
+      isEditing: true,
+    })
+  }
 
   const cancelEditing = () => {
-    setEditingBinding(null);
-  };
+    setEditingBinding(null)
+  }
 
   const saveEditing = () => {
-    if (!editingBinding) return;
+    if (!editingBinding) return
 
     try {
-      const newKeys = hotkeyFromString(editingBinding.keys);
-      const conflict = findConflict(editingBinding.actionId, newKeys);
-      
+      const newKeys = hotkeyFromString(editingBinding.keys)
+      const conflict = findConflict(editingBinding.actionId, newKeys)
+
       if (conflict) {
-        setConflicts([conflict]);
-        return;
+        setConflicts([conflict])
+        return
       }
 
-      hotkeyService.updateBinding(editingBinding.actionId, newKeys);
-      loadBindings();
-      
-      logger.dialog('Hotkey updated', { 
-        actionId: editingBinding.actionId, 
-        newKeys: editingBinding.keys 
-      }, 'HotkeySettings');
+      hotkeyService.updateBinding(editingBinding.actionId, newKeys)
+      loadBindings()
+
+      logger.dialog('Hotkey updated', {
+        actionId: editingBinding.actionId,
+        newKeys: editingBinding.keys,
+      }, 'HotkeySettings')
     } catch (error) {
-      logger.dialogError('Invalid hotkey format', { keys: editingBinding.keys }, 'HotkeySettings');
+      logger.dialogError('Invalid hotkey format', { keys: editingBinding.keys }, 'HotkeySettings')
     }
-  };
+  }
 
   const updateEditingKeys = (keys: string) => {
     if (editingBinding) {
-      setEditingBinding({ ...editingBinding, keys });
+      setEditingBinding({ ...editingBinding, keys })
     }
-  };
+  }
 
   const resetToDefault = (actionId: string) => {
-    const defaultBinding = hotkeyService.getDefaultBinding(actionId);
+    const defaultBinding = hotkeyService.getDefaultBinding(actionId)
     if (defaultBinding) {
-      hotkeyService.updateBinding(actionId, defaultBinding.keys);
-      loadBindings();
-      logger.dialog('Hotkey reset to default', { actionId }, 'HotkeySettings');
+      hotkeyService.updateBinding(actionId, defaultBinding.keys)
+      loadBindings()
+      logger.dialog('Hotkey reset to default', { actionId }, 'HotkeySettings')
     }
-  };
+  }
 
   const findConflict = (actionId: string, keys: Hotkey): HotkeyConflict | null => {
     for (const binding of bindings) {
@@ -101,50 +101,50 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
         return {
           action1: actionId,
           action2: binding.actionId,
-          keys
-        };
+          keys,
+        }
       }
     }
-    return null;
-  };
+    return null
+  }
 
   const getActionName = (actionId: string): string => {
-    const actions = hotkeyService.getAllActions();
-    const action = actions.find(a => a.id === actionId);
-    return action?.name || actionId;
-  };
+    const actions = hotkeyService.getAllActions()
+    const action = actions.find(a => a.id === actionId)
+    return action?.name || actionId
+  }
 
   const getFilteredBindings = (): HotkeyBinding[] => {
-    let filtered = bindings;
+    let filtered = bindings
 
     if (selectedCategory !== 'all' && Object.values(HotkeyCategory).includes(selectedCategory as HotkeyCategory)) {
-      const actions = hotkeyService.getActionsByCategory(selectedCategory as HotkeyCategory);
-      const actionIds = new Set(actions.map(a => a.id));
-      filtered = filtered.filter(b => actionIds.has(b.actionId));
+      const actions = hotkeyService.getActionsByCategory(selectedCategory as HotkeyCategory)
+      const actionIds = new Set(actions.map(a => a.id))
+      filtered = filtered.filter(b => actionIds.has(b.actionId))
     }
 
     if (filter) {
-      const filterLower = filter.toLowerCase();
-      filtered = filtered.filter(binding => 
-        getActionName(binding.actionId).toLowerCase().includes(filterLower)
-      );
+      const filterLower = filter.toLowerCase()
+      filtered = filtered.filter(binding =>
+        getActionName(binding.actionId).toLowerCase().includes(filterLower),
+      )
     }
 
-    return filtered;
-  };
+    return filtered
+  }
 
   const saveAll = () => {
     try {
-      hotkeyService.saveToStorage();
-      logger.dialog('Hotkeys saved to storage', {}, 'HotkeySettings');
-      onSave?.();
-      onOpenChange?.(false);
+      hotkeyService.saveToStorage()
+      logger.dialog('Hotkeys saved to storage', {}, 'HotkeySettings')
+      onSave?.()
+      onOpenChange?.(false)
     } catch (error) {
-      logger.dialogError('Failed to save hotkeys', error instanceof Error ? error : String(error), 'HotkeySettings');
+      logger.dialogError('Failed to save hotkeys', error instanceof Error ? error : String(error), 'HotkeySettings')
     }
-  };
+  }
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       title="Настройки горячих клавиш"
@@ -190,7 +190,7 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
         {conflicts.length > 0 && (
           <Alert>
             <AlertDescription>
-              Обнаружен конфликт горячих клавиш между "{getActionName(conflicts[0].action1)}" 
+              Обнаружен конфликт горячих клавиш между "{getActionName(conflicts[0].action1)}"
               и "{getActionName(conflicts[0].action2)}". Пожалуйста, измените комбинацию.
             </AlertDescription>
           </Alert>
@@ -218,5 +218,5 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
         </Card>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}

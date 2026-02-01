@@ -1,4 +1,4 @@
-import { CellValue } from '@/types/sheet/CellValueTypes';
+import { CellValue } from '@/types/sheet/CellValueTypes'
 
 /**
  * Опция для выбора в редакторе

@@ -3,9 +3,9 @@
  * Следует принципу единственной ответственности
  */
 
-export { ViewInfoSection } from './ViewInfoSection';
-export { ProjectInfoSection } from './ProjectInfoSection';
-export { MessageSection } from './MessageSection';
-export { TimeSection } from './TimeSection';
-export { ZoomSection } from './ZoomSection';
+export { ViewInfoSection } from './ViewInfoSection'
+export { ProjectInfoSection } from './ProjectInfoSection'
+export { MessageSection } from './MessageSection'
+export { TimeSection } from './TimeSection'
+export { ZoomSection } from './ZoomSection'
 

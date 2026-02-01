@@ -3,12 +3,12 @@
  * Presentational component для ProjectDialog.
  */
 
-import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ProjectDialogData } from '@/types/calendar-types';
+import React from 'react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import type { ProjectDialogData } from '@/types/calendar-types'
 
 export interface ProjectDialogFormProps {
   data: ProjectDialogData;
@@ -21,7 +21,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({
   data,
   validationErrors,
   submitError,
-  onFieldChange
+  onFieldChange,
 }) => (
   <div className="space-y-6 p-6">
     {submitError && (
@@ -135,4 +135,4 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({
       </div>
     </div>
   </div>
-);
+)

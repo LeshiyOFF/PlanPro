@@ -1,4 +1,4 @@
-import { CanvasRect } from '../../canvas/interfaces/GanttCanvas';
+import { CanvasRect } from '../../canvas/interfaces/GanttCanvas'
 
 /**
  * Interface for Work Breakdown Structure node

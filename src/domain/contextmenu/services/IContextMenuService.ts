@@ -1,5 +1,5 @@
-import { IContextMenu, IContextMenuContext } from '../entities/ContextMenu';
-import { ContextMenuType } from '../ContextMenuType';
+import { IContextMenu, IContextMenuContext } from '../entities/ContextMenu'
+import { ContextMenuType } from '../ContextMenuType'
 
 /**
  * Сервис для управления контекстными меню

@@ -29,7 +29,7 @@ export interface IToolbarGroup {
 /**
  * Тип панели инструментов
  */
-export type ToolbarType = 
+export type ToolbarType =
   | 'standard'
   | 'formatting'
   | 'view'
@@ -60,7 +60,7 @@ export interface IToolbarEvents {
 /**
  * Позиция кнопки в группе
  */
-export type ToolbarButtonPosition = 
+export type ToolbarButtonPosition =
   | 'first'
   | 'last'
   | 'middle';
@@ -68,7 +68,7 @@ export type ToolbarButtonPosition =
 /**
  * Размер кнопки
  */
-export type ToolbarButtonSize = 
+export type ToolbarButtonSize =
   | 'small'
   | 'medium'
   | 'large';
@@ -76,7 +76,7 @@ export type ToolbarButtonSize =
 /**
  * Состояние кнопки
  */
-export type ToolbarButtonState = 
+export type ToolbarButtonState =
   | 'default'
   | 'active'
   | 'disabled'

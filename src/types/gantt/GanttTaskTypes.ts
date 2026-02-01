@@ -2,7 +2,7 @@
  * Типы задач для Gantt диаграммы.
  */
 
-import { TaskSegment } from '../task-types';
+import { TaskSegment } from '../task-types'
 
 /**
  * Базовая задача для отображения в Gantt

@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 /**
  * Тип контекстного меню
  */
-export type ContextMenuType = 
-  | 'task' 
-  | 'resource' 
-  | 'project' 
+export type ContextMenuType =
+  | 'task'
+  | 'resource'
+  | 'project'
   | 'gantt'
   | 'timesheet'
   | 'calendar'
@@ -40,7 +40,7 @@ export interface ContextMenuConfig {
 /**
  * Контекст для меню
  */
-export const MenuContext = createContext<MenuContextType | null>(null);
+export const MenuContext = createContext<MenuContextType | null>(null)
 
 /**
  * Тип контекста меню
@@ -60,64 +60,64 @@ export interface MenuContextType {
  * Хук для использования контекста меню
  */
 export const useMenuContext = (): MenuContextType => {
-  const context = useContext(MenuContext);
+  const context = useContext(MenuContext)
   if (!context) {
-    throw new Error('useMenuContext must be used within a MenuProvider');
+    throw new Error('useMenuContext must be used within a MenuProvider')
   }
-  return context;
-};
+  return context
+}
 
 /**
  * Провайдер для управления меню
  */
 export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [contextMenu, setContextMenu] = useState<ContextMenuConfig | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuConfig | null>(null)
 
   const showContextMenu = useCallback((
     type: ContextMenuType,
     items: ContextMenuItem[],
     x: number,
-    y: number
+    y: number,
   ) => {
     setContextMenu({
       type,
       items: items.filter(item => !item.separator || item.id !== 'separator'),
       x,
       y,
-      visible: true
-    });
-  }, []);
+      visible: true,
+    })
+  }, [])
 
   const hideContextMenu = useCallback(() => {
-    setContextMenu(null);
-  }, []);
+    setContextMenu(null)
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = () => {
       if (contextMenu?.visible) {
-        hideContextMenu();
+        hideContextMenu()
       }
-    };
+    }
 
     if (contextMenu?.visible) {
-      document.addEventListener('click', handleClickOutside);
+      document.addEventListener('click', handleClickOutside)
       return () => {
-        document.removeEventListener('click', handleClickOutside);
-      };
+        document.removeEventListener('click', handleClickOutside)
+      }
     }
-    return undefined;
-  }, [contextMenu?.visible, hideContextMenu]);
+    return undefined
+  }, [contextMenu?.visible, hideContextMenu])
 
   const contextValue: MenuContextType = {
     contextMenu,
     showContextMenu,
-    hideContextMenu
-  };
+    hideContextMenu,
+  }
 
   return (
     <MenuContext.Provider value={contextValue}>
       {children}
     </MenuContext.Provider>
-  );
-};
+  )
+}
 

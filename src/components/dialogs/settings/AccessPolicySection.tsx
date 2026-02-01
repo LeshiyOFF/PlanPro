@@ -1,10 +1,10 @@
-import React from 'react';
-import { FormField } from '../components/FormField';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import React from 'react'
+import { FormField } from '../components/FormField'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { X } from 'lucide-react'
 
 interface AccessPolicyData {
   twoFactorEnabled: boolean;
@@ -25,17 +25,17 @@ interface AccessPolicySectionProps {
 export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
   data,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   const removeIpFromWhitelist = (index: number) => {
-    const newWhitelist = data.ipWhitelist.filter((_, i) => i !== index);
-    onChange('ipWhitelist', newWhitelist);
-  };
+    const newWhitelist = data.ipWhitelist.filter((_, i) => i !== index)
+    onChange('ipWhitelist', newWhitelist)
+  }
 
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Политика доступа</h3>
-      
+
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -55,14 +55,14 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
             value={data.twoFactorMethod}
             onChange={(value) => {
               if (value != null && typeof value === 'string' && (value === 'email' || value === 'sms' || value === 'app')) {
-                onChange('twoFactorMethod', value);
+                onChange('twoFactorMethod', value)
               }
             }}
             error={errors.twoFactorMethod}
             options={[
               { value: 'email', label: 'Email' },
               { value: 'sms', label: 'SMS' },
-              { value: 'app', label: 'Authenticator App' }
+              { value: 'app', label: 'Authenticator App' },
             ]}
           />
         )}
@@ -118,8 +118,8 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
             type="number"
             value={data.apiRateLimit}
             onChange={(value) => {
-              const num = typeof value === 'number' && !isNaN(value) ? value : data.apiRateLimit;
-              onChange('apiRateLimit', num);
+              const num = typeof value === 'number' && !isNaN(value) ? value : data.apiRateLimit
+              onChange('apiRateLimit', num)
             }}
             error={errors.apiRateLimit}
             min="1"
@@ -136,6 +136,6 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 

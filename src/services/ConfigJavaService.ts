@@ -1,11 +1,11 @@
-import { BaseJavaService } from './BaseJavaService';
-import { convertDateFnsToJava } from '@/utils/DateFormatConverter';
-import type { ConfigurationUpdateRequest } from '@/types/api/request-types';
+import { BaseJavaService } from './BaseJavaService'
+import { convertDateFnsToJava } from '@/utils/DateFormatConverter'
+import type { ConfigurationUpdateRequest } from '@/types/api/request-types'
 import type {
   DataResponse,
   ConfigurationResponse,
-  ApiStatusResponse
-} from '@/types/api/response-types';
+  ApiStatusResponse,
+} from '@/types/api/response-types'
 
 /**
  * Сервис для управления конфигурацией и системными операциями Java-ядра.
@@ -18,10 +18,10 @@ export class ConfigJavaService extends BaseJavaService {
    */
   public async updateConfiguration(
     config: ConfigurationUpdateRequest,
-    silent: boolean = false
+    silent: boolean = false,
   ): Promise<DataResponse<ConfigurationResponse>> {
-    const convertedConfig = this.convertConfigFormats(config);
-    return await this.executeApiCommand('config.update', [convertedConfig], silent);
+    const convertedConfig = this.convertConfigFormats(config)
+    return await this.executeApiCommand('config.update', [convertedConfig], silent)
   }
 
   /**
@@ -29,28 +29,28 @@ export class ConfigJavaService extends BaseJavaService {
    */
   private convertConfigFormats(config: ConfigurationUpdateRequest): ConfigurationUpdateRequest {
     if (!config) {
-      return config;
+      return config
     }
 
-    const converted = { ...config };
+    const converted = { ...config }
 
     // Конвертируем dateFormat в general
     if (converted.general?.dateFormat) {
       converted.general = {
         ...converted.general,
-        dateFormat: convertDateFnsToJava(converted.general.dateFormat)
-      };
+        dateFormat: convertDateFnsToJava(converted.general.dateFormat),
+      }
     }
 
     // Конвертируем timeFormat в general (если требуется)
     if (converted.general?.timeFormat) {
       converted.general = {
         ...converted.general,
-        timeFormat: convertDateFnsToJava(converted.general.timeFormat)
-      };
+        timeFormat: convertDateFnsToJava(converted.general.timeFormat),
+      }
     }
 
-    return converted;
+    return converted
   }
 
   /**
@@ -58,10 +58,10 @@ export class ConfigJavaService extends BaseJavaService {
    */
   public async ping(): Promise<boolean> {
     try {
-      await this.executeApiCommand('ping', [], true);
-      return true;
+      await this.executeApiCommand('ping', [], true)
+      return true
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -70,10 +70,10 @@ export class ConfigJavaService extends BaseJavaService {
    */
   public async getVersion(): Promise<string> {
     try {
-      const data = await this.executeApiCommand('version', [], true);
-      return (typeof data === 'string' ? data : (data as { version?: string })?.version) || 'unknown';
+      const data = await this.executeApiCommand('version', [], true)
+      return (typeof data === 'string' ? data : (data as { version?: string })?.version) || 'unknown'
     } catch {
-      return 'unknown';
+      return 'unknown'
     }
   }
 
@@ -81,7 +81,7 @@ export class ConfigJavaService extends BaseJavaService {
    * Получение статуса Java API
    */
   public async getApiStatus(): Promise<DataResponse<ApiStatusResponse>> {
-    return await this.executeApiCommand('status');
+    return await this.executeApiCommand('status')
   }
 }
 

@@ -1,7 +1,7 @@
-import React from 'react';
-import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
-import { Clock } from 'lucide-react';
-import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
+import React from 'react'
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
+import { Clock } from 'lucide-react'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
 
 interface CalendarPreviewProps {
   calendar: IWorkCalendar;
@@ -13,18 +13,18 @@ interface CalendarPreviewProps {
  * Показывает сетку рабочих/выходных дней и рабочее время
  * Stage 8.15: Визуализация календаря для tooltip и списков
  */
-export const CalendarPreview: React.FC<CalendarPreviewProps> = ({ 
-  calendar, 
-  compact = false 
+export const CalendarPreview: React.FC<CalendarPreviewProps> = ({
+  calendar,
+  compact = false,
 }) => {
-  const templateService = CalendarTemplateService.getInstance();
-  const dayNames = compact 
+  const templateService = CalendarTemplateService.getInstance()
+  const dayNames = compact
     ? ['В', 'П', 'В', 'С', 'Ч', 'П', 'С']
-    : ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    : ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
 
-  const workingDaysCount = calendar.workingDays.filter(wd => wd.isWorking).length;
-  const firstWorkingDay = calendar.workingDays.find(wd => wd.isWorking);
-  const dynamicShortDesc = templateService.generateShortDescription(calendar);
+  const workingDaysCount = calendar.workingDays.filter(wd => wd.isWorking).length
+  const firstWorkingDay = calendar.workingDays.find(wd => wd.isWorking)
+  const dynamicShortDesc = templateService.generateShortDescription(calendar)
 
   return (
     <div className="space-y-3">
@@ -42,9 +42,9 @@ export const CalendarPreview: React.FC<CalendarPreviewProps> = ({
         <div className="flex gap-1.5">
           {calendar.workingDays
             .sort((a, b) => {
-              const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
-              const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
-              return orderA - orderB;
+              const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek
+              const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek
+              return orderA - orderB
             })
             .map((wd) => (
               <div
@@ -54,9 +54,9 @@ export const CalendarPreview: React.FC<CalendarPreviewProps> = ({
                   ${compact ? 'w-7 h-7' : 'w-10 h-10'}
                   rounded text-xs font-bold
                   ${wd.isWorking
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-slate-200 text-slate-400'
-                  }
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-slate-200 text-slate-400'
+              }
                 `}
                 title={`${dayNames[wd.dayOfWeek]}: ${wd.isWorking ? 'Рабочий' : 'Выходной'}`}
               >
@@ -94,5 +94,5 @@ export const CalendarPreview: React.FC<CalendarPreviewProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

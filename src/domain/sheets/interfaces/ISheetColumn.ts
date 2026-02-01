@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import type { JsonValue } from '@/types/json-types';
+import { ReactNode } from 'react'
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import type { JsonValue } from '@/types/json-types'
 
 /**
  * Типы данных ячеек таблицы

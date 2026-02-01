@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { useProjectStore } from '@/store/projectStore';
-import { Task, ResourceAssignment } from '@/store/project/interfaces';
-import { useTranslation } from 'react-i18next';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Settings2, Users, MessageSquare, Link2, X, Diamond, FolderTree } from 'lucide-react';
-import { normalizeFraction } from '@/utils/ProgressFormatter';
-import { TaskType } from './task/ProgressSection';
-import { GeneralTab } from './task/GeneralTab';
-import { ResourceAssignmentTab } from './task/ResourceAssignmentTab';
-import { LinksTab } from './task/LinksTab';
-import { NotesTab } from './task/NotesTab';
+import React, { useState, useEffect, useMemo } from 'react'
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { useProjectStore } from '@/store/projectStore'
+import { Task, ResourceAssignment } from '@/store/project/interfaces'
+import { useTranslation } from 'react-i18next'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Settings2, Users, MessageSquare, Link2, X, Diamond, FolderTree } from 'lucide-react'
+import { normalizeFraction } from '@/utils/ProgressFormatter'
+import { TaskType } from './task/ProgressSection'
+import { GeneralTab } from './task/GeneralTab'
+import { ResourceAssignmentTab } from './task/ResourceAssignmentTab'
+import { LinksTab } from './task/LinksTab'
+import { NotesTab } from './task/NotesTab'
 
 interface TaskPropertiesDialogProps {
   taskId: string | null;
@@ -21,66 +21,66 @@ interface TaskPropertiesDialogProps {
 
 /**
  * TaskPropertiesDialog - Диалог свойств задачи
- * 
+ *
  * КРИТИЧНО V3.0: Исправлен переход на resourceAssignments вместо resourceIds.
  * Это устраняет баг с нулевыми трудозатратами в отчётах.
- * 
+ *
  * Clean Architecture: UI Component (Presentation Layer)
  * SOLID: Single Responsibility - оркестрация вкладок свойств задачи
- * 
+ *
  * @version 3.0 - Миграция на resourceAssignments
  */
-export const TaskPropertiesDialog: React.FC<TaskPropertiesDialogProps> = ({ 
-  taskId, isOpen, onClose 
+export const TaskPropertiesDialog: React.FC<TaskPropertiesDialogProps> = ({
+  taskId, isOpen, onClose,
 }) => {
-  const { t } = useTranslation();
-  const { tasks, resources, updateTask } = useProjectStore();
-  const task = tasks.find(tsk => tsk.id === taskId);
-  
-  const [formData, setFormData] = useState<Partial<Task>>({});
-  const [assignments, setAssignments] = useState<ResourceAssignment[]>([]);
-  const [predecessorsInput, setPredecessorsInput] = useState('');
+  const { t } = useTranslation()
+  const { tasks, resources, updateTask } = useProjectStore()
+  const task = tasks.find(tsk => tsk.id === taskId)
+
+  const [formData, setFormData] = useState<Partial<Task>>({})
+  const [assignments, setAssignments] = useState<ResourceAssignment[]>([])
+  const [predecessorsInput, setPredecessorsInput] = useState('')
 
   const taskType: TaskType = useMemo(() => {
-    if (!task) return 'regular';
-    if (task.isMilestone) return 'milestone';
-    if (task.isSummary) return 'summary';
-    return 'regular';
-  }, [task]);
+    if (!task) return 'regular'
+    if (task.isMilestone) return 'milestone'
+    if (task.isSummary) return 'summary'
+    return 'regular'
+  }, [task])
 
   const successors = useMemo(() => {
-    if (!taskId) return [];
-    return tasks.filter(tsk => tsk.predecessors?.includes(taskId)).map(tsk => tsk.id);
-  }, [tasks, taskId]);
+    if (!taskId) return []
+    return tasks.filter(tsk => tsk.predecessors?.includes(taskId)).map(tsk => tsk.id)
+  }, [tasks, taskId])
 
   useEffect(() => {
     if (task && isOpen) {
       setFormData({
         name: task.name, progress: task.progress, notes: task.notes || '',
-        startDate: new Date(task.startDate), endDate: new Date(task.endDate)
-      });
-      setAssignments(migrateToAssignments(task));
-      setPredecessorsInput(task.predecessors?.join(', ') || '');
+        startDate: new Date(task.startDate), endDate: new Date(task.endDate),
+      })
+      setAssignments(migrateToAssignments(task))
+      setPredecessorsInput(task.predecessors?.join(', ') || '')
     }
-  }, [task, isOpen]);
+  }, [task, isOpen])
 
-  if (!task) return null;
+  if (!task) return null
 
   const handleSave = () => {
-    const predecessorsArray = predecessorsInput.split(',').map(s => s.trim()).filter(s => s !== '');
-    updateTask(task.id, { ...formData, resourceAssignments: assignments, predecessors: predecessorsArray });
-    onClose();
-  };
+    const predecessorsArray = predecessorsInput.split(',').map(s => s.trim()).filter(s => s !== '')
+    updateTask(task.id, { ...formData, resourceAssignments: assignments, predecessors: predecessorsArray })
+    onClose()
+  }
 
   const handleProgressChange = (value: number) => {
-    setFormData(prev => ({ ...prev, progress: normalizeFraction(value) }));
-  };
+    setFormData(prev => ({ ...prev, progress: normalizeFraction(value) }))
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="p-0 border-none overflow-hidden w-[750px] min-h-[650px] max-h-[85vh] rounded-2xl shadow-2xl bg-[hsl(var(--primary))] gap-0 flex flex-col" hideClose>
         <DialogHeader task={task} taskType={taskType} onClose={onClose} t={t} />
-        <DialogBody 
+        <DialogBody
           formData={formData} setFormData={setFormData} taskType={taskType}
           assignments={assignments} setAssignments={setAssignments}
           predecessorsInput={predecessorsInput} setPredecessorsInput={setPredecessorsInput}
@@ -96,17 +96,17 @@ export const TaskPropertiesDialog: React.FC<TaskPropertiesDialogProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
 /** Преобразование назначений задачи в массив ResourceAssignment */
 const migrateToAssignments = (task: Task): ResourceAssignment[] => {
-  if (task.resourceAssignments?.length) return task.resourceAssignments;
-  return [];
-};
+  if (task.resourceAssignments?.length) return task.resourceAssignments
+  return []
+}
 
 const DialogHeader: React.FC<{task: Task; taskType: TaskType; onClose: () => void; t: (k: string, o?: Record<string,string>) => string}> = ({ task, taskType, onClose, t }) => {
-  const Icon = taskType === 'milestone' ? Diamond : taskType === 'summary' ? FolderTree : Settings2;
+  const Icon = taskType === 'milestone' ? Diamond : taskType === 'summary' ? FolderTree : Settings2
   return (
     <div className="p-10 pb-8 text-white relative shadow-lg">
       <button onClick={onClose} className="absolute right-4 top-4 opacity-70 hover:opacity-100 transition-all p-2 rounded-full hover:bg-white/10 z-50"><X size={20} /></button>
@@ -118,8 +118,8 @@ const DialogHeader: React.FC<{task: Task; taskType: TaskType; onClose: () => voi
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface DialogBodyProps {
   formData: Partial<Task>; setFormData: React.Dispatch<React.SetStateAction<Partial<Task>>>;
@@ -152,6 +152,6 @@ const DialogBody: React.FC<DialogBodyProps> = (props) => (
       </TabsContent>
     </Tabs>
   </div>
-);
+)
 
-export default TaskPropertiesDialog;
+export default TaskPropertiesDialog

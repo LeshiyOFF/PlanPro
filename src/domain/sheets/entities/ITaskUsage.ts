@@ -1,8 +1,8 @@
-import { ResourceAssignment } from '@/store/project/interfaces';
+import { ResourceAssignment } from '@/store/project/interfaces'
 
 /**
  * Представление данных использования задачи
- * 
+ *
  * Расширенная версия с поддержкой иерархии, вех и суммарных задач
  */
 export interface ITaskUsage {

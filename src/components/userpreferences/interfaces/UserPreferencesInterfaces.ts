@@ -3,8 +3,8 @@
  * Следует SOLID принципам и Clean Architecture
  */
 
-import { ViewType } from '@/types/ViewTypes';
-import type { Duration } from '@/types/Master_Functionality_Catalog';
+import { ViewType } from '@/types/ViewTypes'
+import type { Duration } from '@/types/Master_Functionality_Catalog'
 
 /**
  * Настройки диаграммы Ганта
@@ -183,7 +183,7 @@ export interface IUserPreferencesService {
   getSecurityPreferences(): ISecurityPreferences;
   getSchedulePreferences(): ISchedulePreferences;
   getCalendarPreferences(): ICalendarPreferences;
-  
+
   updateGeneralPreferences(preferences: Partial<IGeneralPreferences>): Promise<void>;
   updateDisplayPreferences(preferences: Partial<IDisplayPreferences>): Promise<void>;
   updateEditingPreferences(preferences: Partial<IEditingPreferences>): Promise<void>;
@@ -192,11 +192,11 @@ export interface IUserPreferencesService {
   updateSchedulePreferences(preferences: Partial<ISchedulePreferences>): Promise<void>;
   updateCalendarPreferences(preferences: Partial<ICalendarPreferences>): Promise<void>;
   updateGanttPreferences(preferences: Partial<IGanttPreferences>): Promise<void>;
-  
+
   resetToDefaults(category?: PreferencesCategory): Promise<void>;
   exportPreferences(): string;
   importPreferences(data: string): Promise<void>;
-  
+
   subscribe(listener: (event: IPreferencesChangeEvent) => void): () => void;
 }
 

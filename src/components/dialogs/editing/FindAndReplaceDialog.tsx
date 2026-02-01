@@ -1,15 +1,15 @@
-import React, { useState, useCallback } from 'react';
-import { BaseDialog } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React, { useState, useCallback } from 'react'
+import { BaseDialog } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 // import { ScrollArea } from '@/components/ui/scroll-area'; // temporarily removed
-import { Search, Replace, FileText, Calendar, Users } from 'lucide-react';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import { Search, Replace, FileText, Calendar, Users } from 'lucide-react'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 interface SearchScope {
   allFields: boolean;
@@ -53,15 +53,15 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
   initialFindText = '',
   onFind,
   onReplace,
-  onReplaceAll
+  onReplaceAll,
 }) => {
-  const [activeTab, setActiveTab] = useState<'find' | 'replace'>('find');
-  const [findText, setFindText] = useState(initialFindText);
-  const [replaceText, setReplaceText] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [currentResultIndex, setCurrentResultIndex] = useState(-1);
-  const [isSearching, setIsSearching] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState<'find' | 'replace'>('find')
+  const [findText, setFindText] = useState(initialFindText)
+  const [replaceText, setReplaceText] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [currentResultIndex, setCurrentResultIndex] = useState(-1)
+  const [isSearching, setIsSearching] = useState(false)
+
   const [options, setOptions] = useState<FindAndReplaceOptions>({
     matchCase: false,
     matchWholeWord: false,
@@ -73,109 +73,109 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
       taskNotes: false,
       resourceNames: false,
       resourceNotes: false,
-      projectFields: false
-    }
-  });
+      projectFields: false,
+    },
+  })
 
   const { validate, errors } = useDialogValidation({
     findText: {
       required: activeTab === 'find',
-      minLength: activeTab === 'find' ? 1 : undefined
+      minLength: activeTab === 'find' ? 1 : undefined,
     },
     replaceText: {
-      required: activeTab === 'replace'
-    }
-  });
+      required: activeTab === 'replace',
+    },
+  })
 
   const validateForm = useCallback(() => {
-    const formData = { findText, replaceText };
-    return validate(formData);
-  }, [findText, replaceText, validate]);
+    const formData = { findText, replaceText }
+    return validate(formData)
+  }, [findText, replaceText, validate])
 
   const handleFind = useCallback(async () => {
-    if (!validateForm()) return;
-    
-    setIsSearching(true);
+    if (!validateForm()) return
+
+    setIsSearching(true)
     try {
-      const results = onFind?.(options) || [];
-      setSearchResults(results);
-      setCurrentResultIndex(results.length > 0 ? 0 : -1);
+      const results = onFind?.(options) || []
+      setSearchResults(results)
+      setCurrentResultIndex(results.length > 0 ? 0 : -1)
     } finally {
-      setIsSearching(false);
+      setIsSearching(false)
     }
-  }, [findText, options, onFind, validateForm]);
+  }, [findText, options, onFind, validateForm])
 
   const handleFindNext = useCallback(() => {
     if (searchResults.length === 0) {
-      handleFind();
+      handleFind()
     } else {
-      setCurrentResultIndex(prev => (prev + 1) % searchResults.length);
+      setCurrentResultIndex(prev => (prev + 1) % searchResults.length)
     }
-  }, [searchResults, handleFind]);
+  }, [searchResults, handleFind])
 
   const handleFindPrevious = useCallback(() => {
     if (searchResults.length === 0) {
-      handleFind();
+      handleFind()
     } else {
-      setCurrentResultIndex(prev => (prev - 1 + searchResults.length) % searchResults.length);
+      setCurrentResultIndex(prev => (prev - 1 + searchResults.length) % searchResults.length)
     }
-  }, [searchResults, handleFind]);
+  }, [searchResults, handleFind])
 
   const handleReplace = useCallback(async () => {
-    if (!validateForm() || currentResultIndex === -1) return;
-    
+    if (!validateForm() || currentResultIndex === -1) return
+
     try {
-      const replaceCount = onReplace?.(findText, replaceText, options) || 0;
+      const replaceCount = onReplace?.(findText, replaceText, options) || 0
       if (replaceCount > 0) {
         // Refresh results after replacement
-        handleFind();
+        handleFind()
       }
     } catch (error) {
-      console.error('Replace failed:', error);
+      console.error('Replace failed:', error)
     }
-  }, [findText, replaceText, options, currentResultIndex, onReplace, handleFind, validateForm]);
+  }, [findText, replaceText, options, currentResultIndex, onReplace, handleFind, validateForm])
 
   const handleReplaceAll = useCallback(async () => {
-    if (!validateForm()) return;
-    
+    if (!validateForm()) return
+
     try {
-      const replaceCount = onReplaceAll?.(findText, replaceText, options) || 0;
+      const replaceCount = onReplaceAll?.(findText, replaceText, options) || 0
       if (replaceCount > 0) {
         // Clear results after replace all
-        setSearchResults([]);
-        setCurrentResultIndex(-1);
+        setSearchResults([])
+        setCurrentResultIndex(-1)
       }
     } catch (error) {
-      console.error('Replace all failed:', error);
+      console.error('Replace all failed:', error)
     }
-  }, [findText, replaceText, options, onReplaceAll, validateForm]);
+  }, [findText, replaceText, options, onReplaceAll, validateForm])
 
   const handleScopeChange = useCallback((field: keyof SearchScope, checked: boolean) => {
     setOptions(prev => ({
       ...prev,
       scope: {
         ...prev.scope,
-        [field]: checked
-      }
-    }));
-  }, []);
+        [field]: checked,
+      },
+    }))
+  }, [])
 
   const getResultIcon = (type: SearchResult['type']) => {
     switch (type) {
-      case 'task': return <FileText className="h-4 w-4" />;
-      case 'resource': return <Users className="h-4 w-4" />;
-      case 'project': return <Calendar className="h-4 w-4" />;
-      default: return <Search className="h-4 w-4" />;
+      case 'task': return <FileText className="h-4 w-4" />
+      case 'resource': return <Users className="h-4 w-4" />
+      case 'project': return <Calendar className="h-4 w-4" />
+      default: return <Search className="h-4 w-4" />
     }
-  };
+  }
 
   const handleConfirm = () => {
     if (activeTab === 'find') {
-      handleFind();
+      handleFind()
     } else {
-      handleReplaceAll();
+      handleReplaceAll()
     }
-  };
+  }
 
   return (
     <BaseDialog
@@ -313,7 +313,7 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
                 <Checkbox
                   id="match-case"
                   checked={options.matchCase}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setOptions(prev => ({ ...prev, matchCase: !!checked }))
                   }
                 />
@@ -323,7 +323,7 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
                 <Checkbox
                   id="whole-word"
                   checked={options.matchWholeWord}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setOptions(prev => ({ ...prev, matchWholeWord: !!checked }))
                   }
                 />
@@ -333,7 +333,7 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
                 <Checkbox
                   id="wildcards"
                   checked={options.useWildcards}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setOptions(prev => ({ ...prev, useWildcards: !!checked }))
                   }
                 />
@@ -422,6 +422,6 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

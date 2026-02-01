@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { FormField } from './FormField';
+import type { Meta, StoryObj } from '@storybook/react'
+import { FormField } from './FormField'
 
 const meta: Meta<typeof FormField> = {
   title: 'Design System/Molecules/FormField',
@@ -47,9 +47,9 @@ const meta: Meta<typeof FormField> = {
       description: 'Позиция лейбла',
     },
   },
-};
+}
 
-export default meta;
+export default meta
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
@@ -60,7 +60,7 @@ export const Default: Story = {
       placeholder: 'Enter your email',
     },
   },
-};
+}
 
 export const WithError: Story = {
   args: {
@@ -71,7 +71,7 @@ export const WithError: Story = {
     },
     error: 'Password must be at least 8 characters',
   },
-};
+}
 
 export const WithHelper: Story = {
   args: {
@@ -82,7 +82,7 @@ export const WithHelper: Story = {
     },
     helperText: 'Username must be unique and contain only letters and numbers',
   },
-};
+}
 
 export const Required: Story = {
   args: {
@@ -93,7 +93,7 @@ export const Required: Story = {
     },
     required: true,
   },
-};
+}
 
 export const LeftLabel: Story = {
   args: {
@@ -104,7 +104,7 @@ export const LeftLabel: Story = {
       placeholder: 'Enter name...',
     },
   },
-};
+}
 
 export const Inline: Story = {
   args: {
@@ -115,7 +115,7 @@ export const Inline: Story = {
       placeholder: 'Enter email...',
     },
   },
-};
+}
 
 export const Sizes: Story = {
   render: () => (
@@ -125,7 +125,7 @@ export const Sizes: Story = {
         size="sm"
         inputProps={{
           type: 'text',
-          placeholder: 'Small input'
+          placeholder: 'Small input',
         }}
       />
       <FormField
@@ -133,7 +133,7 @@ export const Sizes: Story = {
         size="md"
         inputProps={{
           type: 'text',
-          placeholder: 'Medium input'
+          placeholder: 'Medium input',
         }}
       />
       <FormField
@@ -141,10 +141,10 @@ export const Sizes: Story = {
         size="lg"
         inputProps={{
           type: 'text',
-          placeholder: 'Large input'
+          placeholder: 'Large input',
         }}
       />
     </div>
   ),
-};
+}
 

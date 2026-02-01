@@ -1,5 +1,5 @@
-import { EventType, Task, Resource } from './Master_Functionality_Catalog';
-import { LogData } from '../utils/logger';
+import { EventType, Task, Resource } from './Master_Functionality_Catalog'
+import { LogData } from '../utils/logger'
 
 /**
  * Типы Event Flow системы для ProjectLibre
@@ -7,7 +7,7 @@ import { LogData } from '../utils/logger';
  */
 
 // Re-exported from Master_Functionality_Catalog
-export { EventType };
+export { EventType }
 
 // Базовый интерфейс события
 export interface BaseEvent {

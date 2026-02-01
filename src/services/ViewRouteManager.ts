@@ -1,6 +1,6 @@
-import React from 'react';
-import { ViewType, ViewConfig, ViewRoute, ViewSettings } from '@/types/ViewTypes';
-import type { ReactElement } from 'react';
+import React from 'react'
+import { ViewType, ViewConfig, ViewRoute, ViewSettings } from '@/types/ViewTypes'
+import type { ReactElement } from 'react'
 
 /**
  * Интерфейс для навигационного сервиса
@@ -31,13 +31,13 @@ export interface IViewRouter {
  * - Dependency Inversion: Работает с интерфейсами
  */
 export class ViewRouteManager implements IViewRouter, INavigationService {
-  private static instance: ViewRouteManager;
-  private views: Map<ViewType, ViewConfig> = new Map();
-  private currentView: ViewType | null = null;
-  private permissions: string[] = [];
+  private static instance: ViewRouteManager
+  private views: Map<ViewType, ViewConfig> = new Map()
+  private currentView: ViewType | null = null
+  private permissions: string[] = []
 
   private constructor() {
-    this.initializeDefaultViews();
+    this.initializeDefaultViews()
   }
 
   /**
@@ -45,9 +45,9 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
    */
   public static getInstance(): ViewRouteManager {
     if (!ViewRouteManager.instance) {
-      ViewRouteManager.instance = new ViewRouteManager();
+      ViewRouteManager.instance = new ViewRouteManager()
     }
-    return ViewRouteManager.instance;
+    return ViewRouteManager.instance
   }
 
   /**
@@ -67,8 +67,8 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
           showCriticalPath: true,
           showProgress: true,
           showResources: true,
-          zoom: 100
-        }
+          zoom: 100,
+        },
       },
       {
         id: 'network',
@@ -80,8 +80,8 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         component: null,
         defaultSettings: {
           showProgress: true,
-          zoom: 100
-        }
+          zoom: 100,
+        },
       },
       {
         id: 'task-sheet',
@@ -92,8 +92,8 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         path: '/task-sheet',
         component: null,
         defaultSettings: {
-          showProgress: true
-        }
+          showProgress: true,
+        },
       },
       {
         id: 'resource-sheet',
@@ -103,7 +103,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'users',
         path: '/resource-sheet',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'task-usage',
@@ -113,7 +113,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'bar-chart-2',
         path: '/task-usage',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'resource-usage',
@@ -123,7 +123,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'pie-chart',
         path: '/resource-usage',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'calendar',
@@ -133,7 +133,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'calendar',
         path: '/calendar',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'reports',
@@ -143,7 +143,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'file-text',
         path: '/reports',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'tracking-gantt',
@@ -155,8 +155,8 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         component: null,
         defaultSettings: {
           showProgress: true,
-          showCriticalPath: true
-        }
+          showCriticalPath: true,
+        },
       },
       {
         id: 'wbs',
@@ -166,7 +166,7 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'git-branch',
         path: '/wbs',
         component: null,
-        defaultSettings: {}
+        defaultSettings: {},
       },
       {
         id: 'settings',
@@ -176,104 +176,104 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
         icon: 'settings',
         path: '/settings',
         component: null,
-        defaultSettings: {}
-      }
-    ];
+        defaultSettings: {},
+      },
+    ]
 
-    defaultViews.forEach(view => this.registerView(view));
+    defaultViews.forEach(view => this.registerView(view))
   }
 
   /**
    * Регистрация нового представления
    */
   public registerView(config: ViewConfig): void {
-    this.views.set(config.type, config);
+    this.views.set(config.type, config)
   }
 
   /**
    * Удаление представления
    */
   public unregisterView(viewType: ViewType): void {
-    this.views.delete(viewType);
+    this.views.delete(viewType)
   }
 
   /**
    * Получение конфигурации представления
    */
   public getViewConfig(viewType: ViewType): ViewConfig | null {
-    return this.views.get(viewType) || null;
+    return this.views.get(viewType) || null
   }
 
   /**
    * Получение всех зарегистрированных представлений
    */
   public getAvailableViews(): ViewConfig[] {
-    return Array.from(this.views.values());
+    return Array.from(this.views.values())
   }
 
   /**
    * Получение всех роутов
    */
   public getAllRoutes(): ViewRoute[] {
-    const routes: ViewRoute[] = [];
-    
+    const routes: ViewRoute[] = []
+
     for (const config of this.views.values()) {
       routes.push({
         path: config.path,
         component: config.component,
         settings: config.defaultSettings || {},
-        permissions: config.permissions
-      });
+        permissions: config.permissions,
+      })
     }
-    
-    return routes;
+
+    return routes
   }
 
   /**
    * Отрисовка представления
    */
   public renderView(viewType: ViewType, settings?: Partial<ViewSettings>): ReactElement | null {
-    const config = this.getViewConfig(viewType);
-    
+    const config = this.getViewConfig(viewType)
+
     if (!config || !config.component) {
-      return null;
+      return null
     }
 
-    const Component = config.component;
-    const mergedSettings = { ...config.defaultSettings, ...settings };
+    const Component = config.component
+    const mergedSettings = { ...config.defaultSettings, ...settings }
 
-    return React.createElement(Component, { viewType, settings: mergedSettings });
+    return React.createElement(Component, { viewType, settings: mergedSettings })
   }
 
   /**
    * Получение текущего представления
    */
   public getCurrentView(): ViewType | null {
-    return this.currentView;
+    return this.currentView
   }
 
   /**
    * Навигация к представлению
    */
   public navigateToView(viewType: ViewType, settings?: Partial<ViewSettings>): void {
-    const config = this.getViewConfig(viewType);
-    
+    const config = this.getViewConfig(viewType)
+
     if (!config) {
-      throw new Error(`View type ${viewType} is not registered`);
+      throw new Error(`View type ${viewType} is not registered`)
     }
 
     if (!this.canNavigateToView(viewType)) {
-      throw new Error(`No permission to navigate to view ${viewType}`);
+      throw new Error(`No permission to navigate to view ${viewType}`)
     }
 
-    this.currentView = viewType;
-    
+    this.currentView = viewType
+
     // Навигация через React Router
-    window.history.pushState({}, '', config.path);
-    
+    window.history.pushState({}, '', config.path)
+
     // Сохранение настроек в localStorage
     if (settings) {
-      localStorage.setItem(`view-settings-${viewType}`, JSON.stringify(settings));
+      localStorage.setItem(`view-settings-${viewType}`, JSON.stringify(settings))
     }
   }
 
@@ -281,47 +281,47 @@ export class ViewRouteManager implements IViewRouter, INavigationService {
    * Проверка возможности навигации
    */
   public canNavigateToView(viewType: ViewType): boolean {
-    const config = this.getViewConfig(viewType);
-    
+    const config = this.getViewConfig(viewType)
+
     if (!config || !config.permissions) {
-      return true;
+      return true
     }
 
-    return config.permissions.every(permission => 
-      this.permissions.includes(permission)
-    );
+    return config.permissions.every(permission =>
+      this.permissions.includes(permission),
+    )
   }
 
   /**
    * Установка прав доступа
    */
   public setPermissions(permissions: string[]): void {
-    this.permissions = permissions;
+    this.permissions = permissions
   }
 
   /**
    * Получение настроек представления
    */
   public getViewSettings(viewType: ViewType): Partial<ViewSettings> {
-    const saved = localStorage.getItem(`view-settings-${viewType}`);
-    
+    const saved = localStorage.getItem(`view-settings-${viewType}`)
+
     if (saved) {
       try {
-        return JSON.parse(saved);
+        return JSON.parse(saved)
       } catch {
-        return {};
+        return {}
       }
     }
-    
-    const config = this.getViewConfig(viewType);
-    return config?.defaultSettings || {};
+
+    const config = this.getViewConfig(viewType)
+    return config?.defaultSettings || {}
   }
 
   /**
    * Сохранение настроек представления
    */
   public saveViewSettings(viewType: ViewType, settings: Partial<ViewSettings>): void {
-    localStorage.setItem(`view-settings-${viewType}`, JSON.stringify(settings));
+    localStorage.setItem(`view-settings-${viewType}`, JSON.stringify(settings))
   }
 }
 

@@ -1,15 +1,15 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import type { SearchResult } from '@/types/search-types';
-import { SearchService } from '@/services/SearchService';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { SearchResult } from '@/types/search-types'
+import { SearchService } from '@/services/SearchService'
 
 export interface SearchScope {
   id: string;
@@ -36,8 +36,8 @@ const SEARCH_OPERATORS = [
   { value: 'any', label: 'Any words' },
   { value: 'all', label: 'All words' },
   { value: 'exact', label: 'Exact phrase' },
-  { value: 'wildcard', label: 'Wildcard (*)' }
-];
+  { value: 'wildcard', label: 'Wildcard (*)' },
+]
 
 const DATE_FILTERS = [
   { value: 'any', label: 'Any time' },
@@ -47,8 +47,8 @@ const DATE_FILTERS = [
   { value: 'month', label: 'This month' },
   { value: 'quarter', label: 'This quarter' },
   { value: 'year', label: 'This year' },
-  { value: 'custom', label: 'Custom range' }
-];
+  { value: 'custom', label: 'Custom range' },
+]
 
 export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
   searchScopes = [],
@@ -60,36 +60,36 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [activeTab, setActiveTab] = React.useState('search');
-  const [query, setQuery] = React.useState('');
-  const [searchOperator, setSearchOperator] = React.useState('any');
-  const [selectedScopes, setSelectedScopes] = React.useState<string[]>([]);
-  const [caseSensitive, setCaseSensitive] = React.useState(false);
-  const [includeContent, setIncludeContent] = React.useState(true);
-  const [dateFilter, setDateFilter] = React.useState('any');
-  const [customStartDate, setCustomStartDate] = React.useState('');
-  const [customEndDate, setCustomEndDate] = React.useState('');
-  const [searchResults, setSearchResults] = React.useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('search')
+  const [query, setQuery] = React.useState('')
+  const [searchOperator, setSearchOperator] = React.useState('any')
+  const [selectedScopes, setSelectedScopes] = React.useState<string[]>([])
+  const [caseSensitive, setCaseSensitive] = React.useState(false)
+  const [includeContent, setIncludeContent] = React.useState(true)
+  const [dateFilter, setDateFilter] = React.useState('any')
+  const [customStartDate, setCustomStartDate] = React.useState('')
+  const [customEndDate, setCustomEndDate] = React.useState('')
+  const [searchResults, setSearchResults] = React.useState<SearchResult[]>([])
+  const [isSearching, setIsSearching] = React.useState(false)
 
   // Saved search state
-  const [saveSearchName, setSaveSearchName] = React.useState('');
-  const [saveSearchDescription, setSaveSearchDescription] = React.useState('');
+  const [saveSearchName, setSaveSearchName] = React.useState('')
+  const [saveSearchDescription, setSaveSearchDescription] = React.useState('')
 
   const handleScopeToggle = (scopeId: string) => {
-    setSelectedScopes(prev => 
+    setSelectedScopes(prev =>
       prev.includes(scopeId)
         ? prev.filter(id => id !== scopeId)
-        : [...prev, scopeId]
-    );
-  };
+        : [...prev, scopeId],
+    )
+  }
 
   const handleSearch = async () => {
-    if (!query.trim() || selectedScopes.length === 0) return;
+    if (!query.trim() || selectedScopes.length === 0) return
 
-    setIsSearching(true);
+    setIsSearching(true)
     try {
-      const searchService = SearchService.getInstance();
+      const searchService = SearchService.getInstance()
       const searchType =
         selectedScopes.includes('task') && selectedScopes.includes('resource')
           ? 'all'
@@ -97,24 +97,24 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
             ? 'task'
             : selectedScopes.includes('resource')
               ? 'resource'
-              : 'all';
+              : 'all'
       const response = await searchService.search({
         query: query.trim(),
         type: searchType,
         limit: 50,
-        offset: 0
-      });
+        offset: 0,
+      })
       const results: SearchResult[] = response.results.map(r => ({
         ...r,
         modified: r.modifiedDate instanceof Date ? r.modifiedDate.toISOString().slice(0, 10) : r.modified,
-        relevance: r.relevanceScore ?? r.relevance
-      }));
-      setSearchResults(results);
-      searchService.saveRecentSearch(query.trim());
+        relevance: r.relevanceScore ?? r.relevance,
+      }))
+      setSearchResults(results)
+      searchService.saveRecentSearch(query.trim())
     } catch {
-      setSearchResults([]);
+      setSearchResults([])
     } finally {
-      setIsSearching(false);
+      setIsSearching(false)
     }
     onSearch?.(query, selectedScopes, {
       searchOperator,
@@ -122,9 +122,9 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
       includeContent,
       dateFilter,
       customStartDate,
-      customEndDate
-    });
-  };
+      customEndDate,
+    })
+  }
 
   const handleSaveSearch = () => {
     if (saveSearchName.trim() && query.trim()) {
@@ -132,42 +132,42 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
         searchOperator,
         caseSensitive,
         includeContent,
-        dateFilter
-      });
-      setSaveSearchName('');
-      setSaveSearchDescription('');
-      setActiveTab('saved');
+        dateFilter,
+      })
+      setSaveSearchName('')
+      setSaveSearchDescription('')
+      setActiveTab('saved')
     }
-  };
+  }
 
   const handleLoadSavedSearch = (savedSearch: { query: string; scope: string[] }) => {
-    setQuery(savedSearch.query);
-    setSelectedScopes(savedSearch.scope);
-    setActiveTab('search');
-  };
+    setQuery(savedSearch.query)
+    setSelectedScopes(savedSearch.scope)
+    setActiveTab('search')
+  }
 
   const handleResultClick = (result: SearchResult) => {
-    onOpenResult?.(result);
-  };
+    onOpenResult?.(result)
+  }
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'task': return 'bg-slate-100 text-slate-900';
-      case 'resource': return 'bg-green-100 text-green-800';
-      case 'project': return 'bg-purple-100 text-purple-800';
-      case 'document': return 'bg-yellow-100 text-yellow-800';
-      case 'note': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'task': return 'bg-slate-100 text-slate-900'
+      case 'resource': return 'bg-green-100 text-green-800'
+      case 'project': return 'bg-purple-100 text-purple-800'
+      case 'document': return 'bg-yellow-100 text-yellow-800'
+      case 'note': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const getRelevanceColor = (relevance: number) => {
-    if (relevance >= 90) return 'text-green-600';
-    if (relevance >= 70) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+    if (relevance >= 90) return 'text-green-600'
+    if (relevance >= 70) return 'text-yellow-600'
+    return 'text-red-600'
+  }
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -333,8 +333,8 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                   key={index}
                   className="border rounded-lg p-3 cursor-pointer hover:bg-muted/50"
                   onClick={() => {
-                    setQuery(search);
-                    setActiveTab('search');
+                    setQuery(search)
+                    setActiveTab('search')
                   }}
                 >
                   <div className="font-medium">{search}</div>
@@ -351,7 +351,7 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
         <TabsContent value="saved" className="space-y-4">
           <div className="flex justify-between items-center">
             <Label>Saved Searches</Label>
-            <Button 
+            <Button
               variant="outline"
               onClick={() => setActiveTab('search')}
             >
@@ -417,8 +417,8 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                 onChange={(e) => setSaveSearchDescription(e.target.value)}
                 placeholder="Optional description..."
               />
-              <Button 
-                onClick={handleSaveSearch} 
+              <Button
+                onClick={handleSaveSearch}
                 disabled={!saveSearchName.trim() || !query.trim()}
               >
                 Save Search
@@ -430,7 +430,7 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
         {/* Results Tab */}
         <TabsContent value="results" className="space-y-4">
           <Label>Search Results</Label>
-          
+
           {isSearching ? (
             <div className="text-center py-8">
               <div className="text-lg font-medium text-muted-foreground">
@@ -465,17 +465,17 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                       <span className="font-medium">{result.title}</span>
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      Relevance: 
+                      Relevance:
                       <span className={`ml-1 font-medium ${getRelevanceColor(result.relevance ?? result.relevanceScore ?? 0)}`}>
                         {(result.relevance ?? result.relevanceScore ?? 0)}%
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="text-sm text-muted-foreground mb-2">
                     {result.description}
                   </div>
-                  
+
                   <div className="flex justify-between items-center text-xs text-muted-foreground">
                     <div>
                       Path: {result.path}
@@ -501,6 +501,6 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
         </TabsContent>
       </Tabs>
     </BaseDialog>
-  );
-};
+  )
+}
 

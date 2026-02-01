@@ -2,31 +2,31 @@
  * Типизированный приветственный диалог
  */
 
-import React, { useState } from 'react';
-import { TypedBaseDialog } from '../base/TypedBaseDialog';
-import { useDialog } from '../context/TypedDialogContext';
-import { WelcomeDialogData } from '@/types/dialog/IDialogRegistry';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import React, { useState } from 'react'
+import { TypedBaseDialog } from '../base/TypedBaseDialog'
+import { useDialog } from '../context/TypedDialogContext'
+import { WelcomeDialogData } from '@/types/dialog/IDialogRegistry'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 /**
  * Компонент приветственного диалога
  */
 export const TypedWelcomeDialog: React.FC = () => {
-  const { isOpen, state, close } = useDialog('welcome');
-  const [showOnStartup, setShowOnStartup] = useState(true);
+  const { isOpen, state, close } = useDialog('welcome')
+  const [showOnStartup, setShowOnStartup] = useState(true)
 
   if (!state) {
-    return null;
+    return null
   }
 
   const handleSubmit = async (_data: WelcomeDialogData): Promise<void> => {
-    close();
-  };
+    close()
+  }
 
   const handleCancel = (): void => {
-    close();
-  };
+    close()
+  }
 
   return (
     <TypedBaseDialog
@@ -84,8 +84,8 @@ export const TypedWelcomeDialog: React.FC = () => {
             onCheckedChange={(checked) => setShowOnStartup(checked as boolean)}
             className="data-[state=checked]:bg-primary data-[state=checked]:border-primary"
           />
-          <Label 
-            htmlFor="show-on-startup" 
+          <Label
+            htmlFor="show-on-startup"
             className="text-sm text-slate-300 cursor-pointer hover:text-slate-100 transition-colors"
           >
             Показывать это окно при запуске
@@ -93,5 +93,5 @@ export const TypedWelcomeDialog: React.FC = () => {
         </div>
       </div>
     </TypedBaseDialog>
-  );
-};
+  )
+}

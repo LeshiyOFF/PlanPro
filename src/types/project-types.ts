@@ -3,8 +3,8 @@
  * Задачи и ресурсы унифицированы со стором (store Task, Catalog Resource/Assignment).
  */
 
-import type { Task } from '@/store/project/interfaces';
-import type { Resource, Assignment } from '@/types/resource-types';
+import type { Task } from '@/store/project/interfaces'
+import type { Resource, Assignment } from '@/types/resource-types'
 
 export type ProjectStatus = 'Planning' | 'InProgress' | 'Completed' | 'OnHold'
 

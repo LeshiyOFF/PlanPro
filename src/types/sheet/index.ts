@@ -2,4 +2,4 @@
  * Экспорт типов для Sheet компонентов
  */
 
-export * from './CellValueTypes';
+export * from './CellValueTypes'

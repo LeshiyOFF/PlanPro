@@ -2,9 +2,9 @@
  * Типы для хука useIpcService.
  */
 
-import type { JavaApiResponseBase, JavaApiResponse, JavaStatusData, JavaCommandArgs, JavaCommandResponse } from '@/types/ipc';
-import type { IIpcService } from '@/services/IIpcService';
-import type { JsonObject } from '@/types/json-types';
+import type { JavaApiResponseBase, JavaApiResponse, JavaStatusData, JavaCommandArgs, JavaCommandResponse } from '@/types/ipc'
+import type { IIpcService } from '@/services/IIpcService'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Состояние статуса Java процесса

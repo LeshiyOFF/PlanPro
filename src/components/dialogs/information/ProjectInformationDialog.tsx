@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { 
+import React, { useState, useEffect } from 'react'
+import { BaseDialog } from '@/components/dialogs/base/BaseDialog'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Separator } from '@/components/ui/separator'
+import {
   IDialogActions,
   DialogResult,
-  IDialogData
-} from '@/types/dialog/DialogTypes';
+  IDialogData,
+} from '@/types/dialog/DialogTypes'
 
 /**
  * Интерфейс для данных проекта
@@ -52,7 +52,7 @@ export interface ProjectInformationDialogProps {
 export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> = ({
   data = {},
   isOpen,
-  onClose
+  onClose,
 }) => {
   const [projectData, setProjectData] = useState<ProjectInformationData>(() => {
     const initial: ProjectInformationData = {
@@ -69,17 +69,17 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         total: 0,
         completed: 0,
         inProgress: 0,
-        delayed: 0
+        delayed: 0,
       },
       projectResources: {
         total: 0,
         assigned: 0,
-        available: 0
+        available: 0,
       },
-      ...data
-    };
-    return initial;
-  });
+      ...data,
+    }
+    return initial
+  })
 
   /**
    * Получение статуса проекта
@@ -88,36 +88,36 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
     switch (status.toLowerCase()) {
       case 'завершен':
       case 'completed':
-        return 'success';
+        return 'success'
       case 'в работе':
       case 'in progress':
-        return 'warning';
+        return 'warning'
       case 'приостановлен':
       case 'suspended':
-        return 'destructive';
+        return 'destructive'
       default:
-        return 'default';
+        return 'default'
     }
-  };
+  }
 
   /**
    * Расчет эффективности бюджета
    */
   const getBudgetEfficiency = (): { percentage: number; status: string } => {
     if (!projectData.projectBudget || !projectData.projectActualCost) {
-      return { percentage: 0, status: 'Нет данных' };
+      return { percentage: 0, status: 'Нет данных' }
     }
 
-    const percentage = ((projectData.projectBudget - projectData.projectActualCost) / projectData.projectBudget) * 100;
-    
+    const percentage = ((projectData.projectBudget - projectData.projectActualCost) / projectData.projectBudget) * 100
+
     if (percentage >= 10) {
-      return { percentage, status: 'Под бюджетом' };
+      return { percentage, status: 'Под бюджетом' }
     } else if (percentage >= -5) {
-      return { percentage, status: 'В рамках бюджета' };
+      return { percentage, status: 'В рамках бюджета' }
     } else {
-      return { percentage, status: 'Превышение бюджета' };
+      return { percentage, status: 'Превышение бюджета' }
     }
-  };
+  }
 
   /**
    * Форматирование даты
@@ -126,31 +126,31 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
     return date.toLocaleDateString('ru-RU', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric'
-    });
-  };
+      year: 'numeric',
+    })
+  }
 
   /**
    * Действия диалога
    */
   const actions: IDialogActions = {
     onOk: async (_data?: IDialogData) => {
-      onClose({ success: true, data: projectData, action: 'ok' });
+      onClose({ success: true, data: projectData, action: 'ok' })
     },
-    
+
     onCancel: () => {
-      console.log('Project information dialog cancelled');
-      onClose({ success: false, action: 'cancel' });
+      console.log('Project information dialog cancelled')
+      onClose({ success: false, action: 'cancel' })
     },
-    
+
     onHelp: () => {
-      console.log('Opening project information help...');
+      console.log('Opening project information help...')
     },
 
     onValidate: (_data: IDialogData) => {
-      return true;
-    }
-  };
+      return true
+    },
+  }
 
   /**
    * Инициализация данных при изменении
@@ -161,12 +161,12 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         ...prev,
         ...data,
         id: prev.id,
-        timestamp: new Date()
-      }));
+        timestamp: new Date(),
+      }))
     }
-  }, [data]);
+  }, [data])
 
-  const budgetEfficiency = getBudgetEfficiency();
+  const budgetEfficiency = getBudgetEfficiency()
 
   /**
    * Компонент содержимого диалога
@@ -181,7 +181,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
             {projectData.projectStatus}
           </Badge>
         </div>
-        
+
         <div className="text-sm text-muted-foreground">
           <div>Менеджер: {projectData.projectManager}</div>
           <div>Создан: {formatDate(projectData.timestamp)}</div>
@@ -197,7 +197,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
           </div>
           <Progress value={projectData.projectProgress} className="h-2" />
         </div>
-        
+
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Дата начала:</span>
@@ -217,7 +217,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
       {/* Статистика задач */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">Статистика задач</h3>
-        
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
@@ -233,20 +233,20 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
               <span className="font-medium text-primary">{projectData.projectTasks.inProgress}</span>
             </div>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Отстают:</span>
               <span className="font-medium text-red-600">{projectData.projectTasks.delayed}</span>
             </div>
-            
+
             {/* Прогресс задач */}
             {projectData.projectTasks.total > 0 && (
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Выполнение задач:</div>
-                <Progress 
-                  value={(projectData.projectTasks.completed / projectData.projectTasks.total) * 100} 
-                  className="h-2" 
+                <Progress
+                  value={(projectData.projectTasks.completed / projectData.projectTasks.total) * 100}
+                  className="h-2"
                 />
               </div>
             )}
@@ -259,7 +259,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
       {/* Ресурсы */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">Ресурсы проекта</h3>
-        
+
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="p-3 bg-muted rounded">
             <div className="text-2xl font-bold text-foreground">{projectData.projectResources.total}</div>
@@ -274,7 +274,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
             <div className="text-sm text-muted-foreground">Доступно</div>
           </div>
         </div>
-        
+
         {/* Прогресс использования ресурсов */}
         {projectData.projectResources.total > 0 && (
           <div className="space-y-2">
@@ -284,9 +284,9 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
                 {Math.round((projectData.projectResources.assigned / projectData.projectResources.total) * 100)}%
               </span>
             </div>
-            <Progress 
-              value={(projectData.projectResources.assigned / projectData.projectResources.total) * 100} 
-              className="h-2" 
+            <Progress
+              value={(projectData.projectResources.assigned / projectData.projectResources.total) * 100}
+              className="h-2"
             />
           </div>
         )}
@@ -298,7 +298,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
           <Separator />
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Бюджет проекта</h3>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
@@ -312,13 +312,13 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Эффективность бюджета:</div>
                 <div className="flex items-center gap-2">
-                  <Progress 
-                    value={Math.abs(budgetEfficiency.percentage)} 
-                    className="h-2 flex-1" 
+                  <Progress
+                    value={Math.abs(budgetEfficiency.percentage)}
+                    className="h-2 flex-1"
                   />
                   <span className={`text-sm font-medium ${
                     budgetEfficiency.percentage >= 0 ? 'text-green-600' : 'text-red-600'
@@ -348,7 +348,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         </>
       )}
     </div>
-  );
+  )
 
   return (
     <BaseDialog<ProjectInformationData>
@@ -360,13 +360,13 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         width: 700,
         height: 600,
         modal: true,
-        showHelp: true
+        showHelp: true,
       }}
     >
       <DialogContent />
     </BaseDialog>
-  );
-};
+  )
+}
 
-export default ProjectInformationDialog;
+export default ProjectInformationDialog
 

@@ -3,10 +3,10 @@
  * Следует SOLID принципам и Atomic Design
  */
 
-import React from 'react';
-import { cn } from '@/utils/cn';
-import { AtomInput, AtomInputProps } from '../atoms';
-import { BaseAtomicProps } from '../atoms/types';
+import React from 'react'
+import { cn } from '@/utils/cn'
+import { AtomInput, AtomInputProps } from '../atoms'
+import { BaseAtomicProps } from '../atoms/types'
 
 /**
  * Props для FormField Molecule
@@ -34,27 +34,27 @@ export const FormField: React.FC<FormFieldProps> = ({
   helperText,
   size = 'md',
   labelPosition = 'top',
-  testId
+  testId,
 }) => {
   const containerClasses = cn(
     'space-y-1',
     labelPosition === 'inline' && 'flex items-center space-x-4 space-y-0',
     labelPosition === 'left' && 'flex flex-col space-y-2',
-    className
-  );
+    className,
+  )
 
   const labelClasses = cn(
     'font-medium text-sm',
     labelPosition === 'left' && 'text-xs uppercase tracking-wider mb-1',
     error ? 'text-red-600' : 'text-gray-700',
-    required && 'after:content-["*"] after:ml-1 after:text-red-500'
-  );
+    required && 'after:content-["*"] after:ml-1 after:text-red-500',
+  )
 
   const inputSize = {
     sm: 'sm',
     md: 'md',
-    lg: 'lg'
-  } as const;
+    lg: 'lg',
+  } as const
 
   return (
     <div className={containerClasses} data-testid={testId}>
@@ -63,13 +63,13 @@ export const FormField: React.FC<FormFieldProps> = ({
           {label}
         </label>
       )}
-      
+
       {labelPosition === 'inline' && (
         <label className={cn(labelClasses, 'flex-shrink-0 w-1/4')}>
           {label}
         </label>
       )}
-      
+
       <div className={labelPosition === 'inline' ? 'flex-1' : ''}>
         <AtomInput
           {...inputProps}
@@ -80,6 +80,6 @@ export const FormField: React.FC<FormFieldProps> = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -1,6 +1,6 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import React from 'react'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 interface NotesTabProps {
   notes: string;
@@ -10,10 +10,10 @@ interface NotesTabProps {
 
 /**
  * NotesTab - Вкладка заметок задачи
- * 
+ *
  * Clean Architecture: UI Component (Presentation Layer)
  * SOLID: Single Responsibility - управление заметками
- * 
+ *
  * @version 1.0
  */
 export const NotesTab: React.FC<NotesTabProps> = ({ notes, setNotes, t }) => (
@@ -21,11 +21,11 @@ export const NotesTab: React.FC<NotesTabProps> = ({ notes, setNotes, t }) => (
     <Label className="text-sm font-semibold text-slate-700">
       {t('task_props.notes_label', { defaultValue: 'Заметки к задаче' })}
     </Label>
-    <Textarea 
-      placeholder={t('task_props.notes_placeholder', { defaultValue: 'Добавьте заметки...' })} 
-      className="flex-1 min-h-[380px] resize-none text-base" 
-      value={notes} 
-      onChange={e => setNotes(e.target.value)} 
+    <Textarea
+      placeholder={t('task_props.notes_placeholder', { defaultValue: 'Добавьте заметки...' })}
+      className="flex-1 min-h-[380px] resize-none text-base"
+      value={notes}
+      onChange={e => setNotes(e.target.value)}
     />
   </div>
-);
+)

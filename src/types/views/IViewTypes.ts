@@ -3,8 +3,8 @@
  * Устраняет использование any в представлениях
  */
 
-import { Task, Resource } from '@/store/project/interfaces';
-import { ViewType, ViewSettings } from '@/types/ViewTypes';
+import { Task, Resource } from '@/store/project/interfaces'
+import { ViewType, ViewSettings } from '@/types/ViewTypes'
 
 /**
  * Базовые пропсы для всех View компонентов

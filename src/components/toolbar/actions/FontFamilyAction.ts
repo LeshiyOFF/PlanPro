@@ -1,6 +1,6 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { textFormattingService } from '@/services/TextFormattingService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { textFormattingService } from '@/services/TextFormattingService'
 
 /**
  * Действие для изменения семейства шрифта
@@ -17,11 +17,11 @@ export class FontFamilyAction extends ToolbarAction {
     'Courier New',
     'Tahoma',
     'Trebuchet MS',
-    'Impact'
-  ];
+    'Impact',
+  ]
 
   constructor() {
-    super('TF005', 'Шрифт', 'Font', 'Изменить семейство шрифта');
+    super('TF005', 'Шрифт', 'Font', 'Изменить семейство шрифта')
   }
 
   /**
@@ -36,7 +36,7 @@ export class FontFamilyAction extends ToolbarAction {
    */
   setFontFamily(fontFamily: string): void {
     if (fontFamily && this.fonts.includes(fontFamily)) {
-      textFormattingService.setFontFamily(fontFamily);
+      textFormattingService.setFontFamily(fontFamily)
     }
   }
 
@@ -44,27 +44,27 @@ export class FontFamilyAction extends ToolbarAction {
    * Возвращает текущее семейство шрифта
    */
   getCurrentFont(): string {
-    return textFormattingService.getFontFamily();
+    return textFormattingService.getFontFamily()
   }
 
   /**
    * Возвращает доступные семейства шрифтов
    */
   getAvailableFonts(): string[] {
-    return [...this.fonts];
+    return [...this.fonts]
   }
 
   /**
    * Создаёт экземпляр кнопки для тулбара с dropdown
    */
   createButton(): IToolbarButton {
-    const currentFont = this.getCurrentFont();
+    const currentFont = this.getCurrentFont()
     const dropdownItems = this.fonts.map(font => ({
       id: `${this.id}-${font.replace(/\s+/g, '')}`,
       label: font,
       icon: font === currentFont ? '✓' : '',
-      onClick: () => this.setFontFamily(font)
-    }));
+      onClick: () => this.setFontFamily(font),
+    }))
 
     return {
       id: this.id,
@@ -74,9 +74,9 @@ export class FontFamilyAction extends ToolbarAction {
       disabled: this.disabled,
       dropdownItems,
       onClick: () => {
-        console.log('Показать меню выбора шрифта');
-      }
-    };
+        console.log('Показать меню выбора шрифта')
+      },
+    }
   }
 }
 

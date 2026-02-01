@@ -1,10 +1,10 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 
 export interface Project {
   id: string;
@@ -33,25 +33,25 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [selectedProjects, setSelectedProjects] = React.useState<string[]>([]);
-  const [readOnly, setReadOnly] = React.useState(false);
+  const [selectedProjects, setSelectedProjects] = React.useState<string[]>([])
+  const [readOnly, setReadOnly] = React.useState(false)
 
   const handleProjectSelect = (projectId: string) => {
-    setSelectedProjects(prev => 
-      prev.includes(projectId) 
+    setSelectedProjects(prev =>
+      prev.includes(projectId)
         ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
-    );
-  };
+        : [...prev, projectId],
+    )
+  }
 
   const handleOpen = () => {
-    onOpen?.(selectedProjects, readOnly);
-    onClose?.();
-  };
+    onOpen?.(selectedProjects, readOnly)
+    onClose?.()
+  }
 
-  const canOpen = selectedProjects.length > 0;
+  const canOpen = selectedProjects.length > 0
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -66,8 +66,8 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
           <div className="flex items-center space-x-4">
             {allowOpenAs && (
               <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="readonly" 
+                <Checkbox
+                  id="readonly"
                   checked={readOnly}
                   onCheckedChange={(checked) => setReadOnly(checked as boolean)}
                 />
@@ -106,7 +106,7 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
             </TableHeader>
             <TableBody>
               {projects.map(project => (
-                <TableRow 
+                <TableRow
                   key={project.id}
                   className={currentProjectIds.includes(project.id) ? 'bg-muted/50' : ''}
                 >
@@ -124,10 +124,10 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
                   <TableCell>{project.lastModified}</TableCell>
                   <TableCell>{project.size}</TableCell>
                   <TableCell>
-                    <Badge 
+                    <Badge
                       variant={
                         project.status === 'active' ? 'default' :
-                        project.status === 'completed' ? 'secondary' : 'outline'
+                          project.status === 'completed' ? 'secondary' : 'outline'
                       }
                     >
                       {project.status}
@@ -153,6 +153,6 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

@@ -1,5 +1,5 @@
-import { ReactProfilerService, type ComponentProfile } from '@/services/ReactProfilerService';
-import { SentryService } from '@/services/SentryService';
+import { ReactProfilerService, type ComponentProfile } from '@/services/ReactProfilerService'
+import { SentryService } from '@/services/SentryService'
 
 /**
  * Интерфейс для собранных метрик
@@ -39,19 +39,19 @@ export interface MetricsCollectorConfig {
  * Следует SOLID принципу Single Responsibility
  */
 export class PerformanceMetricsCollector {
-  private static instance: PerformanceMetricsCollector;
-  private config: MetricsCollectorConfig;
-  private sentryService: SentryService;
-  private profilerService: ReactProfilerService;
-  private metrics: CollectedMetrics[] = [];
-  private sessionStartTime: number;
-  private collectTimer?: NodeJS.Timeout;
+  private static instance: PerformanceMetricsCollector
+  private config: MetricsCollectorConfig
+  private sentryService: SentryService
+  private profilerService: ReactProfilerService
+  private metrics: CollectedMetrics[] = []
+  private sessionStartTime: number
+  private collectTimer?: NodeJS.Timeout
 
   private constructor(config: MetricsCollectorConfig) {
-    this.config = config;
-    this.sentryService = SentryService.getInstance();
-    this.profilerService = ReactProfilerService.getInstance();
-    this.sessionStartTime = Date.now();
+    this.config = config
+    this.sentryService = SentryService.getInstance()
+    this.profilerService = ReactProfilerService.getInstance()
+    this.sessionStartTime = Date.now()
   }
 
   /**
@@ -68,10 +68,10 @@ export class PerformanceMetricsCollector {
           memoryUsage: 100, // MB
           score: 80, // минимальный балл
         },
-      };
-      PerformanceMetricsCollector.instance = new PerformanceMetricsCollector(config || defaultConfig);
+      }
+      PerformanceMetricsCollector.instance = new PerformanceMetricsCollector(config || defaultConfig)
     }
-    return PerformanceMetricsCollector.instance;
+    return PerformanceMetricsCollector.instance
   }
 
   /**
@@ -79,14 +79,14 @@ export class PerformanceMetricsCollector {
    */
   public start(): void {
     if (!this.config.enabled) {
-      return;
+      return
     }
 
-    this.collectMetrics(); // Немедленный сбор
+    this.collectMetrics() // Немедленный сбор
     this.collectTimer = setInterval(
       () => this.collectMetrics(),
-      this.config.collectInterval
-    );
+      this.config.collectInterval,
+    )
   }
 
   /**
@@ -94,8 +94,8 @@ export class PerformanceMetricsCollector {
    */
   public stop(): void {
     if (this.collectTimer) {
-      clearInterval(this.collectTimer);
-      this.collectTimer = undefined;
+      clearInterval(this.collectTimer)
+      this.collectTimer = undefined
     }
   }
 
@@ -103,13 +103,13 @@ export class PerformanceMetricsCollector {
    * Собрать метрики производительности
    */
   private collectMetrics(): void {
-    const now = Date.now();
-    const sessionDuration = now - this.sessionStartTime;
-    const profilerStats = this.profilerService.getPerformanceStats();
-    const componentProfiles = this.profilerService.getComponentProfiles();
+    const now = Date.now()
+    const sessionDuration = now - this.sessionStartTime
+    const profilerStats = this.profilerService.getPerformanceStats()
+    const componentProfiles = this.profilerService.getComponentProfiles()
 
     // Расчет памяти
-    const memoryUsage = this.getMemoryUsage();
+    const memoryUsage = this.getMemoryUsage()
 
     // Расчет производительности
     const metrics: CollectedMetrics = {
@@ -126,22 +126,22 @@ export class PerformanceMetricsCollector {
         mostRendered: this.profilerService.getMostRenderedComponents(10),
       },
       performanceScore: this.calculatePerformanceScore(profilerStats, memoryUsage),
-    };
+    }
 
-    this.recordMetrics(metrics);
-    this.checkPerformanceThresholds(metrics);
+    this.recordMetrics(metrics)
+    this.checkPerformanceThresholds(metrics)
   }
 
   /**
    * Записать метрики в историю
    */
   private recordMetrics(metrics: CollectedMetrics): void {
-    this.metrics.push(metrics);
+    this.metrics.push(metrics)
 
     // Ограничение размера истории
-    const maxSize = this.config.maxHistorySize || 100;
+    const maxSize = this.config.maxHistorySize || 100
     if (this.metrics.length > maxSize) {
-      this.metrics = this.metrics.slice(-maxSize);
+      this.metrics = this.metrics.slice(-maxSize)
     }
 
     // Отправка в Sentry для critical метрик
@@ -152,8 +152,8 @@ export class PerformanceMetricsCollector {
         {
           performanceScore: metrics.performanceScore,
           threshold: this.config.performanceThresholds.score,
-        } as Record<string, string | number | boolean>
-      );
+        } as Record<string, string | number | boolean>,
+      )
     }
   }
 
@@ -161,10 +161,10 @@ export class PerformanceMetricsCollector {
    * Получить использование памяти (Chrome/Node: performance.memory)
    */
   private getMemoryUsage(): number | undefined {
-    const p = performance as Performance & { memory?: { usedJSHeapSize: number } };
-    const memory = p.memory;
-    if (memory) return memory.usedJSHeapSize / 1024 / 1024; // MB
-    return undefined;
+    const p = performance as Performance & { memory?: { usedJSHeapSize: number } }
+    const memory = p.memory
+    if (memory) return memory.usedJSHeapSize / 1024 / 1024 // MB
+    return undefined
   }
 
   /**
@@ -176,36 +176,36 @@ export class PerformanceMetricsCollector {
       slowRenderCount: number;
       averageRenderTime: number;
     },
-    memoryUsage?: number
+    memoryUsage?: number,
   ): number {
-    let score = 100;
+    let score = 100
 
     // Штраф за медленные рендеры
     const slowRenderRatio = profilerStats.totalRenders > 0
       ? profilerStats.slowRenderCount / profilerStats.totalRenders
-      : 0;
-    score -= slowRenderRatio * 30;
+      : 0
+    score -= slowRenderRatio * 30
 
     // Штраф за медленный средний рендер
     if (profilerStats.averageRenderTime > this.config.performanceThresholds.renderTime) {
-      const overThreshold = profilerStats.averageRenderTime - this.config.performanceThresholds.renderTime;
-      score -= Math.min(overThreshold / 2, 25);
+      const overThreshold = profilerStats.averageRenderTime - this.config.performanceThresholds.renderTime
+      score -= Math.min(overThreshold / 2, 25)
     }
 
     // Штраф за использование памяти
     if (memoryUsage && memoryUsage > this.config.performanceThresholds.memoryUsage) {
-      const overThreshold = memoryUsage - this.config.performanceThresholds.memoryUsage;
-      score -= Math.min(overThreshold / 5, 20);
+      const overThreshold = memoryUsage - this.config.performanceThresholds.memoryUsage
+      score -= Math.min(overThreshold / 5, 20)
     }
 
-    return Math.max(0, Math.round(score));
+    return Math.max(0, Math.round(score))
   }
 
   /**
    * Проверить пороги производительности
    */
   private checkPerformanceThresholds(metrics: CollectedMetrics): void {
-    const thresholds = this.config.performanceThresholds;
+    const thresholds = this.config.performanceThresholds
 
     // Проверка времени рендеринга
     if (metrics.maxRenderTime > thresholds.renderTime * 3) {
@@ -216,8 +216,8 @@ export class PerformanceMetricsCollector {
           type: 'performance',
           renderTime: metrics.maxRenderTime,
           threshold: thresholds.renderTime * 3,
-        }
-      );
+        },
+      )
     }
 
     // Проверка использования памяти
@@ -229,8 +229,8 @@ export class PerformanceMetricsCollector {
           type: 'performance',
           memoryUsage: metrics.memoryUsage,
           threshold: thresholds.memoryUsage * 2,
-        }
-      );
+        },
+      )
     }
   }
 
@@ -238,46 +238,46 @@ export class PerformanceMetricsCollector {
    * Получить все собранные метрики
    */
   public getMetrics(): CollectedMetrics[] {
-    return [...this.metrics];
+    return [...this.metrics]
   }
 
   /**
    * Получить последние метрики
    */
   public getLatestMetrics(): CollectedMetrics | undefined {
-    return this.metrics[this.metrics.length - 1];
+    return this.metrics[this.metrics.length - 1]
   }
 
   /**
    * Получить средний балл производительности
    */
   public getAveragePerformanceScore(): number {
-    if (this.metrics.length === 0) return 100;
-    
-    const totalScore = this.metrics.reduce((sum, m) => sum + m.performanceScore, 0);
-    return Math.round(totalScore / this.metrics.length);
+    if (this.metrics.length === 0) return 100
+
+    const totalScore = this.metrics.reduce((sum, m) => sum + m.performanceScore, 0)
+    return Math.round(totalScore / this.metrics.length)
   }
 
   /**
    * Сбросить историю метрик
    */
   public reset(): void {
-    this.metrics = [];
-    this.sessionStartTime = Date.now();
+    this.metrics = []
+    this.sessionStartTime = Date.now()
   }
 
   /**
    * Обновить конфигурацию
    */
   public updateConfig(config: Partial<MetricsCollectorConfig>): void {
-    this.config = { ...this.config, ...config };
+    this.config = { ...this.config, ...config }
   }
 
   /**
    * Получить конфигурацию
    */
   public getConfig(): MetricsCollectorConfig {
-    return { ...this.config };
+    return { ...this.config }
   }
 }
 

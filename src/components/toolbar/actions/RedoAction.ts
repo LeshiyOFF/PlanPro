@@ -1,30 +1,30 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { undoRedoService } from '../../../services/UndoRedoService';
-import type { UndoRedoState } from '../../../services/UndoRedoService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { undoRedoService } from '../../../services/UndoRedoService'
+import type { UndoRedoState } from '../../../services/UndoRedoService'
 
 /**
  * Действие для повторения последнего отменённого действия
  * Стандартная кнопка тулбара TB006
  */
 export class RedoAction extends ToolbarAction {
-  private state: UndoRedoState | null = null;
-  private unsubscribe: (() => void) | null = null;
+  private state: UndoRedoState | null = null
+  private unsubscribe: (() => void) | null = null
 
   constructor() {
-    super('TB006', 'Повторить', '↪️', 'Повторить последнее действие (Ctrl+Y)', 'Ctrl+Y');
+    super('TB006', 'Повторить', '↪️', 'Повторить последнее действие (Ctrl+Y)', 'Ctrl+Y')
     this.unsubscribe = undoRedoService.addStateListener((s) => {
-      this.state = s;
-    });
+      this.state = s
+    })
   }
 
   /**
    * Выполняет повторение действия
    */
   override async execute(): Promise<void> {
-    console.log('Повторение действия');
+    console.log('Повторение действия')
     if (!this.state?.canRedo) {
-      return;
+      return
     }
     // Интеграция с HistoryManager или RedoStack — при подключении сервиса
   }
@@ -33,7 +33,7 @@ export class RedoAction extends ToolbarAction {
    * Проверяет, можно ли выполнить повторение
    */
   override canExecute(): boolean {
-    return this.state?.canRedo ?? false;
+    return this.state?.canRedo ?? false
   }
 
   /**
@@ -49,11 +49,11 @@ export class RedoAction extends ToolbarAction {
       onClick: () => this.execute(),
       onKeyDown: (event: KeyboardEvent) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'y') {
-          event.preventDefault();
-          this.execute();
+          event.preventDefault()
+          this.execute()
         }
-      }
-    };
+      },
+    }
   }
 }
 

@@ -1,7 +1,7 @@
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Search, User, Briefcase, Folder } from 'lucide-react';
-import { SearchResult } from '@/services/SearchService';
+import React from 'react'
+import { Badge } from '@/components/ui/badge'
+import { Search, User, Briefcase, Folder } from 'lucide-react'
+import { SearchResult } from '@/services/SearchService'
 
 export interface SearchResultsProps {
   results: SearchResult[];
@@ -10,50 +10,50 @@ export interface SearchResultsProps {
   isSearching: boolean;
 }
 
-export const SearchResults: React.FC<SearchResultsProps> = ({ 
-  results, 
-  selectedResult, 
-  onResultSelect, 
-  isSearching 
+export const SearchResults: React.FC<SearchResultsProps> = ({
+  results,
+  selectedResult,
+  onResultSelect,
+  isSearching,
 }) => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'task':
-        return <User className="h-4 w-4" />;
+        return <User className="h-4 w-4" />
       case 'resource':
-        return <Briefcase className="h-4 w-4" />;
+        return <Briefcase className="h-4 w-4" />
       case 'project':
-        return <Folder className="h-4 w-4" />;
+        return <Folder className="h-4 w-4" />
       default:
-        return <Search className="h-4 w-4" />;
+        return <Search className="h-4 w-4" />
     }
-  };
+  }
 
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'task':
-        return 'bg-slate-100 text-slate-900 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-slate-100 text-slate-900 dark:bg-blue-900 dark:text-blue-200'
       case 'resource':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
       case 'project':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
     }
-  };
+  }
 
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'task':
-        return 'Задача';
+        return 'Задача'
       case 'resource':
-        return 'Ресурс';
+        return 'Ресурс'
       case 'project':
-        return 'Проект';
+        return 'Проект'
       default:
-        return 'Другое';
+        return 'Другое'
     }
-  };
+  }
 
   if (isSearching) {
     return (
@@ -63,7 +63,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <span>Поиск...</span>
         </div>
       </div>
-    );
+    )
   }
 
   if (results.length === 0) {
@@ -75,7 +75,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
           <p className="text-sm">Попробуйте изменить поисковый запрос</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -97,22 +97,22 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
                   {getTypeLabel(result.type)}
                 </Badge>
               </div>
-              
+
               <p className="text-sm text-muted-foreground line-clamp-2">
                 {result.description}
               </p>
-              
+
               {result.context && (
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
                   {result.context}
                 </p>
               )}
-              
+
               <div className="flex items-center space-x-2 mt-2">
                 <span className="text-xs text-muted-foreground">
                   {result.path}
                 </span>
-                
+
                 {result.metadata && Object.keys(result.metadata).length > 0 && (
                   <div className="flex items-center space-x-1">
                     {Object.entries(result.metadata).slice(0, 2).map(([key, value]) => (
@@ -128,6 +128,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         </div>
       ))}
     </div>
-  );
-};
+  )
+}
 

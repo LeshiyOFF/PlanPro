@@ -1,5 +1,5 @@
-import React from 'react';
-import { IStatusBarMessage, StatusBarMessageType } from '../interfaces/StatusBarInterfaces';
+import React from 'react'
+import { IStatusBarMessage, StatusBarMessageType } from '../interfaces/StatusBarInterfaces'
 
 /**
  * Секция сообщений статусбара
@@ -15,44 +15,44 @@ export const MessageSection: React.FC<MessageSectionProps> = ({ message }) => {
       <div className="flex items-center gap-2 text-sm">
         <span className="text-muted-foreground">Готов</span>
       </div>
-    );
+    )
   }
 
   const getMessageIcon = (type: StatusBarMessageType): string => {
     switch (type) {
       case 'success':
-        return '✅';
+        return '✅'
       case 'warning':
-        return '⚠️';
+        return '⚠️'
       case 'error':
-        return '❌';
+        return '❌'
       case 'progress':
-        return '⏳';
+        return '⏳'
       default:
-        return 'ℹ️';
+        return 'ℹ️'
     }
-  };
+  }
 
   const getMessageClass = (type: StatusBarMessageType): string => {
     switch (type) {
       case 'success':
-        return 'text-green-600';
+        return 'text-green-600'
       case 'warning':
-        return 'text-yellow-600';
+        return 'text-yellow-600'
       case 'error':
-        return 'text-red-600';
+        return 'text-red-600'
       case 'progress':
-        return 'text-primary';
+        return 'text-primary'
       default:
-        return 'text-muted-foreground';
+        return 'text-muted-foreground'
     }
-  };
+  }
 
   return (
     <div className={`flex items-center gap-2 text-sm ${getMessageClass(message.type)}`}>
       <span>{getMessageIcon(message.type)}</span>
       <span className="font-medium">{message.text}</span>
     </div>
-  );
-};
+  )
+}
 

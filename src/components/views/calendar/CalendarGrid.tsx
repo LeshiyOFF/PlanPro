@@ -1,7 +1,7 @@
-import React from 'react';
-import { ICalendarCell } from '@/domain/calendar/interfaces/ICalendarCell';
-import { CalendarDay } from './CalendarDay';
-import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent';
+import React from 'react'
+import { ICalendarCell } from '@/domain/calendar/interfaces/ICalendarCell'
+import { CalendarDay } from './CalendarDay'
+import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent'
 
 interface CalendarGridProps {
   days: ICalendarCell[];
@@ -15,15 +15,15 @@ interface CalendarGridProps {
 /**
  * Сетка календаря
  */
-export const CalendarGrid: React.FC<CalendarGridProps> = ({ 
-  days, 
+export const CalendarGrid: React.FC<CalendarGridProps> = ({
+  days,
   onEventClick,
   onEventContextMenu,
   onDragStart,
   onDragEnd,
-  onDrop
+  onDrop,
 }) => {
-  const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -35,13 +35,13 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           </div>
         ))}
       </div>
-      
+
       {/* Сетка дней */}
       <div className="grid grid-cols-7 flex-1 overflow-hidden">
         {days.map((day, index) => (
-          <CalendarDay 
-            key={`${day.date.getTime()}-${index}`} 
-            day={day} 
+          <CalendarDay
+            key={`${day.date.getTime()}-${index}`}
+            day={day}
             onEventClick={onEventClick}
             onEventContextMenu={onEventContextMenu}
             onDragStart={onDragStart}
@@ -51,7 +51,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
 

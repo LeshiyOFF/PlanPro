@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useActionManager } from '@/providers/hooks/useActionManager';
-import './ToolbarStyles.css';
+import React, { useState, useEffect, useCallback } from 'react'
+import { useActionManager } from '@/providers/hooks/useActionManager'
+import './ToolbarStyles.css'
 import {
   IToolbarContainer,
   IToolbarGroup,
-  IToolbarButton
-} from './interfaces/ToolbarInterfaces';
-import type { IAction } from '@/services/actions/BaseAction';
+  IToolbarButton,
+} from './interfaces/ToolbarInterfaces'
+import type { IAction } from '@/services/actions/BaseAction'
 import {
   // Стандартный тулбар (TB001-TB007)
   NewAction,
@@ -21,15 +21,15 @@ import {
   ItalicAction,
   UnderlineAction,
   FontSizeAction,
-  FontFamilyAction
-} from './actions';
+  FontFamilyAction,
+} from './actions'
 
 /**
  * Контейнер тулбаров с поддержкой 24 кнопок
  * Следует принципам SOLID и Clean Architecture
  */
 export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAction }) => {
-  const actionManager = useActionManager();
+  const actionManager = useActionManager()
   const [actions] = useState(() => ({
     // Стандартные действия
     new: new NewAction(),
@@ -44,29 +44,29 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
     italic: new ItalicAction(),
     underline: new UnderlineAction(),
     fontSize: new FontSizeAction(),
-    fontFamily: new FontFamilyAction()
-  }));
+    fontFamily: new FontFamilyAction(),
+  }))
 
   // Регистрация действий при монтировании (приведение к IAction для ActionManager)
   useEffect(() => {
     // Регистрация стандартных действий
-    actionManager.registerAction(actions.new as IAction, 'file');
-    actionManager.registerAction(actions.open as IAction, 'file');
-    actionManager.registerAction(actions.save as IAction, 'file');
-    actionManager.registerAction(actions.print as IAction, 'file');
-    actionManager.registerAction(actions.undo as IAction, 'edit');
-    actionManager.registerAction(actions.redo as IAction, 'edit');
-    actionManager.registerAction(actions.find as IAction, 'edit');
+    actionManager.registerAction(actions.new as IAction, 'file')
+    actionManager.registerAction(actions.open as IAction, 'file')
+    actionManager.registerAction(actions.save as IAction, 'file')
+    actionManager.registerAction(actions.print as IAction, 'file')
+    actionManager.registerAction(actions.undo as IAction, 'edit')
+    actionManager.registerAction(actions.redo as IAction, 'edit')
+    actionManager.registerAction(actions.find as IAction, 'edit')
     // Регистрация действий форматирования
-    actionManager.registerAction(actions.bold as IAction, 'format');
-    actionManager.registerAction(actions.italic as IAction, 'format');
-    actionManager.registerAction(actions.underline as IAction, 'format');
-    actionManager.registerAction(actions.fontSize as IAction, 'format');
-    actionManager.registerAction(actions.fontFamily as IAction, 'format');
+    actionManager.registerAction(actions.bold as IAction, 'format')
+    actionManager.registerAction(actions.italic as IAction, 'format')
+    actionManager.registerAction(actions.underline as IAction, 'format')
+    actionManager.registerAction(actions.fontSize as IAction, 'format')
+    actionManager.registerAction(actions.fontFamily as IAction, 'format')
   // eslint-disable-next-line react-hooks/exhaustive-deps -- регистрация один раз при монтировании
-  }, []);
+  }, [])
 
-  const [toolbarGroups, setToolbarGroups] = useState<IToolbarGroup[]>([]);
+  const [toolbarGroups, setToolbarGroups] = useState<IToolbarGroup[]>([])
 
   /**
    * Создаёт группы кнопок для тулбара
@@ -83,8 +83,8 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
           actions.print.createButton(),
           actions.undo.createButton(),
           actions.redo.createButton(),
-          actions.find.createButton()
-        ]
+          actions.find.createButton(),
+        ],
       },
       {
         id: 'formatting',
@@ -94,27 +94,27 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
           actions.italic.createButton(),
           actions.underline.createButton(),
           actions.fontSize.createButton(),
-          actions.fontFamily.createButton()
-        ]
-      }
-    ];
-  }, [actions]);
+          actions.fontFamily.createButton(),
+        ],
+      },
+    ]
+  }, [actions])
 
   useEffect(() => {
-    setToolbarGroups(createToolbarGroups());
-  }, [createToolbarGroups]);
+    setToolbarGroups(createToolbarGroups())
+  }, [createToolbarGroups])
 
   /**
    * Обработчик нажатия на кнопку
    */
   const handleButtonClick = useCallback((button: IToolbarButton) => {
     try {
-      button.onClick();
-      onAction?.(button.id, button.label);
+      button.onClick()
+      onAction?.(button.id, button.label)
     } catch (error) {
-      console.error(`Ошибка при выполнении действия ${button.id}:`, error);
+      console.error(`Ошибка при выполнении действия ${button.id}:`, error)
     }
-  }, [onAction]);
+  }, [onAction])
 
   /**
    * Рендерит отдельную кнопку
@@ -123,8 +123,8 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
     const buttonClass = [
       'toolbar-button',
       button.className,
-      button.disabled ? 'toolbar-button-disabled' : ''
-    ].filter(Boolean).join(' ');
+      button.disabled ? 'toolbar-button-disabled' : '',
+    ].filter(Boolean).join(' ')
 
     if (button.dropdownItems && button.dropdownItems.length > 0) {
       return (
@@ -154,7 +154,7 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
             </div>
           )}
         </div>
-      );
+      )
     }
 
     return (
@@ -168,28 +168,28 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
         <span className="toolbar-button-icon">{button.icon}</span>
         <span className="toolbar-button-label">{button.label}</span>
       </button>
-    );
-  }, [handleButtonClick]);
+    )
+  }, [handleButtonClick])
 
   /**
    * Рендерит группу кнопок
    */
   const renderGroup = useCallback((group: IToolbarGroup) => {
     if (!group.visible && group.visible !== undefined) {
-      return null;
+      return null
     }
 
     return (
       <div key={group.id} className={`toolbar-group ${group.className || ''}`}>
         {group.buttons.map(renderButton)}
       </div>
-    );
-  }, [renderButton]);
+    )
+  }, [renderButton])
 
   return (
     <div className={`toolbar-container ${className || ''}`}>
       {toolbarGroups.map(renderGroup)}
     </div>
-  );
-};
+  )
+}
 

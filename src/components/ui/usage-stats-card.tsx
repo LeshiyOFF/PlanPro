@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip';
+import React, { memo } from 'react'
+import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip'
 
 /**
  * Доступные цветовые схемы для карточки статистики
@@ -31,36 +31,36 @@ const COLOR_CLASSES: Record<StatsCardColorScheme, { bg: string; title: string; v
   primary: {
     bg: 'bg-primary/5',
     title: 'text-primary',
-    value: 'text-primary'
+    value: 'text-primary',
   },
   green: {
     bg: 'bg-green-50/30',
     title: 'text-green-700',
-    value: 'text-green-600'
+    value: 'text-green-600',
   },
   amber: {
     bg: 'bg-amber-50/30',
     title: 'text-amber-700',
-    value: 'text-amber-600'
+    value: 'text-amber-600',
   },
   slate: {
     bg: 'bg-slate-50/30',
     title: 'text-slate-700',
-    value: 'text-slate-600'
+    value: 'text-slate-600',
   },
   red: {
     bg: 'bg-red-50/30',
     title: 'text-red-700',
-    value: 'text-red-600'
-  }
-};
+    value: 'text-red-600',
+  },
+}
 
 /**
  * UsageStatsCard - Универсальная карточка статистики с tooltip.
- * 
+ *
  * Переиспользуемый компонент для отображения метрик как в TaskUsageView,
  * так и в ResourceUsageView. Следует принципу DRY.
- * 
+ *
  * @example
  * ```tsx
  * <UsageStatsCard
@@ -77,14 +77,14 @@ export const UsageStatsCard: React.FC<UsageStatsCardProps> = memo(({
   tooltip,
   colorScheme,
   className = '',
-  formatValue
+  formatValue,
 }) => {
-  const colors = COLOR_CLASSES[colorScheme];
-  const displayValue = formatValue ? formatValue(value) : value;
+  const colors = COLOR_CLASSES[colorScheme]
+  const displayValue = formatValue ? formatValue(value) : value
 
   return (
     <TooltipProvider>
-      <SafeTooltip 
+      <SafeTooltip
         content={
           <div className="max-w-xs p-1">
             <p className="text-sm whitespace-pre-line">{tooltip}</p>
@@ -93,7 +93,7 @@ export const UsageStatsCard: React.FC<UsageStatsCardProps> = memo(({
         side="bottom"
         delayDuration={300}
       >
-        <div 
+        <div
           className={`
             stat-card border rounded-lg p-4 shadow-sm soft-border 
             cursor-help transition-all hover:shadow-md
@@ -105,7 +105,7 @@ export const UsageStatsCard: React.FC<UsageStatsCardProps> = memo(({
         </div>
       </SafeTooltip>
     </TooltipProvider>
-  );
-});
+  )
+})
 
-UsageStatsCard.displayName = 'UsageStatsCard';
+UsageStatsCard.displayName = 'UsageStatsCard'

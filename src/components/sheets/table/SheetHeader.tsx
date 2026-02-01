@@ -1,9 +1,9 @@
-import React from 'react';
-import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
-import { ISortRule, SortDirection } from '@/domain/sheets/interfaces/IDataProcessing';
-import { ArrowUp, ArrowDown, HelpCircle } from 'lucide-react';
-import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip';
-import type { JsonValue } from '@/types/json-types';
+import React from 'react'
+import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
+import { ISortRule, SortDirection } from '@/domain/sheets/interfaces/IDataProcessing'
+import { ArrowUp, ArrowDown, HelpCircle } from 'lucide-react'
+import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip'
+import type { JsonValue } from '@/types/json-types'
 
 interface SheetHeaderProps {
   columns: ISheetColumn<Record<string, JsonValue>>[];
@@ -14,24 +14,24 @@ interface SheetHeaderProps {
 /**
  * Заголовок профессиональной таблицы
  */
-export const SheetHeader: React.FC<SheetHeaderProps> = ({ 
-  columns, 
-  sortRules = [], 
-  onSort 
+export const SheetHeader: React.FC<SheetHeaderProps> = ({
+  columns,
+  sortRules = [],
+  onSort,
 }) => {
   const getSortIcon = (columnId: string) => {
-    const rule = sortRules.find(r => r.columnId === columnId);
-    if (!rule) return null;
-    if (rule.direction === SortDirection.ASC) return <ArrowUp className="w-3 h-3 ml-1" />;
-    if (rule.direction === SortDirection.DESC) return <ArrowDown className="w-3 h-3 ml-1" />;
-    return null;
-  };
+    const rule = sortRules.find(r => r.columnId === columnId)
+    if (!rule) return null
+    if (rule.direction === SortDirection.ASC) return <ArrowUp className="w-3 h-3 ml-1" />
+    if (rule.direction === SortDirection.DESC) return <ArrowDown className="w-3 h-3 ml-1" />
+    return null
+  }
 
   const handleHeaderClick = (e: React.MouseEvent, column: ISheetColumn<Record<string, JsonValue>>) => {
     if (column.sortable && onSort) {
-      onSort(column.field, e.ctrlKey || e.metaKey);
+      onSort(column.field, e.ctrlKey || e.metaKey)
     }
-  };
+  }
 
   return (
     <thead className="bg-gray-50 border-b border-gray-200">
@@ -65,7 +65,7 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
         </TooltipProvider>
       </tr>
     </thead>
-  );
-};
+  )
+}
 
 

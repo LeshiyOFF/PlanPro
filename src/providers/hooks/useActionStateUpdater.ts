@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
 /**
  * Хук для периодического обновления состояний действий
@@ -7,12 +7,12 @@ export const useActionStateUpdater = (updateActionStates: () => void, intervalMs
   useEffect(() => {
     // Обновляем состояния каждые N секунд или по триггеру
     const interval = setInterval(() => {
-      updateActionStates();
-    }, intervalMs);
+      updateActionStates()
+    }, intervalMs)
 
     return () => {
-      clearInterval(interval);
-    };
-  }, [updateActionStates, intervalMs]);
-};
+      clearInterval(interval)
+    }
+  }, [updateActionStates, intervalMs])
+}
 

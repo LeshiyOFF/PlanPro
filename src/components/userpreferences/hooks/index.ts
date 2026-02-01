@@ -2,5 +2,5 @@
  * Экспорт всех хуков UserPreferences
  */
 
-export { useUserPreferences } from './useUserPreferences';
+export { useUserPreferences } from './useUserPreferences'
 

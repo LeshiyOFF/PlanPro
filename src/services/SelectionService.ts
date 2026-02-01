@@ -1,4 +1,4 @@
-import { logger } from '@/utils/logger';
+import { logger } from '@/utils/logger'
 
 /**
  * Тип выделения
@@ -19,44 +19,44 @@ export interface SelectionInfo {
  * Отслеживает выделенные элементы в различных представлениях
  */
 class SelectionService {
-  private static instance: SelectionService;
+  private static instance: SelectionService
   private currentSelection: SelectionInfo = {
     type: 'none',
     count: 0,
-    ids: []
-  };
+    ids: [],
+  }
 
   private constructor() {
-    this.initializeListeners();
+    this.initializeListeners()
   }
 
   static getInstance(): SelectionService {
     if (!SelectionService.instance) {
-      SelectionService.instance = new SelectionService();
+      SelectionService.instance = new SelectionService()
     }
-    return SelectionService.instance;
+    return SelectionService.instance
   }
 
   /**
    * Проверяет наличие выделения
    */
   hasSelection(): boolean {
-    return this.currentSelection.count > 0 || this.hasTextSelection();
+    return this.currentSelection.count > 0 || this.hasTextSelection()
   }
 
   /**
    * Проверяет наличие текстового выделения
    */
   hasTextSelection(): boolean {
-    const selection = window.getSelection();
-    return selection !== null && selection.toString().length > 0;
+    const selection = window.getSelection()
+    return selection !== null && selection.toString().length > 0
   }
 
   /**
    * Возвращает текущее выделение
    */
   getSelection(): SelectionInfo {
-    return { ...this.currentSelection };
+    return { ...this.currentSelection }
   }
 
   /**
@@ -66,9 +66,9 @@ class SelectionService {
     this.currentSelection = {
       type,
       count: ids.length,
-      ids
-    };
-    logger.dialog('Selection changed', { type, count: ids.length }, 'Selection');
+      ids,
+    }
+    logger.dialog('Selection changed', { type, count: ids.length }, 'Selection')
   }
 
   /**
@@ -78,16 +78,16 @@ class SelectionService {
     this.currentSelection = {
       type: 'none',
       count: 0,
-      ids: []
-    };
+      ids: [],
+    }
   }
 
   /**
    * Получает выделенный текст
    */
   getSelectedText(): string {
-    const selection = window.getSelection();
-    return selection ? selection.toString() : '';
+    const selection = window.getSelection()
+    return selection ? selection.toString() : ''
   }
 
   /**
@@ -95,24 +95,24 @@ class SelectionService {
    */
   private initializeListeners(): void {
     document.addEventListener('selectionchange', () => {
-      const hasText = this.hasTextSelection();
+      const hasText = this.hasTextSelection()
       if (hasText && this.currentSelection.type === 'none') {
         this.currentSelection = {
           type: 'text',
           count: 1,
-          ids: []
-        };
+          ids: [],
+        }
       } else if (!hasText && this.currentSelection.type === 'text') {
-        this.clearSelection();
+        this.clearSelection()
       }
-    });
+    })
   }
 
   /**
    * Проверяет, выделен ли конкретный элемент
    */
   isSelected(id: string): boolean {
-    return this.currentSelection.ids.includes(id);
+    return this.currentSelection.ids.includes(id)
   }
 
   /**
@@ -120,10 +120,10 @@ class SelectionService {
    */
   addToSelection(type: SelectionType, id: string): void {
     if (!this.currentSelection.ids.includes(id)) {
-      this.currentSelection.type = type;
-      this.currentSelection.ids.push(id);
-      this.currentSelection.count = this.currentSelection.ids.length;
-      logger.dialog('Item added to selection', { type, id }, 'Selection');
+      this.currentSelection.type = type
+      this.currentSelection.ids.push(id)
+      this.currentSelection.count = this.currentSelection.ids.length
+      logger.dialog('Item added to selection', { type, id }, 'Selection')
     }
   }
 
@@ -131,17 +131,17 @@ class SelectionService {
    * Удаляет элемент из выделения
    */
   removeFromSelection(id: string): void {
-    const index = this.currentSelection.ids.indexOf(id);
+    const index = this.currentSelection.ids.indexOf(id)
     if (index !== -1) {
-      this.currentSelection.ids.splice(index, 1);
-      this.currentSelection.count = this.currentSelection.ids.length;
+      this.currentSelection.ids.splice(index, 1)
+      this.currentSelection.count = this.currentSelection.ids.length
       if (this.currentSelection.count === 0) {
-        this.currentSelection.type = 'none';
+        this.currentSelection.type = 'none'
       }
-      logger.dialog('Item removed from selection', { id }, 'Selection');
+      logger.dialog('Item removed from selection', { id }, 'Selection')
     }
   }
 }
 
-export { SelectionService };
-export const selectionService = SelectionService.getInstance();
+export { SelectionService }
+export const selectionService = SelectionService.getInstance()

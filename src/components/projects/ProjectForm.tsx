@@ -1,5 +1,5 @@
-import React from 'react';
-import { Project } from '@/hooks/useJavaApi';
+import React from 'react'
+import { Project } from '@/hooks/useJavaApi'
 
 interface ProjectFormProps {
   project: Project | null;
@@ -25,7 +25,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
   onFormChange,
   onSubmit,
   onCancel,
-  isLoading
+  isLoading,
 }) => {
   return (
     <div style={{
@@ -38,17 +38,17 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
     }}>
       <div style={{
         backgroundColor: 'white',
         padding: '30px',
         borderRadius: '10px',
         minWidth: '500px',
-        maxWidth: '80%'
+        maxWidth: '80%',
       }}>
         <h3>{project ? 'Edit Project' : 'Create New Project'}</h3>
-        
+
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -58,17 +58,17 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               type="text"
               value={formData.name}
               onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
               placeholder="Enter project name"
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Description
@@ -76,17 +76,17 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             <textarea
               value={formData.description}
               onChange={(e) => onFormChange({ ...formData, description: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
                 borderRadius: '3px',
-                minHeight: '80px'
+                minHeight: '80px',
               }}
               placeholder="Enter project description"
             />
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -96,15 +96,15 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => onFormChange({ ...formData, startDate: e.target.value })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
-            
+
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                 End Date
@@ -113,16 +113,16 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 type="date"
                 value={formData.endDate}
                 onChange={(e) => onFormChange({ ...formData, endDate: e.target.value })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
           </div>
-          
+
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Status
@@ -130,11 +130,11 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
             <select
               value={formData.status}
               onChange={(e) => onFormChange({ ...formData, status: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
             >
               <option value="planning">Planning</option>
@@ -144,7 +144,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
             <button
               type="button"
@@ -155,7 +155,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Cancel
@@ -170,7 +170,7 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
                 border: 'none',
                 borderRadius: '5px',
                 cursor: 'pointer',
-                opacity: (isLoading || !formData.name.trim()) ? 0.5 : 1
+                opacity: (isLoading || !formData.name.trim()) ? 0.5 : 1,
               }}
             >
               {isLoading ? 'Saving...' : (project ? 'Update' : 'Create')}
@@ -179,6 +179,6 @@ export const ProjectForm: React.FC<ProjectFormProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 

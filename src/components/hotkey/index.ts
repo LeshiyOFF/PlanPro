@@ -1,48 +1,48 @@
 // Компоненты для работы с горячими клавишами
-export { HotkeyDisplay, HotkeyList, HotkeyTooltip } from './HotkeyDisplay';
-export { HotkeySettings } from './HotkeySettings';
+export { HotkeyDisplay, HotkeyList, HotkeyTooltip } from './HotkeyDisplay'
+export { HotkeySettings } from './HotkeySettings'
 
 // Хуки
-export { 
-  useHotkey, 
-  useHotkeyBind, 
-  useHotkeyAction, 
-  useHotkeyState, 
+export {
+  useHotkey,
+  useHotkeyBind,
+  useHotkeyAction,
+  useHotkeyState,
   useHotkeyCategory,
   useHotkeyToggle,
   useNavigationHotkeys,
-  useFileHotkeys
-} from '../../hooks/useHotkey';
+  useFileHotkeys,
+} from '../../hooks/useHotkey'
 
 // Провайдеры
-export { 
-  HotkeyProvider, 
-  useHotkeyContext, 
-  useGlobalHotkey, 
+export {
+  HotkeyProvider,
+  useHotkeyContext,
+  useGlobalHotkey,
   useHotkeyStatus,
-  HotkeyStatusIndicator 
-} from '../../providers/HotkeyProvider';
+  HotkeyStatusIndicator,
+} from '../../providers/HotkeyProvider'
 
 // Сервис
-export { hotkeyService } from '../../services/HotkeyService';
+export { hotkeyService } from '../../services/HotkeyService'
 
 // Типы
-export type { 
-  Hotkey, 
-  HotkeyConfig, 
-  HotkeyAction, 
-  HotkeyBinding, 
-  HotkeyProfile, 
+export type {
+  Hotkey,
+  HotkeyConfig,
+  HotkeyAction,
+  HotkeyBinding,
+  HotkeyProfile,
   HotkeyConflict,
   HotkeyState,
-  HotkeyEventHandler 
-} from '../../types/HotkeyTypes';
+  HotkeyEventHandler,
+} from '../../types/HotkeyTypes'
 
-export { 
+export {
   HotkeyCategory,
   DEFAULT_HOTKEYS,
   hotkeyToString,
   hotkeyFromString,
-  hotkeyEquals 
-} from '../../types/HotkeyTypes';
+  hotkeyEquals,
+} from '../../types/HotkeyTypes'
 

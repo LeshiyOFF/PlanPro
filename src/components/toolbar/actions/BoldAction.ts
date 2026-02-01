@@ -1,6 +1,6 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { textFormattingService } from '@/services/TextFormattingService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { textFormattingService } from '@/services/TextFormattingService'
 
 /**
  * Действие для применения жирного начертания текста
@@ -8,21 +8,21 @@ import { textFormattingService } from '@/services/TextFormattingService';
  */
 export class BoldAction extends ToolbarAction {
   constructor() {
-    super('TF001', 'Жирный', 'B', 'Жирный текст (Ctrl+B)', 'Ctrl+B');
+    super('TF001', 'Жирный', 'B', 'Жирный текст (Ctrl+B)', 'Ctrl+B')
   }
 
   /**
    * Переключает жирное начертание текста
    */
   override async execute(): Promise<void> {
-    textFormattingService.toggleStyle('bold');
+    textFormattingService.toggleStyle('bold')
   }
 
   /**
    * Проверяет, активно ли жирное начертание
    */
   isActiveState(): boolean {
-    return textFormattingService.getStyleState('bold');
+    return textFormattingService.getStyleState('bold')
   }
 
   /**
@@ -39,11 +39,11 @@ export class BoldAction extends ToolbarAction {
       onClick: () => this.execute(),
       onKeyDown: (event: KeyboardEvent) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
-          event.preventDefault();
-          this.execute();
+          event.preventDefault()
+          this.execute()
         }
-      }
-    };
+      },
+    }
   }
 }
 

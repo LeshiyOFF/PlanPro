@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface TaskNote {
   id: string;
@@ -34,15 +34,15 @@ const NOTE_CATEGORIES = [
   { value: 'general', label: 'General', description: 'General project notes' },
   { value: 'progress', label: 'Progress', description: 'Progress updates and milestones' },
   { value: 'issue', label: 'Issue', description: 'Problems and obstacles' },
-  { value: 'resolution', label: 'Resolution', description: 'Solutions and fixes' }
-];
+  { value: 'resolution', label: 'Resolution', description: 'Solutions and fixes' },
+]
 
 const PRIORITY_LEVELS = [
   { value: 'low', label: 'Low', color: 'text-gray-600' },
   { value: 'normal', label: 'Normal', color: 'text-primary' },
   { value: 'high', label: 'High', color: 'text-orange-600' },
-  { value: 'critical', label: 'Critical', color: 'text-red-600' }
-];
+  { value: 'critical', label: 'Critical', color: 'text-red-600' },
+]
 
 export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
   taskId,
@@ -55,8 +55,8 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view');
-  const [selectedNoteId, setSelectedNoteId] = React.useState('');
+  const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view')
+  const [selectedNoteId, setSelectedNoteId] = React.useState('')
   const [noteData, setNoteData] = React.useState<{
     date: string;
     author: string;
@@ -72,8 +72,8 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
     priority: 'normal',
     subject: '',
     content: '',
-    isPublic: true
-  });
+    isPublic: true,
+  })
 
   const { validate, errors, isValid } = useDialogValidation({
     subject: {
@@ -81,42 +81,42 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
       minLength: 1,
       maxLength: 255,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Subject is required';
-        return value.trim() ? null : 'Subject is required';
-      }
+        if (!value || typeof value !== 'string') return 'Subject is required'
+        return value.trim() ? null : 'Subject is required'
+      },
     },
     content: {
       required: true,
       minLength: 1,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Content is required';
-        return value.trim() ? null : 'Content is required';
-      }
+        if (!value || typeof value !== 'string') return 'Content is required'
+        return value.trim() ? null : 'Content is required'
+      },
     },
     author: {
       required: true,
-      custom: (value) => value ? null : 'Author is required'
-    }
-  });
+      custom: (value) => value ? null : 'Author is required',
+    },
+  })
 
   React.useEffect(() => {
     Object.keys(noteData).forEach(key => {
-      validate(key, noteData[key as keyof typeof noteData]);
-    });
-  }, [noteData]);
+      validate(key, noteData[key as keyof typeof noteData])
+    })
+  }, [noteData])
 
   const handleFieldChange = (field: keyof typeof noteData, value: (typeof noteData)[keyof typeof noteData]) => {
-    setNoteData(prev => ({ ...prev, [field]: value }));
-  };
+    setNoteData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleAddNote = () => {
     if (isValid()) {
       onSave?.({
         taskId,
         taskName,
-        ...noteData
-      });
-      
+        ...noteData,
+      })
+
       // Reset form
       setNoteData({
         date: new Date().toISOString().split('T')[0],
@@ -125,14 +125,14 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
         priority: 'normal',
         subject: '',
         content: '',
-        isPublic: true
-      });
-      setMode('view');
+        isPublic: true,
+      })
+      setMode('view')
     }
-  };
+  }
 
   const handleEditNote = (note: TaskNote) => {
-    setSelectedNoteId(note.id);
+    setSelectedNoteId(note.id)
     setNoteData({
       date: note.date,
       author: note.author,
@@ -140,35 +140,35 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
       priority: note.priority,
       subject: note.subject,
       content: note.content,
-      isPublic: note.isPublic
-    });
-    setMode('edit');
-  };
+      isPublic: note.isPublic,
+    })
+    setMode('edit')
+  }
 
   const handleUpdateNote = () => {
     if (isValid() && selectedNoteId) {
-      const noteToUpdate = notes.find(n => n.id === selectedNoteId);
+      const noteToUpdate = notes.find(n => n.id === selectedNoteId)
       if (noteToUpdate) {
         onUpdate?.({
           ...noteToUpdate,
-          ...noteData
-        });
-        setMode('view');
-        setSelectedNoteId('');
+          ...noteData,
+        })
+        setMode('view')
+        setSelectedNoteId('')
       }
     }
-  };
+  }
 
   const handleDeleteNote = (noteId: string) => {
-    onDelete?.(noteId);
-  };
+    onDelete?.(noteId)
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
   const getPriorityColor = (priority: string) => {
-    return PRIORITY_LEVELS.find(p => p.value === priority)?.color || 'text-gray-600';
-  };
+    return PRIORITY_LEVELS.find(p => p.value === priority)?.color || 'text-gray-600'
+  }
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -213,7 +213,7 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
             <Label className="text-sm font-medium mb-3">
               {mode === 'add' ? 'Add New Note' : 'Edit Note'}
             </Label>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="subject">Subject *</Label>
@@ -366,12 +366,12 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="text-sm text-muted-foreground mb-2">
                     {note.date} • {note.author}
                     {note.isPublic && ' • Public'}
                   </div>
-                  
+
                   <div className="text-sm whitespace-pre-wrap">{note.content}</div>
                 </div>
               ))}
@@ -395,6 +395,6 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

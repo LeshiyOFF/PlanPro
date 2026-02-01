@@ -1,13 +1,13 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useDialogForm, type FormFieldValue } from '../hooks/useDialogForm';
-import { PasswordPolicySection } from './PasswordPolicySection';
-import { SessionPolicySection } from './SessionPolicySection';
-import { AccessPolicySection } from './AccessPolicySection';
-import { AuditPolicySection } from './AuditPolicySection';
-import type { JsonObject, JsonValue } from '@/types/json-types';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useDialogForm, type FormFieldValue } from '../hooks/useDialogForm'
+import { PasswordPolicySection } from './PasswordPolicySection'
+import { SessionPolicySection } from './SessionPolicySection'
+import { AccessPolicySection } from './AccessPolicySection'
+import { AuditPolicySection } from './AuditPolicySection'
+import type { JsonObject, JsonValue } from '@/types/json-types'
 
 export interface SecurityPolicy {
   passwordPolicy: {
@@ -61,29 +61,29 @@ const defaultSettings: SecurityPolicy = {
     maxAge: 90,
     historyCount: 5,
     lockoutThreshold: 5,
-    lockoutDuration: 30
+    lockoutDuration: 30,
   },
   sessionPolicy: {
     timeoutMinutes: 60,
     maxConcurrentSessions: 3,
     requireReauth: false,
-    reauthInterval: 60
+    reauthInterval: 60,
   },
   accessPolicy: {
     twoFactorEnabled: false,
     twoFactorMethod: 'email',
     ipWhitelist: [],
     apiAccessEnabled: true,
-    apiRateLimit: 1000
+    apiRateLimit: 1000,
   },
   auditPolicy: {
     enabled: true,
     retentionDays: 90,
     logLevel: 'warning',
     alertOnFailedLogin: true,
-    alertOnPermissionChange: true
-  }
-};
+    alertOnPermissionChange: true,
+  },
+}
 
 export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
   currentSettings = defaultSettings,
@@ -98,48 +98,48 @@ export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
     dialogData: settings,
     handleFieldChange,
     errors,
-    isFormValid
+    isFormValid,
   } = useDialogForm<SecurityPolicy>({
     initialData: currentSettings,
     validationRules: {
       'passwordPolicy.minLength': {
         required: true,
         min: 6,
-        max: 128
+        max: 128,
       },
       'passwordPolicy.maxAge': {
         required: true,
         min: 1,
-        max: 365
+        max: 365,
       },
       'sessionPolicy.timeoutMinutes': {
         required: true,
         min: 5,
-        max: 480
-      }
-    }
-  });
+        max: 480,
+      },
+    },
+  })
 
   const handleSave = () => {
     if (isFormValid) {
-      onSave?.(settings);
-      onOpenChange(false);
+      onSave?.(settings)
+      onOpenChange(false)
     }
-  };
+  }
 
   const handleResetPassword = () => {
-    onResetPassword?.();
-  };
+    onResetPassword?.()
+  }
 
   const handleSectionChange = (section: keyof SecurityPolicy, field: string, value: string | number | boolean) => {
     // Используем type casting к unknown перед приведением к нужному типу для корректной работы с вложенными полями в useDialogForm
-    handleFieldChange(`${section}.${field}` as keyof SecurityPolicy, value as SecurityPolicy[keyof SecurityPolicy]);
-  };
+    handleFieldChange(`${section}.${field}` as keyof SecurityPolicy, value as SecurityPolicy[keyof SecurityPolicy])
+  }
 
-  const canEditSettings = currentUserRole === 'admin';
-  const hasUnsavedChanges = JSON.stringify(settings) !== JSON.stringify(currentSettings);
+  const canEditSettings = currentUserRole === 'admin'
+  const hasUnsavedChanges = JSON.stringify(settings) !== JSON.stringify(currentSettings)
 
-  const { title: _omitTitle, ...dialogProps } = props;
+  const { title: _omitTitle, ...dialogProps } = props
   return (
     <BaseDialog
       {...dialogProps}
@@ -200,6 +200,6 @@ export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

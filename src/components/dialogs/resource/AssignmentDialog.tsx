@@ -1,11 +1,11 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export interface Resource {
   id: string;
@@ -51,89 +51,89 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const { title: _omitTitle, ...dialogProps } = props;
-  const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
-  const [selectedResources, setSelectedResources] = React.useState<string[]>([]);
-  const [assignments, setAssignments] = React.useState<Assignment[]>([]);
-  const [mode, setMode] = React.useState<'assign' | 'remove' | 'replace'>('assign');
+  const { title: _omitTitle, ...dialogProps } = props
+  const [selectedTasks, setSelectedTasks] = React.useState<string[]>([])
+  const [selectedResources, setSelectedResources] = React.useState<string[]>([])
+  const [assignments, setAssignments] = React.useState<Assignment[]>([])
+  const [mode, setMode] = React.useState<'assign' | 'remove' | 'replace'>('assign')
 
-  const availableResources = resources.filter(r => r.available);
+  const availableResources = resources.filter(r => r.available)
 
   React.useEffect(() => {
     // Initialize assignments based on current assignments
-    setAssignments(currentAssignments);
-  }, [currentAssignments]);
+    setAssignments(currentAssignments)
+  }, [currentAssignments])
 
   const handleTaskToggle = (taskId: string) => {
-    setSelectedTasks(prev => 
+    setSelectedTasks(prev =>
       prev.includes(taskId)
         ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
+        : [...prev, taskId],
+    )
+  }
 
   const handleResourceToggle = (resourceId: string) => {
-    setSelectedResources(prev => 
+    setSelectedResources(prev =>
       prev.includes(resourceId)
         ? prev.filter(id => id !== resourceId)
-        : [...prev, resourceId]
-    );
-  };
+        : [...prev, resourceId],
+    )
+  }
 
   const handleUnitsChange = (assignmentId: string, units: number) => {
-    setAssignments(prev => 
-      prev.map(a => a.id === assignmentId ? { ...a, units } : a)
-    );
-  };
+    setAssignments(prev =>
+      prev.map(a => a.id === assignmentId ? { ...a, units } : a),
+    )
+  }
 
   const handleAssign = () => {
     if (selectedTasks.length > 0 && selectedResources.length > 0) {
-      const newAssignments: Assignment[] = [];
-      
+      const newAssignments: Assignment[] = []
+
       selectedTasks.forEach(taskId => {
         selectedResources.forEach(resourceId => {
-          const resource = resources.find(r => r.id === resourceId);
-          const task = tasks.find(t => t.id === taskId);
-          
+          const resource = resources.find(r => r.id === resourceId)
+          const task = tasks.find(t => t.id === taskId)
+
           if (resource && task) {
-            const units = resource.maxUnits ? Math.min(100, resource.maxUnits) : 100;
-            const work = task.duration * (units / 100);
-            const cost = work * (resource.rate || 0);
-            
+            const units = resource.maxUnits ? Math.min(100, resource.maxUnits) : 100
+            const work = task.duration * (units / 100)
+            const cost = work * (resource.rate || 0)
+
             newAssignments.push({
               id: `${taskId}-${resourceId}-${Date.now()}`,
               taskId,
               resourceId,
               units,
               work,
-              cost
-            });
+              cost,
+            })
           }
-        });
-      });
-      
-      onAssign?.(newAssignments);
-      onClose?.();
+        })
+      })
+
+      onAssign?.(newAssignments)
+      onClose?.()
     }
-  };
+  }
 
   const handleRemoveAssignments = () => {
     const assignmentIds = assignments
       .filter(a => selectedTasks.includes(a.taskId))
-      .map(a => a.id);
-    
+      .map(a => a.id)
+
     if (assignmentIds.length > 0) {
-      onRemove?.(assignmentIds);
-      onClose?.();
+      onRemove?.(assignmentIds)
+      onClose?.()
     }
-  };
+  }
 
-  const totalWork = assignments.reduce((sum, a) => sum + a.work, 0);
-  const totalCost = assignments.reduce((sum, a) => sum + a.cost, 0);
-  const overAllocatedResources = assignments.filter(a => a.units > 100).length;
+  const totalWork = assignments.reduce((sum, a) => sum + a.work, 0)
+  const totalCost = assignments.reduce((sum, a) => sum + a.cost, 0)
+  const overAllocatedResources = assignments.filter(a => a.units > 100).length
 
-  const canAssign = selectedTasks.length > 0 && selectedResources.length > 0;
-  const canRemove = selectedTasks.length > 0;
+  const canAssign = selectedTasks.length > 0 && selectedResources.length > 0
+  const canRemove = selectedTasks.length > 0
 
   return (
     <BaseDialog
@@ -274,7 +274,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                   <div>
                     <div className="font-medium text-sm">{resource.name}</div>
                     <div className="text-xs text-muted-foreground">
-                      {resource.type} • ${resource.rate || 0}/h 
+                      {resource.type} • ${resource.rate || 0}/h
                       {resource.maxUnits && ` • Max: ${resource.maxUnits}%`}
                     </div>
                   </div>
@@ -301,9 +301,9 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                 </TableHeader>
                 <TableBody>
                   {assignments.map(assignment => {
-                    const task = tasks.find(t => t.id === assignment.taskId);
-                    const resource = resources.find(r => r.id === assignment.resourceId);
-                    
+                    const task = tasks.find(t => t.id === assignment.taskId)
+                    const resource = resources.find(r => r.id === assignment.resourceId)
+
                     return (
                       <TableRow key={assignment.id}>
                         <TableCell className="font-medium">{task?.name || 'Unknown'}</TableCell>
@@ -321,7 +321,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                         <TableCell>{assignment.work.toFixed(1)}</TableCell>
                         <TableCell>${assignment.cost.toFixed(2)}</TableCell>
                       </TableRow>
-                    );
+                    )
                   })}
                 </TableBody>
               </Table>
@@ -330,6 +330,6 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

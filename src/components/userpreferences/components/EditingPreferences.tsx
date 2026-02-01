@@ -1,47 +1,47 @@
-import React, { useCallback, useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { PreferencesSection } from './PreferencesSection';
-import { useUserPreferences } from '../hooks/useUserPreferences';
-import { IEditingPreferences } from '../interfaces/UserPreferencesInterfaces';
+import React, { useCallback, useEffect } from 'react'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { PreferencesSection } from './PreferencesSection'
+import { useUserPreferences } from '../hooks/useUserPreferences'
+import { IEditingPreferences } from '../interfaces/UserPreferencesInterfaces'
 
 /**
  * Компонент настроек редактирования
  */
 export const EditingPreferences: React.FC = () => {
-  const { preferences, updateEditingPreferences, flush } = useUserPreferences();
-  const editingPrefs = preferences.editing as IEditingPreferences;
+  const { preferences, updateEditingPreferences, flush } = useUserPreferences()
+  const editingPrefs = preferences.editing as IEditingPreferences
 
   // Гарантированное сохранение при закрытии окна
   useEffect(() => {
     return () => {
-      flush();
-    };
-  }, [flush]);
+      flush()
+    }
+  }, [flush])
 
   const handleAutoCalculateChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ autoCalculate: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ autoCalculate: checked })
+  }, [updateEditingPreferences])
 
   const handleShowDependenciesChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ showDependencies: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ showDependencies: checked })
+  }, [updateEditingPreferences])
 
   const handleAllowTaskDeletionChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ allowTaskDeletion: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ allowTaskDeletion: checked })
+  }, [updateEditingPreferences])
 
   const handleConfirmDeletionsChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ confirmDeletions: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ confirmDeletions: checked })
+  }, [updateEditingPreferences])
 
   const handleAutoLinkTasksChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ autoLinkTasks: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ autoLinkTasks: checked })
+  }, [updateEditingPreferences])
 
   const handleSplitTasksEnabledChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ splitTasksEnabled: checked });
-  }, [updateEditingPreferences]);
+    updateEditingPreferences({ splitTasksEnabled: checked })
+  }, [updateEditingPreferences])
 
   return (
     <PreferencesSection
@@ -104,6 +104,6 @@ export const EditingPreferences: React.FC = () => {
         </div>
       </div>
     </PreferencesSection>
-  );
-};
+  )
+}
 

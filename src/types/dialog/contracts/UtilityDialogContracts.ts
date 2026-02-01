@@ -2,7 +2,7 @@
  * Контракты для утилитарных диалогов (поиск, настройки)
  */
 
-import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry';
+import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry'
 
 /**
  * Поисковые диалоги

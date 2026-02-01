@@ -3,11 +3,11 @@
  * Определяет контракты между типами диалогов и их данными
  */
 
-import * as ProjectContracts from './contracts/ProjectDialogContracts';
-import * as TaskContracts from './contracts/TaskDialogContracts';
-import * as ResourceContracts from './contracts/ResourceDialogContracts';
-import * as CalendarContracts from './contracts/CalendarDialogContracts';
-import * as UtilityContracts from './contracts/UtilityDialogContracts';
+import * as ProjectContracts from './contracts/ProjectDialogContracts'
+import * as TaskContracts from './contracts/TaskDialogContracts'
+import * as ResourceContracts from './contracts/ResourceDialogContracts'
+import * as CalendarContracts from './contracts/CalendarDialogContracts'
+import * as UtilityContracts from './contracts/UtilityDialogContracts'
 
 /**
  * Маппинг типов диалогов к их Data и Result типам
@@ -16,14 +16,14 @@ export interface DialogDataMap {
   // Основные диалоги
   welcome: { data: WelcomeDialogData; result: void };
   about: { data: AboutDialogData; result: void };
-  
+
   // Проектные диалоги
   'project-information': { data: ProjectInformationDialogData; result: ProjectInformationResult };
   'projects': { data: ProjectContracts.ProjectsDialogData; result: ProjectContracts.ProjectsDialogResult };
   'update-project': { data: ProjectContracts.UpdateProjectDialogData; result: ProjectContracts.UpdateProjectDialogResult };
   'rename-project': { data: ProjectContracts.RenameProjectDialogData; result: ProjectContracts.RenameProjectDialogResult };
   'open-project': { data: ProjectContracts.OpenProjectDialogData; result: ProjectContracts.OpenProjectDialogResult };
-  
+
   // Задачные диалоги
   'task-details': { data: TaskDetailsDialogData; result: TaskDetailsResult };
   'update-task': { data: TaskContracts.UpdateTaskDialogData; result: TaskContracts.UpdateTaskDialogResult };
@@ -33,32 +33,32 @@ export interface DialogDataMap {
   'task-links': { data: TaskContracts.TaskLinksDialogData; result: TaskContracts.TaskLinksDialogResult };
   'task-notes': { data: TaskContracts.TaskNotesDialogData; result: TaskContracts.TaskNotesDialogResult };
   'xbs-dependency': { data: TaskContracts.XbsDependencyDialogData; result: TaskContracts.XbsDependencyDialogResult };
-  
+
   // Ресурсные диалоги
   'resource-information': { data: ResourceInformationDialogData; result: ResourceInformationResult };
   'assignment': { data: AssignmentDialogData; result: AssignmentResult };
   'resource-mapping': { data: ResourceContracts.ResourceMappingDialogData; result: ResourceContracts.ResourceMappingDialogResult };
   'resource-addition': { data: ResourceContracts.ResourceAdditionDialogData; result: ResourceContracts.ResourceAdditionDialogResult };
   'replace-assignment': { data: ResourceContracts.ReplaceAssignmentDialogData; result: ResourceContracts.ReplaceAssignmentDialogResult };
-  
+
   // Календарные диалоги
   'new-base-calendar': { data: NewBaseCalendarDialogData; result: NewBaseCalendarResult };
   'holiday': { data: HolidayDialogData; result: HolidayResult };
   'working-time': { data: WorkingTimeDialogData; result: WorkingTimeResult };
   'calendar-editor': { data: CalendarContracts.CalendarEditorDialogData; result: CalendarContracts.CalendarEditorDialogResult };
   'change-working-time': { data: CalendarContracts.ChangeWorkingTimeDialogData; result: CalendarContracts.ChangeWorkingTimeDialogResult };
-  
+
   // Информационные диалоги
   'earned-value': { data: ProjectContracts.EarnedValueDialogData; result: ProjectContracts.EarnedValueDialogResult };
   'project-statistics': { data: ProjectContracts.ProjectStatisticsDialogData; result: ProjectContracts.ProjectStatisticsDialogResult };
-  
+
   // Поисковые диалоги
   'find': { data: FindDialogData; result: FindResult };
   'filter': { data: UtilityContracts.FilterDialogData; result: UtilityContracts.FilterDialogResult };
   'advanced-search': { data: UtilityContracts.AdvancedSearchDialogData; result: UtilityContracts.AdvancedSearchDialogResult };
   'find-and-replace': { data: UtilityContracts.FindAndReplaceDialogData; result: UtilityContracts.FindAndReplaceDialogResult };
   'go-to': { data: UtilityContracts.GoToDialogData; result: UtilityContracts.GoToDialogResult };
-  
+
   // Диалоги настроек
   'settings': { data: SettingsDialogData; result: SettingsResult };
   'baseline': { data: BaselineDialogData; result: BaselineResult };
@@ -169,9 +169,9 @@ export interface HolidayResult extends BaseDialogResult {
 }
 
 export interface WorkingTimeDialogData extends BaseDialogData {
-  readonly workingTime: Record<string, { 
-    startTime: string; 
-    endTime: string; 
+  readonly workingTime: Record<string, {
+    startTime: string;
+    endTime: string;
     isWorkingDay: boolean;
   }>;
 }

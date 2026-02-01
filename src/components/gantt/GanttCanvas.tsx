@@ -1,7 +1,7 @@
-import { forwardRef } from 'react';
-import { ProfessionalGantt, ProfessionalGanttHandle } from './ProfessionalGantt';
-import { Task } from '@/store/project/interfaces';
-import { GanttDisplayMode, GanttTaskUpdate } from '@/types/gantt/GanttTaskTypes';
+import { forwardRef } from 'react'
+import { ProfessionalGantt, ProfessionalGanttHandle } from './ProfessionalGantt'
+import { Task } from '@/store/project/interfaces'
+import { GanttDisplayMode, GanttTaskUpdate } from '@/types/gantt/GanttTaskTypes'
 
 /**
  * Пропсы компонента Gantt Canvas
@@ -35,9 +35,9 @@ export const GanttCanvas = forwardRef<ProfessionalGanttHandle, GanttCanvasProps>
       mode = 'standard',
       forcedEndDate,
       targetDate,
-      onNavigationComplete
+      onNavigationComplete,
     },
-    ref
+    ref,
   ) => {
     return (
       <ProfessionalGantt
@@ -52,8 +52,8 @@ export const GanttCanvas = forwardRef<ProfessionalGanttHandle, GanttCanvasProps>
         targetDate={targetDate}
         onNavigationComplete={onNavigationComplete}
       />
-    );
-  }
-);
+    )
+  },
+)
 
-GanttCanvas.displayName = 'GanttCanvas';
+GanttCanvas.displayName = 'GanttCanvas'

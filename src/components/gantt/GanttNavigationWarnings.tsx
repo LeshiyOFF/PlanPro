@@ -1,14 +1,14 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription, 
-  DialogFooter 
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 interface GanttNavigationWarningsProps {
   showEmptyDateWarning: boolean;
@@ -25,9 +25,9 @@ export const GanttNavigationWarnings: React.FC<GanttNavigationWarningsProps> = (
   showLargeJumpWarning,
   setShowLargeJumpWarning,
   onConfirmEmptyDate,
-  onConfirmLargeJump
+  onConfirmLargeJump,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <>
@@ -36,8 +36,8 @@ export const GanttNavigationWarnings: React.FC<GanttNavigationWarningsProps> = (
           <DialogHeader>
             <DialogTitle>{t('gantt.empty_date_title', { defaultValue: 'Пустая область' })}</DialogTitle>
             <DialogDescription>
-              {t('gantt.empty_date_message', { 
-                defaultValue: 'На выбранную дату задач не запланировано. Перейти всё равно?' 
+              {t('gantt.empty_date_message', {
+                defaultValue: 'На выбранную дату задач не запланировано. Перейти всё равно?',
               })}
             </DialogDescription>
           </DialogHeader>
@@ -57,8 +57,8 @@ export const GanttNavigationWarnings: React.FC<GanttNavigationWarningsProps> = (
           <DialogHeader>
             <DialogTitle>{t('gantt.large_jump_title', { defaultValue: 'Большой интервал' })}</DialogTitle>
             <DialogDescription>
-              {t('gantt.large_jump_message', { 
-                defaultValue: 'Выбранная дата находится очень далеко. Рекомендуется переключиться в режим месяца для сохранения производительности. Переключить и перейти?' 
+              {t('gantt.large_jump_message', {
+                defaultValue: 'Выбранная дата находится очень далеко. Рекомендуется переключиться в режим месяца для сохранения производительности. Переключить и перейти?',
               })}
             </DialogDescription>
           </DialogHeader>
@@ -73,5 +73,5 @@ export const GanttNavigationWarnings: React.FC<GanttNavigationWarningsProps> = (
         </DialogContent>
       </Dialog>
     </>
-  );
-};
+  )
+}

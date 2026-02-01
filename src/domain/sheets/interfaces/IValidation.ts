@@ -1,5 +1,5 @@
-import { CellValue } from '@/types/sheet/CellValueTypes';
-import type { JsonObject } from '@/types/json-types';
+import { CellValue } from '@/types/sheet/CellValueTypes'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Результат валидации данных ячейки

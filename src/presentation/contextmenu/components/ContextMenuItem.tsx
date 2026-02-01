@@ -1,12 +1,12 @@
-import React from 'react';
-import { IContextMenuItem } from '../../../domain/contextmenu/entities/ContextMenu';
-import { useAppStore } from '@/store/appStore';
+import React from 'react'
+import { IContextMenuItem } from '../../../domain/contextmenu/entities/ContextMenu'
+import { useAppStore } from '@/store/appStore'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip'
 
 interface ContextMenuItemProps {
   item: IContextMenuItem;
@@ -20,34 +20,34 @@ interface ContextMenuItemProps {
 export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
   item,
   onSelect,
-  depth: _depth = 0
+  depth: _depth = 0,
 }) => {
-  const { preferences } = useAppStore();
+  const { preferences } = useAppStore()
   const showTips = (preferences && typeof preferences === 'object' && 'display' in preferences && preferences.display && typeof preferences.display === 'object' && 'showTips' in preferences.display)
     ? Boolean((preferences.display as { showTips?: boolean }).showTips)
-    : true;
+    : true
 
   if (item.separator) {
     return (
-      <div 
+      <div
         className="context-menu-separator"
-        style={{ 
+        style={{
           margin: '4px 8px',
           height: '1px',
           backgroundColor: '#e2e8f0',
         }}
       />
-    );
+    )
   }
 
   const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (!item.disabled && !item.separator) {
-      onSelect(item);
+      onSelect(item)
     }
-  };
+  }
 
-  const hasSubmenu = item.submenu && item.submenu.length > 0;
+  const hasSubmenu = item.submenu && item.submenu.length > 0
 
   const content = (
     <div
@@ -77,14 +77,14 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
         {!item.icon && <div className="w-4" />} {/* Spacer if no icon */}
         <span className="font-medium">{item.label}</span>
       </div>
-      
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         {item.shortcut && (
-          <span 
-            style={{ 
-              fontSize: '12px', 
+          <span
+            style={{
+              fontSize: '12px',
               color: 'var(--text-secondary, #64748b)',
-              opacity: 0.7
+              opacity: 0.7,
             }}
           >
             {item.shortcut}
@@ -97,7 +97,7 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
         )}
       </div>
     </div>
-  );
+  )
 
   if (item.tooltip && showTips) {
     return (
@@ -111,9 +111,9 @@ export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    );
+    )
   }
 
-  return content;
-};
+  return content
+}
 

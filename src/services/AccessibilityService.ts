@@ -37,7 +37,7 @@ export class AccessibilityService {
     return Promise.resolve({
       score: 85,
       issues: [],
-      recommendations: []
+      recommendations: [],
     })
   }
 
@@ -52,8 +52,8 @@ export class AccessibilityService {
         score: 85,
         totalIssues: 0,
         critical: 0,
-        warning: 0
-      }
+        warning: 0,
+      },
     })
   }
 }

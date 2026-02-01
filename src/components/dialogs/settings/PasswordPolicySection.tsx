@@ -1,7 +1,7 @@
-import React from 'react';
-import { FormField } from '../components/FormField';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from 'react'
+import { FormField } from '../components/FormField'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
 
 interface PasswordPolicyData {
   minLength: number;
@@ -26,20 +26,20 @@ interface PasswordPolicySectionProps {
 export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
   data,
   onChange,
-  errors = {}
+  errors = {},
 }) => {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold">Политика паролей</h3>
-      
+
       <div className="grid grid-cols-2 gap-4">
         <FormField
           label="Минимальная длина"
           type="number"
           value={data.minLength}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.minLength;
-            onChange('minLength', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.minLength
+            onChange('minLength', num)
           }}
           error={errors.minLength}
           min="6"
@@ -51,8 +51,8 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           type="number"
           value={data.maxAge}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxAge;
-            onChange('maxAge', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxAge
+            onChange('maxAge', num)
           }}
           error={errors.maxAge}
           min="1"
@@ -64,8 +64,8 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           type="number"
           value={data.historyCount}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.historyCount;
-            onChange('historyCount', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.historyCount
+            onChange('historyCount', num)
           }}
           error={errors.historyCount}
           min="0"
@@ -77,8 +77,8 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           type="number"
           value={data.lockoutThreshold}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutThreshold;
-            onChange('lockoutThreshold', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutThreshold
+            onChange('lockoutThreshold', num)
           }}
           error={errors.lockoutThreshold}
           min="3"
@@ -90,8 +90,8 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           type="number"
           value={data.lockoutDuration}
           onChange={(value) => {
-            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutDuration;
-            onChange('lockoutDuration', num);
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutDuration
+            onChange('lockoutDuration', num)
           }}
           error={errors.lockoutDuration}
           min="5"
@@ -101,7 +101,7 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
 
       <div className="space-y-4">
         <h4 className="font-medium">Требования к паролю</h4>
-        
+
         <div className="space-y-3">
           <div className="flex items-center space-x-2">
             <Checkbox
@@ -149,6 +149,6 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -1,6 +1,6 @@
-import React, { useMemo, ReactNode } from 'react';
-import { ViewMode } from 'gantt-task-react';
-import { GanttNavigationService } from '@/services/GanttNavigationService';
+import React, { useMemo, ReactNode } from 'react'
+import { ViewMode } from 'gantt-task-react'
+import { GanttNavigationService } from '@/services/GanttNavigationService'
 
 /**
  * Типизированная задача для Pulse Overlay
@@ -31,30 +31,30 @@ export const PulseOverlay: React.FC<PulseOverlayProps> = ({
   projectStartDate,
   columnWidth,
   viewMode,
-  rowHeight
+  rowHeight,
 }) => {
   const criticalConnections = useMemo(() => {
-    const lines: ReactNode[] = [];
-    
+    const lines: ReactNode[] = []
+
     tasks.forEach((task, index) => {
-      const isTaskCritical = task.originalTask?.critical || task.originalTask?.criticalPath;
-      if (!isTaskCritical || !task.dependencies || task.originalTask?.isFiller) return;
+      const isTaskCritical = task.originalTask?.critical || task.originalTask?.criticalPath
+      if (!isTaskCritical || !task.dependencies || task.originalTask?.isFiller) return
 
       task.dependencies.forEach((depId: string) => {
-        const depIndex = tasks.findIndex(t => t.id === depId);
-        if (depIndex === -1) return;
-        
-        const depTask = tasks[depIndex];
-        const isDepCritical = depTask.originalTask?.critical || depTask.originalTask?.criticalPath;
-        
-        if (isDepCritical) {
-          const startX = GanttNavigationService.dateToStepIndex(depTask.end, projectStartDate, viewMode) * columnWidth;
-          const startY = depIndex * rowHeight + (rowHeight / 2);
-          const endX = GanttNavigationService.dateToStepIndex(task.start, projectStartDate, viewMode) * columnWidth;
-          const endY = index * rowHeight + (rowHeight / 2);
+        const depIndex = tasks.findIndex(t => t.id === depId)
+        if (depIndex === -1) return
 
-          const midX = startX + Math.max(20, (endX - startX) / 2);
-          
+        const depTask = tasks[depIndex]
+        const isDepCritical = depTask.originalTask?.critical || depTask.originalTask?.criticalPath
+
+        if (isDepCritical) {
+          const startX = GanttNavigationService.dateToStepIndex(depTask.end, projectStartDate, viewMode) * columnWidth
+          const startY = depIndex * rowHeight + (rowHeight / 2)
+          const endX = GanttNavigationService.dateToStepIndex(task.start, projectStartDate, viewMode) * columnWidth
+          const endY = index * rowHeight + (rowHeight / 2)
+
+          const midX = startX + Math.max(20, (endX - startX) / 2)
+
           lines.push(
             <path
               key={`pulse-link-${depId}-${task.id}`}
@@ -65,18 +65,18 @@ export const PulseOverlay: React.FC<PulseOverlayProps> = ({
               strokeLinecap="round"
               strokeLinejoin="round"
               style={{ filter: 'drop-shadow(0 0 2px rgba(239, 68, 68, 0.4))', pointerEvents: 'none' }}
-            />
-          );
+            />,
+          )
         }
-      });
-    });
-    
-    return lines;
-  }, [tasks, projectStartDate, columnWidth, viewMode, rowHeight]);
+      })
+    })
+
+    return lines
+  }, [tasks, projectStartDate, columnWidth, viewMode, rowHeight])
 
   return (
     <g className="pulse-overlay-layer">
       {criticalConnections}
     </g>
-  );
-};
+  )
+}

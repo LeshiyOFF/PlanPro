@@ -1,6 +1,6 @@
-import React from 'react';
-import { Task } from '@/hooks/useJavaApi';
-import { formatDuration } from '@/utils/formatUtils';
+import React from 'react'
+import { Task } from '@/hooks/useJavaApi'
+import { formatDuration } from '@/utils/formatUtils'
 
 interface TaskCardProps {
   task: Task;
@@ -16,27 +16,27 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   onEdit,
   onDelete,
-  onProgressUpdate
+  onProgressUpdate,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#28a745';
-      case 'in_progress': return '#007acc';
-      case 'not_started': return '#6c757d';
-      case 'blocked': return '#dc3545';
-      default: return '#6c757d';
+      case 'completed': return '#28a745'
+      case 'in_progress': return '#007acc'
+      case 'not_started': return '#6c757d'
+      case 'blocked': return '#dc3545'
+      default: return '#6c757d'
     }
-  };
+  }
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'not_started': return 'Not Started';
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      case 'blocked': return 'Blocked';
-      default: return status;
+      case 'not_started': return 'Not Started'
+      case 'in_progress': return 'In Progress'
+      case 'completed': return 'Completed'
+      case 'blocked': return 'Blocked'
+      default: return status
     }
-  };
+  }
 
   return (
     <div style={{
@@ -44,12 +44,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       borderRadius: '8px',
       padding: '20px',
       backgroundColor: 'white',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     }}>
-      <div style={{ 
-        display: 'flex', 
+      <div style={{
+        display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
       }}>
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: '0 0 10px 0', color: '#333' }}>
@@ -60,13 +60,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               {task.description}
             </p>
           )}
-          
-          <div style={{ 
-            display: 'flex', 
+
+          <div style={{
+            display: 'flex',
             gap: '15px',
             fontSize: '14px',
             color: '#666',
-            marginBottom: '15px'
+            marginBottom: '15px',
           }}>
             <span style={{ color: getStatusColor(task.status || 'not_started') }}>
               <strong>Status:</strong> {getStatusText(task.status || 'not_started')}
@@ -82,14 +82,14 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               </span>
             )}
           </div>
-          
+
           {/* Progress bar */}
           <div style={{ marginBottom: '15px' }}>
-            <div style={{ 
-              display: 'flex', 
+            <div style={{
+              display: 'flex',
               justifyContent: 'space-between',
               marginBottom: '5px',
-              fontSize: '14px'
+              fontSize: '14px',
             }}>
               <span>Progress</span>
               <span>{task.progress || 0}%</span>
@@ -99,17 +99,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               height: '8px',
               backgroundColor: '#e9ecef',
               borderRadius: '4px',
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}>
               <div style={{
                 width: `${task.progress || 0}%`,
                 height: '100%',
                 backgroundColor: getStatusColor(task.status || 'not_started'),
-                transition: 'width 0.3s ease'
+                transition: 'width 0.3s ease',
               }} />
             </div>
           </div>
-          
+
           {/* Quick progress update buttons */}
           <div style={{ display: 'flex', gap: '5px' }}>
             <button
@@ -121,7 +121,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               0%
@@ -135,7 +135,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               25%
@@ -149,7 +149,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 color: 'black',
                 border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               50%
@@ -163,7 +163,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               75%
@@ -177,18 +177,18 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '3px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               100%
             </button>
           </div>
         </div>
-        
-        <div style={{ 
-          display: 'flex', 
+
+        <div style={{
+          display: 'flex',
           gap: '5px',
-          flexDirection: 'column'
+          flexDirection: 'column',
         }}>
           <button
             onClick={() => onEdit(task)}
@@ -199,7 +199,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               border: 'none',
               borderRadius: '3px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Edit
@@ -213,7 +213,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               border: 'none',
               borderRadius: '3px',
               cursor: 'pointer',
-              fontSize: '12px'
+              fontSize: '12px',
             }}
           >
             Delete
@@ -221,6 +221,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Resource } from '@/hooks/useJavaApi';
+import React from 'react'
+import { Resource } from '@/hooks/useJavaApi'
 
 interface ResourceFormProps {
   resource: Resource | null;
@@ -25,7 +25,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
   onFormChange,
   onSubmit,
   onCancel,
-  isLoading
+  isLoading,
 }) => {
   const roleOptions = [
     'Developer',
@@ -38,8 +38,8 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
     'Technical Writer',
     'UI/UX Designer',
     'Data Scientist',
-    'Other'
-  ];
+    'Other',
+  ]
 
   return (
     <div style={{
@@ -52,17 +52,17 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
     }}>
       <div style={{
         backgroundColor: 'white',
         padding: '30px',
         borderRadius: '10px',
         minWidth: '500px',
-        maxWidth: '80%'
+        maxWidth: '80%',
       }}>
         <h3>{resource ? 'Edit Resource' : 'Create New Resource'}</h3>
-        
+
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -72,17 +72,17 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
               type="text"
               value={formData.name}
               onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
               placeholder="Enter resource name"
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Email
@@ -91,16 +91,16 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
               type="email"
               value={formData.email}
               onChange={(e) => onFormChange({ ...formData, email: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
               placeholder="Enter email address"
             />
           </div>
-          
+
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Role
@@ -108,11 +108,11 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
             <select
               value={formData.role}
               onChange={(e) => onFormChange({ ...formData, role: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
             >
               <option value="">Select Role</option>
@@ -121,7 +121,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
               ))}
             </select>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -133,15 +133,15 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                 max="100"
                 value={formData.availability}
                 onChange={(e) => onFormChange({ ...formData, availability: parseInt(e.target.value) || 0 })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
-            
+
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                 Cost per Hour ($)
@@ -152,16 +152,16 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                 step="0.01"
                 value={formData.costPerHour}
                 onChange={(e) => onFormChange({ ...formData, costPerHour: parseFloat(e.target.value) || 0 })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
             <button
               type="button"
@@ -172,7 +172,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Cancel
@@ -187,7 +187,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                 border: 'none',
                 borderRadius: '5px',
                 cursor: 'pointer',
-                opacity: (isLoading || !formData.name.trim()) ? 0.5 : 1
+                opacity: (isLoading || !formData.name.trim()) ? 0.5 : 1,
               }}
             >
               {isLoading ? 'Saving...' : (resource ? 'Update' : 'Create')}
@@ -196,6 +196,6 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useProjectStore } from '@/store/projectStore';
-import { CalendarEditorDialog } from '@/components/dialogs/calendar/CalendarEditorDialog';
-import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
-import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
-import { Button } from '@/components/ui/button';
-import { Plus, Edit, Trash2, Calendar, Lock } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from 'react'
+import { useProjectStore } from '@/store/projectStore'
+import { CalendarEditorDialog } from '@/components/dialogs/calendar/CalendarEditorDialog'
+import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
+import { Button } from '@/components/ui/button'
+import { Plus, Edit, Trash2, Calendar, Lock } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
 
 interface CalendarManagerProps {
   className?: string;
@@ -17,58 +17,58 @@ interface CalendarManagerProps {
  * Stage 8.15: Эталонное управление календарями
  */
 export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = '' }) => {
-  const { toast } = useToast();
-  const { calendars, addCalendar, updateCalendar, deleteCalendar } = useProjectStore();
-  const templateService = CalendarTemplateService.getInstance();
+  const { toast } = useToast()
+  const { calendars, addCalendar, updateCalendar, deleteCalendar } = useProjectStore()
+  const templateService = CalendarTemplateService.getInstance()
 
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingCalendar, setEditingCalendar] = useState<IWorkCalendar | undefined>();
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editingCalendar, setEditingCalendar] = useState<IWorkCalendar | undefined>()
 
   const handleCreate = () => {
-    setEditingCalendar(undefined);
-    setEditorOpen(true);
-  };
+    setEditingCalendar(undefined)
+    setEditorOpen(true)
+  }
 
   const handleEdit = (calendar: IWorkCalendar) => {
-    setEditingCalendar(calendar);
-    setEditorOpen(true);
-  };
+    setEditingCalendar(calendar)
+    setEditorOpen(true)
+  }
 
   const handleDelete = (calendar: IWorkCalendar) => {
     if (calendar.isBase) {
       toast({
         title: 'Ошибка',
         description: 'Базовые календари нельзя удалять',
-        variant: 'destructive'
-      });
-      return;
+        variant: 'destructive',
+      })
+      return
     }
 
-    const confirmed = window.confirm(`Удалить календарь "${calendar.name}"?`);
+    const confirmed = window.confirm(`Удалить календарь "${calendar.name}"?`)
     if (confirmed) {
-      deleteCalendar(calendar.id);
+      deleteCalendar(calendar.id)
       toast({
         title: 'Успех',
-        description: `Календарь "${calendar.name}" удален`
-      });
+        description: `Календарь "${calendar.name}" удален`,
+      })
     }
-  };
+  }
 
   const handleSave = (calendar: IWorkCalendar) => {
     if (editingCalendar) {
-      updateCalendar(calendar.id, calendar);
+      updateCalendar(calendar.id, calendar)
       toast({
         title: 'Успех',
-        description: `Календарь "${calendar.name}" обновлен`
-      });
+        description: `Календарь "${calendar.name}" обновлен`,
+      })
     } else {
-      addCalendar(calendar);
+      addCalendar(calendar)
       toast({
         title: 'Успех',
-        description: `Календарь "${calendar.name}" создан`
-      });
+        description: `Календарь "${calendar.name}" создан`,
+      })
     }
-  };
+  }
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -87,7 +87,7 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
       {/* Список календарей */}
       <div className="grid gap-3">
         {calendars.map((calendar) => {
-          const dynamicShortDesc = templateService.generateShortDescription(calendar);
+          const dynamicShortDesc = templateService.generateShortDescription(calendar)
 
           return (
             <div
@@ -105,7 +105,7 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
                       </span>
                     )}
                   </div>
-                  
+
                   <p className="text-xs text-muted-foreground mb-2">
                     {calendar.description || dynamicShortDesc}
                   </p>
@@ -114,9 +114,9 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
                   <div className="flex gap-1">
                     {calendar.workingDays
                       .sort((a, b) => {
-                        const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
-                        const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
-                        return orderA - orderB;
+                        const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek
+                        const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek
+                        return orderA - orderB
                       })
                       .map((wd) => (
                         <div
@@ -155,7 +155,7 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
                 </div>
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -167,5 +167,5 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
         calendar={editingCalendar}
       />
     </div>
-  );
-};
+  )
+}

@@ -1,12 +1,12 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 export interface ResourceData {
   [key: string]: string | number | boolean | undefined;
@@ -35,14 +35,14 @@ export interface ResourceAdditionDialogProps extends Omit<BaseDialogProps, 'chil
 const RESOURCE_TYPES = [
   { value: 'work', label: 'Work Resource', description: 'Human resources with time-based capacity' },
   { value: 'material', label: 'Material Resource', description: 'Consumable materials' },
-  { value: 'cost', label: 'Cost Resource', description: 'Fixed costs or budget items' }
-];
+  { value: 'cost', label: 'Cost Resource', description: 'Fixed costs or budget items' },
+]
 
 const ACCRUAL_OPTIONS = [
   { value: 'start', label: 'At Start' },
   { value: 'end', label: 'At End' },
-  { value: 'prorated', label: 'Prorated' }
-];
+  { value: 'prorated', label: 'Prorated' },
+]
 
 export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
   calendars = [],
@@ -65,8 +65,8 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
     accrueAt: 'start',
     calendar: '',
     notes: '',
-    generic: false
-  });
+    generic: false,
+  })
 
   const { validate, errors, isValid } = useDialogValidation({
     name: {
@@ -74,57 +74,57 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
       minLength: 1,
       maxLength: 255,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Resource name is required';
-        return value.trim() ? null : 'Resource name is required';
-      }
+        if (!value || typeof value !== 'string') return 'Resource name is required'
+        return value.trim() ? null : 'Resource name is required'
+      },
     },
     initials: {
       required: true,
       minLength: 1,
       maxLength: 10,
       custom: (value) => {
-        if (!value || typeof value !== 'string') return 'Initials are required';
-        return value.trim() ? null : 'Initials are required';
-      }
+        if (!value || typeof value !== 'string') return 'Initials are required'
+        return value.trim() ? null : 'Initials are required'
+      },
     },
     maxUnits: {
       required: true,
       custom: (value) => {
-        const numValue = Number(value);
-        return (numValue > 0 && numValue <= 1000) ? null : 'Max units must be between 0.1 and 1000';
-      }
+        const numValue = Number(value)
+        return (numValue > 0 && numValue <= 1000) ? null : 'Max units must be between 0.1 and 1000'
+      },
     },
     standardRate: {
       required: true,
       custom: (value) => {
-        const numValue = Number(value);
-        return numValue >= 0 ? null : 'Standard rate must be non-negative';
-      }
-    }
-  });
+        const numValue = Number(value)
+        return numValue >= 0 ? null : 'Standard rate must be non-negative'
+      },
+    },
+  })
 
   React.useEffect(() => {
-    validate(resourceData);
-  }, [resourceData]);
+    validate(resourceData)
+  }, [resourceData])
 
   const handleFieldChange = (field: keyof ResourceData, value: ResourceData[keyof ResourceData]) => {
-    setResourceData(prev => ({ ...prev, [field]: value }));
-  };
+    setResourceData(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(resourceData);
-      onClose?.();
+      onSave?.(resourceData)
+      onClose?.()
     }
-  };
+  }
 
-  const canSave = isValid();
+  const canSave = isValid()
 
   const getTypeDescription = (type: string) => {
-    return RESOURCE_TYPES.find(t => t.value === type)?.description || '';
-  };
+    return RESOURCE_TYPES.find(t => t.value === type)?.description || ''
+  }
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   return (
     <BaseDialog
@@ -398,6 +398,6 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
         </div>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

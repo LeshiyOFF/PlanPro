@@ -1,9 +1,9 @@
-import { 
-  ICalendarTemplate, 
-  CalendarTemplateType, 
+import {
+  ICalendarTemplate,
+  CalendarTemplateType,
   IWorkingDay,
-  IWorkCalendar
-} from '../interfaces/IWorkCalendar';
+  IWorkCalendar,
+} from '../interfaces/IWorkCalendar'
 
 /**
  * Сервис шаблонов календарей
@@ -11,13 +11,13 @@ import {
  * Stage 8.15: Эталонная система управления графиками
  */
 export class CalendarTemplateService {
-  private static instance: CalendarTemplateService;
+  private static instance: CalendarTemplateService
 
   public static getInstance(): CalendarTemplateService {
     if (!CalendarTemplateService.instance) {
-      CalendarTemplateService.instance = new CalendarTemplateService();
+      CalendarTemplateService.instance = new CalendarTemplateService()
     }
-    return CalendarTemplateService.instance;
+    return CalendarTemplateService.instance
   }
 
   /**
@@ -33,49 +33,49 @@ export class CalendarTemplateService {
       this.getFourThreeTemplate(),
       this.getShiftFifteenTemplate(),
       this.getShiftThirtyTemplate(),
-      this.getSixDaysTemplate()
-    ];
+      this.getSixDaysTemplate(),
+    ]
   }
 
   /**
    * Генерация динамического краткого описания на основе рабочих дней
    */
   public generateShortDescription(calendar: Partial<IWorkCalendar>): string {
-    const workingDays = calendar.workingDays || [];
-    const activeDays = workingDays.filter(wd => wd.isWorking);
-    
-    if (activeDays.length === 0) return 'Нет рабочих дней';
-    if (activeDays.length === 7) return `${calendar.hoursPerDay}ч/дн, 7/7 (Без выходных)`;
+    const workingDays = calendar.workingDays || []
+    const activeDays = workingDays.filter(wd => wd.isWorking)
 
-    const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    
+    if (activeDays.length === 0) return 'Нет рабочих дней'
+    if (activeDays.length === 7) return `${calendar.hoursPerDay}ч/дн, 7/7 (Без выходных)`
+
+    const dayNames = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
+
     // Сортируем дни с Пн по Вс
     const sortedDays = [...activeDays].sort((a, b) => {
-      const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek;
-      const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek;
-      return orderA - orderB;
-    });
+      const orderA = a.dayOfWeek === 0 ? 7 : a.dayOfWeek
+      const orderB = b.dayOfWeek === 0 ? 7 : b.dayOfWeek
+      return orderA - orderB
+    })
 
-    const activeDayLabels = sortedDays.map(d => dayNames[d.dayOfWeek]).join(', ');
-    return `${calendar.hoursPerDay}ч/дн, ${activeDays.length}/7 (${activeDayLabels})`;
+    const activeDayLabels = sortedDays.map(d => dayNames[d.dayOfWeek]).join(', ')
+    return `${calendar.hoursPerDay}ч/дн, ${activeDays.length}/7 (${activeDayLabels})`
   }
 
   /**
    * Проверка: совпадает ли текущий график с шаблоном
    */
   public isMatchingTemplate(workingDays: IWorkingDay[], template: ICalendarTemplate): boolean {
-    if (workingDays.length !== template.workingDays.length) return false;
-    
+    if (workingDays.length !== template.workingDays.length) return false
+
     return workingDays.every(wd => {
-      const twd = template.workingDays.find(t => t.dayOfWeek === wd.dayOfWeek);
-      if (!twd) return false;
-      if (wd.isWorking !== twd.isWorking) return false;
+      const twd = template.workingDays.find(t => t.dayOfWeek === wd.dayOfWeek)
+      if (!twd) return false
+      if (wd.isWorking !== twd.isWorking) return false
       if (wd.isWorking) {
-        if (wd.workingHours?.start !== twd.workingHours?.start) return false;
-        if (wd.workingHours?.end !== twd.workingHours?.end) return false;
+        if (wd.workingHours?.start !== twd.workingHours?.start) return false
+        if (wd.workingHours?.end !== twd.workingHours?.end) return false
       }
-      return true;
-    });
+      return true
+    })
   }
 
   /**
@@ -91,7 +91,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 5,
       defaultWorkTime: {
         start: '09:00',
-        end: '18:00'
+        end: '18:00',
       },
       workingDays: [
         { dayOfWeek: 0, isWorking: false }, // Воскресенье
@@ -100,9 +100,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '09:00', end: '18:00', breakStart: '13:00', breakEnd: '14:00' } },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '09:00', end: '18:00', breakStart: '13:00', breakEnd: '14:00' } },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '09:00', end: '18:00', breakStart: '13:00', breakEnd: '14:00' } },
-        { dayOfWeek: 6, isWorking: false }  // Суббота
-      ]
-    };
+        { dayOfWeek: 6, isWorking: false },  // Суббота
+      ],
+    }
   }
 
   /**
@@ -112,8 +112,8 @@ export class CalendarTemplateService {
     const allDaysWorking: IWorkingDay[] = Array.from({ length: 7 }, (_, i) => ({
       dayOfWeek: i,
       isWorking: true,
-      workingHours: { start: '00:00', end: '23:59' }
-    }));
+      workingHours: { start: '00:00', end: '23:59' },
+    }))
 
     return {
       type: CalendarTemplateType.TWENTY_FOUR_SEVEN,
@@ -124,10 +124,10 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 7,
       defaultWorkTime: {
         start: '00:00',
-        end: '23:59'
+        end: '23:59',
       },
-      workingDays: allDaysWorking
-    };
+      workingDays: allDaysWorking,
+    }
   }
 
   /**
@@ -143,7 +143,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 5,
       defaultWorkTime: {
         start: '22:00',
-        end: '06:00'
+        end: '06:00',
       },
       workingDays: [
         { dayOfWeek: 0, isWorking: false },
@@ -152,9 +152,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '22:00', end: '06:00' } },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '22:00', end: '06:00' } },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '22:00', end: '06:00' } },
-        { dayOfWeek: 6, isWorking: false }
-      ]
-    };
+        { dayOfWeek: 6, isWorking: false },
+      ],
+    }
   }
 
   /**
@@ -170,7 +170,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 3.5, // В среднем: 2 раб дня на 4-дневный цикл = 3.5 дней в неделю
       defaultWorkTime: {
         start: '08:00',
-        end: '20:00'
+        end: '20:00',
       },
       // Для циклических графиков базовое расписание условно (логика в CalendarMathService)
       workingDays: [
@@ -180,9 +180,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: false },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '08:00', end: '20:00' } },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '08:00', end: '20:00' } },
-        { dayOfWeek: 6, isWorking: false }
-      ]
-    };
+        { dayOfWeek: 6, isWorking: false },
+      ],
+    }
   }
 
   /**
@@ -198,7 +198,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 5.25, // 3 раб из 4 = 5.25 дней в неделю
       defaultWorkTime: {
         start: '08:00',
-        end: '17:00'
+        end: '17:00',
       },
       workingDays: [
         { dayOfWeek: 0, isWorking: false },
@@ -207,9 +207,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '08:00', end: '17:00' } },
         { dayOfWeek: 4, isWorking: false },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '08:00', end: '17:00' } },
-        { dayOfWeek: 6, isWorking: true, workingHours: { start: '08:00', end: '17:00' } }
-      ]
-    };
+        { dayOfWeek: 6, isWorking: true, workingHours: { start: '08:00', end: '17:00' } },
+      ],
+    }
   }
 
   /**
@@ -225,7 +225,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 4,
       defaultWorkTime: {
         start: '08:00',
-        end: '17:00'
+        end: '17:00',
       },
       workingDays: [
         { dayOfWeek: 0, isWorking: false },
@@ -234,9 +234,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '08:00', end: '17:00' } },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '08:00', end: '17:00' } },
         { dayOfWeek: 5, isWorking: false },
-        { dayOfWeek: 6, isWorking: false }
-      ]
-    };
+        { dayOfWeek: 6, isWorking: false },
+      ],
+    }
   }
 
   /**
@@ -252,15 +252,15 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 3.5, // 15 рабочих из 30 дней цикла = 3.5 дней/неделю
       defaultWorkTime: {
         start: '08:00',
-        end: '20:00'
+        end: '20:00',
       },
       // Циклический график (логика в расчетах)
       workingDays: Array.from({ length: 7 }, (_, i) => ({
         dayOfWeek: i,
         isWorking: true,
-        workingHours: { start: '08:00', end: '20:00' }
-      }))
-    };
+        workingHours: { start: '08:00', end: '20:00' },
+      })),
+    }
   }
 
   /**
@@ -276,14 +276,14 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 3.5,
       defaultWorkTime: {
         start: '08:00',
-        end: '20:00'
+        end: '20:00',
       },
       workingDays: Array.from({ length: 7 }, (_, i) => ({
         dayOfWeek: i,
         isWorking: true,
-        workingHours: { start: '08:00', end: '20:00' }
-      }))
-    };
+        workingHours: { start: '08:00', end: '20:00' },
+      })),
+    }
   }
 
   /**
@@ -299,7 +299,7 @@ export class CalendarTemplateService {
       workingDaysPerWeek: 6,
       defaultWorkTime: {
         start: '09:00',
-        end: '18:00'
+        end: '18:00',
       },
       workingDays: [
         { dayOfWeek: 0, isWorking: false }, // Воскресенье
@@ -308,9 +308,9 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
-        { dayOfWeek: 6, isWorking: true, workingHours: { start: '09:00', end: '18:00' } }
-      ]
-    };
+        { dayOfWeek: 6, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
+      ],
+    }
   }
 
   /**
@@ -318,10 +318,10 @@ export class CalendarTemplateService {
    * V2.0: Генерирует ID в формате custom_<UUID>_<sanitized_name>.
    */
   public createFromTemplate(template: ICalendarTemplate, customName?: string): IWorkCalendar {
-    const now = new Date();
-    const calendarName = customName || template.name;
-    const calendarId = this.generateCalendarIdWithName(calendarName);
-    
+    const now = new Date()
+    const calendarName = customName || template.name
+    const calendarId = this.generateCalendarIdWithName(calendarName)
+
     return {
       id: calendarId,
       name: calendarName,
@@ -333,20 +333,20 @@ export class CalendarTemplateService {
       workingDaysPerWeek: template.workingDaysPerWeek,
       isBase: false,
       createdAt: now,
-      updatedAt: now
-    };
+      updatedAt: now,
+    }
   }
-  
+
   /**
    * Генерация ID календаря с именем.
    * V2.0: Формат custom_<UUID>_<sanitized_name> для совместимости с Java backend.
    */
   private generateCalendarIdWithName(name: string): string {
-    const base = this._generateCalendarId();
-    const sanitizedName = this.sanitizeName(name);
-    return base.replace(/_temp$/, `_${sanitizedName}`);
+    const base = this._generateCalendarId()
+    const sanitizedName = this.sanitizeName(name)
+    return base.replace(/_temp$/, `_${sanitizedName}`)
   }
-  
+
   /**
    * Санитизация имени для использования в ID.
    * Совпадает с логикой Java CalendarIdConverter.sanitizeName().
@@ -356,14 +356,14 @@ export class CalendarTemplateService {
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s-]/g, '') // Удаляем спецсимволы
       .replace(/\s+/g, '_') // Пробелы → подчеркивания
-      .toLowerCase();
+      .toLowerCase()
   }
 
   /**
    * Получить шаблон по типу
    */
   public getTemplateByType(type: CalendarTemplateType): ICalendarTemplate | undefined {
-    return this.getAllTemplates().find(t => t.type === type);
+    return this.getAllTemplates().find(t => t.type === type)
   }
 
   /**
@@ -371,9 +371,9 @@ export class CalendarTemplateService {
    * V2.0: Использует новый формат ID.
    */
   public createCustomCalendar(name: string): IWorkCalendar {
-    const now = new Date();
-    const calendarId = this.generateCalendarIdWithName(name);
-    
+    const now = new Date()
+    const calendarId = this.generateCalendarIdWithName(name)
+
     return {
       id: calendarId,
       name,
@@ -386,54 +386,54 @@ export class CalendarTemplateService {
         { dayOfWeek: 3, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
         { dayOfWeek: 4, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
         { dayOfWeek: 5, isWorking: true, workingHours: { start: '09:00', end: '18:00' } },
-        { dayOfWeek: 6, isWorking: false }
+        { dayOfWeek: 6, isWorking: false },
       ],
       exceptions: [],
       hoursPerDay: 8,
       workingDaysPerWeek: 5,
       isBase: false,
       createdAt: now,
-      updatedAt: now
-    };
+      updatedAt: now,
+    }
   }
 
   /**
    * Получить базовые (нельзя удалить) календари
    */
   public getBaseCalendars(): IWorkCalendar[] {
-    const standardTemplate = this.getStandardTemplate();
-    const nightTemplate = this.getNightShiftTemplate();
-    const twentyFourTemplate = this.getTwentyFourSevenTemplate();
+    const standardTemplate = this.getStandardTemplate()
+    const nightTemplate = this.getNightShiftTemplate()
+    const twentyFourTemplate = this.getTwentyFourSevenTemplate()
 
     return [
       { ...this.createFromTemplate(standardTemplate), isBase: true, id: 'standard' },
       { ...this.createFromTemplate(nightTemplate), isBase: true, id: 'night_shift' },
-      { ...this.createFromTemplate(twentyFourTemplate), isBase: true, id: '24_7' }
-    ];
+      { ...this.createFromTemplate(twentyFourTemplate), isBase: true, id: '24_7' },
+    ]
   }
 
   /**
    * Генерация уникального ID календаря.
    * V2.0: Использует UUID вместо timestamp для стабильности и совместимости с Java backend.
-   * 
+   *
    * Формат: custom_<UUID>_<sanitized_name>
    * Где UUID - это первые 8 символов UUID v4
    */
   private _generateCalendarId(): string {
     // Генерация UUID v4 (упрощенная версия)
-    const uuid = this.generateUUID().substring(0, 8);
-    return `custom_${uuid}_temp`; // Временное имя, будет заменено при сохранении
+    const uuid = this.generateUUID().substring(0, 8)
+    return `custom_${uuid}_temp` // Временное имя, будет заменено при сохранении
   }
-  
+
   /**
    * Генерация UUID v4 (упрощенная версия для frontend).
    */
   private generateUUID(): string {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-      const r = Math.random() * 16 | 0;
-      const v = c === 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+      const r = Math.random() * 16 | 0
+      const v = c === 'x' ? r : (r & 0x3 | 0x8)
+      return v.toString(16)
+    })
   }
 
   /**
@@ -442,81 +442,81 @@ export class CalendarTemplateService {
   public isWorkingDay(calendar: IWorkCalendar, date: Date): boolean {
     // Сначала проверяем исключения (ex.date в CalendarException — строка ISO)
     const exception = calendar.exceptions.find(ex => {
-      const exDate = new Date(ex.date);
+      const exDate = new Date(ex.date)
       return exDate.getDate() === date.getDate() &&
         exDate.getMonth() === date.getMonth() &&
-        exDate.getFullYear() === date.getFullYear();
-    });
+        exDate.getFullYear() === date.getFullYear()
+    })
 
     if (exception) {
-      return exception.type === 'working';
+      return exception.type === 'working'
     }
 
     // Если нет исключения, смотрим базовый график
-    const dayOfWeek = date.getDay();
-    const workingDay = calendar.workingDays.find(wd => wd.dayOfWeek === dayOfWeek);
-    
-    return workingDay?.isWorking ?? false;
+    const dayOfWeek = date.getDay()
+    const workingDay = calendar.workingDays.find(wd => wd.dayOfWeek === dayOfWeek)
+
+    return workingDay?.isWorking ?? false
   }
 
   /**
    * Получить рабочие часы для конкретной даты
    */
   public getWorkingHours(calendar: IWorkCalendar, date: Date): number {
-    if (!this.isWorkingDay(calendar, date)) return 0;
+    if (!this.isWorkingDay(calendar, date)) return 0
 
     // Проверяем исключения
     const exception = calendar.exceptions.find(ex => {
-      const exDate = new Date(ex.date);
+      const exDate = new Date(ex.date)
       return exDate.getDate() === date.getDate() &&
         exDate.getMonth() === date.getMonth() &&
-        exDate.getFullYear() === date.getFullYear();
-    });
+        exDate.getFullYear() === date.getFullYear()
+    })
 
     if (exception?.startTime != null && exception?.endTime != null) {
-      return this.calculateHoursBetween(exception.startTime, exception.endTime);
+      return this.calculateHoursBetween(exception.startTime, exception.endTime)
     }
 
     // Базовый график
-    const dayOfWeek = date.getDay();
-    const workingDay = calendar.workingDays.find(wd => wd.dayOfWeek === dayOfWeek);
-    
+    const dayOfWeek = date.getDay()
+    const workingDay = calendar.workingDays.find(wd => wd.dayOfWeek === dayOfWeek)
+
     if (workingDay?.workingHours) {
       const hours = this.calculateHoursBetween(
-        workingDay.workingHours.start, 
-        workingDay.workingHours.end
-      );
-      
+        workingDay.workingHours.start,
+        workingDay.workingHours.end,
+      )
+
       // Вычитаем перерыв, если есть
       if (workingDay.workingHours.breakStart && workingDay.workingHours.breakEnd) {
         const breakHours = this.calculateHoursBetween(
           workingDay.workingHours.breakStart,
-          workingDay.workingHours.breakEnd
-        );
-        return hours - breakHours;
+          workingDay.workingHours.breakEnd,
+        )
+        return hours - breakHours
       }
-      
-      return hours;
+
+      return hours
     }
 
-    return calendar.hoursPerDay; // Fallback
+    return calendar.hoursPerDay // Fallback
   }
 
   /**
    * Вспомогательный метод: расчет часов между двумя временными метками
    */
   private calculateHoursBetween(start: string, end: string): number {
-    const [startH, startM] = start.split(':').map(Number);
-    const [endH, endM] = end.split(':').map(Number);
-    
-    let hours = endH - startH;
-    let minutes = endM - startM;
-    
+    const [startH, startM] = start.split(':').map(Number)
+    const [endH, endM] = end.split(':').map(Number)
+
+    let hours = endH - startH
+    const minutes = endM - startM
+
     // Обработка перехода через полночь (ночная смена)
     if (hours < 0) {
-      hours += 24;
+      hours += 24
     }
-    
-    return hours + minutes / 60;
+
+    return hours + minutes / 60
   }
 }

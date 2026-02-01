@@ -1,13 +1,13 @@
-import React from 'react';
-import { ViewHeaderProps } from './ViewHeaderTypes';
-import { ContextHelp } from '@/components/ui/context-help';
-import { cn } from '@/lib/utils';
+import React from 'react'
+import { ViewHeaderProps } from './ViewHeaderTypes'
+import { ContextHelp } from '@/components/ui/context-help'
+import { cn } from '@/lib/utils'
 
 /**
  * ViewHeader - Tier 1: Title Bar
- * 
+ *
  * Отображает заголовок с поддержкой Dynamic Accent System.
- * 
+ *
  * @version 8.14
  */
 export const ViewHeader: React.FC<ViewHeaderProps> = ({
@@ -15,13 +15,13 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({
   description,
   icon,
   help,
-  className = ''
+  className = '',
 }) => {
   return (
-    <div 
+    <div
       className={cn(
-        "view-header-tier1 bg-white/95 backdrop-blur-md border-b border-[hsl(var(--primary-border)/0.5)] px-6 py-3 flex-shrink-0 relative overflow-hidden",
-        className
+        'view-header-tier1 bg-white/95 backdrop-blur-md border-b border-[hsl(var(--primary-border)/0.5)] px-6 py-3 flex-shrink-0 relative overflow-hidden',
+        className,
       )}
       role="banner"
       aria-label={title}
@@ -52,15 +52,15 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({
         {/* Правая секция: Контекстная помощь */}
         {help && (
           <div className="flex-shrink-0 mt-1">
-            <ContextHelp 
-              title={help.title} 
-              content={help.content} 
-              side="bottom" 
+            <ContextHelp
+              title={help.title}
+              content={help.content}
+              side="bottom"
             />
           </div>
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { LastProjectService } from '@/services/LastProjectService';
-import { useFileOperations } from './useFileOperations';
-import { getElectronAPI } from '@/utils/electronAPI';
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { LastProjectService } from '@/services/LastProjectService'
+import { useFileOperations } from './useFileOperations'
+import { getElectronAPI } from '@/utils/electronAPI'
 
 export type LoadErrorType = 'FILE_NOT_FOUND' | 'FILE_MOVED' | 'LOAD_FAILED' | 'API_ERROR' | 'CREATE_FAILED' | null;
 
@@ -15,144 +15,144 @@ interface LoaderState {
 /**
  * Хук для автоматической загрузки последнего проекта или создания нового при старте.
  * Включает улучшенную обработку ошибок и уведомления пользователя.
- * 
+ *
  * Логика:
  * 1. Если есть MRU (последний открытый проект) → загружаем его
  * 2. Если MRU пуст → автоматически создаём новый проект в Java-ядре
- * 
+ *
  * Принцип SRP: отвечает только за инициализацию проекта при старте.
  */
 export const useLastProjectLoader = () => {
-  const { loadProjectFromPath, createNewProject } = useFileOperations();
+  const { loadProjectFromPath, createNewProject } = useFileOperations()
   const [state, setState] = useState<LoaderState>({
     isLoading: false,
     errorType: null,
     errorMessage: null,
-    filePath: null
-  });
-  const hasAttemptedRef = useRef(false);
-  
+    filePath: null,
+  })
+  const hasAttemptedRef = useRef(false)
+
   const showErrorNotification = useCallback(async (errorType: LoadErrorType, filePath: string) => {
-    const api = getElectronAPI();
-    if (!api?.showMessageBox) return;
+    const api = getElectronAPI()
+    if (!api?.showMessageBox) return
 
     const messages: Record<Exclude<LoadErrorType, null>, string> = {
       'FILE_NOT_FOUND': `Файл последнего проекта не найден:\n${filePath}\n\nФайл мог быть удален или перемещен.`,
       'FILE_MOVED': `Файл проекта был перемещен или переименован:\n${filePath}`,
       'LOAD_FAILED': `Не удалось загрузить проект:\n${filePath}\n\nФайл может быть поврежден.`,
-      'API_ERROR': `Ошибка при загрузке проекта.\nПроверьте, что Java-бэкенд запущен.`,
-      'CREATE_FAILED': `Не удалось создать новый проект.\nПроверьте, что Java-бэкенд запущен.`
-    };
+      'API_ERROR': 'Ошибка при загрузке проекта.\nПроверьте, что Java-бэкенд запущен.',
+      'CREATE_FAILED': 'Не удалось создать новый проект.\nПроверьте, что Java-бэкенд запущен.',
+    }
 
     if (errorType) {
       await api.showMessageBox({
         type: 'warning',
         title: 'Автозагрузка проекта',
-        message: messages[errorType]
-      });
+        message: messages[errorType],
+      })
     }
-  }, []);
+  }, [])
 
   const checkFileExists = useCallback(async (filePath: string): Promise<boolean> => {
-    const api = getElectronAPI();
+    const api = getElectronAPI()
     if (!api?.fileExists) {
-      return true; // Если метод недоступен, пропускаем проверку
+      return true // Если метод недоступен, пропускаем проверку
     }
 
     try {
-      return await api.fileExists(filePath);
+      return await api.fileExists(filePath)
     } catch (error) {
-      console.warn('[useLastProjectLoader] fileExists check failed:', error);
-      return true; // При ошибке проверки, пробуем загрузить
+      console.warn('[useLastProjectLoader] fileExists check failed:', error)
+      return true // При ошибке проверки, пробуем загрузить
     }
-  }, []);
-  
+  }, [])
+
   useEffect(() => {
-    if (hasAttemptedRef.current) return;
-    hasAttemptedRef.current = true;
-    
+    if (hasAttemptedRef.current) return
+    hasAttemptedRef.current = true
+
     const initializeProject = async () => {
-      const lastProjectService = LastProjectService.getInstance();
-      const lastProjectPath = lastProjectService.getLastProject();
-      
+      const lastProjectService = LastProjectService.getInstance()
+      const lastProjectPath = lastProjectService.getLastProject()
+
       // Если нет MRU — создаём новый проект в Java-ядре
       if (!lastProjectPath) {
-        console.log('[useLastProjectLoader] No last project found, creating new project...');
-        await createNewProjectSilently();
-        return;
+        console.log('[useLastProjectLoader] No last project found, creating new project...')
+        await createNewProjectSilently()
+        return
       }
-      
-      console.log('[useLastProjectLoader] Loading:', lastProjectPath);
-      setState(s => ({ ...s, isLoading: true, filePath: lastProjectPath }));
-      
+
+      console.log('[useLastProjectLoader] Loading:', lastProjectPath)
+      setState(s => ({ ...s, isLoading: true, filePath: lastProjectPath }))
+
       // Проверяем существование файла
-      const exists = await checkFileExists(lastProjectPath);
+      const exists = await checkFileExists(lastProjectPath)
       if (!exists) {
-        console.warn('[useLastProjectLoader] File not found:', lastProjectPath);
-        lastProjectService.clearLastProject();
-        setState(s => ({ ...s, isLoading: false, errorType: 'FILE_NOT_FOUND', errorMessage: 'Файл не найден' }));
-        await showErrorNotification('FILE_NOT_FOUND', lastProjectPath);
+        console.warn('[useLastProjectLoader] File not found:', lastProjectPath)
+        lastProjectService.clearLastProject()
+        setState(s => ({ ...s, isLoading: false, errorType: 'FILE_NOT_FOUND', errorMessage: 'Файл не найден' }))
+        await showErrorNotification('FILE_NOT_FOUND', lastProjectPath)
         // После уведомления создаём новый проект
-        await createNewProjectSilently();
-        return;
+        await createNewProjectSilently()
+        return
       }
-      
+
       try {
-        const success = await loadProjectFromPath(lastProjectPath);
-        
+        const success = await loadProjectFromPath(lastProjectPath)
+
         if (success) {
-          console.log('[useLastProjectLoader] ✅ Loaded successfully');
-          setState(s => ({ ...s, isLoading: false, errorType: null, errorMessage: null }));
+          console.log('[useLastProjectLoader] ✅ Loaded successfully')
+          setState(s => ({ ...s, isLoading: false, errorType: null, errorMessage: null }))
         } else {
-          console.warn('[useLastProjectLoader] ⚠️ Load returned false');
-          lastProjectService.clearLastProject();
-          setState(s => ({ ...s, isLoading: false, errorType: 'LOAD_FAILED', errorMessage: 'Ошибка загрузки' }));
-          await showErrorNotification('LOAD_FAILED', lastProjectPath);
+          console.warn('[useLastProjectLoader] ⚠️ Load returned false')
+          lastProjectService.clearLastProject()
+          setState(s => ({ ...s, isLoading: false, errorType: 'LOAD_FAILED', errorMessage: 'Ошибка загрузки' }))
+          await showErrorNotification('LOAD_FAILED', lastProjectPath)
           // После ошибки загрузки создаём новый проект
-          await createNewProjectSilently();
+          await createNewProjectSilently()
         }
       } catch (error) {
-        console.error('[useLastProjectLoader] ❌ Error:', error);
-        lastProjectService.clearLastProject();
-        const message = (error as Error).message;
-        const errorType: LoadErrorType = message.includes('API') ? 'API_ERROR' : 'LOAD_FAILED';
-        setState(s => ({ ...s, isLoading: false, errorType, errorMessage: message }));
-        await showErrorNotification(errorType, lastProjectPath);
+        console.error('[useLastProjectLoader] ❌ Error:', error)
+        lastProjectService.clearLastProject()
+        const message = (error as Error).message
+        const errorType: LoadErrorType = message.includes('API') ? 'API_ERROR' : 'LOAD_FAILED'
+        setState(s => ({ ...s, isLoading: false, errorType, errorMessage: message }))
+        await showErrorNotification(errorType, lastProjectPath)
         // После ошибки создаём новый проект (если не API ошибка)
         if (errorType !== 'API_ERROR') {
-          await createNewProjectSilently();
+          await createNewProjectSilently()
         }
       }
-    };
-    
+    }
+
     /**
      * Создаёт новый проект без показа диалога.
      * Используется для автоматической инициализации при старте.
      */
     const createNewProjectSilently = async () => {
       try {
-        console.log('[useLastProjectLoader] Creating new project silently...');
-        const success = await createNewProject(true); // silent mode
+        console.log('[useLastProjectLoader] Creating new project silently...')
+        const success = await createNewProject(true) // silent mode
         if (success) {
-          console.log('[useLastProjectLoader] ✅ New project created');
+          console.log('[useLastProjectLoader] ✅ New project created')
         } else {
-          console.warn('[useLastProjectLoader] ⚠️ New project creation returned false');
-          setState(s => ({ ...s, errorType: 'CREATE_FAILED', errorMessage: 'Не удалось создать проект' }));
+          console.warn('[useLastProjectLoader] ⚠️ New project creation returned false')
+          setState(s => ({ ...s, errorType: 'CREATE_FAILED', errorMessage: 'Не удалось создать проект' }))
         }
       } catch (error) {
-        console.error('[useLastProjectLoader] ❌ Failed to create new project:', error);
-        setState(s => ({ ...s, errorType: 'CREATE_FAILED', errorMessage: 'Не удалось создать проект' }));
+        console.error('[useLastProjectLoader] ❌ Failed to create new project:', error)
+        setState(s => ({ ...s, errorType: 'CREATE_FAILED', errorMessage: 'Не удалось создать проект' }))
       }
-    };
-    
-    const timeoutId = setTimeout(initializeProject, 500);
-    return () => clearTimeout(timeoutId);
-  }, [loadProjectFromPath, createNewProject, checkFileExists, showErrorNotification]);
-  
-  return { 
-    isLoading: state.isLoading, 
+    }
+
+    const timeoutId = setTimeout(initializeProject, 500)
+    return () => clearTimeout(timeoutId)
+  }, [loadProjectFromPath, createNewProject, checkFileExists, showErrorNotification])
+
+  return {
+    isLoading: state.isLoading,
     loadError: state.errorMessage,
-    errorType: state.errorType 
-  };
-};
+    errorType: state.errorType,
+  }
+}
 

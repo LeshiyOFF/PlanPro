@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface ErrorAlertProps {
   error: string | null;
@@ -16,9 +16,9 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
   onDismiss,
   onRetry,
   type = 'error',
-  title
+  title,
 }) => {
-  if (!error) return null;
+  if (!error) return null
 
   const getStyles = () => {
     switch (type) {
@@ -27,26 +27,26 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
           backgroundColor: '#fffbeb',
           border: '1px solid #fbbf24',
           color: '#92400e',
-          icon: '⚠️'
-        };
+          icon: '⚠️',
+        }
       case 'info':
         return {
           backgroundColor: '#eff6ff',
           border: '1px solid hsl(var(--primary))',
           color: '#1e40af',
-          icon: 'ℹ️'
-        };
+          icon: 'ℹ️',
+        }
       default:
         return {
           backgroundColor: '#fef2f2',
           border: '1px solid #ef4444',
           color: '#991b1b',
-          icon: '❌'
-        };
+          icon: '❌',
+        }
     }
-  };
+  }
 
-  const styles = getStyles();
+  const styles = getStyles()
 
   return (
     <div style={{
@@ -58,33 +58,33 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
       display: 'flex',
       alignItems: 'flex-start',
       gap: '12px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
     }}>
       <div style={{ fontSize: '20px', flexShrink: 0 }}>
         {styles.icon}
       </div>
-      
+
       <div style={{ flex: 1 }}>
         {title && (
           <h4 style={{
             margin: '0 0 8px 0',
             color: styles.color,
             fontSize: '16px',
-            fontWeight: '600'
+            fontWeight: '600',
           }}>
             {title}
           </h4>
         )}
-        
+
         <p style={{
           margin: '0 0 12px 0',
           color: styles.color,
           fontSize: '14px',
-          lineHeight: '1.5'
+          lineHeight: '1.5',
         }}>
           {error}
         </p>
-        
+
         <div style={{ display: 'flex', gap: '8px' }}>
           {onRetry && (
             <button
@@ -96,13 +96,13 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
                 border: 'none',
                 borderRadius: '4px',
                 fontSize: '12px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Retry
             </button>
           )}
-          
+
           {onDismiss && (
             <button
               onClick={onDismiss}
@@ -113,7 +113,7 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
                 border: `1px solid ${styles.color}`,
                 borderRadius: '4px',
                 fontSize: '12px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Dismiss
@@ -122,6 +122,6 @@ export const ErrorAlert: React.FC<ErrorAlertProps> = ({
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 

@@ -18,7 +18,7 @@ import { TypedDialogProvider, initializeTypedDialogs } from '@/components/dialog
 import { HotkeyProvider } from '@/components/hotkey'
 
 // Инициализация типизированных диалогов
-initializeTypedDialogs();
+initializeTypedDialogs()
 
 import { LastProjectLoader } from '@/components/startup/LastProjectLoader'
 import { UnsavedChangesGuard } from '@/components/guards/UnsavedChangesGuard'
@@ -31,7 +31,7 @@ import { ProjectProvider } from '@/providers/ProjectProvider'
  * Главный компонент приложения
  */
 const App: React.FC = () => {
-  const { handleGlobalError } = useAppInitialization();
+  const { handleGlobalError } = useAppInitialization()
 
   /**
    * Обработчик изменения представления
@@ -44,46 +44,46 @@ const App: React.FC = () => {
     <ThemeProvider defaultTheme="light" storageKey="projectlibre-ui-theme">
       <I18nProvider>
         <AnimationProvider>
-        <SentryProvider user={{ username: 'user' }} tags={{ component: 'App' }}>
-          <ReactProfilerProvider config={{ enabled: process.env.NODE_ENV === 'development' }}>
-            <ErrorBoundary
-              onError={handleGlobalError}
-              fallback={<GeneralErrorFallback error={new Error()} resetError={() => window.location.reload()} />}
-            >
-              <AppStoreProvider>
-                <ErrorBoundary fallback={(error: Error, reset: () => void) => <StoreErrorFallback error={error} resetError={reset} />}>
-                  <EventFlowProvider>
-                    <NavigationProvider>
-                      <ActionProvider>
-                        <ContextMenuProvider>
-                          <TypedDialogProvider>
-                            <DialogProvider>
-                              <StartupDialogLauncher />
-                              <HotkeyProvider enabled={true}>
-                                <TooltipProvider>
-                                  <ProjectProvider>
-                                    <LastProjectLoader />
-                                    <UnsavedChangesGuard />
-                                    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                      <NavigationRouter onViewChange={handleViewChange} />
-                                    </div>
-                                    <DialogManager>
-                                      <Toaster />
-                                    </DialogManager>
-                                  </ProjectProvider>
-                                </TooltipProvider>
-                              </HotkeyProvider>
-                            </DialogProvider>
-                          </TypedDialogProvider>
-                        </ContextMenuProvider>
-                      </ActionProvider>
-                    </NavigationProvider>
-                  </EventFlowProvider>
-                </ErrorBoundary>
-              </AppStoreProvider>
-            </ErrorBoundary>
-          </ReactProfilerProvider>
-        </SentryProvider>
+          <SentryProvider user={{ username: 'user' }} tags={{ component: 'App' }}>
+            <ReactProfilerProvider config={{ enabled: process.env.NODE_ENV === 'development' }}>
+              <ErrorBoundary
+                onError={handleGlobalError}
+                fallback={<GeneralErrorFallback error={new Error()} resetError={() => window.location.reload()} />}
+              >
+                <AppStoreProvider>
+                  <ErrorBoundary fallback={(error: Error, reset: () => void) => <StoreErrorFallback error={error} resetError={reset} />}>
+                    <EventFlowProvider>
+                      <NavigationProvider>
+                        <ActionProvider>
+                          <ContextMenuProvider>
+                            <TypedDialogProvider>
+                              <DialogProvider>
+                                <StartupDialogLauncher />
+                                <HotkeyProvider enabled={true}>
+                                  <TooltipProvider>
+                                    <ProjectProvider>
+                                      <LastProjectLoader />
+                                      <UnsavedChangesGuard />
+                                      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                        <NavigationRouter onViewChange={handleViewChange} />
+                                      </div>
+                                      <DialogManager>
+                                        <Toaster />
+                                      </DialogManager>
+                                    </ProjectProvider>
+                                  </TooltipProvider>
+                                </HotkeyProvider>
+                              </DialogProvider>
+                            </TypedDialogProvider>
+                          </ContextMenuProvider>
+                        </ActionProvider>
+                      </NavigationProvider>
+                    </EventFlowProvider>
+                  </ErrorBoundary>
+                </AppStoreProvider>
+              </ErrorBoundary>
+            </ReactProfilerProvider>
+          </SentryProvider>
         </AnimationProvider>
       </I18nProvider>
     </ThemeProvider>

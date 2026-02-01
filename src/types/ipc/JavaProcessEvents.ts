@@ -3,7 +3,7 @@
  * Заменяет использование `any` в callback функциях событий.
  */
 
-import type { JsonObject } from '../json-types';
+import type { JsonObject } from '../json-types'
 
 /**
  * Базовый интерфейс события Java процесса

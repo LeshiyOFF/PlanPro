@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogContent,
@@ -7,15 +7,15 @@ import {
   DialogTitle,
   DialogFooter,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
-import { IGanttPreferences } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
+import { IGanttPreferences } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces'
 
 interface GanttSettingsDialogProps {
   isOpen: boolean;
@@ -23,13 +23,13 @@ interface GanttSettingsDialogProps {
 }
 
 export const GanttSettingsDialog: React.FC<GanttSettingsDialogProps> = ({ isOpen, onClose }) => {
-  const { t } = useTranslation();
-  const { preferences, updateGanttPreferences } = useUserPreferences();
-  const ganttPrefs = preferences.gantt;
+  const { t } = useTranslation()
+  const { preferences, updateGanttPreferences } = useUserPreferences()
+  const ganttPrefs = preferences.gantt
 
   const handleUpdate = (updates: Partial<IGanttPreferences>) => {
-    updateGanttPreferences(updates);
-  };
+    updateGanttPreferences(updates)
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -125,5 +125,5 @@ export const GanttSettingsDialog: React.FC<GanttSettingsDialogProps> = ({ isOpen
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

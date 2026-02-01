@@ -1,6 +1,6 @@
-import React from 'react';
-import { ContextMenuProvider } from './providers/ContextMenuProvider';
-import { ContextMenuTestPage } from './pages/ContextMenuTestPage';
+import React from 'react'
+import { ContextMenuProvider } from './providers/ContextMenuProvider'
+import { ContextMenuTestPage } from './pages/ContextMenuTestPage'
 
 /**
  * Полный пример использования Context Menu системы
@@ -10,6 +10,6 @@ export const ContextMenuExample: React.FC = () => {
     <ContextMenuProvider>
       <ContextMenuTestPage />
     </ContextMenuProvider>
-  );
-};
+  )
+}
 

@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
-import { useProjectStore } from '@/store/projectStore';
-import { useFileNew } from './useFileNew';
-import { useFileOpen } from './useFileOpen';
-import { useFileSave } from './useFileSave';
+import { useCallback } from 'react'
+import { useProjectStore } from '@/store/projectStore'
+import { useFileNew } from './useFileNew'
+import { useFileOpen } from './useFileOpen'
+import { useFileSave } from './useFileSave'
 
 /**
  * Facade for file operations (Open, Save, Save As, New).
@@ -10,20 +10,20 @@ import { useFileSave } from './useFileSave';
  * Delegates "Save" without path to "Save As" for consistent UX.
  */
 export const useFileOperations = () => {
-  const { currentFilePath } = useProjectStore();
-  const newOps = useFileNew();
-  const openOps = useFileOpen();
-  const saveOps = useFileSave();
+  const { currentFilePath } = useProjectStore()
+  const newOps = useFileNew()
+  const openOps = useFileOpen()
+  const saveOps = useFileSave()
 
   const saveProject = useCallback(async (): Promise<void> => {
     if (!currentFilePath) {
-      return saveOps.saveProjectAs();
+      return saveOps.saveProjectAs()
     }
-    return saveOps.saveProject();
-  }, [currentFilePath, saveOps.saveProject, saveOps.saveProjectAs]);
+    return saveOps.saveProject()
+  }, [currentFilePath, saveOps.saveProject, saveOps.saveProjectAs])
 
   const isProcessing =
-    newOps.isProcessing || openOps.isProcessing || saveOps.isProcessing;
+    newOps.isProcessing || openOps.isProcessing || saveOps.isProcessing
 
   return {
     createNewProject: newOps.createNewProject,
@@ -32,6 +32,6 @@ export const useFileOperations = () => {
     saveProjectAs: saveOps.saveProjectAs,
     loadProjectFromPath: openOps.loadProjectFromPath,
     currentFilePath,
-    isProcessing
-  };
-};
+    isProcessing,
+  }
+}

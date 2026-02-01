@@ -1,6 +1,6 @@
-import React from 'react';
-import { Task, Project } from '@/hooks/useJavaApi';
-import { Resource } from '@/hooks/useJavaApi';
+import React from 'react'
+import { Task, Project } from '@/hooks/useJavaApi'
+import { Resource } from '@/hooks/useJavaApi'
 
 interface TaskFormProps {
   task: Task | null;
@@ -33,7 +33,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   onFormChange,
   onSubmit,
   onCancel,
-  isLoading
+  isLoading,
 }) => {
   return (
     <div style={{
@@ -46,17 +46,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
     }}>
       <div style={{
         backgroundColor: 'white',
         padding: '30px',
         borderRadius: '10px',
         minWidth: '500px',
-        maxWidth: '80%'
+        maxWidth: '80%',
       }}>
         <h3>{task ? 'Edit Task' : 'Create New Task'}</h3>
-        
+
         <form onSubmit={onSubmit}>
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -66,17 +66,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               type="text"
               value={formData.name}
               onChange={(e) => onFormChange({ ...formData, name: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
-                borderRadius: '3px'
+                borderRadius: '3px',
               }}
               placeholder="Enter task name"
               required
             />
           </div>
-          
+
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
               Description
@@ -84,17 +84,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             <textarea
               value={formData.description}
               onChange={(e) => onFormChange({ ...formData, description: e.target.value })}
-              style={{ 
-                width: '100%', 
+              style={{
+                width: '100%',
                 padding: '8px',
                 border: '1px solid #ddd',
                 borderRadius: '3px',
-                minHeight: '80px'
+                minHeight: '80px',
               }}
               placeholder="Enter task description"
             />
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -104,15 +104,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => onFormChange({ ...formData, startDate: e.target.value })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
-            
+
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                 Duration (days)
@@ -122,16 +122,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 min="1"
                 value={formData.duration}
                 onChange={(e) => onFormChange({ ...formData, duration: parseInt(e.target.value) || 1 })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
@@ -140,11 +140,11 @@ export const TaskForm: React.FC<TaskFormProps> = ({
               <select
                 value={formData.status}
                 onChange={(e) => onFormChange({ ...formData, status: e.target.value })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               >
                 <option value="not_started">Not Started</option>
@@ -153,7 +153,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 <option value="blocked">Blocked</option>
               </select>
             </div>
-            
+
             <div style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
                 Progress (%)
@@ -164,16 +164,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 max="100"
                 value={formData.progress}
                 onChange={(e) => onFormChange({ ...formData, progress: parseInt(e.target.value) || 0 })}
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   padding: '8px',
                   border: '1px solid #ddd',
-                  borderRadius: '3px'
+                  borderRadius: '3px',
                 }}
               />
             </div>
           </div>
-          
+
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
             <button
               type="button"
@@ -184,7 +184,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 color: 'white',
                 border: 'none',
                 borderRadius: '5px',
-                cursor: 'pointer'
+                cursor: 'pointer',
               }}
             >
               Cancel
@@ -199,7 +199,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 border: 'none',
                 borderRadius: '5px',
                 cursor: 'pointer',
-                opacity: (isLoading || !formData.name.trim() || !selectedProject) ? 0.5 : 1
+                opacity: (isLoading || !formData.name.trim() || !selectedProject) ? 0.5 : 1,
               }}
             >
               {isLoading ? 'Saving...' : (task ? 'Update' : 'Create')}
@@ -208,6 +208,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 

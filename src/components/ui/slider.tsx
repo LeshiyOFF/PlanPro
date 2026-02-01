@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '@/utils/cn';
+import React from 'react'
+import { cn } from '@/utils/cn'
 
 /**
  * Компонент Slider
@@ -27,17 +27,17 @@ export const Slider: React.FC<SliderProps> = ({
   onValueCommit,
   className,
   disabled = false,
-  id
+  id,
 }) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (disabled) return;
-    const next = [parseInt(event.target.value, 10)];
-    onValueChange?.(next);
-  };
+    if (disabled) return
+    const next = [parseInt(event.target.value, 10)]
+    onValueChange?.(next)
+  }
 
   const handleCommit = () => {
-    if (!disabled && value.length > 0) onValueCommit?.(value);
-  };
+    if (!disabled && value.length > 0) onValueCommit?.(value)
+  }
 
   return (
     <div id={id} className={cn('relative flex w-full touch-none select-none items-center', className)}>
@@ -53,10 +53,10 @@ export const Slider: React.FC<SliderProps> = ({
         disabled={disabled}
         className={cn(
           'absolute h-2 w-full appearance-none rounded-lg bg-background outline-none cursor-pointer',
-          'disabled:cursor-not-allowed disabled:opacity-50'
+          'disabled:cursor-not-allowed disabled:opacity-50',
         )}
       />
     </div>
-  );
-};
+  )
+}
 

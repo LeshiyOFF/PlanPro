@@ -1,10 +1,10 @@
-import React from 'react';
-import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React from 'react'
+import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export interface TaskDetails {
   id: string;
@@ -78,29 +78,29 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in-progress': return 'bg-slate-100 text-slate-900';
-      case 'delayed': return 'bg-red-100 text-red-800';
-      case 'not-started': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'completed': return 'bg-green-100 text-green-800'
+      case 'in-progress': return 'bg-slate-100 text-slate-900'
+      case 'delayed': return 'bg-red-100 text-red-800'
+      case 'not-started': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'normal': return 'bg-slate-100 text-slate-900';
-      case 'low': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'critical': return 'bg-red-100 text-red-800'
+      case 'high': return 'bg-orange-100 text-orange-800'
+      case 'normal': return 'bg-slate-100 text-slate-900'
+      case 'low': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
-  const totalWork = task?.assignments.reduce((sum, a) => sum + a.work, 0) || 0;
-  const totalCost = task?.assignments.reduce((sum, a) => sum + a.cost, 0) || 0;
-  const remainingWork = task?.assignments.reduce((sum, a) => sum + a.remainingWork, 0) || 0;
+  const totalWork = task?.assignments.reduce((sum, a) => sum + a.work, 0) || 0
+  const totalCost = task?.assignments.reduce((sum, a) => sum + a.cost, 0) || 0
+  const remainingWork = task?.assignments.reduce((sum, a) => sum + a.remainingWork, 0) || 0
 
-  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props
 
   if (!task) {
     return (
@@ -125,7 +125,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
           </div>
         </div>
       </BaseDialog>
-    );
+    )
   }
 
   return (
@@ -244,7 +244,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                       <div key={index} className="flex justify-between">
                         <span className="font-medium">{field.name}:</span>
                         <span>
-                          {typeof field.value === 'boolean' 
+                          {typeof field.value === 'boolean'
                             ? field.value ? 'Yes' : 'No'
                             : String(field.value)
                           }
@@ -410,7 +410,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                         </div>
                       </div>
                       <div className="mt-2">
-                        <Progress 
+                        <Progress
                           value={((assignment.work - assignment.remainingWork) / assignment.work) * 100}
                           className="h-2"
                         />
@@ -482,6 +482,6 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
         </Tabs>
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

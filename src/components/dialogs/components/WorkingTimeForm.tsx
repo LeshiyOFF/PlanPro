@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
 /**
  * Типизированные props для формы рабочего времени
@@ -12,26 +12,26 @@ export interface TypedWorkingTimeFormProps {
 /**
  * Компонент формы для редактирования рабочего времени
  */
-export const WorkingTimeFormBase: React.FC<TypedWorkingTimeFormProps> = ({ 
-  workingTime, 
-  onChange 
+export const WorkingTimeFormBase: React.FC<TypedWorkingTimeFormProps> = ({
+  workingTime,
+  onChange,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
-  const daysOfWeek: number[] = [1, 2, 3, 4, 5, 6, 0];
+  const daysOfWeek: number[] = [1, 2, 3, 4, 5, 6, 0]
 
   return (
     <div className="space-y-6">
       {daysOfWeek.map((day) => {
-        const dayData = workingTime[`day${day}`] || { 
-          startTime: '', 
-          endTime: '', 
-          isWorkingDay: false 
-        };
-        
-        const isWorkingDayLabel = dayData.isWorkingDay 
-          ? t('calendar.working_day', { defaultValue: 'Рабочий' }) 
-          : t('calendar.weekend', { defaultValue: 'Выходной' });
+        const dayData = workingTime[`day${day}`] || {
+          startTime: '',
+          endTime: '',
+          isWorkingDay: false,
+        }
+
+        const isWorkingDayLabel = dayData.isWorkingDay
+          ? t('calendar.working_day', { defaultValue: 'Рабочий' })
+          : t('calendar.weekend', { defaultValue: 'Выходной' })
 
         return (
           <div key={day} className="space-y-4 p-4 border rounded-lg">
@@ -48,26 +48,26 @@ export const WorkingTimeFormBase: React.FC<TypedWorkingTimeFormProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-xs text-slate-500">{t('calendar.start_time')}</label>
-                <input 
-                  type="time" 
-                  value={dayData.startTime} 
+                <input
+                  type="time"
+                  value={dayData.startTime}
                   onChange={(e) => onChange(day, 'start', e.target.value)}
                   className="w-full p-2 border rounded"
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-xs text-slate-500">{t('calendar.end_time')}</label>
-                <input 
-                  type="time" 
-                  value={dayData.endTime} 
+                <input
+                  type="time"
+                  value={dayData.endTime}
                   onChange={(e) => onChange(day, 'end', e.target.value)}
                   className="w-full p-2 border rounded"
                 />
               </div>
             </div>
           </div>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}

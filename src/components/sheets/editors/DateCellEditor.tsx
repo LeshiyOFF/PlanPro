@@ -1,16 +1,16 @@
-import React, { KeyboardEvent, useEffect, useRef } from 'react';
-import { ICellEditorProps } from './ICellEditorProps';
-import { format, parse } from 'date-fns';
-import { CellValue } from '@/types/sheet/CellValueTypes';
+import React, { KeyboardEvent, useEffect, useRef } from 'react'
+import { ICellEditorProps } from './ICellEditorProps'
+import { format, parse } from 'date-fns'
+import { CellValue } from '@/types/sheet/CellValueTypes'
 
 /**
  * Преобразует значение в формат для input type="date"
  */
 function getInputValue(val: CellValue): string {
-  if (!val) return '';
-  const date = new Date(val as string | Date);
-  if (isNaN(date.getTime())) return '';
-  return format(date, 'yyyy-MM-dd');
+  if (!val) return ''
+  const date = new Date(val as string | Date)
+  if (isNaN(date.getTime())) return ''
+  return format(date, 'yyyy-MM-dd')
 }
 
 /**
@@ -23,46 +23,46 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
   onCancel,
   autoFocus = true,
   isValid = true,
-  errorMessage
+  errorMessage,
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
-      inputRef.current.focus();
+      inputRef.current.focus()
     }
-  }, [autoFocus]);
+  }, [autoFocus])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVal = e.target.value;
+    const newVal = e.target.value
     if (!newVal) {
-      onChange(null);
-      return;
+      onChange(null)
+      return
     }
 
-    const date = parse(newVal, 'yyyy-MM-dd', new Date());
+    const date = parse(newVal, 'yyyy-MM-dd', new Date())
     if (!isNaN(date.getTime())) {
-      onChange(date);
+      onChange(date)
     }
-  };
+  }
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
-      onCommit();
+      onCommit()
     } else if (e.key === 'Escape') {
-      onCancel();
+      onCancel()
     }
-  };
+  }
 
   const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     if (e.currentTarget.showPicker) {
       try {
-        e.currentTarget.showPicker();
+        e.currentTarget.showPicker()
       } catch (err) {
-        console.error('Error showing picker:', err);
+        console.error('Error showing picker:', err)
       }
     }
-  };
+  }
 
   return (
     <div className="relative w-full h-full flex items-center bg-white">
@@ -84,5 +84,5 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}

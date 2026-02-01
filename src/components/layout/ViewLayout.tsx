@@ -1,11 +1,11 @@
-import React, { ReactNode } from 'react';
-import { useNavigation } from '@/providers/NavigationProvider';
-import { useActionManager } from '@/providers/ActionContext';
-import { SidebarNavigation } from '@/components/navigation';
-import { ViewType } from '@/types/ViewTypes';
-import MainWindow from './MainWindow';
-import { MainWindowInitializer } from './MainWindowInitializer';
-import { MenuProvider } from '@/providers/MenuProvider';
+import React, { ReactNode } from 'react'
+import { useNavigation } from '@/providers/NavigationProvider'
+import { useActionManager } from '@/providers/ActionContext'
+import { SidebarNavigation } from '@/components/navigation'
+import { ViewType } from '@/types/ViewTypes'
+import MainWindow from './MainWindow'
+import { MainWindowInitializer } from './MainWindowInitializer'
+import { MenuProvider } from '@/providers/MenuProvider'
 
 /**
  * Интерфейс для MainLayout
@@ -21,20 +21,20 @@ interface MainLayoutProps {
  */
 export const ViewLayout: React.FC<MainLayoutProps> = ({
   children,
-  onViewChange
+  onViewChange,
 }) => {
-  useNavigation();
-  const { updateActionStates } = useActionManager();
+  useNavigation()
+  const { updateActionStates } = useActionManager()
 
   /**
    * Обработчик изменения представления
    */
   const handleViewChange = (viewType: ViewType) => {
     if (onViewChange) {
-      onViewChange(viewType);
+      onViewChange(viewType)
     }
-    updateActionStates(); // Обновление состояний действий
-  };
+    updateActionStates() // Обновление состояний действий
+  }
 
   return (
     <MainWindowInitializer>
@@ -55,6 +55,6 @@ export const ViewLayout: React.FC<MainLayoutProps> = ({
         </div>
       </div>
     </MainWindowInitializer>
-  );
-};
+  )
+}
 

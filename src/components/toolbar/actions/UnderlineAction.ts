@@ -1,6 +1,6 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
-import { textFormattingService } from '@/services/TextFormattingService';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
+import { textFormattingService } from '@/services/TextFormattingService'
 
 /**
  * Действие для применения подчёркнутого начертания текста
@@ -8,21 +8,21 @@ import { textFormattingService } from '@/services/TextFormattingService';
  */
 export class UnderlineAction extends ToolbarAction {
   constructor() {
-    super('TF003', 'Подчёркнутый', 'U', 'Подчёркнутый текст (Ctrl+U)', 'Ctrl+U');
+    super('TF003', 'Подчёркнутый', 'U', 'Подчёркнутый текст (Ctrl+U)', 'Ctrl+U')
   }
 
   /**
    * Переключает подчёркнутое начертание текста
    */
   override async execute(): Promise<void> {
-    textFormattingService.toggleStyle('underline');
+    textFormattingService.toggleStyle('underline')
   }
 
   /**
    * Проверяет, активно ли подчёркивание
    */
   isActiveState(): boolean {
-    return textFormattingService.getStyleState('underline');
+    return textFormattingService.getStyleState('underline')
   }
 
   /**
@@ -39,11 +39,11 @@ export class UnderlineAction extends ToolbarAction {
       onClick: () => this.execute(),
       onKeyDown: (event: KeyboardEvent) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'u') {
-          event.preventDefault();
-          this.execute();
+          event.preventDefault()
+          this.execute()
         }
-      }
-    };
+      },
+    }
   }
 }
 

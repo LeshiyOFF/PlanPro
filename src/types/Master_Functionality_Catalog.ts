@@ -1,14 +1,14 @@
 // Master Functionality Catalog - ProjectLibre React Migration
 // Полный каталог всех интерфейсов и типов для 100% сохранения функциональности
 
-import type { TaskSegment } from './task-types';
-import type { JsonObject, JsonValue } from './json-types';
+import type { TaskSegment } from './task-types'
+import type { JsonObject, JsonValue } from './json-types'
 
 // ============================================================================
 // БАЗОВЫЕ ТИПЫ ДАННЫХ
 // ============================================================================
 
-export type { TaskSegment };
+export type { TaskSegment }
 
 export interface ID {
   value: number;
@@ -56,7 +56,7 @@ export interface Project {
 
 export enum ProjectStatus {
   PLANNING = 'planning',
-  IN_PROGRESS = 'in_progress', 
+  IN_PROGRESS = 'in_progress',
   COMPLETED = 'completed',
   ON_HOLD = 'on_hold',
   CANCELLED = 'cancelled'
@@ -195,7 +195,7 @@ export interface Dependency {
 
 export enum DependencyType {
   FINISH_TO_START = 'fs',
-  START_TO_START = 'ss', 
+  START_TO_START = 'ss',
   FINISH_TO_FINISH = 'ff',
   START_TO_FINISH = 'sf'
 }
@@ -381,7 +381,7 @@ export interface View {
 
 export enum ViewType {
   GANTT = 'gantt',
-  NETWORK = 'network', 
+  NETWORK = 'network',
   TASK_SHEET = 'task-sheet',
   RESOURCE_SHEET = 'resource-sheet',
   TASK_USAGE = 'task-usage',
@@ -400,13 +400,13 @@ export interface ViewConfiguration {
   filters: Filter[];
   groups: GroupDefinition[];
   sorts: SortDefinition[];
-  
+
   // Специфичные для Gantt
   gantt?: GanttConfiguration;
-  
+
   // Специфичные для таблиц
   table?: TableConfiguration;
-  
+
   // Специфичные для графиков
   chart?: ChartConfiguration;
 }
@@ -422,7 +422,7 @@ export interface TimeScale {
 
 export enum TimeUnit {
   MINUTES = 'minutes',
-  HOURS = 'hours', 
+  HOURS = 'hours',
   DAYS = 'days',
   WEEKS = 'weeks',
   MONTHS = 'months',
@@ -1555,14 +1555,14 @@ export type ValidationErrors = Record<string, string[]>;
  * Строго типизированные данные для JSON-совместимых структур (без any/unknown)
  * Добавлена поддержка Date для совместимости с бизнес-моделями
  */
-export type StrictData = 
-  | Error 
-  | string 
-  | number 
-  | boolean 
+export type StrictData =
+  | Error
+  | string
+  | number
+  | boolean
   | Date
-  | null 
-  | undefined 
+  | null
+  | undefined
   | { [key: string]: StrictData }
   | StrictData[];
 

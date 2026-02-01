@@ -2,7 +2,7 @@
  * Контракты для ресурсных диалогов
  */
 
-import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry';
+import { BaseDialogData, BaseDialogResult } from '../IDialogRegistry'
 
 export interface ResourceMappingDialogData extends BaseDialogData {
   readonly sourceResources: ReadonlyArray<string>;

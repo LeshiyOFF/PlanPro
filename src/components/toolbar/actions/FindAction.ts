@@ -1,5 +1,5 @@
-import { ToolbarAction } from './ToolbarAction';
-import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
+import { ToolbarAction } from './ToolbarAction'
+import { IToolbarButton } from '../interfaces/ToolbarInterfaces'
 
 /**
  * Действие для поиска в проекте
@@ -7,14 +7,14 @@ import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
  */
 export class FindAction extends ToolbarAction {
   constructor() {
-    super('TB007', 'Найти', '🔍', 'Найти в проекте (Ctrl+F)', 'Ctrl+F');
+    super('TB007', 'Найти', '🔍', 'Найти в проекте (Ctrl+F)', 'Ctrl+F')
   }
 
   /**
    * Выполняет открытие панели поиска
    */
   override async execute(): Promise<void> {
-    window.dispatchEvent(new CustomEvent('search:open'));
+    window.dispatchEvent(new CustomEvent('search:open'))
   }
 
   /**
@@ -30,11 +30,11 @@ export class FindAction extends ToolbarAction {
       onClick: () => this.execute(),
       onKeyDown: (event: KeyboardEvent) => {
         if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
-          event.preventDefault();
-          this.execute();
+          event.preventDefault()
+          this.execute()
         }
-      }
-    };
+      },
+    }
   }
 }
 

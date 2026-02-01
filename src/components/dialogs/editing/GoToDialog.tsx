@@ -1,14 +1,14 @@
-import React, { useState, useCallback } from 'react';
-import { BaseDialog } from '../base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import React, { useState, useCallback } from 'react'
+import { BaseDialog } from '../base/SimpleBaseDialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
 // import { ScrollArea } from '@/components/ui/scroll-area'; // temporarily removed
-import { Search, FileText, Calendar, MapPin, Hash, ArrowRight } from 'lucide-react';
-import { useDialogValidation } from '../hooks/useDialogValidation';
+import { Search, FileText, Calendar, MapPin, Hash, ArrowRight } from 'lucide-react'
+import { useDialogValidation } from '../hooks/useDialogValidation'
 
 interface GoToTarget {
   id: string;
@@ -44,130 +44,130 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
   open,
   onOpenChange,
   onGoTo,
-  onSearch
+  onSearch,
 }) => {
-  const [searchType, setSearchType] = useState<GoToOptions['searchType']>('task');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<GoToTarget[]>([]);
-  const [selectedTarget, setSelectedTarget] = useState<GoToTarget | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  
+  const [searchType, setSearchType] = useState<GoToOptions['searchType']>('task')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<GoToTarget[]>([])
+  const [selectedTarget, setSelectedTarget] = useState<GoToTarget | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+
   const [options, setOptions] = useState<GoToOptions>({
     searchType: 'task',
     dateFormat: 'absolute',
     caseSensitive: false,
-    exactMatch: false
-  });
+    exactMatch: false,
+  })
 
   const { validate, errors } = useDialogValidation({
     searchQuery: {
       required: true,
-      minLength: 1
-    }
-  });
+      minLength: 1,
+    },
+  })
 
   const validateForm = useCallback(() => {
-    const formData = { searchQuery };
-    return validate(formData);
-  }, [searchQuery, validate]);
+    const formData = { searchQuery }
+    return validate(formData)
+  }, [searchQuery, validate])
 
   const handleSearch = useCallback(async () => {
-    if (!validateForm()) return;
-    
-    setIsSearching(true);
+    if (!validateForm()) return
+
+    setIsSearching(true)
     try {
-      const results = onSearch?.(searchQuery, searchType) || [];
-      setSearchResults(results);
-      setSelectedTarget(results.length > 0 ? results[0] : null);
+      const results = onSearch?.(searchQuery, searchType) || []
+      setSearchResults(results)
+      setSelectedTarget(results.length > 0 ? results[0] : null)
     } finally {
-      setIsSearching(false);
+      setIsSearching(false)
     }
-  }, [searchQuery, searchType, onSearch, validateForm]);
+  }, [searchQuery, searchType, onSearch, validateForm])
 
   const handleGoTo = useCallback(() => {
-    if (!selectedTarget) return;
-    
-    onGoTo?.(selectedTarget, options);
-    onOpenChange(false);
-  }, [selectedTarget, options, onGoTo, onOpenChange]);
+    if (!selectedTarget) return
+
+    onGoTo?.(selectedTarget, options)
+    onOpenChange(false)
+  }, [selectedTarget, options, onGoTo, onOpenChange])
 
   const handleSearchTypeChange = useCallback((type: GoToOptions['searchType']) => {
-    setSearchType(type);
-    setOptions(prev => ({ ...prev, searchType: type }));
-    setSearchQuery('');
-    setSearchResults([]);
-    setSelectedTarget(null);
-  }, []);
+    setSearchType(type)
+    setOptions(prev => ({ ...prev, searchType: type }))
+    setSearchQuery('')
+    setSearchResults([])
+    setSelectedTarget(null)
+  }, [])
 
   const handleTargetSelect = useCallback((target: GoToTarget) => {
-    setSelectedTarget(target);
-  }, []);
+    setSelectedTarget(target)
+  }, [])
 
   const getTargetIcon = (type: GoToTarget['type']) => {
     switch (type) {
-      case 'task': return <FileText className="h-4 w-4" />;
-      case 'resource': return <Hash className="h-4 w-4" />;
-      case 'date': return <Calendar className="h-4 w-4" />;
-      case 'id': return <MapPin className="h-4 w-4" />;
-      default: return <Search className="h-4 w-4" />;
+      case 'task': return <FileText className="h-4 w-4" />
+      case 'resource': return <Hash className="h-4 w-4" />
+      case 'date': return <Calendar className="h-4 w-4" />
+      case 'id': return <MapPin className="h-4 w-4" />
+      default: return <Search className="h-4 w-4" />
     }
-  };
+  }
 
   const getTargetBadgeColor = (type: GoToTarget['type']) => {
     switch (type) {
-      case 'task': return 'bg-slate-100 text-slate-900';
-      case 'resource': return 'bg-green-100 text-green-800';
-      case 'date': return 'bg-purple-100 text-purple-800';
-      case 'id': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'task': return 'bg-slate-100 text-slate-900'
+      case 'resource': return 'bg-green-100 text-green-800'
+      case 'date': return 'bg-purple-100 text-purple-800'
+      case 'id': return 'bg-orange-100 text-orange-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
-  };
+  }
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('ru-RU', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
-    });
-  };
+      day: 'numeric',
+    })
+  }
 
   const getSearchPlaceholder = () => {
     switch (searchType) {
       case 'task':
-        return 'Введите имя или ID задачи...';
+        return 'Введите имя или ID задачи...'
       case 'resource':
-        return 'Введите имя или ID ресурса...';
+        return 'Введите имя или ID ресурса...'
       case 'date':
-        return 'Введите дату (ДД.ММ.ГГГГ)...';
+        return 'Введите дату (ДД.ММ.ГГГГ)...'
       case 'id':
-        return 'Введите ID задачи...';
+        return 'Введите ID задачи...'
       default:
-        return 'Введите текст для поиска...';
+        return 'Введите текст для поиска...'
     }
-  };
+  }
 
   const getSearchExamples = () => {
     switch (searchType) {
       case 'task':
-        return ['Разработка модуля', 'ID 123', 'Критическая задача'];
+        return ['Разработка модуля', 'ID 123', 'Критическая задача']
       case 'resource':
-        return ['Иван Петров', 'Разработчик', 'RES-001'];
+        return ['Иван Петров', 'Разработчик', 'RES-001']
       case 'date':
-        return ['01.01.2024', 'Сегодня', 'Следующая неделя'];
+        return ['01.01.2024', 'Сегодня', 'Следующая неделя']
       case 'id':
-        return ['123', 'TASK-456', '789'];
+        return ['123', 'TASK-456', '789']
       default:
-        return [];
+        return []
     }
-  };
+  }
 
   const handleConfirm = () => {
     if (selectedTarget) {
-      handleGoTo();
+      handleGoTo()
     } else {
-      handleSearch();
+      handleSearch()
     }
-  };
+  }
 
   return (
     <BaseDialog
@@ -213,7 +213,7 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
                   className={errors.searchQuery ? 'border-red-500' : ''}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleSearch();
+                      handleSearch()
                     }
                   }}
                 />
@@ -239,7 +239,7 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
                       type="checkbox"
                       id="case-sensitive"
                       checked={options.caseSensitive}
-                      onChange={(e) => 
+                      onChange={(e) =>
                         setOptions(prev => ({ ...prev, caseSensitive: e.target.checked }))
                       }
                     />
@@ -250,7 +250,7 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
                       type="checkbox"
                       id="exact-match"
                       checked={options.exactMatch}
-                      onChange={(e) => 
+                      onChange={(e) =>
                         setOptions(prev => ({ ...prev, exactMatch: e.target.checked }))
                       }
                     />
@@ -302,8 +302,8 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
                   <div
                     key={target.id}
                     className={`p-3 rounded cursor-pointer border ${
-                      selectedTarget?.id === target.id 
-                        ? 'bg-primary/10 border-blue-300' 
+                      selectedTarget?.id === target.id
+                        ? 'bg-primary/10 border-blue-300'
                         : 'hover:bg-gray-50 border-gray-200'
                     }`}
                     onClick={() => handleTargetSelect(target)}
@@ -313,8 +313,8 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-medium truncate">{target.name}</span>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className={`text-xs ${getTargetBadgeColor(target.type)}`}
                           >
                             {target.type}
@@ -359,6 +359,6 @@ export const GoToDialog: React.FC<GoToDialogProps> = ({
         )}
       </div>
     </BaseDialog>
-  );
-};
+  )
+}
 

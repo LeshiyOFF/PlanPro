@@ -1,9 +1,9 @@
-import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Resource } from '@/types/resource-types';
-import { ResourceAssignment } from '@/store/project/interfaces';
+import React from 'react'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Resource } from '@/types/resource-types'
+import { ResourceAssignment } from '@/store/project/interfaces'
 
 interface ResourceAssignmentTabProps {
   resources: Resource[];
@@ -14,41 +14,41 @@ interface ResourceAssignmentTabProps {
 
 /**
  * ResourceAssignmentTab - Вкладка назначения ресурсов на задачу
- * 
+ *
  * КРИТИЧНО: Использует resourceAssignments с units вместо устаревшего resourceIds.
  * Это исправляет баг с нулевыми трудозатратами в отчётах.
- * 
+ *
  * Clean Architecture: UI Component (Presentation Layer)
  * SOLID: Single Responsibility - управление назначениями ресурсов
- * 
+ *
  * @version 2.0 - Переход на resourceAssignments с units
  */
 export const ResourceAssignmentTab: React.FC<ResourceAssignmentTabProps> = ({
-  resources, assignments, onAssignmentsChange, t
+  resources, assignments, onAssignmentsChange, t,
 }) => {
   const isResourceAssigned = (resourceId: string): boolean => {
-    return assignments.some(a => a.resourceId === resourceId);
-  };
+    return assignments.some(a => a.resourceId === resourceId)
+  }
 
   const getResourceUnits = (resourceId: string): number => {
-    const assignment = assignments.find(a => a.resourceId === resourceId);
-    return assignment?.units ?? 1.0;
-  };
+    const assignment = assignments.find(a => a.resourceId === resourceId)
+    return assignment?.units ?? 1.0
+  }
 
   const toggleResource = (resourceId: string) => {
     if (isResourceAssigned(resourceId)) {
-      onAssignmentsChange(assignments.filter(a => a.resourceId !== resourceId));
+      onAssignmentsChange(assignments.filter(a => a.resourceId !== resourceId))
     } else {
-      onAssignmentsChange([...assignments, { resourceId, units: 1.0 }]);
+      onAssignmentsChange([...assignments, { resourceId, units: 1.0 }])
     }
-  };
+  }
 
   const updateUnits = (resourceId: string, units: number) => {
-    const normalizedUnits = Math.max(0.01, Math.min(10, units));
+    const normalizedUnits = Math.max(0.01, Math.min(10, units))
     onAssignmentsChange(
-      assignments.map(a => a.resourceId === resourceId ? { ...a, units: normalizedUnits } : a)
-    );
-  };
+      assignments.map(a => a.resourceId === resourceId ? { ...a, units: normalizedUnits } : a),
+    )
+  }
 
   return (
     <div className="space-y-4 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
@@ -77,8 +77,8 @@ export const ResourceAssignmentTab: React.FC<ResourceAssignmentTabProps> = ({
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
 interface ResourceRowProps {
   resource: Resource;
@@ -89,16 +89,16 @@ interface ResourceRowProps {
 }
 
 const ResourceRow: React.FC<ResourceRowProps> = ({
-  resource, isAssigned, units, onToggle, onUnitsChange
+  resource, isAssigned, units, onToggle, onUnitsChange,
 }) => (
   <div className="flex items-center gap-3 p-3 hover:bg-white rounded-lg transition-all border border-transparent hover:border-slate-200">
-    <Checkbox 
-      id={`res-${resource.id}`} 
+    <Checkbox
+      id={`res-${resource.id}`}
       checked={isAssigned}
       onCheckedChange={onToggle}
     />
-    <label 
-      htmlFor={`res-${resource.id}`} 
+    <label
+      htmlFor={`res-${resource.id}`}
       className="text-base font-medium leading-none cursor-pointer flex-1"
       onClick={onToggle}
     >
@@ -123,4 +123,4 @@ const ResourceRow: React.FC<ResourceRowProps> = ({
       </div>
     )}
   </div>
-);
+)
