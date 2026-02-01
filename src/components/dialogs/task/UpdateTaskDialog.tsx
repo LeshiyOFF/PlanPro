@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -48,13 +48,13 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
     duration: {
       required: true,
       min: 0.1,
-      validate: (value) => value > 0 ? null : 'Duration must be greater than 0'
+      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0'
     },
     complete: {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => (value >= 0 && value <= 100) ? null : 'Complete must be between 0 and 100'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Complete must be between 0 and 100'
     }
   });
 
@@ -78,7 +78,7 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
     );
   };
 
-  const handleUpdateChange = (field: keyof TaskData, value: any) => {
+  const handleUpdateChange = (field: keyof TaskData, value: TaskData[keyof TaskData]) => {
     setUpdates(prev => ({ ...prev, [field]: value }));
   };
 
@@ -92,11 +92,12 @@ export const UpdateTaskDialog: React.FC<UpdateTaskDialogProps> = ({
   const canUpdate = isValid() && selectedTasks.length > 0;
   const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id));
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Update Tasks"
       size="large"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

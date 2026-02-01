@@ -1,5 +1,9 @@
 package com.projectlibre.api.observability;
 
+import io.sentry.Sentry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Instant;
 import java.util.Map;
 import java.util.HashMap;
@@ -54,20 +58,22 @@ public class ObservabilityManager {
     }
     
     /**
-     * Error tracking component
+     * Error tracking component with Sentry integration
      */
     private static class ErrorTracker {
+        private static final Logger logger = LoggerFactory.getLogger(ErrorTracker.class);
         private final Map<String, Integer> errorCounts = new ConcurrentHashMap<>();
         
         public void trackError(String errorType, String message, Throwable throwable) {
             errorCounts.merge(errorType, 1, Integer::sum);
             
-            // Integration point for Sentry or other error tracking services
-            System.err.println("[" + errorType + "] " + message + 
-                             (throwable != null ? " - " + throwable.getMessage() : ""));
-            
-            // TODO: Replace with Sentry integration
-            // Sentry.captureException(throwable);
+            String errorMessage = "[" + errorType + "] " + message;
+            if (throwable != null) {
+                logger.error(errorMessage, throwable);
+                Sentry.captureException(throwable);
+            } else {
+                logger.error(errorMessage);
+            }
         }
         
         public void shutdown() {
@@ -79,6 +85,8 @@ public class ObservabilityManager {
      * Health monitoring component
      */
     private static class HealthMonitor {
+        private static final Logger logger = LoggerFactory.getLogger(HealthMonitor.class);
+        private static final long PROJECT_START_TIME = 1735540800000L;
         private volatile boolean isHealthy = true;
         private Instant lastCheck = Instant.now();
         
@@ -86,13 +94,13 @@ public class ObservabilityManager {
             Map<String, Object> status = new HashMap<>();
             status.put("status", isHealthy ? "UP" : "DOWN");
             status.put("lastCheck", lastCheck.toString());
-            status.put("uptime", System.currentTimeMillis() - 1735540800000L); // Project start time
+            status.put("uptime", System.currentTimeMillis() - PROJECT_START_TIME);
             return status;
         }
         
         public void markUnhealthy(String reason) {
             isHealthy = false;
-            System.err.println("Health check failed: " + reason);
+            logger.warn("Health check failed: {}", reason);
         }
         
         public void markHealthy() {
@@ -101,7 +109,7 @@ public class ObservabilityManager {
         }
         
         public void shutdown() {
-            // Cleanup resources
+            logger.info("HealthMonitor shutdown");
         }
     }
 }

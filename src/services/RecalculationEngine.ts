@@ -3,6 +3,7 @@ import { PreferencesCategory, IPreferencesChangeEvent } from '../components/user
 import { useProjectStore } from '../store/projectStore';
 import { javaApiService } from './JavaApiService';
 import { logger } from '../utils/logger';
+import type { ConfigurationUpdateRequest } from '@/types/api/request-types';
 
 /**
  * RecalculationEngine - механизм мгновенного пересчета проекта при изменении настроек.
@@ -64,13 +65,18 @@ export class RecalculationEngine {
         // 1. Синхронизируем конфигурацию с Java
         const preferences = UserPreferencesService.getInstance().getPreferences();
         try {
-          await javaApiService.updateConfiguration(preferences, true);
+          const configRequest: ConfigurationUpdateRequest = {
+            display: {
+              theme: preferences.display.theme === 'dark' ? 'dark' : preferences.display.theme === 'light' ? 'light' : 'system',
+            },
+          };
+          await javaApiService.updateConfiguration(configRequest, true);
         } catch (error) {
-          logger.error('Failed to sync preferences to Java:', error);
+          logger.error('Failed to sync preferences to Java:', error instanceof Error ? error : String(error));
         }
 
         // 2. Если категория критическая — запускаем пересчет
-        if (criticalCategories.includes(event.category as any)) {
+        if (criticalCategories.includes(event.category)) {
           logger.info(`Critical preference change detected in ${event.category}, triggering recalculation...`);
           await this.recalculateProject();
         }
@@ -102,24 +108,24 @@ export class RecalculationEngine {
       // Вызываем пересчет проекта в Java Core
       // Примечание: Мы предполагаем, что текущий проект имеет ID 'current' или берем его из стора
       // В будущем здесь будет ID активного проекта
-      const result = await (javaApiService as any).recalculateProject('current');
-      
+      const result = await javaApiService.recalculateProject('current');
+      const data = result?.data;
       // Обрабатываем результат пересчета
-      if (result && result.tasks) {
+      if (data && data.tasks) {
         // 3. Обновляем фронтенд стор новыми данными от Java
-        useProjectStore.getState().setTasks(result.tasks);
+        useProjectStore.getState().setTasks(data.tasks);
         logger.info('Project recalculated successfully and store updated');
-      } else if (result && result.name) {
+      } else if (data && data.projectName) {
         // Если вернулся объект проекта, но без задач (текущая ситуация с демо-проектами)
-        logger.info(`Project '${result.name}' recalculated successfully (no task updates needed)`);
-      } else if (result === null || (result && result.success && !result.data)) {
+        logger.info(`Project '${data.projectName}' recalculated successfully (no task updates needed)`);
+      } else if (!result?.success || !data) {
         // Java вернул успех, но данных нет - это нормально, если проект не открыт
         logger.info('No project loaded in Java, preferences synced without recalculation');
       } else {
         logger.info('Recalculation completed');
       }
     } catch (error) {
-      logger.error('Failed to recalculate project:', error);
+      logger.error('Failed to recalculate project:', error instanceof Error ? error : String(error));
       
       // Fallback: если Java API недоступно, делаем базовый пересчет на фронте
       useProjectStore.getState().recalculateAllTasks();

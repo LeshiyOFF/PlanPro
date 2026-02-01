@@ -94,11 +94,12 @@ public class NodeList extends ArrayList {
 	public void accept(NodeVisitor visitor) {
 		accept(visitor, iterator());
 	}
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.grouping.core.Node#getImpl()
+	/**
+	 * Returns the implementation object for this node list.
+	 * NodeList is a collection of nodes and doesn't have a single implementation object.
+	 * @return null
 	 */
 	public Object getImpl() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

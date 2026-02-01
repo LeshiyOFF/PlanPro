@@ -2,6 +2,7 @@ import type { Task, ResourceAssignment } from '@/store/project/interfaces';
 import type { Resource } from '@/types/resource-types';
 import type { CoreTaskData, CoreResourceData } from '@/types/api/response-types';
 import type { FrontendTaskData } from '@/types/api/request-types';
+import { TaskType } from '@/types/Master_Functionality_Catalog';
 import { CalendarDateService } from '@/services/CalendarDateService';
 
 /**
@@ -55,8 +56,8 @@ export class TaskDataConverter {
       progress: coreTask.progress || 0,
       color: coreTask.color || '#4A90D9',
       level: (coreTask.level ?? 0) + 1,
-      summary: coreTask.summary || false,
-      type: coreTask.type || 'TASK',
+      isSummary: coreTask.summary || false,
+      type: (coreTask.type as TaskType) ?? TaskType.FIXED_DURATION,
       children: coreTask.children || [],
       predecessors: coreTask.predecessors || [],
       resourceAssignments,
@@ -65,24 +66,30 @@ export class TaskDataConverter {
       milestone: coreTask.milestone || false,
       notes: coreTask.notes || '',
       totalSlack: coreTask.totalSlack
-    };
+    } as Task;
   }
   
+  /** Core-задача с опциональным полем resourceAssignments (расширение бэкенда) */
+  private static coreTaskWithAssignments(
+    t: CoreTaskData
+  ): t is CoreTaskData & { resourceAssignments: Array<{ resourceId: string; units?: number }> } {
+    const withAssignments = t as CoreTaskData & { resourceAssignments?: Array<{ resourceId: string; units?: number }> };
+    return Array.isArray(withAssignments.resourceAssignments) && withAssignments.resourceAssignments.length > 0;
+  }
+
   /**
    * Мигрирует resourceIds в resourceAssignments.
    * Приоритет: resourceAssignments > resourceIds.
    */
   private static migrateResourceAssignments(coreTask: CoreTaskData): ResourceAssignment[] {
-    const coreAny = coreTask as any;
-    
     // Приоритет 1: Если есть resourceAssignments, используем их
-    if (coreAny.resourceAssignments && coreAny.resourceAssignments.length > 0) {
-      return coreAny.resourceAssignments.map((a: any) => ({
+    if (TaskDataConverter.coreTaskWithAssignments(coreTask)) {
+      return coreTask.resourceAssignments.map((a) => ({
         resourceId: a.resourceId,
         units: a.units ?? 1.0
       }));
     }
-    
+
     // Приоритет 2: Конвертируем resourceIds в resourceAssignments
     if (coreTask.resourceIds && coreTask.resourceIds.length > 0) {
       return coreTask.resourceIds.map(resourceId => ({
@@ -131,14 +138,14 @@ export class TaskDataConverter {
       endDate: TaskDataConverter.dateToIsoString(task.endDate),
       progress: task.progress || 0,
       level: Math.max(0, task.level - 1),
-      summary: task.summary || false,
-      milestone: task.milestone || false,
-      type: task.type || 'TASK',
+      summary: task.isSummary || false,
+      milestone: task.isMilestone || false,
+      type: task.type ?? TaskType.FIXED_DURATION,
       predecessors: task.predecessors || [],
       children: task.children || [],
       resourceAssignments: task.resourceAssignments || [],
       notes: task.notes || '',
-      color: task.color || '#4A90D9'
+      color: (task as Task & { color?: string }).color ?? '#4A90D9'
       // critical НЕ отправляется - вычисляется ядром
     };
   }

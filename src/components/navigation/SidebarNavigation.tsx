@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@/providers/NavigationProvider';
-import { SafeTooltip } from '@/components/ui/Tooltip';
 import { ViewType } from '@/types/ViewTypes';
 import './SidebarNavigation.css';
 import { 

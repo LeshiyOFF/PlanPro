@@ -102,7 +102,6 @@
 					source="17"
 					target="17">
 						<src path="${src_core}" />
-						<src path="${src_ui}" />
 						<src path="${src_reports}" />
 						<src path="${src_exchange}" />
 						<src path="${src_ext}" />
@@ -120,7 +119,6 @@
 					source="17"
 					target="17">
 						<src path="${src_core}" />
-						<src path="${src_ui}" />
 						<src path="${src_reports}" />
 						<src path="${src_exchange}" />
 						<src path="${src_ext}" />
@@ -136,10 +134,6 @@
 	<target name="build" depends="compile">
 		<copy todir="${build}">
 			<fileset dir="${src_core}/">
-				<include name="**/*" />
-				<exclude name="**/*.java" />
-			</fileset>
-			<fileset dir="${src_ui}/">
 				<include name="**/*" />
 				<exclude name="**/*.java" />
 			</fileset>

@@ -1,25 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
+import React from 'react';
+import { BaseDialog, BaseDialogProps } from '@/components/dialogs/base/SimpleBaseDialog';
 import { UserPreferencesContainer } from '@/components/userpreferences/UserPreferencesContainer';
-import { 
-  SettingsDialogData 
-} from '@/types/dialog/DialogTypes';
+
+export interface OptionsDialogProps extends Omit<BaseDialogProps, 'children' | 'title'> {
+  title?: string;
+}
 
 /**
- * Диалог настроек приложения
- * Интегрирован с профессиональной системой UserPreferences
+ * Диалог настроек приложения.
+ * Интегрирован с профессиональной системой UserPreferences.
+ * Использует SimpleBaseDialog для единообразия с другими диалогами настроек.
  */
-export const OptionsDialog: React.FC<SettingsDialogData> = (data) => {
+export const OptionsDialog: React.FC<OptionsDialogProps> = ({
+  open,
+  onOpenChange,
+  title = 'Настройки',
+  width = '900px',
+  height = '700px',
+  ...rest
+}) => {
   return (
     <BaseDialog
-      data={{
-        ...data,
-      }}
-      config={{
-        width: 900,
-        height: 700,
-        modal: true
-      }}
+      open={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      width={width}
+      height={height}
+      {...rest}
     >
       <UserPreferencesContainer />
     </BaseDialog>

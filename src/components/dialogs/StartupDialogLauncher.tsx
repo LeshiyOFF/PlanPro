@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useDialogContext } from './DialogContext';
+import { useTypedDialog } from './context/TypedDialogContext';
 import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
 import { logger } from '@/utils/logger';
 
@@ -8,29 +8,30 @@ import { logger } from '@/utils/logger';
  * Отвечает за логику показа WelcomeDialog
  */
 export const StartupDialogLauncher: React.FC = () => {
-  const { openDialog } = useDialogContext();
+  const { openDialog } = useTypedDialog();
   const { preferences, isReady } = useUserPreferences();
   const launchedRef = useRef(false);
 
   useEffect(() => {
     // Ждем, пока настройки будут загружены с диска
-    if (!isReady) return;
+    if (!isReady) return undefined;
 
     // Предотвращаем повторный запуск в StrictMode или при ререндерах
-    if (launchedRef.current) return;
+    if (launchedRef.current) return undefined;
 
     const showWelcome = preferences.display.showWelcomeScreen;
-    
+
     if (showWelcome) {
       logger.info('Launching WelcomeDialog at startup');
       // Небольшая задержка, чтобы UI успел отрисоваться
       const timer = setTimeout(() => {
-        openDialog('welcome');
+        openDialog('welcome', { showOnStartup: preferences.display.showWelcomeScreen });
       }, 500);
-      
+
       launchedRef.current = true;
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [openDialog, preferences.display.showWelcomeScreen, isReady]);
 
   return null; // Визуально ничего не рендерит

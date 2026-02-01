@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -28,7 +28,8 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
       required: true,
       minLength: 1,
       maxLength: 255,
-      validate: (value) => {
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Project name is required';
         if (!value.trim()) return 'Project name is required';
         if (existingNames.includes(value.trim()) && !saveAs) {
           return 'Project with this name already exists';
@@ -43,7 +44,7 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
   }, [projectName]);
 
   React.useEffect(() => {
-    validate('newName', newName);
+    validate({ newName });
   }, [newName, saveAs, existingNames]);
 
   const handleRename = () => {
@@ -55,11 +56,15 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
 
   const canRename = isValid() && newName.trim() !== projectName;
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title="Rename Project"
       size="medium"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -67,7 +72,7 @@ export const RenameProjectDialog: React.FC<RenameProjectDialogProps> = ({
             <Checkbox 
               id="saveAs" 
               checked={saveAs}
-              onCheckedChange={setSaveAs}
+              onCheckedChange={(checked) => setSaveAs(checked as boolean)}
             />
             <Label htmlFor="saveAs">Save as new project</Label>
           </div>

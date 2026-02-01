@@ -177,16 +177,6 @@ public class CostRateTables implements Cost, Serializable, Cloneable {
 //			CostRate test;
 //			test = costRateTableArray[DEFAULT].newRate(start1.getTimeInMillis());
 //			test.setStandardRate(100.0/(1000*60*60*8));
-//			test.setOvertimeRate(110.0/(1000*60*60*8));
-//			test.setCostPerUse(450);
-//			test = costRateTableArray[DEFAULT].newRate(start2.getTimeInMillis());
-//			test.setStandardRate(13);
-//			test.setOvertimeRate(1300);
-//		} catch (InvalidCostRateException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
 	}
 	public long getEffectiveDate() {
 		return getCurrent().getEffectiveDate();

@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { getActionManager, IActionManager } from '@/services/actions/ActionManager';
 
 /**

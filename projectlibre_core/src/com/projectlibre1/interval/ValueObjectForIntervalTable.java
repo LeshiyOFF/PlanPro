@@ -209,8 +209,7 @@ public abstract class ValueObjectForIntervalTable implements NodeModelDataFactor
 		try {
 			return newValueObject(date);
 		} catch (InvalidValueObjectForIntervalException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace(); // should not ever happen
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to create unvalidated object in ValueObjectForIntervalTable", e);
 			return null;
 		}
 	}
@@ -223,12 +222,7 @@ public abstract class ValueObjectForIntervalTable implements NodeModelDataFactor
 	
 	
 	public void rollbackUnvalidated(NodeModel nodeModel, Object object) {
-//		try {
-			remove(object,nodeModel,false,true,true);
-//		} catch (NodeException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		remove(object,nodeModel,false,true,true);
 	}
 
 

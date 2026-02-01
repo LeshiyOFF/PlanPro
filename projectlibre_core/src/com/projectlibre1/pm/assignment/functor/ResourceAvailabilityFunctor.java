@@ -70,11 +70,11 @@ public class ResourceAvailabilityFunctor extends AssignmentFieldFunctor {
 			// if no work calendar for resource, then use project's calendar
 			workCalendar = assignment.getTask().getProject().getEffectiveWorkCalendar();
 		}
-		maxUnits = assignment.getResource().getMaximumUnits(); //TODO add support for contoured availability
+		maxUnits = assignment.getResource().getMaximumUnits();
 	}
 	private ResourceAvailabilityFunctor(Resource resource) {
 		super(null,resource.getEffectiveWorkCalendar(), null);
-		maxUnits = resource.getMaximumUnits(); //TODO add support for contoured availability
+		maxUnits = resource.getMaximumUnits();
 	}
 	public void execute(Object object) {
 		HasStartAndEnd interval = (HasStartAndEnd)object;

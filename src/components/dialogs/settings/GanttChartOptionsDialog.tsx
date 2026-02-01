@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -125,13 +125,13 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
       required: true,
       min: 10,
       max: 50,
-      validate: (value) => (value >= 10 && value <= 50) ? null : 'Высота полосы должна быть от 10 до 50'
+      custom: (value) => (Number(value) >= 10 && Number(value) <= 50) ? null : 'Высота полосы должна быть от 10 до 50'
     },
     'formatting.fontSize': {
       required: true,
       min: 8,
       max: 24,
-      validate: (value) => (value >= 8 && value <= 24) ? null : 'Размер шрифта должен быть от 8 до 24'
+      custom: (value) => (Number(value) >= 8 && Number(value) <= 24) ? null : 'Размер шрифта должен быть от 8 до 24'
     }
   });
 
@@ -146,14 +146,20 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
     validate('formatting.fontSize', options.formatting.fontSize);
   }, [options.formatting]);
 
-  const handleOptionChange = (category: keyof GanttChartOptions, field: string, value: any) => {
-    setOptions(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [field]: value
+  const handleOptionChange = (category: keyof GanttChartOptions, field: string, value: string | number | boolean) => {
+    setOptions(prev => {
+      const categoryData = prev[category];
+      if (typeof categoryData !== 'object' || categoryData === null) {
+        return prev;
       }
-    }));
+      return {
+        ...prev,
+        [category]: {
+          ...categoryData,
+          [field]: value
+        }
+      };
+    });
   };
 
   const handleColorChange = (field: keyof GanttChartOptions['colors'], value: string) => {
@@ -180,11 +186,12 @@ export const GanttChartOptionsDialog: React.FC<GanttChartOptionsDialogProps> = (
 
   const canSave = isValid();
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Настройки диаграммы Ганта"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

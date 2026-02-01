@@ -69,6 +69,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
@@ -384,8 +385,6 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 
 	public void initializeProject(){
 		setSchedulingAlgorithm(new CriticalPath(this));
-		/**TODO fix calendar handling  should be created by factory*/
-
 		initializeOutlines();
 
 	}
@@ -411,8 +410,17 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 
 	public void initializeId(Task task) {
 		long id = ++taskIdCounter;
-		task.setId(id); //starts at 1TODO check for duplicates -
-		//task.setUniqueId(id); //TODO use a GUID generator
+		task.setId(id);
+		task.setUniqueId(generateUniqueId());
+	}
+	
+	/**
+	 * Generates a globally unique ID using UUID.
+	 * Uses most significant bits to ensure positive value.
+	 * @return unique positive long ID
+	 */
+	private long generateUniqueId() {
+		return UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
 	}
 
 
@@ -456,22 +464,6 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		getSchedulingAlgorithm().addObject(task);
 		return childNode;
 	}
-
-
-
-//	public Task cloneTask(Task from) {
-//		//TODO this does not copy fields correctly
-//		NormalTask newOne = (NormalTask) from.clone();
-//		add(newOne);
-//		initializeId(newOne);
-//		newOne.setWbsParent(from.getWbsParentTask());
-//		Node node = NodeFactory.getInstance().createNode(newOne);
-//		getTaskModel().addBefore(getTaskModel().search(from),node,NodeModel.NORMAL);
-//		objectEventManager.fireCreateEvent(this,newOne);
-//		return newOne;
-//
-//	}
-
 
 	/**
 	 * Used when creating a task on spreadsheet that may not be valid
@@ -554,32 +546,6 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 	public LinkedList getTasks() {
 		return tasks;
 	}
-
-//	public static Closure forAllTasks(Closure visitor, Predicate filter) {
-//		return new CollectionVisitor(visitor,filter) {
-//			protected Collection getCollection(Object arg0) {
-//				return ((Project)arg0).getTasks();
-//			}
-//		};
-//	}
-//
-//	public int testCount() {
-//		ReflectionPredicate taskPredicate;
-//		try {
-//			taskPredicate = ReflectionPredicate.getInstance(NormalTask.class.getMethod("isVirtual",null));
-//			Closure t = Project.forAllTasks(NormalTask.forAllAssignments(PrintString.INSTANCE),taskPredicate);
-//			t.execute(this);
-//		} catch (SecurityException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (NoSuchMethodException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//		return 0;
-//	}
-
-
 
 	/**
 	 * @return Returns the resourcePool.
@@ -1246,10 +1212,10 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		return isFieldHidden(fieldContext);
 	}
 	public boolean fieldHideBaselineCost(int numBaseline,FieldContext fieldContext) {
-		return false; //TODO implement
+		return isFieldHidden(fieldContext);
 	}
 	public boolean fieldHideBaselineWork(int numBaseline,FieldContext fieldContext) {
-		return false; //TODO implement
+		return isFieldHidden(fieldContext);
 	}
 	public boolean fieldHideAcwp(FieldContext fieldContext) {
 		return isFieldHidden(fieldContext);
@@ -1383,7 +1349,6 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 	public String getSchedulingMethod() {
 		return schedulingAlgorithm.getName();
 	}
-	//TODO other baselines
 	public double getBaselineCost(int numBaseline, FieldContext fieldContext) {
 		return baselineCost(FieldContext.start(fieldContext),FieldContext.end(fieldContext));	}
 	/* (non-Javadoc)
@@ -1413,11 +1378,6 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 			node=(Node)e.getNodes()[i];
 			if (!(node.getImpl() instanceof Task)) continue;
 			task=(Task) node.getImpl();
-
-			//TODO verify that this is ok when pasting for bug 426
-//			task.setProject((Project) getSchedulingAlgorithm().getMasterDocument());
-//			task.setOwningProject(this);
-			//moved to validateObject
 
 			previousParentTask=task.getWbsParentTask();
 			previousParentNode=taskOutlines.getDefaultOutline().search(previousParentTask);
@@ -1567,8 +1527,7 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		try {
 			subprojectHandler = (SubprojectHandler) Class.forName(Messages.getMetaString("SubprojectHandler")).getConstructor(new Class[]{Project.class}).newInstance(this);
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("SubprojectHandler not valid in meta.properties");
+			com.projectlibre1.server.access.ErrorLogger.log("SubprojectHandler not valid in meta.properties", e);
 			System.exit(-1);
 		}
 	}
@@ -2010,8 +1969,8 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		return getEffectiveWorkCalendar().compare(getFinishDate(),stop,false);
 	}
 
-	//TODO to avoid risks of breaking obfuscation, Project will implement all of Schedule for now
 	public void setRemainingDuration(long remainingDuration) {
+		// Project-level remaining duration is computed from tasks, not directly settable
 	}
 	public double getPercentComplete() {
 		Task task;
@@ -2062,19 +2021,19 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 	public void moveInterval(Object eventSource, long start, long end, ScheduleInterval oldInterval, boolean isChild) {
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Split operation is not supported at project level.
+	 * Splitting is only applicable to individual tasks.
 	 * @see com.projectlibre1.pm.scheduling.Schedule#split(java.lang.Object, long, long)
 	 */
 	public void split(Object eventSource, long from, long to) {
-		// TODO Auto-generated method stub
-
+		// Split is not applicable to projects - only to individual tasks
 	}
 	public final boolean isDirty() {
 		return isDirty;
 	}
 	public final void setDirty(boolean dirty) {
-		//System.out.println("Project _setDirty("+dirty+"): "+getName());
-		this.isDirty = isDirty;
+		this.isDirty = dirty;
 		if (isDirty)
 			setGroupDirty(true);
 	}
@@ -2384,14 +2343,21 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		return EarnedValueCalculator.getInstance().getBudgetStatusIndicator(getSpi(null));
 	}
 
+	/**
+	 * Returns backup of project detail state.
+	 * Project-level backup is handled through task-level backups.
+	 * @return null as project uses task-level backups
+	 */
 	public Object backupDetail() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void restoreDetail(Object source,Object detail,boolean isChild) {
-		// TODO Auto-generated method stub
-
+	/**
+	 * Restores project detail from backup.
+	 * Project-level restore is handled through task-level restores.
+	 */
+	public void restoreDetail(Object source, Object detail, boolean isChild) {
+		// Project restore is handled at task level
 	}
 
 	public boolean containsAssignments(){return true;}
@@ -2462,8 +2428,8 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 			return;
 		try {
 			DependencyService.getInstance().connect(NodeList.nodeListToImplList(children, NotAssignmentFilter.getInstance()),eventSource,canBeSuccessorCondition);
-		} catch (InvalidAssociationException e) {
-			e.printStackTrace();
+		} catch (com.projectlibre1.pm.association.InvalidAssociationException e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to link siblings", e);
 		}
 		for (Node n : children) // recursively do children
 			linkAllSiblings(n,canBeSuccessorCondition,eventSource);
@@ -2537,14 +2503,29 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		fireScheduleChanged(this,ScheduleEvent.SCHEDULE);
 	}
 
-	public void setAllTasksInSubproject(boolean b, Project masterProject) {
-		// TODO Auto-generated method stub
-
+	/**
+	 * Sets subproject flag on all tasks in this project.
+	 * @param inSubproject true if tasks are in subproject
+	 * @param masterProject the master project containing this subproject
+	 */
+	public void setAllTasksInSubproject(boolean inSubproject, Project masterProject) {
+		for (Iterator i = tasks.iterator(); i.hasNext();) {
+			Task task = (Task) i.next();
+			task.setInSubproject(inSubproject);
+		}
 	}
 
-	public void setAllNodesInSubproject(boolean b) {
-		// TODO Auto-generated method stub
-
+	/**
+	 * Sets subproject flag on all nodes in task outlines.
+	 * @param inSubproject true if nodes are in subproject
+	 */
+	public void setAllNodesInSubproject(boolean inSubproject) {
+		for (Iterator i = getTaskOutlineIterator(); i.hasNext();) {
+			Object impl = i.next();
+			if (impl instanceof Task) {
+				((Task) impl).setInSubproject(inSubproject);
+			}
+		}
 	}
 
 	public SubprojectHandler getSubprojectHandler() {
@@ -2562,8 +2543,7 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		try {
 			Class.forName(Messages.getMetaString("ProjectRoleManager")).getDeclaredMethod("resetRoles", new Class[] {Project.class, Boolean.class}).invoke(null, new Object[] {this,publicRoles});
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("ProjectRoleManager not valid in meta.properties");
+			com.projectlibre1.server.access.ErrorLogger.log("ProjectRoleManager not valid in meta.properties", e);
 			System.exit(-1);
 		}
 	}

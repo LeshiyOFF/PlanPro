@@ -1,20 +1,9 @@
-import React, { useEffect, useCallback, useRef } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import { MainLayout } from '@/components/layout/ViewLayout'
-import { GanttView } from '@/components/views/GanttView'
-import { NetworkView } from '@/components/views/NetworkView'
-import { TaskUsageView } from '@/components/views/TaskUsageView'
-import { ResourceUsageView } from '@/components/views/ResourceUsageView'
-import { ProjectProvider } from '@/providers/ProjectProvider'
-import { ThemeProvider } from '@/providers/ThemeProvider'
-import { AppStoreProvider } from '@/providers/AppStoreProvider'
+import React, { useCallback } from 'react'
 import { Toaster } from '@/components/ui/toaster'
-import { Button } from '@/components/ui/button'
 import { logger } from '@/utils/logger'
-import { ErrorBoundary, RetryErrorBoundary, GeneralErrorFallback, StoreErrorFallback, NetworkErrorFallback } from '@/components/error-handling'
-import { hotkeyStatusBarBridge } from '@/services/HotkeyStatusBarBridge'
-import { SentryProvider, useSentry } from '@/providers/SentryProvider'
-import { ReactProfilerProvider, PerformanceMetricsCollector } from '@/providers/ReactProfilerProvider'
+import { ErrorBoundary, GeneralErrorFallback, StoreErrorFallback } from '@/components/error-handling'
+import { SentryProvider } from '@/providers/SentryProvider'
+import { ReactProfilerProvider } from '@/providers/ReactProfilerProvider'
 import { NavigationProvider } from '@/providers/NavigationProvider'
 import { EventFlowProvider } from '@/providers/EventFlowProvider'
 import { ActionProvider } from '@/providers/ActionProvider'
@@ -25,45 +14,31 @@ import { useAppInitialization } from '@/hooks/useAppInitialization'
 import { NavigationRouter } from '@/components/navigation'
 import { ContextMenuProvider } from '@/presentation/contextmenu/providers/ContextMenuProvider'
 import { DialogProvider, DialogManager, StartupDialogLauncher } from '@/components/dialogs'
+import { TypedDialogProvider, initializeTypedDialogs } from '@/components/dialogs/typed'
 import { HotkeyProvider } from '@/components/hotkey'
+
+// Инициализация типизированных диалогов
+initializeTypedDialogs();
+
 import { LastProjectLoader } from '@/components/startup/LastProjectLoader'
 import { UnsavedChangesGuard } from '@/components/guards/UnsavedChangesGuard'
-import { useIpcService } from '@/hooks/useIpcService'
 import { ViewType, EventType } from '@/types/Master_Functionality_Catalog'
+import { ThemeProvider } from '@/providers/ThemeProvider'
+import { AppStoreProvider } from '@/providers/AppStoreProvider'
+import { ProjectProvider } from '@/providers/ProjectProvider'
 
 /**
  * Главный компонент приложения
  */
 const App: React.FC = () => {
   const { handleGlobalError } = useAppInitialization();
-  const ipcService = useIpcService();
 
   /**
    * Обработчик изменения представления
    */
   const handleViewChange = useCallback(async (viewType: ViewType) => {
     logger.info('View changed', { type: EventType.VIEW_CHANGED, data: { viewType } })
-    // Уведомление в консоль/лог достаточно для смены вью, 
-    // убираем раздражающий showMessageBox при каждом клике
   }, [])
-
-  // Инициализация Hotkey-StatusBar моста отключена (Statusbar удален)
-  /*
-  const initializedRef = useRef(false);
-  useEffect(() => {
-    if (initializedRef.current) return;
-    import('@/services/HotkeyStatusBarBridge').then(({ hotkeyStatusBarBridge }) => {
-      setTimeout(() => {
-        if (!initializedRef.current) {
-          try {
-            hotkeyStatusBarBridge.initialize();
-            initializedRef.current = true;
-          } catch (e) { }
-        }
-      }, 1000);
-    });
-  }, [])
-  */
 
   return (
     <ThemeProvider defaultTheme="light" storageKey="projectlibre-ui-theme">
@@ -76,28 +51,30 @@ const App: React.FC = () => {
               fallback={<GeneralErrorFallback error={new Error()} resetError={() => window.location.reload()} />}
             >
               <AppStoreProvider>
-                <ErrorBoundary fallback={(error: Error, reset: any) => <StoreErrorFallback error={error} resetError={reset} />}>
+                <ErrorBoundary fallback={(error: Error, reset: () => void) => <StoreErrorFallback error={error} resetError={reset} />}>
                   <EventFlowProvider>
                     <NavigationProvider>
                       <ActionProvider>
                         <ContextMenuProvider>
-                          <DialogProvider>
-                            <StartupDialogLauncher />
-                            <HotkeyProvider enabled={true}>
-                              <TooltipProvider>
-                                <ProjectProvider>
-                                  <LastProjectLoader />
-                                  <UnsavedChangesGuard />
-                                  <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                    <NavigationRouter onViewChange={handleViewChange} />
-                                  </div>
-                                  <DialogManager>
-                                    <Toaster />
-                                  </DialogManager>
-                                </ProjectProvider>
-                              </TooltipProvider>
-                            </HotkeyProvider>
-                          </DialogProvider>
+                          <TypedDialogProvider>
+                            <DialogProvider>
+                              <StartupDialogLauncher />
+                              <HotkeyProvider enabled={true}>
+                                <TooltipProvider>
+                                  <ProjectProvider>
+                                    <LastProjectLoader />
+                                    <UnsavedChangesGuard />
+                                    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                      <NavigationRouter onViewChange={handleViewChange} />
+                                    </div>
+                                    <DialogManager>
+                                      <Toaster />
+                                    </DialogManager>
+                                  </ProjectProvider>
+                                </TooltipProvider>
+                              </HotkeyProvider>
+                            </DialogProvider>
+                          </TypedDialogProvider>
                         </ContextMenuProvider>
                       </ActionProvider>
                     </NavigationProvider>
@@ -107,10 +84,10 @@ const App: React.FC = () => {
             </ErrorBoundary>
           </ReactProfilerProvider>
         </SentryProvider>
-      </AnimationProvider>
-    </I18nProvider>
-  </ThemeProvider>
-)
+        </AnimationProvider>
+      </I18nProvider>
+    </ThemeProvider>
+  )
 }
 
 export default App

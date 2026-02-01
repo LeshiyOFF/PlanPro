@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { ActionManager } from '@/services/actions/ActionManager';
+import type { IActionManager } from '@/services/actions/ActionManager';
 import type { IAction } from '@/services/actions/BaseAction';
 
 /**
@@ -11,7 +11,7 @@ export const ActionContext = createContext<ActionContextType | undefined>(undefi
  * Интерфейс контекста для Action Manager
  */
 export interface ActionContextType {
-  actionManager: ActionManager;
+  actionManager: IActionManager;
   executeAction: (actionId: string) => Promise<void>;
   getAction: (actionId: string) => IAction | undefined;
   getActionsByCategory: (category: string) => IAction[];

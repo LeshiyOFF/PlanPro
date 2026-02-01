@@ -42,7 +42,8 @@ export class AssignmentUtils {
   }
 
   /**
-   * Создание mock назначения
+   * Создание назначения для тестов и разработки.
+   * В production-потоке не использовать.
    */
   static createMockAssignment(data: Omit<Assignment, 'id'>): Assignment {
     return {

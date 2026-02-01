@@ -1,17 +1,16 @@
 import { useCallback, useMemo } from 'react'
 
-// API клиенты и типы
 import { TaskAPIClient } from '@/services'
-import type { 
-  Task, 
-  ID,
-  TaskAPI,
-  APIClientConfig 
-} from '@/types'
+import { stringToCatalogTaskId, uiTaskPartialToCatalog } from '@/services/CatalogTaskMapper'
+import type { APIClientConfig } from '@/services/BaseAPIClient'
+import type { Task } from '@/types/task-types'
+import type { ID } from '@/types/Master_Functionality_Catalog'
+import type { CaughtError } from '@/errors/CaughtError'
+import { toCaughtError } from '@/errors/CaughtError'
 
 /**
- * React хук для работы с Task API
- * Следует SOLID принципам
+ * React хук для работы с Task API.
+ * Использует типы store (task-types); маппинг в Catalog выполняется на границе.
  */
 export const useTaskAPI = (config?: APIClientConfig) => {
   const apiClient = useMemo(() => {
@@ -26,77 +25,52 @@ export const useTaskAPI = (config?: APIClientConfig) => {
     });
   }, [config]);
 
-  const handleError = useCallback((error: unknown, context: string) => {
+  const handleError = useCallback((error: CaughtError, context: string) => {
     console.error(`${context}:`, error);
-    
-    if (error instanceof Error) {
-      return {
-        message: error.message,
-        code: 'API_ERROR',
-        context
-      };
-    }
-
-    return {
-      message: 'Unknown error occurred',
-      code: 'UNKNOWN_ERROR',
-      context
-    };
+    return { message: error.message, code: 'API_ERROR', context };
   }, []);
 
+  const toId = (id: string | ID): ID =>
+    typeof id === 'string' ? stringToCatalogTaskId(id) : id;
+
   return useMemo(() => ({
-    /**
-     * Получение всех задач проекта
-     */
-    getAll: async (projectId: ID) => {
+    getAll: async (projectId: string | ID) => {
       try {
-        return await apiClient.getTasks(projectId);
+        return await apiClient.getTasks(toId(projectId));
       } catch (error) {
-        throw handleError(error, `Failed to fetch tasks for project ${projectId.value}`);
+        throw handleError(toCaughtError(error), 'Failed to fetch tasks for project');
       }
     },
 
-    /**
-     * Получение задачи по ID
-     */
-    getById: async (id: ID) => {
+    getById: async (id: string | ID) => {
       try {
-        return await apiClient.getTask(id);
+        return await apiClient.getTask(toId(id));
       } catch (error) {
-        throw handleError(error, `Failed to fetch task ${id.value}`);
+        throw handleError(toCaughtError(error), 'Failed to fetch task');
       }
     },
 
-    /**
-     * Создание задачи
-     */
     create: async (task: Partial<Task>) => {
       try {
-        return await apiClient.createTask(task);
+        return await apiClient.createTask(uiTaskPartialToCatalog(task));
       } catch (error) {
-        throw handleError(error, 'Failed to create task');
+        throw handleError(toCaughtError(error), 'Failed to create task');
       }
     },
 
-    /**
-     * Обновление задачи
-     */
-    update: async (id: ID, task: Partial<Task>) => {
+    update: async (id: string | ID, task: Partial<Task>) => {
       try {
-        return await apiClient.updateTask(id, task);
+        return await apiClient.updateTask(toId(id), uiTaskPartialToCatalog(task));
       } catch (error) {
-        throw handleError(error, `Failed to update task ${id.value}`);
+        throw handleError(toCaughtError(error), 'Failed to update task');
       }
     },
 
-    /**
-     * Удаление задачи
-     */
-    delete: async (id: ID) => {
+    delete: async (id: string | ID) => {
       try {
-        await apiClient.deleteTask(id);
+        await apiClient.deleteTask(toId(id));
       } catch (error) {
-        throw handleError(error, `Failed to delete task ${id.value}`);
+        throw handleError(toCaughtError(error), 'Failed to delete task');
       }
     }
   }), [apiClient, handleError]);

@@ -70,7 +70,7 @@ public class BrowserControl {
 				Desktop desktop = Desktop.getDesktop();
 				desktop.browse(new URI(url));
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to display URL: " + url, e);
 			}
 		}
 	}

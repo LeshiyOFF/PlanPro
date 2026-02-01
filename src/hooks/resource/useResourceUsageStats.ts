@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Resource } from '@/types/resource-types';
-import { Task } from '@/store/project/interfaces';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 
 /** Базовая загрузка: 100% = полная занятость ресурса */
 const BASE_CAPACITY = 1.0;
@@ -31,13 +31,13 @@ const calculateResourceLoad = (resource: Resource, tasks: Task[]): number => {
   
   for (const task of tasks) {
     // Пропускаем summary задачи
-    if (task.summary) continue;
+    if (task.isSummary) continue;
     
     // Приоритет: новый формат resourceAssignments
-    const assignment = task.resourceAssignments?.find(a => a.resourceId === resource.id);
+    const assignment = task.resourceAssignments?.find(a => a.resourceId === String(resource.id));
     if (assignment) {
       totalUnits += assignment.units;
-    } else if (task.resourceIds?.includes(resource.id)) {
+    } else if (getTaskResourceIds(task).includes(String(resource.id))) {
       // Fallback: старый формат resourceIds (100% по умолчанию)
       totalUnits += BASE_CAPACITY;
     }

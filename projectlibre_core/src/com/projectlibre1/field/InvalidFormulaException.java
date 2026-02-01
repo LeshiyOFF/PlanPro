@@ -56,41 +56,24 @@
 package com.projectlibre1.field;
 
 /**
- * 
+ * Exception thrown when a formula expression is invalid or cannot be parsed.
  */
 public class InvalidFormulaException extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
 	public InvalidFormulaException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidFormulaException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidFormulaException(String message) {
+		super(message);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidFormulaException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidFormulaException(Throwable cause) {
+		super(cause);
 	}
 
-	/**
-	 * @param arg0
-	 * @param arg1
-	 */
-	public InvalidFormulaException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+	public InvalidFormulaException(String message, Throwable cause) {
+		super(message, cause);
 	}
-
 }

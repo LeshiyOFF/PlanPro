@@ -101,14 +101,9 @@ import com.projectlibre1.util.DateTime;
  */
 public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable, Serializable, ContourTypes {// , Schedule {
 	static final long serialVersionUID = 867792734923243L;
-	transient Rate rate = new Rate(1.0D,TimeUnit.PERCENT); // units can never be 0!!!
+	transient Rate rate = new Rate(1.0D,TimeUnit.PERCENT);
  	double percentComplete = 0;
  	long duration = 0;
-	//TODO There is some stuff to figure out regarding contouring remaining work.  If you change the contour, Project applies
-	// the entire contour to the remaining work.  If you keep completing and change the contour again, project keeps the
-	// different contours active to where they were applied.  The weird thing is that if you uncomplete the task, the work still
-	// shows the various contours, even if the current contour is flat.  This is a bug.
- 	
  	
 	private int workContourType; // these are only used for serializing the contour.  They are not "up to date" otherwise
 	private int costContourType;
@@ -208,8 +203,8 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 	 * @return overtime value 
 	 */
 	double calcOvertimeUnits() {
-		long workingDuration = calcWorkingDuration(); //TODO this should be stored
-		if (workingDuration == 0) // take care of degenerate case
+		long workingDuration = calcWorkingDuration();
+		if (workingDuration == 0)
 			return 0.0;
 		return ((double)overtimeWork) / workingDuration;
 	}
@@ -244,8 +239,9 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 	}
 
 	/**
+	 * Debug method to set work contour directly.
 	 * @param contour The contour to set.
-	 * TODO get rid of this
+	 * @deprecated Use setWorkContour with ContourFactory instead
 	 */
 	public void debugSetWorkContour(AbstractContour contour) {
 		this.workContour = contour;
@@ -412,8 +408,7 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 			else
 				baselineCalendar = (WorkingCalendar) getEffectiveWorkCalendar().clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Failed to clone work calendar for baseline", e);
 		}
 	}
 	
@@ -474,8 +469,7 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 				s = d;
 		}
 		if (delay > 0)
-			s = getEffectiveWorkCalendar().add(s,delay,false); // use later time
-		//TODO check if above should use task calendar or assignment calendar
+			s = getEffectiveWorkCalendar().add(s,delay,false);
 		return s; 
 	}
 	
@@ -501,32 +495,8 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 		return Math.max(0,getEffectiveWorkCalendar().compare(getDependencyStart(),remainingStart,false));
 	}
 	
-
-//		// if need to split
-//		if (actualDuration >0 && actualDuration != durationMillis) {
-//			long start = getStart();
-//			long split = getTaskSchedule().getResume();
-//			if (split > start) {
-//				long splitDuration = task.getEffectiveWorkCalendar().compare(split,start,false); //TODO move this elsewhere
-//				finish = getEffectiveWorkCalendar().add(finish,splitDuration,true);
-//		}
-//		}
-//		return finish;
-
-	
 	long getFinish() {
 		return getEnd();
-
-//		// if need to split
-//		if (actualDuration >0 && actualDuration != durationMillis) {
-//			long start = getStart();
-//			long split = getTaskSchedule().getResume();
-//			if (split > start) {
-//				long splitDuration = task.getEffectiveWorkCalendar().compare(split,start,false); //TODO move this elsewhere
-//				finish = getEffectiveWorkCalendar().add(finish,splitDuration,true);
-//		}
-//		}
-//		return finish;
 	}
 
 
@@ -630,15 +600,15 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 
 
 	
-	/** returns the amount of effort that the resource as available to work on the assignment 
-	 * 
-	 * @return
+	/**
+	 * Returns the amount of effort that the resource has available to work on the assignment.
+	 * Uses resource's maximum units multiplied by duration.
+	 * @return available effort in milliseconds
 	 */
 	long getResourceAvailability() {
 		WorkCalendar cal = resource.getEffectiveWorkCalendar();
 		if (cal == null)
 			cal = task.getOwningProject().getEffectiveWorkCalendar();
-		//TODO implement time-scaled availability
 		return (long) resource.getMaximumUnits() * cal.compare(getFinish(),getStart(),false);
 	}
 	
@@ -1013,41 +983,6 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 	    	
 	}
 	public Object clone() {
-//		try {
-			/*
-			private transient Rate rate = new Rate(1.0D); // units can never be 0!!!
-		 	double percentComplete = 0;
-		 	long duration = 0;
-
-		    //	private Schedule schedule = new ScheduleImpl(this);
-			
-//			private long durationMillis; // This includes non-working duration (if personal contour).  See also calcWorkingDuration()
-//			long actualDuration = 0;
-			
-			//TODO There is some stuff to figure out regarding contouring remaining work.  If you change the contour, Project applies
-			// the entire contour to the remaining work.  If you keep completing and change the contour again, project keeps the
-			// different contours active to where they were applied.  The weird thing is that if you uncomplete the task, the work still
-			// shows the various contours, even if the current contour is flat.  This is a bug.
-		 	
-		 	
-			private int workContourType; // these are only used for serializing the contour.  They are not "up to date" otherwise
-			private int costContourType;
-		 	private transient AbstractContour workContour = StandardContour.FLAT_CONTOUR;
-			private transient AbstractContour costContour = StandardContour.FLAT_CONTOUR;
-
-			private transient WorkCalendar actualExceptionsCalendar; // for when user enters actual work during non-work time of calendar
-			private transient WorkingCalendar intersectionCalendar = null;
-			private transient TaskSchedule taskSchedule = null;
-
-			private transient Resource resource;
-			private transient Task task;
-			private transient Delayable delayable;
-			private int requestDemandType = RequestDemandType.NONE;
-			private int costRateIndex = CostRateTables.DEFAULT;
-			private long overtimeWork = 0; // allowed overtime that is evenly distributed across contour
-			
-			private WorkingCalendar baselineCalendar = null; // only applies if this is a baseline
-			*/
 			AssignmentDetail a = new AssignmentDetail();
 			a.rate=(Rate)rate.clone();
 			a.percentComplete = percentComplete;
@@ -1128,8 +1063,7 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 			try {
 				actualExceptionsCalendar.setBaseCalendar(base);
 			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new RuntimeException("Failed to set base calendar for exceptions", e);
 			}
 		}
 		actualExceptionsCalendar.addCalendarTime(start, end);

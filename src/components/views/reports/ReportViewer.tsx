@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { IReportData, IReportSection } from '@/domain/reporting/interfaces/IReport';
 import { FileText } from 'lucide-react';
+import type { JsonObject } from '@/types/json-types';
+
+import type { JsonValue } from '@/types/json-types';
 
 interface ReportViewerProps {
   data: IReportData;
@@ -130,7 +133,7 @@ const ReportSection: React.FC<{ section: IReportSection }> = ({ section }) => {
       return new Set<string>();
     }
     const cols = new Set<string>();
-    const firstRow = section.content[0] as Record<string, unknown>;
+    const firstRow = section.content[0] as Record<string, JsonValue>;
     Object.keys(firstRow).forEach(key => {
       if (isProgressValue(key, firstRow[key]) !== null) {
         cols.add(key);
@@ -171,7 +174,7 @@ const ReportSection: React.FC<{ section: IReportSection }> = ({ section }) => {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {section.content.map((row: Record<string, unknown>, i: number) => (
+              {section.content.map((row: Record<string, JsonValue>, i: number) => (
                 <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                   {Object.entries(row).map(([key, val], j: number) => {
                     const progressValue = progressColumns.has(key) ? isProgressValue(key, val) : null;
@@ -195,5 +198,3 @@ const ReportSection: React.FC<{ section: IReportSection }> = ({ section }) => {
     </section>
   );
 };
-
-

@@ -203,10 +203,14 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 
 	public boolean isCritical() {
-		if (currentSchedule.isForward())
-			return getEarlyFinish() >= getLateFinish(); //TODO hook into preference
-		else // reverse schedule
-			return getLateStart() <= getEarlyStart();
+		long threshold = ScheduleOption.getInstance().getCriticalSlackThreshold();
+		if (currentSchedule.isForward()) {
+			long slack = getLateFinish() - getEarlyFinish();
+			return slack <= threshold;
+		} else {
+			long slack = getEarlyStart() - getLateStart();
+			return slack <= threshold;
+		}
 	}
 
 	public boolean isMilestone() {
@@ -1182,8 +1186,6 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 			getDocument().getObjectEventManager().fireUpdateEvent(this, this,
 					Configuration.getFieldFromId("Field.start"));
 		} else {
-			//TODO duplicate event
-			//TODO in the case of progress update this event is useless since critical path runs after.
 			getProject().fireScheduleChanged(this, ScheduleEvent.ACTUAL, this);
 		}
 
@@ -1217,7 +1219,6 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 
 	private void setStopNoExtend(long stop) {
-		//TODO figure out
 		long start = getStart();
 		if (stop < start) {// don't allow completion before start
 			setActualDuration(0);
@@ -1904,7 +1905,7 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 	protected transient static BarClosure barClosureInstance = new BarClosure();
 	public void consumeIntervals(IntervalConsumer consumer) {
-		if (isWbsParent() || isSubproject()) { //TODO this shouldn't be needed since default assignment should be ok.  See why
+		if (isWbsParent() || isSubproject()) {
 			consumer.consumeInterval(new ScheduleInterval(getStart(),getEnd()));
 			return;
 		}
@@ -1946,11 +1947,12 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 
 	/**
-	 * @param actualStart
+	 * Sets the actual start date for this task.
+	 * The date is adjusted to fall within working calendar.
+	 * @param actualStart the actual start date in milliseconds
 	 */
 	public void setActualStart(long actualStart) {
-		actualStart = getEffectiveWorkCalendar().adjustInsideCalendar(actualStart, false); //TODO not good if it starts off calendar
-
+		actualStart = getEffectiveWorkCalendar().adjustInsideCalendar(actualStart, false);
 		setActualStartNoEvent(actualStart);
 		markTaskAsNeedingRecalculation();
 		getProject().fireScheduleChanged(this, ScheduleEvent.ACTUAL, this);
@@ -2271,8 +2273,6 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 			getDocument().getObjectEventManager().fireUpdateEvent(this, this,
 					Configuration.getFieldFromId("Field.start"));
 		} else {
-			//TODO duplicate event
-			//TODO in the case of progress update this event is useless since critical path runs after.
 			getProject().fireScheduleChanged(this, ScheduleEvent.ACTUAL, this);
 		}
 	}
@@ -2303,7 +2303,6 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 		backup.windowLateFinish=windowLateFinish;
 		backup.windowLateStart=windowLateStart;
 		backup.actualStart=actualStart;
-		//TODO Backup other fields?
 		return backup;
 	}
 

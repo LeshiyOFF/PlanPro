@@ -1,4 +1,13 @@
-import { IJavaResponse } from '../types/JavaResponseDTO';
+import type { IJavaResponse } from '../types/JavaResponseDTO';
+import type { JsonValue } from '../types/JsonValue';
+
+/** Форма сырого ответа Java API до валидации (опциональные поля). */
+export interface RawJavaResponseShape {
+  success?: boolean;
+  timestamp?: string;
+  data?: JsonValue;
+  error?: string;
+}
 
 /**
  * Сервис валидации схем данных.
@@ -9,7 +18,7 @@ export class SchemaValidatorService {
   /**
    * Валидация базовой структуры ответа Java
    */
-  public static validateResponse<T>(response: any): IJavaResponse<T> {
+  public static validateResponse<T>(response: RawJavaResponseShape): IJavaResponse<T> {
     if (!response || typeof response !== 'object') {
       throw new Error('Invalid response format: expected object');
     }
@@ -18,17 +27,17 @@ export class SchemaValidatorService {
       throw new Error('Invalid response format: missing success flag');
     }
 
-    if (!response.timestamp) {
-      response.timestamp = new Date().toISOString();
+    const result = { ...response } as IJavaResponse<T>;
+    if (!result.timestamp) {
+      result.timestamp = new Date().toISOString();
     }
-
-    return response as IJavaResponse<T>;
+    return result;
   }
 
   /**
    * Глубокая валидация DTO (пример для расширения)
    */
-  public static validateDto(data: any, type: 'project' | 'task' | 'resource'): boolean {
+  public static validateDto(data: object, type: 'project' | 'task' | 'resource'): boolean {
     if (!data) return false;
 
     // Базовая проверка наличия обязательных полей

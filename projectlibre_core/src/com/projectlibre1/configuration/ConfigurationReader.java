@@ -84,7 +84,7 @@ public class ConfigurationReader {
 			result = readStream(url.openStream(), root);
 		} catch (IOException e) {
 			log.error("Could not read field xml configuration file " + url);
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Could not read field xml configuration file " + url, e);
 		}
 		//log.info("Done reading configuration from " + url + " " + new java.util.Date());
 		return result;
@@ -110,8 +110,7 @@ public class ConfigurationReader {
 			result = (ProvidesDigesterEvents) digester.parse(stream);
 		} catch (Exception e1) { //claur
 			log.error("Error parsing reading/parsing field xml configuration file.");
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Error parsing reading/parsing field xml configuration file.", e1);
 		}
 		return result;
 	}

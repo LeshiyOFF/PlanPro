@@ -1,18 +1,20 @@
-import { 
-  DialogResult, 
-  DialogEvent, 
-  DialogEventHandler,
-  DialogStatus,
-  DialogCategory
-} from '@/types/dialog/DialogTypes';
+/**
+ * @deprecated Используйте TypedDialogService вместо этого класса
+ * Этот файл сохранен для обратной совместимости
+ */
+
+import React from 'react';
+import { TypedDialogService } from './dialog/TypedDialogService';
+import type { JsonValue } from '@/types/json-types';
+import type { JsonValue } from '@/types/json-types';
 
 /**
- * Интерфейс для регистрации диалога
+ * @deprecated Legacy интерфейс, используйте IDialogService
  */
 export interface DialogRegistration {
   id: string;
-  category: DialogCategory;
-  component: React.ComponentType<any>;
+  category: string;
+  component: React.ComponentType<Record<string, JsonValue>>;
   config?: {
     width?: number;
     height?: number;
@@ -21,30 +23,31 @@ export interface DialogRegistration {
 }
 
 /**
- * Интерфейс для состояния диалога
+ * @deprecated Legacy интерфейс, используйте IDialogState
  */
 export interface DialogState {
   id: string;
   isOpen: boolean;
-  data?: any;
-  status: DialogStatus;
-  config?: any;
+  data?: Record<string, JsonValue>;
+  status: string;
+  config?: Record<string, JsonValue>;
 }
 
 /**
- * Сервис для управления всеми диалоговыми окнами приложения
- * Реизует SOLID принцип Single Responsibility
- * Следует Clean Architecture (Application Layer)
+ * @deprecated Используйте TypedDialogService
+ * Обертка для обратной совместимости
  */
 export class DialogService {
   private static instance: DialogService;
-  private dialogs: Map<string, DialogRegistration> = new Map();
-  private activeDialogs: Map<string, DialogState> = new Map();
-  private eventHandlers: Map<string, DialogEventHandler[]> = new Map();
-  private listeners: Set<() => void> = new Set();
+  private typedService: TypedDialogService;
+  private readonly legacyRegistrations = new Map<string, DialogRegistration>();
+
+  private constructor() {
+    this.typedService = TypedDialogService.getInstance();
+  }
 
   /**
-   * Получение singleton экземпляра
+   * @deprecated Используйте TypedDialogService.getInstance()
    */
   public static getInstance(): DialogService {
     if (!DialogService.instance) {
@@ -54,239 +57,68 @@ export class DialogService {
   }
 
   /**
-   * Регистрация нового типа диалога
+   * @deprecated Используйте typedService.register()
    */
   public registerDialog(registration: DialogRegistration): void {
-    if (this.dialogs.has(registration.id)) {
-      console.warn(`Dialog with id ${registration.id} already registered`);
-      return;
-    }
-
-    this.dialogs.set(registration.id, registration);
-    this.emitEvent({
-      type: 'open',
-      dialogId: registration.id,
-      timestamp: new Date()
-    });
+    this.legacyRegistrations.set(registration.id, registration);
+    console.warn('DialogService.registerDialog is deprecated. Use TypedDialogService.register()');
   }
 
   /**
-   * Открытие диалога
+   * @deprecated Возвращает legacy-регистрацию по id для обратной совместимости
    */
-  public openDialog(dialogId: string, data?: any, config?: any): Promise<DialogResult> {
-    return new Promise((resolve) => {
-      const registration = this.dialogs.get(dialogId);
-      if (!registration) {
-        console.error(`Dialog with id ${dialogId} not found`);
-        resolve({
-          success: false,
-          error: 'Dialog not found',
-          action: 'cancel'
-        });
-        return;
-      }
-
-      // Закрытие существующего диалога того же типа
-      if (this.activeDialogs.has(dialogId)) {
-        this.closeDialog(dialogId);
-      }
-
-      const dialogState: DialogState = {
-        id: dialogId,
-        isOpen: true,
-        data,
-        status: DialogStatus.INITIAL,
-        config: { ...registration.config, ...config }
-      };
-
-      this.activeDialogs.set(dialogId, dialogState);
-      
-      // Сохранение resolver для последующего вызова при закрытии
-      (dialogState as any).resolver = resolve;
-
-      this.emitEvent({
-        type: 'open',
-        dialogId,
-        timestamp: new Date(),
-        data
-      });
-
-      this.notifyListeners();
-    });
+  public getDialog(id: string): DialogRegistration | null {
+    return this.legacyRegistrations.get(id) ?? null;
   }
 
   /**
-   * Закрытие диалога
+   * @deprecated Используйте typedService.open()
    */
-  public closeDialog(dialogId: string, result?: DialogResult): void {
-    const dialogState = this.activeDialogs.get(dialogId);
-    if (!dialogState) {
-      return;
-    }
-
-    // Вызов resolver если есть
-    if ((dialogState as any).resolver && result) {
-      (dialogState as any).resolver(result);
-    }
-
-    this.activeDialogs.delete(dialogId);
-    
-    this.emitEvent({
-      type: 'close',
-      dialogId,
-      timestamp: new Date(),
-      data: result
-    });
-
-    this.notifyListeners();
+  public async openDialog(
+    _dialogId: string,
+    _data?: Record<string, JsonValue>
+  ): Promise<{ success: boolean; error?: string }> {
+    console.warn('DialogService.openDialog is deprecated. Use TypedDialogService.open()');
+    return { success: false, error: 'Use TypedDialogService' };
   }
 
   /**
-   * Получение зарегистрированного диалога по ID
+   * @deprecated Используйте typedService.close()
    */
-  public getDialog(dialogId: string): DialogRegistration | null {
-    return this.dialogs.get(dialogId) || null;
+  public closeDialog(_dialogId: string): void {
+    console.warn('DialogService.closeDialog is deprecated. Use TypedDialogService.close()');
   }
 
   /**
-   * Получение состояния диалога
+   * @deprecated Используйте typedService.isOpen()
    */
-  public getDialogState(dialogId: string): DialogState | undefined {
-    return this.activeDialogs.get(dialogId);
+  public isDialogOpen(_dialogId: string): boolean {
+    console.warn('DialogService.isDialogOpen is deprecated. Use TypedDialogService.isOpen()');
+    return false;
   }
 
   /**
-   * Получение всех активных диалогов
-   */
-  public getActiveDialogs(): DialogState[] {
-    return Array.from(this.activeDialogs.values());
-  }
-
-  /**
-   * Проверка открыт ли диалог
-   */
-  public isDialogOpen(dialogId: string): boolean {
-    const state = this.activeDialogs.get(dialogId);
-    return state?.isOpen || false;
-  }
-
-  /**
-   * Обновление данных диалога
-   */
-  public updateDialogData(dialogId: string, data: any): void {
-    const dialogState = this.activeDialogs.get(dialogId);
-    if (dialogState) {
-      dialogState.data = data;
-      this.notifyListeners();
-    }
-  }
-
-  /**
-   * Обновление статуса диалога
-   */
-  public updateDialogStatus(dialogId: string, status: DialogStatus): void {
-    const dialogState = this.activeDialogs.get(dialogId);
-    if (dialogState) {
-      dialogState.status = status;
-      this.notifyListeners();
-    }
-  }
-
-  /**
-   * Закрытие всех диалогов
+   * @deprecated Используйте typedService.closeAll()
    */
   public closeAllDialogs(): void {
-    const dialogIds = Array.from(this.activeDialogs.keys());
-    dialogIds.forEach(id => this.closeDialog(id));
+    console.warn('DialogService.closeAllDialogs is deprecated. Use TypedDialogService.closeAll()');
   }
 
   /**
-   * Получение всех зарегистрированных диалогов по категории
-   */
-  public getDialogsByCategory(category: DialogCategory): DialogRegistration[] {
-    return Array.from(this.dialogs.values())
-      .filter(dialog => dialog.category === category);
-  }
-
-  /**
-   * Подписка на события диалога
-   */
-  public addEventListener(eventType: string, handler: DialogEventHandler): void {
-    const key = `${eventType}_handlers`;
-    if (!this.eventHandlers.has(key)) {
-      this.eventHandlers.set(key, []);
-    }
-    
-    const handlers = this.eventHandlers.get(key)!;
-    handlers.push(handler);
-  }
-
-  /**
-   * Отписка от событий диалога
-   */
-  public removeEventListener(eventType: string, handler: DialogEventHandler): void {
-    const key = `${eventType}_handlers`;
-    const handlers = this.eventHandlers.get(key);
-    if (handlers) {
-      const index = handlers.indexOf(handler);
-      if (index > -1) {
-        handlers.splice(index, 1);
-      }
-    }
-  }
-
-  /**
-   * Подписка на изменения состояния
+   * @deprecated Используйте typedService.subscribe()
    */
   public subscribe(listener: () => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  /**
-   * Излучение события
-   */
-  private emitEvent(event: DialogEvent): void {
-    const key = `${event.type}_handlers`;
-    const handlers = this.eventHandlers.get(key);
-    if (handlers) {
-      handlers.forEach(handler => {
-        try {
-          handler(event);
-        } catch (error) {
-          console.error('Dialog event handler error:', error);
-        }
-      });
-    }
-  }
-
-  /**
-   * Уведомление всех слушателей
-   */
-  private notifyListeners(): void {
-    this.listeners.forEach(listener => {
-      try {
-        listener();
-      } catch (error) {
-        console.error('Dialog listener error:', error);
-      }
-    });
-  }
-
-  /**
-   * Очистка ресурсов
-   */
-  public dispose(): void {
-    this.dialogs.clear();
-    this.activeDialogs.clear();
-    this.eventHandlers.clear();
-    this.listeners.clear();
+    return this.typedService.subscribe(listener);
   }
 }
 
-// Экспорт singleton экземпляра для совместимости
+/**
+ * @deprecated Используйте dialogService из './dialog/TypedDialogService'
+ */
 export const dialogService = DialogService.getInstance();
 
-// Экспорт singleton по умолчанию для удобного импорта
+/**
+ * @deprecated Используйте TypedDialogService.getInstance()
+ */
 export default DialogService.getInstance();
 

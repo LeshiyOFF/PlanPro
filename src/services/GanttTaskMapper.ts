@@ -33,14 +33,14 @@ export class GanttTaskMapper {
     resources: Resource[] = [],
     calendars: IWorkCalendar[] = [],
     activeBaseline?: ProjectBaseline,
-    t?: any
+    t?: (key: string, opts?: Record<string, string>) => string
   ): ExtendedGanttTask[] {
     const extendedTasks = this.dataExtender.extendTasksToFillView(tasks, containerHeight, preferences.rowHeight);
     const conflictService = CalendarConflictService.getInstance();
     
     return extendedTasks.map((task: Task & { isFiller?: boolean }): ExtendedGanttTask => {
       const visualProgress = task.isFiller ? 0 : getVisualProgress(task);
-      const isCritical = !task.isFiller && (task.critical || task.criticalPath);
+      const isCritical = !task.isFiller && !!task.isCritical;
       const baselineDates = activeBaseline?.taskDates[task.id];
       
       // Stage 8.20: Проверка календарных конфликтов
@@ -58,10 +58,10 @@ export class GanttTaskMapper {
         end: mappedEnd,
         // Округление для устранения IEEE 754 артефактов (0.28 * 100 -> 28, не 28.000000...)
         progress: Math.round(visualProgress * 100),
-        type: task.summary ? 'project' : (task.milestone ? 'milestone' : 'task'),
+        type: task.isSummary ? 'project' : (task.isMilestone ? 'milestone' : 'task'),
         dependencies: task.predecessors || [],
         styles,
-        isDisabled: !!task.isFiller || !!task.summary,
+        isDisabled: !!task.isFiller || !!task.isSummary,
         originalTask: task,
         baselineDates,
         calendarConflict
@@ -73,10 +73,10 @@ export class GanttTaskMapper {
     task: Task & { isFiller?: boolean }, 
     isCritical: boolean, 
     isPulseActive: boolean,
-    showBaseline: boolean,
-    mode: string,
+    _showBaseline: boolean,
+    _mode: string,
     prefs: IGanttPreferences,
-    baselineDates?: { startDate: Date; endDate: Date },
+    _baselineDates?: { startDate: Date; endDate: Date },
     calendarConflict?: CalendarConflictResult
   ) {
     if (task.isFiller) {
@@ -88,7 +88,7 @@ export class GanttTaskMapper {
       };
     }
 
-    let barColor = task.color;
+    let barColor: string | undefined = undefined;
     let backgroundSelectedColor = '#3b82f6';
     let progressColor = '#2563eb';
     
@@ -121,11 +121,11 @@ export class GanttTaskMapper {
     }
 
     // Default Coloring based on preferences
-    const overrideColor = (task.summary && prefs.summaryColoringMode === 'auto') || 
-                         (!task.summary && prefs.coloringMode !== 'single');
+const overrideColor = (task.isSummary && prefs.summaryColoringMode === 'auto') ||
+                         (!task.isSummary && prefs.coloringMode !== 'single');
 
     if (!barColor || overrideColor) {
-      if (task.summary) {
+      if (task.isSummary) {
         barColor = prefs.summaryColoringMode === 'auto' 
           ? ColorUtils.generateRainbowColor(task.id) 
           : prefs.summaryColor;
@@ -156,7 +156,7 @@ export class GanttTaskMapper {
     getFormattedName: (t: Task) => string,
     resources: Resource[],
     baselineDates?: { startDate: Date; endDate: Date },
-    t?: any // Translation function
+    t?: (key: string, opts?: Record<string, string>) => string
   ): string {
     if (task.isFiller) return '';
     if (prefs.labelMode === 'none') return '';
@@ -165,7 +165,7 @@ export class GanttTaskMapper {
     let label = baseName;
 
     // Delta Markers
-    if (prefs.showDeltasInLabels && baselineDates && !task.summary && !task.milestone) {
+    if (prefs.showDeltasInLabels && baselineDates && !task.isSummary && !task.isMilestone) {
       const diffDays = Math.round((new Date(task.endDate).getTime() - new Date(baselineDates.endDate).getTime()) / (1000 * 60 * 60 * 24));
       if (diffDays > 0) {
         label += ` [+${diffDays}${t ? t('gantt.days_short', { defaultValue: 'д' }) : 'd'}]`;
@@ -178,9 +178,10 @@ export class GanttTaskMapper {
 
     switch (prefs.labelMode) {
       case 'resource': {
-        const names = task.resourceIds
-          ?.map(id => resources.find(r => r.id === id)?.name)
-          .filter((name): name is string => !!name && name.trim() !== '') || [];
+        const resourceIds = task.resourceAssignments?.map((a: { resourceId: string }) => a.resourceId) ?? [];
+        const names = resourceIds
+          .map((id: string) => resources.find((r: Resource) => r.id === id)?.name)
+          .filter((name: string | undefined): name is string => !!name && name.trim() !== '');
         return names.length > 0 ? `${label} [${names.join(', ')}]` : label;
       }
       case 'dates':

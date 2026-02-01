@@ -1,6 +1,10 @@
 /**
- * Типы для проектов ProjectLibre
+ * Типы для проектов ProjectLibre.
+ * Задачи и ресурсы унифицированы со стором (store Task, Catalog Resource/Assignment).
  */
+
+import type { Task } from '@/store/project/interfaces';
+import type { Resource, Assignment } from '@/types/resource-types';
 
 export type ProjectStatus = 'Planning' | 'InProgress' | 'Completed' | 'OnHold'
 
@@ -16,9 +20,9 @@ export interface Project {
   actualCost?: number
   manager?: string
   description?: string
-  tasks: import('./task-types').Task[]
-  resources: import('./resource-types').Resource[]
-  assignments: import('./resource-types').Assignment[]
+  tasks: Task[]
+  resources: Resource[]
+  assignments: Assignment[]
 }
 
 export type ViewType = 'gantt' | 'network' | 'task-usage' | 'resource-usage'

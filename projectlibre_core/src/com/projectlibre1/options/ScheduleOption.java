@@ -81,6 +81,13 @@ public class ScheduleOption implements Serializable {
 	int workUnit = TimeUnit.HOURS;
 	int rateEnteredIn = TimeUnit.HOURS;
 	boolean newTasksStartToday = false; // default is project start;
+	
+	/**
+	 * Critical path slack threshold in milliseconds.
+	 * Tasks with slack less than this threshold are considered critical.
+	 * Default: 0 (only tasks with zero slack are critical)
+	 */
+	long criticalSlackThreshold = 0L;
 	/**
 	 * @return Returns the schedulingRule.
 	 */
@@ -167,5 +174,21 @@ public class ScheduleOption implements Serializable {
 
 	public final void setRateEnteredIn(int rateEnteredIn) {
 		this.rateEnteredIn = rateEnteredIn;
+	}
+	
+	/**
+	 * Gets the critical path slack threshold in milliseconds.
+	 * @return threshold in milliseconds
+	 */
+	public long getCriticalSlackThreshold() {
+		return criticalSlackThreshold;
+	}
+	
+	/**
+	 * Sets the critical path slack threshold.
+	 * @param criticalSlackThreshold threshold in milliseconds
+	 */
+	public void setCriticalSlackThreshold(long criticalSlackThreshold) {
+		this.criticalSlackThreshold = criticalSlackThreshold;
 	}
 }

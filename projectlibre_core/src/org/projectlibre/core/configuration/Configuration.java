@@ -98,11 +98,6 @@ public class Configuration {
 	}
 	
 	public synchronized void load(){
-//		try {
-//			Thread.sleep(5000L);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 		for (ConfigurationFile config : configurations){
 			if (!config.isBinded()){
 				config.setRoot(load(config.getFile(),config.getClassesToBeBound()));
@@ -135,10 +130,13 @@ public class Configuration {
 			unmarshaller.setSchema(null);
 			unmarshaller.setListener(new DictionaryListener());
 			InputStream in = Configuration.class.getClassLoader().getResourceAsStream(resourceName);
-			//TODO handle null case if not found
+			if (in == null) {
+				com.projectlibre1.server.access.ErrorLogger.log("Resource not found: " + resourceName, null);
+				return null;
+			}
 			return unmarshaller.unmarshal(in);
 		} catch(JAXBException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("JAXB exception loading resource: " + resourceName, e);
 		}
 		return null;
 	}
@@ -148,25 +146,21 @@ public class Configuration {
 			Marshaller marshaller = context.createMarshaller();			
 			marshaller.marshal(configuration, new File(resourceName));
 		} catch(JAXBException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("JAXB exception saving resource: " + resourceName, e);
 		}
 	}
 	public static synchronized void dump(Object obj, java.io.OutputStream out){
 		dump(obj.getClass(),obj,out);
 	}
 	public static synchronized void dump(Class<?> classe, Object obj,  java.io.OutputStream out){
-		if (obj==null)
-			System.out.println("null");
-		else{
+		if (obj!=null){
 			try {
 				JAXBContext context = JAXBContext.newInstance(classe);
 				Marshaller marshaller = context.createMarshaller();
 				marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 				marshaller.marshal(obj, out);
-			} catch (PropertyException e) {
-				e.printStackTrace();
-			} catch (JAXBException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				com.projectlibre1.server.access.ErrorLogger.log("Exception during JAXB dump", e);
 			}
 		}
 	}
@@ -184,10 +178,8 @@ public class Configuration {
 					marshaller.marshal(map.get(id), System.out);
 				}
 			}
-		} catch (PropertyException e) {
-			e.printStackTrace();
-		} catch (JAXBException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Exception during dictionary dump", e);
 		}
 
 	}

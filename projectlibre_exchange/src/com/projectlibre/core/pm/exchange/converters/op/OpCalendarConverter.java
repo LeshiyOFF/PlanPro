@@ -84,8 +84,7 @@ public class OpCalendarConverter {
 			try {
 				opCalendar.setBaseCalendar(baseCalendar);
 			} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log(e);
 			}
 		}		
 		

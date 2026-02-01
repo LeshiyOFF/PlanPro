@@ -39,7 +39,8 @@ export class TaskUtils {
   }
 
   /**
-   * Создание mock задачи
+   * Создание задачи для тестов и разработки.
+   * В production-потоке не использовать.
    */
   static createMockTask(data: Omit<Task, 'id'>): Task {
     return {
@@ -53,7 +54,7 @@ export class TaskUtils {
    */
   static calculateProgress(tasks: Task[]): number {
     if (tasks.length === 0) return 0
-    return Math.round(Math.random() * 100) // mock: случайный прогресс
+    return Math.round(tasks.reduce((sum, t) => sum + (t.progress ?? 0), 0) / tasks.length)
   }
 }
 

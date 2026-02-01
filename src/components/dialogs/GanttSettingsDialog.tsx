@@ -77,7 +77,7 @@ export const GanttSettingsDialog: React.FC<GanttSettingsDialogProps> = ({ isOpen
           <TabsContent value="colors" className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>{t('gantt.task_coloring', { defaultValue: 'Режим раскраски задач' })}</Label>
-              <Select value={ganttPrefs.coloringMode} onValueChange={(val: 'single' | 'rainbow' | 'status') => handleUpdate({ coloringMode: val })}>
+              <Select value={ganttPrefs.coloringMode} onValueChange={(val: string) => handleUpdate({ coloringMode: val as 'single' | 'rainbow' | 'status' })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -90,7 +90,7 @@ export const GanttSettingsDialog: React.FC<GanttSettingsDialogProps> = ({ isOpen
             </div>
             <div className="space-y-2">
               <Label>{t('gantt.summary_coloring', { defaultValue: 'Режим раскраски суммарных задач' })}</Label>
-              <Select value={ganttPrefs.summaryColoringMode} onValueChange={(val: 'single' | 'auto') => handleUpdate({ summaryColoringMode: val })}>
+              <Select value={ganttPrefs.summaryColoringMode} onValueChange={(val: string) => handleUpdate({ summaryColoringMode: val as 'single' | 'auto' })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -105,7 +105,7 @@ export const GanttSettingsDialog: React.FC<GanttSettingsDialogProps> = ({ isOpen
           <TabsContent value="labels" className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>{t('gantt.label_mode', { defaultValue: 'Подписи у полосок' })}</Label>
-              <Select value={ganttPrefs.labelMode} onValueChange={(val: 'none' | 'name' | 'resource' | 'dates') => handleUpdate({ labelMode: val })}>
+              <Select value={ganttPrefs.labelMode} onValueChange={(val: string) => handleUpdate({ labelMode: val as 'none' | 'name' | 'resource' | 'dates' })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

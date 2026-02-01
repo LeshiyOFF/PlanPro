@@ -38,7 +38,7 @@ export const useEventOnce = (
   const { once } = useEventFlow();
 
   useEffect(() => {
-    const subscriptionId = once(eventType, handler);
+    once(eventType, handler);
     
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     return () => {}; // once автоматически удаляется после выполнения

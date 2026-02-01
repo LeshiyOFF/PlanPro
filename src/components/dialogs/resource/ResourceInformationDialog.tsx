@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  ResourceInformationData, 
   IDialogActions,
-  DialogResult 
+  DialogResult,
+  IDialogData
 } from '@/types/dialog/DialogTypes';
+import { ResourceInformationData, ResourceAssignedTaskItem } from '@/types/calendar-types';
 
 /**
  * Интерфейс для ResourceInformationDialog компонента
@@ -27,28 +28,31 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
   isOpen,
   onClose
 }) => {
-  const [resourceData, setResourceData] = useState<ResourceInformationData>({
-    id: `resource_${Date.now()}`,
-    title: 'Информация о ресурсе',
-    description: 'Детальная информация',
-    timestamp: new Date(),
-    resourceId: '',
-    name: '',
-    type: 'Рабочий',
-    rate: 0,
-    cost: 0,
-    availability: {
-      monday: true,
-      tuesday: true,
-      wednesday: true,
-      thursday: true,
-      friday: true,
-      saturday: false,
-      sunday: false
-    },
-    assignedTasks: [],
-    notes: '',
-    ...data
+  const [resourceData, setResourceData] = useState<ResourceInformationData>(() => {
+    const initial: ResourceInformationData = {
+      id: `resource_${Date.now()}`,
+      title: 'Информация о ресурсе',
+      description: 'Детальная информация',
+      timestamp: new Date(),
+      resourceId: '',
+      name: '',
+      type: 'Рабочий',
+      rate: 0,
+      cost: 0,
+      availability: {
+        monday: true,
+        tuesday: true,
+        wednesday: true,
+        thursday: true,
+        friday: true,
+        saturday: false,
+        sunday: false
+      },
+      assignedTasks: [],
+      notes: '',
+      ...data
+    };
+    return initial;
   });
 
   /**
@@ -95,10 +99,9 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
    * Расчет общей загрузки ресурса
    */
   const getTotalWorkload = (): number => {
-    if (!resourceData.assignedTasks.length) return 0;
-    
-    return resourceData.assignedTasks.reduce((total, task) => {
-      return total + (task.duration || 0);
+    if (!resourceData.assignedTasks?.length) return 0;
+    return resourceData.assignedTasks.reduce((total: number, task: ResourceAssignedTaskItem) => {
+      return total + (task.duration ?? 0);
     }, 0);
   };
 
@@ -106,18 +109,21 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
    * Действия диалога
    */
   const actions: IDialogActions = {
-    onOk: async (data: ResourceInformationData) => {
-      console.log('Resource information confirmed:', data);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return data;
+    onOk: async (_data?: IDialogData) => {
+      onClose({ success: true, data: resourceData, action: 'ok' });
     },
     
     onCancel: () => {
       console.log('Resource information dialog cancelled');
+      onClose({ success: false, action: 'cancel' });
     },
     
     onHelp: () => {
       console.log('Opening resource information help...');
+    },
+    
+    onValidate: (_data: IDialogData) => {
+      return true;
     }
   };
 
@@ -126,7 +132,7 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
    */
   useEffect(() => {
     if (data && Object.keys(data).length > 0) {
-      setResourceData(prev => ({
+      setResourceData((prev: ResourceInformationData) => ({
         ...prev,
         ...data,
         id: prev.id,
@@ -141,7 +147,7 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
   /**
    * Компонент содержимого диалога
    */
-  const DialogContent = () => (
+  const DialogContent: React.FC = () => (
     <div className="space-y-6 p-6">
       {/* Общая информация */}
       <div className="space-y-4">
@@ -222,12 +228,12 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
       {/* Назначенные задачи */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold text-foreground">
-          Назначенные задачи ({resourceData.assignedTasks.length})
+          Назначенные задачи ({resourceData.assignedTasks?.length ?? 0})
         </h3>
         
-        {resourceData.assignedTasks.length > 0 ? (
+        {(resourceData.assignedTasks?.length ?? 0) > 0 ? (
           <div className="space-y-2">
-            {resourceData.assignedTasks.map((task, index) => (
+            {resourceData.assignedTasks.map((task: ResourceAssignedTaskItem, index: number) => (
               <div key={index} className="flex items-center justify-between p-3 bg-muted rounded">
                 <div className="flex-1">
                   <div className="font-medium">{task.name}</div>
@@ -261,7 +267,7 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Общие затраты:</span>
                 <span className="font-medium">
-                  {resourceData.assignedTasks.reduce((total, task) => {
+                  {resourceData.assignedTasks.reduce((total: number, task: ResourceAssignedTaskItem) => {
                     return total + (task.rate * task.duration);
                   }, 0).toFixed(2)}
                 </span>
@@ -300,7 +306,7 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
         showHelp: true
       }}
     >
-      {DialogContent}
+      <DialogContent />
     </BaseDialog>
   );
 };

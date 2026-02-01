@@ -1,8 +1,10 @@
 import { 
   IGeneralPreferences,
-  IUserPreferences 
+  IUserPreferences,
+  Theme
 } from '../interfaces/UserPreferencesInterfaces';
 import { ViewType } from '@/types/ViewTypes';
+import type { Duration } from '@/types/Master_Functionality_Catalog';
 
 /**
  * Фабрика настроек по умолчанию
@@ -81,7 +83,7 @@ export class PreferencesDefaultsFactory {
       highContrast: false,
       fontSize: 14,
       fontFamily: 'Arial',
-      theme: 'light' as any,
+      theme: Theme.LIGHT,
       accentColor: '#1F1F1F'
     };
   }
@@ -106,9 +108,9 @@ export class PreferencesDefaultsFactory {
    */
   public static getCalculationPreferences() {
     return {
-      criticalSlack: { value: 0, unit: 'days' as any },
+      criticalSlack: { value: 0, unit: 'days' as Duration['unit'] },
       calculateMultipleCriticalPaths: false,
-      tasksAreCriticalIfSlackIsLessThan: { value: 0, unit: 'days' as any },
+      tasksAreCriticalIfSlackIsLessThan: { value: 0, unit: 'days' as Duration['unit'] },
       showEstimatedDurations: true,
       showActualWork: true,
       showBaselineWork: false

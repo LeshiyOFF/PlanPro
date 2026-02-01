@@ -1,6 +1,7 @@
 import { INITIAL_TASKS } from '../../data/projectData';
 import { Resource } from '@/types/resource-types';
 import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
+import { ProjectStore, Task } from './interfaces';
 
 export const initialResources: Resource[] = [
   {
@@ -11,62 +12,39 @@ export const initialResources: Resource[] = [
     standardRate: 50,
     overtimeRate: 75,
     costPerUse: 0,
-    available: true,
-    calendarId: 'standard'
-  },
-  {
-    id: '2',
-    name: 'Maria Garcia',
-    type: 'Work',
-    maxUnits: 0.75,
-    standardRate: 45,
-    overtimeRate: 65,
-    costPerUse: 0,
-    available: true,
-    calendarId: 'standard'
-  },
-  {
-    id: '3',
-    name: 'Development Team',
-    type: 'Material',
-    maxUnits: 10,
-    standardRate: 0,
-    overtimeRate: 0,
-    costPerUse: 0,
-    available: true,
-    materialLabel: 'чел.'
+    available: true
   }
 ];
 
 /**
  * Начальное состояние с демо-данными для первого запуска
  */
-export const initialProjectState = {
-  tasks: INITIAL_TASKS,
+export const initialProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
+  tasks: INITIAL_TASKS as Task[],
   resources: initialResources,
   calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
   baselines: [],
-  activeBaselineId: undefined as string | undefined,
+  activeBaselineId: undefined,
   initialized: true,
-  currentProjectId: undefined as number | undefined,
-  currentFilePath: undefined as string | undefined,
-  projectManager: undefined as string | undefined,
+  currentProjectId: undefined,
+  currentFilePath: undefined,
+  projectManager: undefined,
   isDirty: false
 };
 
 /**
  * Пустое состояние для нового/загруженного проекта
  */
-export const emptyProjectState = {
+export const emptyProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
   tasks: [],
   resources: [],
   calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
   baselines: [],
-  activeBaselineId: undefined as string | undefined,
+  activeBaselineId: undefined,
   initialized: true,
-  currentProjectId: undefined as number | undefined,
-  currentFilePath: undefined as string | undefined,
-  projectManager: undefined as string | undefined,
+  currentProjectId: undefined,
+  currentFilePath: undefined,
+  projectManager: undefined,
   isDirty: false
 };
 

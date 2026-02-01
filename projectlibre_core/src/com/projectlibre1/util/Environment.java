@@ -93,7 +93,6 @@ public class Environment {
 	}
 	public Environment() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	public static String getLogin() {
 		if (login == null)

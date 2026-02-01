@@ -16,8 +16,8 @@ export class GanttNavigationService {
     const target = CalendarDateService.toLocalMidnight(date).getTime();
     
     return tasks.some(task => {
-      // Игнорируем филлеры
-      if ((task as any).isFiller) return false;
+      // Игнорируем филлеры (расширение типа Task для UI)
+      if ((task as Task & { isFiller?: boolean }).isFiller) return false;
       
       const start = CalendarDateService.toLocalMidnight(task.startDate).getTime();
       const end = CalendarDateService.toLocalMidnight(task.endDate).getTime();
@@ -108,7 +108,7 @@ export class GanttNavigationService {
     let minDiff = Infinity;
 
     for (const task of tasks) {
-      if ((task as any).isFiller) continue;
+      if ((task as Task & { isFiller?: boolean }).isFiller) continue;
       
       const taskStart = new Date(task.startDate).getTime();
       const diff = Math.abs(taskStart - targetTime);

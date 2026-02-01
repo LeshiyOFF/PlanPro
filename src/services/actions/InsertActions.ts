@@ -1,7 +1,16 @@
 import { BaseAction } from './BaseAction';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
 import { EventType } from '@/types/Master_Functionality_Catalog';
 import { logger } from '@/utils/logger';
+import { useProjectStore } from '@/store/projectStore';
+import { createTaskFromView } from '@/store/project/interfaces';
+import type { Resource } from '@/types/resource-types';
+
+/**
+ * Интерфейс для провайдера проекта
+ */
+interface ProjectProvider {
+  currentProject: { id: string } | null;
+}
 
 /**
  * Action для создания новой задачи
@@ -11,7 +20,7 @@ export class NewTaskAction extends BaseAction {
   public readonly name = 'Новая задача';
   public readonly description = 'Создать новую задачу';
 
-  constructor(private projectProvider: any) {
+  constructor(private projectProvider: ProjectProvider) {
     super({ shortcut: 'Ins', icon: 'task' });
   }
 
@@ -25,8 +34,20 @@ export class NewTaskAction extends BaseAction {
     }
 
     this.logAction(EventType.TASK_ACTION, { action: 'new-task' });
-    // TODO: Implement new task creation
-    logger.info('New task creation requested');
+
+    const start = new Date();
+    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+    const newTask = createTaskFromView({
+      id: `task_${Date.now()}`,
+      name: 'Новая задача',
+      startDate: start,
+      endDate: end,
+      progress: 0
+    });
+    newTask.isMilestone = false;
+
+    useProjectStore.getState().addTask(newTask);
+    logger.info('New task created successfully');
   }
 }
 
@@ -38,7 +59,7 @@ export class NewResourceAction extends BaseAction {
   public readonly name = 'Новый ресурс';
   public readonly description = 'Создать новый ресурс';
 
-  constructor(private projectProvider: any) {
+  constructor(private projectProvider: ProjectProvider) {
     super({ icon: 'resource' });
   }
 
@@ -52,8 +73,18 @@ export class NewResourceAction extends BaseAction {
     }
 
     this.logAction(EventType.RESOURCE_ACTION, { action: 'new-resource' });
-    // TODO: Implement new resource creation
-    logger.info('New resource creation requested');
+    
+    const newResource: Resource = {
+      id: `resource_${Date.now()}`,
+      name: 'Новый ресурс',
+      type: 'Work',
+      maxUnits: 100,
+      standardRate: 0,
+      overtimeRate: 0,
+      costPerUse: 0
+    };
+    
+    useProjectStore.getState().addResource(newResource);
+    logger.info('New resource created successfully');
   }
 }
-

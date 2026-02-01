@@ -57,9 +57,13 @@ package com.projectlibre1.pm.task;
 
 public class DefaultProjectRoleManager  {
 
+	/**
+	 * Resets roles for the project.
+	 * Default implementation does nothing.
+	 * @param project the project
+	 * @param publicRoles true if public roles should be reset
+	 */
 	public static void resetRoles(Project project, Boolean publicRoles) {
-		// TODO Auto-generated method stub
-
 	}
 
 }

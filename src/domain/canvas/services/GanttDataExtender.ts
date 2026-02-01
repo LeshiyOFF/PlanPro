@@ -1,5 +1,20 @@
 import { Task } from '@/store/project/interfaces';
 
+/** Задача-филлер для заполнения пустого пространства Ганта */
+export interface GanttFillerTask extends Partial<Task> {
+  id: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  progress: number;
+  type: string;
+  level: number;
+  isDisabled?: boolean;
+  isFiller?: boolean;
+}
+
+export type TaskOrFiller = Task | GanttFillerTask;
+
 /**
  * GanttDataExtender - Сервис для подготовки визуальных данных Ганта.
  * Позволяет заполнить пустое пространство диаграммы фиктивными строками и расширить временную шкалу.
@@ -7,7 +22,7 @@ import { Task } from '@/store/project/interfaces';
 export class GanttDataExtender {
   /**
    * Добавляет фиктивные задачи для заполнения вертикального пространства.
-   * 
+   *
    * @param realTasks - Массив реальных задач проекта
    * @param containerHeight - Текущая высота контейнера Ганта
    * @param rowHeight - Высота одной строки
@@ -17,7 +32,7 @@ export class GanttDataExtender {
     realTasks: Task[],
     containerHeight: number,
     rowHeight: number
-  ): any[] {
+  ): TaskOrFiller[] {
     if (containerHeight <= 0) return realTasks;
 
     const visibleRowsCount = Math.ceil(containerHeight / rowHeight);
@@ -25,7 +40,7 @@ export class GanttDataExtender {
 
     if (fillerCount === 0) return realTasks;
 
-    const extendedTasks: any[] = [...realTasks];
+    const extendedTasks: TaskOrFiller[] = [...realTasks];
     
     // Находим базовые даты для филлеров (чтобы они не ломали масштаб)
     const defaultStart = realTasks.length > 0 

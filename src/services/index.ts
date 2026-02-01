@@ -1,4 +1,4 @@
-export { SentryService } from './SentryService';
+export { SentryService, type SentryConfig } from './SentryService';
 export { PerformanceMonitor } from './PerformanceMonitor';
 export { ReactProfilerService } from './ReactProfilerService';
 export { PerformanceMetricsCollector } from './PerformanceMetricsCollector';

@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui';
 import { Badge } from '@/components/ui';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { useHelpContent } from '@/hooks/useHelpContent';
@@ -9,9 +8,9 @@ import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { GanttCanvasController } from '@/components/gantt';
 import { useProjectStore } from '@/store/projectStore';
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
-import { ViewType } from '@/types/ViewTypes';
 import { LineChart, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import type { IGanttTaskUpdate } from '@/types/gantt/IGanttTypes';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * Tracking Gantt View - Гант отслеживания
@@ -48,14 +47,18 @@ export const TrackingGanttView: React.FC = () => {
     setEditingTaskId(null);
   }, []);
 
-  const handleTaskUpdate = useCallback((taskId: string, updates: { startDate: Date; endDate: Date }) => {
-    updateTask(taskId, updates);
+  const handleTaskUpdate = useCallback((taskId: string, updates: IGanttTaskUpdate) => {
+    const partial: { startDate?: Date; endDate?: Date; progress?: number } = {};
+    if (updates.startDate != null) partial.startDate = updates.startDate;
+    if (updates.endDate != null) partial.endDate = updates.endDate;
+    if (updates.progress != null) partial.progress = updates.progress;
+    updateTask(taskId, partial);
   }, [updateTask]);
 
-  const handleTaskContextMenu = useCallback((event: React.MouseEvent, taskData: Record<string, unknown>) => {
+  const handleTaskContextMenu = useCallback((event: React.MouseEvent, taskData: JsonObject) => {
     event.preventDefault();
     showMenu(ContextMenuType.TASK, {
-      target: { ...taskData, type: 'task' },
+      target: { ...taskData, type: 'task' } as JsonObject,
       position: { x: event.clientX, y: event.clientY }
     });
   }, [showMenu]);
@@ -72,7 +75,7 @@ export const TrackingGanttView: React.FC = () => {
           actionBar={{
             primaryAction: {
               label: t('view_controls.update_progress'),
-              onClick: () => {/* TODO: implement update progress */},
+              onClick: () => { /* Update progress: reserved for future implementation */ },
               icon: <RefreshCw className="w-4 h-4" />
             }
           }}
@@ -91,7 +94,7 @@ export const TrackingGanttView: React.FC = () => {
                   <div 
                     key={task.id}
                     className="task-item p-2 hover:bg-[hsl(var(--primary-soft))] transition-all cursor-pointer text-xs rounded-lg group"
-                    onContextMenu={(e) => handleTaskContextMenu(e, task as unknown as Record<string, unknown>)}
+                    onContextMenu={(e) => handleTaskContextMenu(e, task as JsonObject)}
                     onDoubleClick={() => handleTaskDoubleClick(task)}
                   >
                     <div className="flex items-center justify-between mb-1.5">
@@ -125,8 +128,6 @@ export const TrackingGanttView: React.FC = () => {
             <div className="flex-1 bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
               <GanttCanvasController
                 tasks={tasks}
-                startDate={currentDate}
-                endDate={new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000)}
                 currentDate={currentDate}
                 onCurrentDateChange={setCurrentDate}
                 onTaskSelect={handleTaskSelect}
@@ -150,4 +151,3 @@ export const TrackingGanttView: React.FC = () => {
     </>
   );
 };
-

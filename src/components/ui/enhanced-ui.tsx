@@ -23,6 +23,7 @@ export const EnhancedToast: React.FC<EnhancedToastProps> = ({
       const timer = setTimeout(onClose, duration);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [duration, onClose]);
 
   const getBackgroundColor = () => {

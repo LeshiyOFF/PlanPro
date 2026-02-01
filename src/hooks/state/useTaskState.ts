@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Task } from '@/types'
+import { Task } from '@/store/project/interfaces'
 import { TaskUtils } from '@/utils/task-utils'
 
 /**

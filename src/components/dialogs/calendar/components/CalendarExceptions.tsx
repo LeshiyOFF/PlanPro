@@ -1,177 +1,80 @@
 import React from 'react';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Plus, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { X } from 'lucide-react';
+import { CalendarExceptionsProps } from './CalendarExceptionsTypes';
 
-export interface CalendarException {
-  id: string;
-  name: string;
-  date: string;
-  type: 'holiday' | 'working';
-  startTime?: string;
-  endTime?: string;
-}
+/**
+ * Типизированные props
+ */
+export interface TypedCalendarExceptionsProps extends CalendarExceptionsProps {}
 
-export interface CalendarExceptionsProps {
-  exceptions: CalendarException[];
-  onExceptionsChange: (exceptions: CalendarException[]) => void;
-}
-
-export const CalendarExceptions: React.FC<CalendarExceptionsProps> = ({ 
-  exceptions, 
-  onExceptionsChange 
+/**
+ * Компонент списка исключений
+ */
+export const CalendarExceptions: React.FC<TypedCalendarExceptionsProps> = ({ 
+  exceptions
 }) => {
-  const addException = () => {
-    const newException: CalendarException = {
-      id: Date.now().toString(),
-      name: '',
-      date: '',
-      type: 'holiday'
-    };
-    onExceptionsChange([...exceptions, newException]);
-  };
-
-  const updateException = (id: string, field: keyof CalendarException, value: any) => {
-    const updatedExceptions = exceptions.map(exc => 
-      exc.id === id ? { ...exc, [field]: value } : exc
-    );
-    onExceptionsChange(updatedExceptions);
-  };
-
-  const removeException = (id: string) => {
-    const updatedExceptions = exceptions.filter(exc => exc.id !== id);
-    onExceptionsChange(updatedExceptions);
-  };
+  const { t } = useTranslation();
 
   const getExceptionColor = (type: string) => {
     switch (type) {
-      case 'holiday':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      case 'working':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+      case 'holiday': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case 'working': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
     }
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-medium">
-          Исключения и особые дни
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addException}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Добавить
-        </Button>
-      </div>
-
       {exceptions.length === 0 ? (
-        <div className="text-center py-4 text-muted-foreground text-sm">
-          Нет исключений
+        <div className="text-center text-gray-500">
+          {t('calendar.exceptions_empty')}
         </div>
       ) : (
-        <div className="space-y-2">
-          {exceptions.map((exception, index) => (
-            <div key={exception.id} className="border rounded-lg p-3 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getExceptionColor(exception.type)}`}>
-                    {exception.type === 'holiday' ? 'Выходной' : 'Рабочий день'}
-                  </span>
-                  <span className="text-sm font-medium">
-                    Исключение #{index + 1}
+        <ul className="space-y-2">
+          {exceptions.map((exception) => (
+            <li key={exception.id} className="flex justify-between items-center p-3 border rounded-lg bg-white dark:bg-slate-800 dark:border-slate-700">
+              <div>
+                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getExceptionColor(exception.type)}`}>
+                  <span className="text-white font-bold text-xs">
+                    {exception.type === 'holiday' ? 'H' : 'W'}
                   </span>
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeException(exception.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label htmlFor={`name-${exception.id}`} className="text-xs">
-                    Название
-                  </Label>
-                  <Input
-                    id={`name-${exception.id}`}
-                    value={exception.name}
-                    onChange={(e) => updateException(exception.id, 'name', e.target.value)}
-                    placeholder="Например: Новый год"
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor={`date-${exception.id}`} className="text-xs">
-                    Дата
-                  </Label>
-                  <Input
-                    id={`date-${exception.id}`}
-                    type="date"
-                    value={exception.date}
-                    onChange={(e) => updateException(exception.id, 'date', e.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor={`type-${exception.id}`} className="text-xs">
-                    Тип
-                  </Label>
-                  <select
-                    id={`type-${exception.id}`}
-                    value={exception.type}
-                    onChange={(e) => updateException(exception.id, 'type', e.target.value as 'holiday' | 'working')}
-                    className="w-full p-1 text-sm border rounded"
-                  >
-                    <option value="holiday">Выходной</option>
-                    <option value="working">Рабочий день</option>
-                  </select>
-                </div>
-
-                {exception.type === 'working' && (
-                  <div>
-                    <Label htmlFor={`hours-${exception.id}`} className="text-xs">
-                      Часы работы
-                    </Label>
-                    <div className="flex space-x-1">
-                      <Input
-                        id={`hours-${exception.id}-start`}
-                        type="time"
-                        value={exception.startTime || ''}
-                        onChange={(e) => updateException(exception.id, 'startTime', e.target.value)}
-                        placeholder="Начало"
-                        className="text-sm"
-                      />
-                      <Input
-                        id={`hours-${exception.id}-end`}
-                        type="time"
-                        value={exception.endTime || ''}
-                        onChange={(e) => updateException(exception.id, 'endTime', e.target.value)}
-                        placeholder="Конец"
-                        className="text-sm"
-                      />
-                    </div>
+                <div className="flex-1">
+                  <div className="font-medium">
+                    {exception.name}
                   </div>
-                )}
+                  <div className="text-xs text-gray-500">
+                    {exception.date}
+                  </div>
+                </div>
               </div>
-            </div>
+              <div className="flex-1">
+                <div className="font-medium">
+                  {exception.type === 'working' ? (
+                    <>
+                      <span className="text-xs">{exception.startTime || '00:00'}</span>
+                      -
+                      <span className="text-xs">{exception.endTime || '00:00'}</span>
+                    </>
+                  ) : null}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {exception.type === 'working' ? 'Рабочее время' : 'Выходной'}
+                </div>
+              </div>
+              <button
+                className="text-red-500 hover:text-red-700 dark:hover:bg-red-900 dark:text-red-900 p-1 rounded"
+                onClick={() => {
+                  // Обработчик будет добавлен в родительский компонент
+                }}
+              >
+                <X size={16} />
+              </button>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
 };
-

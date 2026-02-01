@@ -56,41 +56,24 @@
 package com.projectlibre1.grouping.core;
 
 /**
- *
+ * Exception thrown when a node operation in the grouping hierarchy fails.
  */
 public class NodeException extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
 	public NodeException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param message
-	 */
 	public NodeException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param cause
-	 */
 	public NodeException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 */
 	public NodeException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
-
 }

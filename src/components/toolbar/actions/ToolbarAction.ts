@@ -1,9 +1,11 @@
+import type { IAction } from '@/services/actions/BaseAction';
 import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
 
 /**
- * Базовый класс для действий кнопок панели инструментов
+ * Базовый класс для действий кнопок панели инструментов.
+ * Реализует IAction для совместимости с ActionManager (name = label, description = tooltip, enabled = !disabled).
  */
-export abstract class ToolbarAction {
+export abstract class ToolbarAction implements IAction {
   public readonly id: string;
   public readonly label: string;
   public readonly icon: string;
@@ -19,10 +21,25 @@ export abstract class ToolbarAction {
     this.shortcut = shortcut;
   }
 
+  /** IAction: name — то же, что label */
+  get name(): string {
+    return this.label;
+  }
+
+  /** IAction: description — то же, что tooltip */
+  get description(): string {
+    return this.tooltip ?? '';
+  }
+
+  /** IAction: enabled — инверсия disabled */
+  get enabled(): boolean {
+    return !this.disabled;
+  }
+
   /**
-   * Выполнить действие
+   * Выполнить действие (возвращает Promise для IAction)
    */
-  abstract execute(): void | Promise<void>;
+  abstract execute(): Promise<void>;
 
   /**
    * Можно ли выполнить действие

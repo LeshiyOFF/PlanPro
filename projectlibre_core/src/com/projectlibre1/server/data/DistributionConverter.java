@@ -59,6 +59,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import com.projectlibre1.pm.task.Project;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.strings.Messages;
 import com.projectlibre1.util.Environment;
 
@@ -68,74 +69,66 @@ import com.projectlibre1.util.Environment;
 public class DistributionConverter {
 	protected Object delegate;
 	protected Class delegateClass;
-	public DistributionConverter(){
-		if (!Environment.getStandAlone()){
-			String className=null;
+	
+	public DistributionConverter() {
+		if (!Environment.getStandAlone()) {
+			String className = null;
 			try {
-				className=Messages.getMetaString("DistributionConverter");
+				className = Messages.getMetaString("DistributionConverter");
 			} catch (Exception e1) {
+				ErrorLogger.log("Failed to get DistributionConverter class name", e1);
 			}
-			if (className!=null){
+			if (className != null) {
 				try {
-					delegateClass=Class.forName(className);
-					delegate=delegateClass.newInstance();
+					delegateClass = Class.forName(className);
+					delegate = delegateClass.newInstance();
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log("Failed to instantiate DistributionConverter: " + className, e);
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log("Illegal access to DistributionConverter: " + className, e);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log("DistributionConverter class not found: " + className, e);
 				}
 			}
 		}
 	}
-	public List createDistributionData(Project project,boolean incremental){
-		if (delegate!=null){
+	public List createDistributionData(Project project, boolean incremental) {
+		if (delegate != null) {
 			try {
-				return (List)delegateClass.getMethod("createDistributionData", new Class[]{Project.class,boolean.class}).invoke(delegate,new Object[]{project,incremental});
+				return (List) delegateClass
+					.getMethod("createDistributionData", new Class[]{Project.class, boolean.class})
+					.invoke(delegate, new Object[]{project, incremental});
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Illegal argument in createDistributionData", e);
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Security exception in createDistributionData", e);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Illegal access in createDistributionData", e);
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Invocation target exception in createDistributionData", e);
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Method createDistributionData not found", e);
 			}
 		}
 		return null;
 	}
-	public void substractDistributionFromProject(Project project){
-		if (delegate!=null){
+	public void substractDistributionFromProject(Project project) {
+		if (delegate != null) {
 			try {
-				delegateClass.getMethod("substractDistributionFromProject", new Class[]{Project.class}).invoke(delegate,new Object[]{project});
+				delegateClass
+					.getMethod("substractDistributionFromProject", new Class[]{Project.class})
+					.invoke(delegate, new Object[]{project});
 			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Illegal argument in substractDistributionFromProject", e);
 			} catch (SecurityException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Security exception in substractDistributionFromProject", e);
 			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Illegal access in substractDistributionFromProject", e);
 			} catch (InvocationTargetException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Invocation target exception in substractDistributionFromProject", e);
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log("Method substractDistributionFromProject not found", e);
 			}
 		}
-
 	}
 }

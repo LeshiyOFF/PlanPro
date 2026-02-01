@@ -11,6 +11,7 @@ import { ProcessStatus, ConfigurationInfo, ProcessStatusInfo } from './types/Jav
 import { JreDetectorFactory } from './factories/JreDetectorFactory';
 import { LaunchParameterValidator } from './validators/LaunchParameterValidator';
 import { ProcessErrorHandler } from './handlers/ProcessErrorHandler';
+import type { JavaBridgeEventPayload } from '../types/JavaBridgeEventPayload';
 
 /**
  * Менеджер Java процесса
@@ -52,7 +53,7 @@ export class JavaProcessManager extends EventEmitter {
     try {
       // КРИТИЧНО: Резервируем свободный порт перед запуском Java
       console.log('[JavaProcessManager] Resolving available ports...');
-      await (this.config as any).resolveAvailablePorts();
+      await this.config.resolveAvailablePorts();
       this.status.port = this.config.getJavaApiPort();
       console.log(`[JavaProcessManager] Using port: ${this.status.port}`);
 
@@ -73,10 +74,9 @@ export class JavaProcessManager extends EventEmitter {
       };
 
       // Проверяем режим через ConfigService
-      const configService = this.config as any;
-      if (configService.isExecutableJarMode && configService.isExecutableJarMode()) {
+      if (this.config.isExecutableJarMode()) {
         // Production: используем executable JAR
-        const jarPath = configService.getExecutableJarPath();
+        const jarPath = this.config.getExecutableJarPath();
         if (!jarPath) {
           throw new Error('Executable JAR mode enabled but JAR path is null');
         }
@@ -263,12 +263,12 @@ export class JavaProcessManager extends EventEmitter {
     await this.start();
   }
 
-  public on(event: string, listener: (...args: any[]) => void): this {
+  public on(event: string, listener: (payload?: JavaBridgeEventPayload) => void): this {
     this.eventEmitter.on(event, listener);
     return this;
   }
 
-  public emit(event: string, ...args: any[]): boolean {
-    return this.eventEmitter.emit(event, ...args);
+  public emit(event: string, payload?: JavaBridgeEventPayload): boolean {
+    return this.eventEmitter.emit(event, payload);
   }
 }

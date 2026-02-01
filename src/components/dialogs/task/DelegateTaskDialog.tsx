@@ -1,8 +1,8 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDialogValidation } from '../hooks/useDialogValidation';
@@ -75,11 +75,12 @@ export const DelegateTaskDialog: React.FC<DelegateTaskDialogProps> = ({
   const availableResources = resources.filter(r => r.available);
   const selectedTasksData = tasks.filter(task => selectedTasks.includes(task.id));
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Delegate Tasks"
       size="large"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -105,7 +106,7 @@ export const DelegateTaskDialog: React.FC<DelegateTaskDialogProps> = ({
             {tasks.map(task => (
               <div key={task.id} className="flex items-center justify-between py-2">
                 <div className="flex items-center space-x-2">
-                  <Select
+                  <Checkbox
                     checked={selectedTasks.includes(task.id)}
                     onCheckedChange={() => handleTaskToggle(task.id)}
                   />

@@ -1,4 +1,5 @@
 import { UserPreferencesService } from '@/components/userpreferences/services/UserPreferencesService';
+import { IUserPreferences } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces';
 import { format } from 'date-fns';
 import { ru, enUS } from 'date-fns/locale';
 import { CurrencyFormatter } from './CurrencyFormatter';
@@ -22,7 +23,7 @@ export const formatDuration = (duration: number | Duration | undefined | null, u
     return '0 ' + i18next.t(`units.days`);
   }
   
-  const prefs = UserPreferencesService.getInstance().getPreferences() as any;
+  const prefs: IUserPreferences = UserPreferencesService.getInstance().getPreferences();
   
   // ЗАЩИТА: Извлечение значения с проверкой типа (Stage 7.19)
   let value: number;
@@ -66,7 +67,7 @@ export const formatWork = (work: number | Duration | undefined | null, unit?: Du
     return '0 ' + i18next.t(`units.hours`);
   }
   
-  const prefs = UserPreferencesService.getInstance().getPreferences() as any;
+  const prefs: IUserPreferences = UserPreferencesService.getInstance().getPreferences();
   
   // ЗАЩИТА: Извлечение значения с проверкой типа (Stage 7.19)
   let value: number;
@@ -90,7 +91,9 @@ export const formatWork = (work: number | Duration | undefined | null, unit?: Du
                     prefs.schedule?.workUnit || 'hours';
   
   // Преобразуем числовой код в строку для i18n
-  const finalUnit = resolveTimeUnitKey(rawUnit);
+  const finalUnit = resolveTimeUnitKey(
+    typeof rawUnit === 'string' || typeof rawUnit === 'number' ? rawUnit : undefined
+  );
 
   // Интеллектуальное округление (Stage 7.18)
   const roundedValue = Math.abs(value - Math.round(value)) < 0.01 
@@ -104,14 +107,14 @@ export const formatWork = (work: number | Duration | undefined | null, unit?: Du
  * Форматирование ставки (Rate) с использованием динамических единиц.
  */
 export const formatRate = (amount: number, unit?: Duration['unit'] | number): string => {
-  const prefs = UserPreferencesService.getInstance().getPreferences() as any;
+  const prefs: IUserPreferences = UserPreferencesService.getInstance().getPreferences();
   let finalUnit = unit || prefs.schedule?.workUnit || 'hours';
   
   // Маппинг числовых TimeUnit из Java (Stage 8.14)
   // Обрабатываем и числа, и строки-числа (Stage 8.15)
   const unitCode = typeof finalUnit === 'string' ? parseInt(finalUnit, 10) : finalUnit;
   if (!isNaN(unitCode as number) && typeof unitCode === 'number') {
-    const unitMap: Record<number, string> = {
+    const unitMap: Record<number, Duration['unit']> = {
       3: 'minutes',
       4: 'hours',
       5: 'days',
@@ -124,7 +127,7 @@ export const formatRate = (amount: number, unit?: Duration['unit'] | number): st
   }
 
   // Для ставок мы обычно используем сокращенную форму "/ед"
-  return `${formatCurrency(amount)}/${i18next.t(`units.${finalUnit}`)}`;
+  return `${formatCurrency(amount)}/${i18next.t(`units.${finalUnit as string}`)}`;
 };
 
 /**

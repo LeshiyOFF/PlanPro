@@ -1,12 +1,16 @@
 import { useState, useCallback } from 'react';
-import { useDialogValidation } from './useDialogValidation';
+import { useDialogValidation, type ValidationRule, type ValidationValue } from './useDialogValidation';
+import type { JsonObject } from '@/types/json-types';
+
+/** Допустимое значение поля формы (примитив или вложенный объект для вложенных форм) */
+export type FormFieldValue = ValidationValue | JsonObject;
 
 interface UseDialogFormOptions<T> {
   initialData: T;
-  validationRules?: Record<string, any>;
+  validationRules?: Record<string, ValidationRule>;
 }
 
-export const useDialogForm = <T extends Record<string, any>>({
+export const useDialogForm = <T extends Record<string, FormFieldValue>>({
   initialData,
   validationRules = {}
 }: UseDialogFormOptions<T>) => {

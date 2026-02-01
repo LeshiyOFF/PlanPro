@@ -22,7 +22,6 @@ export interface ScrollOptions {
 export class GanttScrollService {
   private container: HTMLElement;
   private isUserInteracting = false;
-  private lastTarget: number | null = null;
   private watchdogRaf = 0;
   private takeoverListenersInstalled = false;
   private readonly userTakeoverEvents = ['wheel', 'pointerdown', 'touchstart', 'keydown'];
@@ -102,7 +101,7 @@ export class GanttScrollService {
     if (!this.takeoverListenersInstalled) return;
     const markTaken = () => { this.isUserInteracting = true; };
     for (const evt of this.userTakeoverEvents) {
-      this.container.removeEventListener(evt, markTaken, { capture: true } as any);
+      this.container.removeEventListener(evt, markTaken, { capture: true } as EventListenerOptions);
     }
     this.takeoverListenersInstalled = false;
   }
@@ -123,11 +122,9 @@ export class GanttScrollService {
     if (Math.abs(targetPos - this.container.scrollLeft) > maxReasonablePixels && opts?.onRequireViewModeFallback) {
       // large jump -> recommend switching view mode (caller decides)
       console.log(`[GanttScrollService] Huge jump detected (${Math.abs(targetPos - this.container.scrollLeft)}px). Recommending view mode fallback.`);
-      opts.onRequireViewModeFallback('Year');
+      opts.onRequireViewModeFallback('Year' as ViewMode);
     }
 
-    // set lastTarget so watchdog knows we're in control
-    this.lastTarget = targetPos;
     this.isUserInteracting = false; // reset user flag when program starts nav
 
     console.log(`[GanttScrollService] Starting watchdog scroll to ${targetPos}`);
@@ -140,7 +137,6 @@ export class GanttScrollService {
         // if user intervened -> cancel nav and resolve to let caller handle UX
         if (this.isUserInteracting) {
           console.log(`[GanttScrollService] Navigation aborted by user`);
-          this.lastTarget = null;
           this.cancelWatchdog();
           resolve(); // user intercepted navigation
           return;
@@ -161,7 +157,6 @@ export class GanttScrollService {
         // If we reached target and container already supports target (maxScroll >= target)
         if (stableFrames >= this.stableFrameCountRequired && (maxScroll >= targetPos || Math.abs(this.container.scrollLeft - targetPos) <= 2)) {
           console.log(`[GanttScrollService] Navigation reached stable target ${targetPos}`);
-          this.lastTarget = null;
           
           // perform subtle smooth scroll to exact target (if browser supports)
           if ('scrollTo' in this.container) {
@@ -179,7 +174,6 @@ export class GanttScrollService {
         // timeout - if we waited too long for DOM expansion
         if (performance.now() - start > expansionTimeout) {
           console.warn(`[GanttScrollService] Navigation timeout waiting for ${targetPos} (current max: ${maxScroll})`);
-          this.lastTarget = null;
           this.cancelWatchdog();
           resolve(); // caller can show feedback to user
           return;

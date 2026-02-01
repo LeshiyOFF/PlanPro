@@ -95,37 +95,20 @@ public class Money extends BigDecimal {
 		return new Money(arg0);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	private Money(double arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	private Money(double value) {
+		super(value);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public Money(String arg0) throws NumberFormatException{
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public Money(String value) throws NumberFormatException {
+		super(value);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public Money(BigInteger arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public Money(BigInteger value) {
+		super(value);
 	}
 
-	/**
-	 * @param arg0
-	 * @param arg1
-	 */
-	public Money(BigInteger arg0, int arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+	public Money(BigInteger unscaledValue, int scale) {
+		super(unscaledValue, scale);
 	}
 	
 	public double getPrimitiveTypeValue()

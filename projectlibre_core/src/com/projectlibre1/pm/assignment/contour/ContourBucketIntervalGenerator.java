@@ -93,7 +93,7 @@ public class ContourBucketIntervalGenerator implements IntervalGenerator {
 		end = assignmentStart; // treat 0th bucket as all time before contour begins
 		
 		Project project = assignment.getTask().getProject();
-		if (project != null && !project.isForward()) //TODO need to figure out what to do if completion in reverse scheduled...
+		if (project != null && !project.isForward())
 			return;
 		
 		if (assignment.getDependencyStart() > assignmentStart && assignment.getPercentComplete() > 0.0D) { // if a split caused by remaining work being pushed out by a dependency

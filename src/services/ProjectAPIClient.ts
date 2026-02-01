@@ -6,10 +6,13 @@ import type {
   ExportFormat,
   ImportFormat,
   ValidationResult,
-  ValidationError
-} from '@/types'
+  ValidationError,
+  ProjectStatistics,
+  StrictData
+} from '../types/Master_Functionality_Catalog'
 
-import { BaseAPIClient, type APIResponse, type APIClientConfig } from './BaseAPIClient'
+import { BaseAPIClient, type APIClientConfig, APIError } from './BaseAPIClient'
+import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError'
 
 /**
  * Валидация проекта перед отправкой
@@ -30,7 +33,8 @@ class ProjectValidator {
       })
     }
 
-    if (!project.startDate) {
+    const start = project.startDate;
+    if (!start) {
       errors.push({
         field: 'startDate',
         message: 'Дата начала проекта обязательна',
@@ -38,7 +42,8 @@ class ProjectValidator {
       })
     }
 
-    if (project.startDate && project.finishDate && project.startDate >= project.finishDate) {
+    const finish = project.finishDate;
+    if (start && finish && start >= finish) {
       errors.push({
         field: 'finishDate',
         message: 'Дата окончания должна быть позже даты начала',
@@ -51,6 +56,16 @@ class ProjectValidator {
       errors,
       warnings: []
     }
+  }
+}
+
+/**
+ * Расширенная ошибка валидации проекта
+ */
+export class ProjectValidationError extends Error {
+  constructor(message: string, public readonly validationErrors: ValidationError[]) {
+    super(message);
+    this.name = 'ProjectValidationError';
   }
 }
 
@@ -76,7 +91,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
       const response = await this.get<Project[]>('/projects');
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, 'Failed to fetch projects');
+      throw this.handleProjectError(toCaughtError(error), 'Failed to fetch projects');
     }
   }
 
@@ -88,7 +103,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
       const response = await this.get<Project>(`/projects/${id.value}`);
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to fetch project ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to fetch project ${id.value}`);
     }
   }
 
@@ -99,16 +114,17 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
     // Валидация перед созданием
     const validation = ProjectValidator.validateProject(project);
     if (!validation.valid) {
-      const error = new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`);
-      (error as any).validationErrors = validation.errors;
-      throw error;
+      throw new ProjectValidationError(
+        `Validation failed: ${validation.errors.map(e => e.message).join(', ')}`,
+        validation.errors
+      );
     }
 
     try {
-      const response = await this.post<Project>('/projects', project);
+      const response = await this.post<Project>('/projects', project as StrictData);
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, 'Failed to create project');
+      throw this.handleProjectError(toCaughtError(error), 'Failed to create project');
     }
   }
 
@@ -119,16 +135,17 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
     // Валидация перед обновлением
     const validation = ProjectValidator.validateProject(project);
     if (!validation.valid) {
-      const error = new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`);
-      (error as any).validationErrors = validation.errors;
-      throw error;
+      throw new ProjectValidationError(
+        `Validation failed: ${validation.errors.map(e => e.message).join(', ')}`,
+        validation.errors
+      );
     }
 
     try {
-      const response = await this.put<Project>(`/projects/${id.value}`, project);
+      const response = await this.put<Project>(`/projects/${id.value}`, project as StrictData);
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to update project ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to update project ${id.value}`);
     }
   }
 
@@ -139,7 +156,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
     try {
       await this.delete<void>(`/projects/${id.value}`);
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to delete project ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to delete project ${id.value}`);
     }
   }
 
@@ -150,7 +167,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
     try {
       return await this.download(`/projects/${id.value}/export`, { format });
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to export project ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to export project ${id.value}`);
     }
   }
 
@@ -162,7 +179,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
       const response = await this.upload<Project>('/projects/import', file, { format });
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, 'Failed to import project');
+      throw this.handleProjectError(toCaughtError(error), 'Failed to import project');
     }
   }
 
@@ -180,7 +197,7 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
       const response = await this.get<Project[]>('/projects/search', params);
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, 'Failed to search projects');
+      throw this.handleProjectError(toCaughtError(error), 'Failed to search projects');
     }
   }
 
@@ -192,19 +209,19 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
       const response = await this.post<Project>(`/projects/${id.value}/clone`, { name: newName });
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to clone project ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to clone project ${id.value}`);
     }
   }
 
   /**
    * Получение статистики проекта
    */
-  async getProjectStatistics(id: ID): Promise<any> {
+  async getProjectStatistics(id: ID): Promise<ProjectStatistics> {
     try {
-      const response = await this.get<any>(`/projects/${id.value}/statistics`);
+      const response = await this.get<ProjectStatistics>(`/projects/${id.value}/statistics`);
       return response.data;
     } catch (error) {
-      throw this.handleProjectError(error, `Failed to get project statistics ${id.value}`);
+      throw this.handleProjectError(toCaughtError(error), `Failed to get project statistics ${id.value}`);
     }
   }
 
@@ -212,18 +229,30 @@ export class ProjectAPIClient extends BaseAPIClient implements ProjectAPI {
    * Обработка ошибок специфичных для проектов
    * Следует Single Responsibility Principle
    */
-  private handleProjectError(error: unknown, context: string): Error {
-    if (error instanceof Error && (error as any).validationErrors) {
-      const validationError = new Error(`${context}: ${(error as any).validationErrors.map((e: ValidationError) => e.message).join(', ')}`);
-      (validationError as any).validationErrors = (error as any).validationErrors;
-      return validationError;
+  private handleProjectError(error: CaughtError, context: string): Error {
+    if (error instanceof ProjectValidationError) {
+      return error;
+    }
+
+    if (error instanceof APIError && error.details && typeof error.details === 'object') {
+      const details = error.details as Record<string, StrictData & { validationErrors?: Array<Record<string, string>> }>;
+      if (Array.isArray(details.validationErrors)) {
+        const validationErrors: ValidationError[] = details.validationErrors.map((e: StrictData) => {
+          const r = e && typeof e === 'object' && !Array.isArray(e) ? (e as Record<string, string>) : {};
+          return { field: r.field ?? '', message: r.message ?? '', code: r.code ?? 'VALIDATION_ERROR' };
+        });
+        return new ProjectValidationError(
+          `${context}: ${String(details.message || 'Validation failed')}`,
+          validationErrors
+        );
+      }
     }
 
     if (error instanceof Error) {
       return new Error(`${context}: ${error.message}`);
     }
 
-    return new Error(`${context}: Unknown error occurred`);
+    return new Error(`${context}: ${getErrorMessage(error)}`);
   }
 }
 

@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog, BaseDialogProps } from '../dialogs/base/SimpleBaseDialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card } from '@/components/ui/Card';
+import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/Badge';
 import { hotkeyService } from '@/services/HotkeyService';
-import { hotkeyToString, hotkeyFromString, hotkeyEquals, type HotkeyConfig, type HotkeyBinding, type HotkeyConflict } from '@/types/HotkeyTypes';
-import { HotkeyDisplay } from './HotkeyDisplay';
+import { hotkeyFromString, hotkeyEquals, HotkeyCategory, type Hotkey, type HotkeyBinding, type HotkeyConflict } from '@/types/HotkeyTypes';
+import { HotkeyBindingList } from './HotkeyBindingList';
+import { EditingBinding } from './HotkeyBindingEditor';
 import { logger } from '@/utils/logger';
 
 interface HotkeySettingsProps extends Omit<BaseDialogProps, 'children'> {
   onSave?: () => void;
-}
-
-interface EditingBinding {
-  actionId: string;
-  keys: string;
-  originalKeys: string;
-  isEditing: boolean;
 }
 
 /**
@@ -54,7 +46,7 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
   const startEditing = (actionId: string, keys: string) => {
     setEditingBinding({
       actionId,
-      keys: keys,
+      keys,
       originalKeys: keys,
       isEditing: true
     });
@@ -69,15 +61,13 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
 
     try {
       const newKeys = hotkeyFromString(editingBinding.keys);
-      
-      // Проверка на конфликты
       const conflict = findConflict(editingBinding.actionId, newKeys);
+      
       if (conflict) {
         setConflicts([conflict]);
         return;
       }
 
-      // Обновление привязки
       hotkeyService.updateBinding(editingBinding.actionId, newKeys);
       loadBindings();
       
@@ -90,35 +80,22 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (!editingBinding) return;
-
-    event.preventDefault();
-    
-    const keys: string[] = [];
-    
-    if (event.ctrlKey || event.metaKey) keys.push('Ctrl');
-    if (event.altKey) keys.push('Alt');
-    if (event.shiftKey) keys.push('Shift');
-    
-    // Основная клавиша
-    const key = event.key;
-    if (key && !['Control', 'Alt', 'Shift', 'Meta'].includes(key)) {
-      keys.push(key);
+  const updateEditingKeys = (keys: string) => {
+    if (editingBinding) {
+      setEditingBinding({ ...editingBinding, keys });
     }
-
-    setEditingBinding({
-      ...editingBinding,
-      keys: keys.join('+')
-    });
   };
 
   const resetToDefault = (actionId: string) => {
-    // TODO: Implement reset to default from DEFAULT_HOTKEYS
-    logger.dialog('Reset to default', { actionId }, 'HotkeySettings');
+    const defaultBinding = hotkeyService.getDefaultBinding(actionId);
+    if (defaultBinding) {
+      hotkeyService.updateBinding(actionId, defaultBinding.keys);
+      loadBindings();
+      logger.dialog('Hotkey reset to default', { actionId }, 'HotkeySettings');
+    }
   };
 
-  const findConflict = (actionId: string, keys: any): HotkeyConflict | null => {
+  const findConflict = (actionId: string, keys: Hotkey): HotkeyConflict | null => {
     for (const binding of bindings) {
       if (binding.actionId !== actionId && hotkeyEquals(binding.keys, keys)) {
         return {
@@ -137,17 +114,15 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
     return action?.name || actionId;
   };
 
-  const getFilteredBindings = () => {
+  const getFilteredBindings = (): HotkeyBinding[] => {
     let filtered = bindings;
 
-    // Фильтрация по категории
-    if (selectedCategory !== 'all') {
-      const actions = hotkeyService.getActionsByCategory(selectedCategory as any);
+    if (selectedCategory !== 'all' && Object.values(HotkeyCategory).includes(selectedCategory as HotkeyCategory)) {
+      const actions = hotkeyService.getActionsByCategory(selectedCategory as HotkeyCategory);
       const actionIds = new Set(actions.map(a => a.id));
       filtered = filtered.filter(b => actionIds.has(b.actionId));
     }
 
-    // Фильтрация по тексту
     if (filter) {
       const filterLower = filter.toLowerCase();
       filtered = filtered.filter(binding => 
@@ -159,11 +134,17 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
   };
 
   const saveAll = () => {
-    // TODO: Implement save to storage
-    onSave?.();
-    onOpenChange?.(false);
+    try {
+      hotkeyService.saveToStorage();
+      logger.dialog('Hotkeys saved to storage', {}, 'HotkeySettings');
+      onSave?.();
+      onOpenChange?.(false);
+    } catch (error) {
+      logger.dialogError('Failed to save hotkeys', error instanceof Error ? error : String(error), 'HotkeySettings');
+    }
   };
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
       title="Настройки горячих клавиш"
@@ -174,10 +155,9 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
       onConfirm={saveAll}
       width="800px"
       height="600px"
-      {...props}
+      {...dialogProps}
     >
       <div className="space-y-6">
-        {/* Фильтры */}
         <div className="flex gap-4">
           <div className="flex-1">
             <Label htmlFor="filter">Поиск</Label>
@@ -207,7 +187,6 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
           </div>
         </div>
 
-        {/* Конфликты */}
         {conflicts.length > 0 && (
           <Alert>
             <AlertDescription>
@@ -217,67 +196,17 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
           </Alert>
         )}
 
-        {/* Список привязок */}
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          {getFilteredBindings().map(binding => {
-            const isEditing = editingBinding?.actionId === binding.actionId;
-            
-            return (
-              <Card key={binding.actionId} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="font-medium">
-                      {getActionName(binding.actionId)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {binding.actionId}
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    {isEditing ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={editingBinding.keys}
-                          onKeyDown={handleKeyDown}
-                          placeholder="Нажмите комбинацию..."
-                          className="w-32 font-mono"
-                          autoFocus
-                        />
-                        <Button size="sm" onClick={saveEditing}>
-                          ✓
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={cancelEditing}>
-                          ✕
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <HotkeyDisplay hotkey={binding.keys} />
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => startEditing(binding.actionId, hotkeyToString(binding.keys))}
-                        >
-                          Изменить
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => resetToDefault(binding.actionId)}
-                        >
-                          Сброс
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+        <HotkeyBindingList
+          bindings={getFilteredBindings()}
+          editingBinding={editingBinding}
+          getActionName={getActionName}
+          onStartEdit={startEditing}
+          onSaveEdit={saveEditing}
+          onCancelEdit={cancelEditing}
+          onResetToDefault={resetToDefault}
+          onEditingKeysChange={updateEditingKeys}
+        />
 
-        {/* Инструкция */}
         <Card className="p-4 bg-muted/50">
           <h4 className="font-medium mb-2">Инструкция</h4>
           <ul className="text-sm text-muted-foreground space-y-1">
@@ -291,4 +220,3 @@ export const HotkeySettings: React.FC<HotkeySettingsProps> = ({
     </BaseDialog>
   );
 };
-

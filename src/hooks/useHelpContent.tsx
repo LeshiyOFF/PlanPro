@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -84,6 +83,50 @@ export const useHelpContent = () => {
             <li><strong>{t('help.tracking_item_3_bold', 'Процент:')}</strong> {t('help.tracking_item_3_text', 'доля выполненной работы.')}</li>
           </ul>
           <p className="mt-2 text-[10px] italic">{t('help.tracking_tip', 'Совет: Это лучший вид для выявления отклонений от графика.')}</p>
+        </>
+      )
+    },
+    CALENDAR: {
+      title: t('help.calendar_title', 'Календарь'),
+      content: (
+        <>
+          <p>{t('help.calendar_desc_1', 'Отображение задач в виде календарной сетки по датам.')}</p>
+          <p>{t('help.calendar_desc_2', 'Удобно для просмотра сроков и пересечений.')}</p>
+        </>
+      )
+    },
+    REPORTS: {
+      title: t('help.reports_title', 'Отчёты'),
+      content: (
+        <>
+          <p>{t('help.reports_desc_1', 'Сводные отчёты по проекту: затраты, загрузка ресурсов, статус.')}</p>
+          <p>{t('help.reports_desc_2', 'Экспорт в PDF и другие форматы.')}</p>
+        </>
+      )
+    },
+    SETTINGS: {
+      title: t('help.settings_title', 'Настройки'),
+      content: (
+        <>
+          <p>{t('help.settings_desc_1', 'Общие настройки приложения, тема, единицы измерения.')}</p>
+        </>
+      )
+    },
+    TASK_SHEET: {
+      title: t('help.task_sheet_title', 'Таблица задач'),
+      content: (
+        <>
+          <p>{t('help.task_sheet_desc_1', 'Табличное представление списка задач проекта.')}</p>
+          <p>{t('help.task_sheet_desc_2', 'Редактирование названий, дат, прогресса и связей.')}</p>
+        </>
+      )
+    },
+    RESOURCE_SHEET: {
+      title: t('help.resource_sheet_title', 'Таблица ресурсов'),
+      content: (
+        <>
+          <p>{t('help.resource_sheet_desc_1', 'Список ресурсов проекта: люди, оборудование, материалы.')}</p>
+          <p>{t('help.resource_sheet_desc_2', 'Настройка календарей и ставок.')}</p>
         </>
       )
     }

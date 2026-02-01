@@ -1,4 +1,5 @@
-import { EventType } from './Master_Functionality_Catalog';
+import { EventType, Task, Resource } from './Master_Functionality_Catalog';
+import { LogData } from '../utils/logger';
 
 /**
  * Типы Event Flow системы для ProjectLibre
@@ -14,12 +15,12 @@ export interface BaseEvent {
   type: EventType;
   timestamp: Date;
   source: string;
-  data?: any;
-  metadata?: Record<string, any>;
+  data?: LogData;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 // Интерфейс обработчика событий
-export interface EventHandler<T = any> {
+export interface EventHandler<T = LogData> {
   (event: BaseEvent & { data?: T }): void | Promise<void>;
 }
 
@@ -27,7 +28,7 @@ export interface EventHandler<T = any> {
 export interface EventSubscription {
   id: string;
   eventType: EventType;
-  handler: EventHandler;
+  handler: EventHandler<LogData>;
   priority: number;
   once: boolean;
 }
@@ -35,9 +36,9 @@ export interface EventSubscription {
 // Интерфейс диспетчера событий
 export interface IEventDispatcher {
   dispatch(event: BaseEvent): void;
-  subscribe(eventType: EventType, handler: EventHandler, priority?: number): string;
+  subscribe(eventType: EventType, handler: EventHandler<LogData>, priority?: number): string;
   unsubscribe(subscriptionId: string): void;
-  once(eventType: EventType, handler: EventHandler): string;
+  once(eventType: EventType, handler: EventHandler<LogData>): string;
   clear(): void;
 }
 
@@ -50,15 +51,15 @@ export interface ProjectEventData {
 
 export interface TaskEventData {
   taskId: string;
-  taskData?: any;
-  oldValues?: any;
-  newValues?: any;
+  taskData?: Task;
+  oldValues?: Partial<Task>;
+  newValues?: Partial<Task>;
   selectedTasks?: string[];
 }
 
 export interface ResourceEventData {
   resourceId: string;
-  resourceData?: any;
+  resourceData?: Resource;
   assignments?: Array<{
     taskId: string;
     units: number;
@@ -68,7 +69,7 @@ export interface ResourceEventData {
 
 export interface ViewEventData {
   viewType: string;
-  settings?: any;
+  settings?: Record<string, string | number | boolean | null>;
   zoomLevel?: number;
   scrollPosition?: { x: number; y: number };
 }

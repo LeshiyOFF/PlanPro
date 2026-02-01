@@ -1,5 +1,6 @@
 import * as React from "react"
 import { DayPicker } from "react-day-picker"
+import type { DayPickerProps } from "react-day-picker"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { ru } from "date-fns/locale"
@@ -8,7 +9,15 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+/** Обёртка над AnimatePresence с корректным типом возврата (React допускает null, не undefined). */
+const CalendarAnimatePresence = AnimatePresence as React.ComponentType<{ mode?: 'wait' | 'sync'; children: React.ReactNode }>
+
+/** Пропсы календаря: режим single с опциональными selected/onSelect (расширяют DayPicker для single mode). */
+export type CalendarProps = Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect'> & {
+  mode?: 'single'
+  selected?: Date
+  onSelect?: (date: Date | undefined) => void
+}
 
 function Calendar({
   className,
@@ -27,10 +36,7 @@ function Calendar({
 
   const handleTodayClick = () => {
     setMonth(today)
-    if (onSelect) {
-      // @ts-ignore
-      onSelect(today, { selected: true })
-    }
+    onSelect?.(today)
   }
 
   return (
@@ -188,7 +194,7 @@ function Calendar({
         </div>
 
         {/* Сетка DayPicker */}
-        <AnimatePresence mode="wait">
+        <CalendarAnimatePresence mode="wait">
           <motion.div
             key={month.toString()}
             initial={{ opacity: 0, y: 5 }}
@@ -198,13 +204,14 @@ function Calendar({
             className="flex-1"
           >
             <DayPicker
+              mode="single"
               month={month}
               onMonthChange={setMonth}
               showOutsideDays={showOutsideDays}
               locale={ru}
               className="m-0 p-0"
               selected={selected}
-              onSelect={onSelect}
+              onSelect={onSelect ? (selectedVal: Date | undefined) => onSelect(selectedVal) : undefined}
               classNames={{
                 months: "w-full",
                 month: "w-full",
@@ -216,10 +223,10 @@ function Calendar({
                 day: "rdp-day",
                 ...classNames
               }}
-              {...props}
+              {...(props as Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect' | 'month' | 'onMonthChange' | 'locale' | 'className' | 'classNames' | 'showOutsideDays'>)}
             />
           </motion.div>
-        </AnimatePresence>
+        </CalendarAnimatePresence>
       </div>
     </div>
   )

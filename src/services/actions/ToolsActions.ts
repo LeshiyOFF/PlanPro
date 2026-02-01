@@ -1,5 +1,4 @@
 import { BaseAction } from './BaseAction';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
 import { EventType } from '@/types/Master_Functionality_Catalog';
 import { logger } from '@/utils/logger';
 
@@ -21,8 +20,8 @@ export class SearchAction extends BaseAction {
 
   public async execute(): Promise<void> {
     this.logAction(EventType.SEARCH_ACTION, { query: '' });
-    // TODO: Implement search dialog
-    logger.info('Search functionality requested');
+    window.dispatchEvent(new CustomEvent('search:open'));
+    logger.info('Search dialog opened');
   }
 }
 

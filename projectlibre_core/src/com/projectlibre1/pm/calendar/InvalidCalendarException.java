@@ -56,41 +56,42 @@
 package com.projectlibre1.pm.calendar;
 
 /**
- * 
+ * Exception thrown when calendar configuration is invalid.
+ * Indicates issues with calendar definitions, working hours, or date calculations.
  */
 public class InvalidCalendarException extends Exception {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
-	 * 
+	 * Creates a new InvalidCalendarException with no message.
 	 */
 	public InvalidCalendarException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
-	 * @param arg0
+	 * Creates a new InvalidCalendarException with the specified message.
+	 * @param message the detail message describing the invalid calendar condition
 	 */
-	public InvalidCalendarException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarException(String message) {
+		super(message);
 	}
 
 	/**
-	 * @param arg0
+	 * Creates a new InvalidCalendarException with the specified cause.
+	 * @param cause the underlying cause of the exception
 	 */
-	public InvalidCalendarException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarException(Throwable cause) {
+		super(cause);
 	}
 
 	/**
-	 * @param arg0
-	 * @param arg1
+	 * Creates a new InvalidCalendarException with the specified message and cause.
+	 * @param message the detail message describing the invalid calendar condition
+	 * @param cause the underlying cause of the exception
 	 */
-	public InvalidCalendarException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarException(String message, Throwable cause) {
+		super(message, cause);
 	}
-
 }

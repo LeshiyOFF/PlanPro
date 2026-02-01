@@ -308,7 +308,6 @@ public class CriticalPath implements SchedulingAlgorithm {
 		earliestStart = latestFinish = date;
 	}
 	private void _calculate(boolean update, Task task) {
-		long t = System.currentTimeMillis();
 		if (predecessorTaskList.getList().size() < 3) {// if no tasks, nothing to calculate.  This is needed to avoid a null pointer execption because of sentinels not having any preds/succs
 			if (isForward())
 				project.setEnd(project.getStartConstraint());
@@ -442,7 +441,6 @@ public class CriticalPath implements SchedulingAlgorithm {
 			reset();
 			calculate(true,null);
 		} else if (changedObject instanceof WorkingCalendar) { // if whole project changed, such
-			//TODO for now just invalidating all projects, eventually be smarter
 			project.markAllTasksAsNeedingRecalculation(false);
 			calculate(true,null);
 		} else if (changedObject instanceof Assignment) {

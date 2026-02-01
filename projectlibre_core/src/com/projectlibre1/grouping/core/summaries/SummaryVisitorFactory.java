@@ -71,8 +71,6 @@ import com.projectlibre1.strings.Messages;
 public class SummaryVisitorFactory implements SummaryNames {
 	
 	public static SummaryVisitor getInstance(int type, Class clazz, boolean forceDeep) {
-		//TODO implement this	
-	    
 		if (type==SAME){
 		    return new ShallowChildWalker(new Same());
 		}

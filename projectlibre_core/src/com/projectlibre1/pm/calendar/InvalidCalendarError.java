@@ -56,41 +56,24 @@
 package com.projectlibre1.pm.calendar;
 
 /**
- * 
+ * Exception thrown when a calendar configuration error occurs.
  */
 public class InvalidCalendarError extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
 	public InvalidCalendarError() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidCalendarError(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarError(String message) {
+		super(message);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidCalendarError(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarError(Throwable cause) {
+		super(cause);
 	}
 
-	/**
-	 * @param arg0
-	 * @param arg1
-	 */
-	public InvalidCalendarError(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarError(String message, Throwable cause) {
+		super(message, cause);
 	}
-
 }

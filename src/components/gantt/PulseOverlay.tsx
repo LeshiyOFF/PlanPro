@@ -1,13 +1,29 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, ReactNode } from 'react';
 import { ViewMode } from 'gantt-task-react';
 import { GanttNavigationService } from '@/services/GanttNavigationService';
 
+/**
+ * Типизированная задача для Pulse Overlay
+ * Содержит минимально необходимые поля для отрисовки критического пути
+ */
+interface IPulseTask {
+  readonly id: string;
+  readonly start: Date;
+  readonly end: Date;
+  readonly dependencies?: ReadonlyArray<string>;
+  readonly originalTask?: {
+    readonly critical?: boolean;
+    readonly criticalPath?: boolean;
+    readonly isFiller?: boolean;
+  };
+}
+
 interface PulseOverlayProps {
-  tasks: any[];
-  projectStartDate: Date;
-  columnWidth: number;
-  viewMode: ViewMode;
-  rowHeight: number;
+  readonly tasks: ReadonlyArray<IPulseTask>;
+  readonly projectStartDate: Date;
+  readonly columnWidth: number;
+  readonly viewMode: ViewMode;
+  readonly rowHeight: number;
 }
 
 export const PulseOverlay: React.FC<PulseOverlayProps> = ({
@@ -18,7 +34,7 @@ export const PulseOverlay: React.FC<PulseOverlayProps> = ({
   rowHeight
 }) => {
   const criticalConnections = useMemo(() => {
-    const lines: React.ReactNode[] = [];
+    const lines: ReactNode[] = [];
     
     tasks.forEach((task, index) => {
       const isTaskCritical = task.originalTask?.critical || task.originalTask?.criticalPath;

@@ -1,12 +1,16 @@
 import * as Sentry from '@sentry/react';
-import { BrowserTracing } from '@sentry/tracing';
 import type { SeverityLevel } from '@sentry/types';
+import type { Event, EventHint } from '@sentry/types';
+import type { JsonObject, JsonValue } from '@/types/json-types';
+
+/** Допустимые значения контекста Sentry: примитивы или вложенные объекты для setContext */
+export type SentryContextValue = string | number | boolean | JsonObject;
 
 /**
  * Конфигурация Sentry
  * Следует SOLID принципу Single Responsibility
  */
-interface SentryConfig {
+export interface SentryConfig {
   dsn: string;
   environment: string;
   release?: string;
@@ -55,20 +59,19 @@ export class SentryService {
     }
 
     try {
+      const browserTracing =
+        typeof Sentry.browserTracingIntegration === 'function'
+          ? Sentry.browserTracingIntegration()
+          : undefined;
+
       Sentry.init({
         dsn: this.config.dsn,
         environment: this.config.environment,
         release: this.config.release,
-        integrations: [
-          new BrowserTracing({
-            tracingOrigins: ['localhost', /^\//],
-          }),
-        ],
+        ...(browserTracing && { integrations: [browserTracing] }),
         tracesSampleRate: this.config.tracesSampleRate || 0.1,
-        beforeSend(event) {
-          // Фильтрация чувствительных данных
-          return SentryService.filterSensitiveData(event);
-        },
+        beforeSend: ((event: Event, _hint: EventHint) =>
+          SentryService.filterSensitiveData(event)) as Sentry.BrowserOptions['beforeSend'],
       });
 
       this.initialized = true;
@@ -83,7 +86,7 @@ export class SentryService {
    */
   public captureException(
     error: Error,
-    context?: Record<string, any>,
+    context?: Record<string, SentryContextValue>,
     level: SeverityLevel = 'error'
   ): void {
     if (!this.initialized) {
@@ -94,7 +97,11 @@ export class SentryService {
     Sentry.withScope(scope => {
       if (context) {
         Object.entries(context).forEach(([key, value]) => {
-          scope.setContext(key, value);
+          const ctx: JsonObject =
+            typeof value === 'object' && value !== null && !Array.isArray(value)
+              ? (value as JsonObject)
+              : { value: value as JsonValue }; // Fallback for primitive values
+          scope.setContext(key, ctx);
         });
       }
       scope.setLevel(level);
@@ -108,7 +115,7 @@ export class SentryService {
   public captureMessage(
     message: string,
     level: SeverityLevel = 'info',
-    context?: Record<string, any>
+    context?: Record<string, SentryContextValue>
   ): void {
     if (!this.initialized) {
       console.warn('Sentry not initialized, logging to console:', message);
@@ -118,7 +125,11 @@ export class SentryService {
     Sentry.withScope(scope => {
       if (context) {
         Object.entries(context).forEach(([key, value]) => {
-          scope.setContext(key, value);
+          const ctx: JsonObject =
+            typeof value === 'object' && value !== null && !Array.isArray(value)
+              ? (value as JsonObject)
+              : { value: value as JsonValue }; // Fallback for primitive values
+          scope.setContext(key, ctx);
         });
       }
       scope.setLevel(level);
@@ -129,7 +140,7 @@ export class SentryService {
   /**
    * Установка пользовательского контекста
    */
-  public setUser(user: { id?: string; email?: string; username?: string }): void {
+  public setUser(user: { id?: string; email?: string; username?: string } | null): void {
     if (!this.initialized) {
       return;
     }
@@ -164,28 +175,31 @@ export class SentryService {
   }
 
   /**
-   * Создание транзакции для performance monitoring
+   * Создание транзакции для performance monitoring (Sentry v10.x).
+   * Использует startSpan при наличии.
    */
-  public startTransaction(name: string, op?: string): any {
+  public startTransaction(name: string, op?: string): undefined {
     if (!this.initialized) {
       return undefined;
     }
-
-    // Используем современный API Sentry v10.x
-    if ('startSpan' in Sentry) {
-      return (Sentry as any).startSpan?.({
-        name,
-        op: op || 'navigation',
-      });
+    const spanOp = op ?? 'navigation';
+    if (typeof Sentry.startSpan === 'function') {
+      try {
+        (Sentry.startSpan as (options: { name: string; op: string }) => void)({
+          name,
+          op: spanOp,
+        });
+      } catch {
+        // игнорируем ошибки трейсинга
+      }
     }
-
     return undefined;
   }
 
   /**
    * Фильтрация чувствительных данных
    */
-  private static filterSensitiveData(event: Sentry.Event): Sentry.Event {
+  private static filterSensitiveData(event: Event): Event | null {
     if (!event.breadcrumbs) {
       return event;
     }
@@ -214,4 +228,3 @@ export class SentryService {
     return this.initialized;
   }
 }
-

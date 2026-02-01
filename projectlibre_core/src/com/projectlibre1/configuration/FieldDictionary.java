@@ -129,12 +129,11 @@ public class FieldDictionary {
 	private Class clazz;
 	public void setClassName(String className) {
 		//System.out.println("						<include name=\""+className+"\"/>");
-		try {
-			clazz = ClassUtils.forName(className);
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	try {
+		clazz = ClassUtils.forName(className);
+	} catch (ClassNotFoundException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Failed to load class: " + className, e);
+	}
 	}
 	
 	public void populateListWithFieldsOfType(List list, Class clazz) {
@@ -248,7 +247,7 @@ public class FieldDictionary {
 	public static void addDigesterEvents(Digester digester){
 //		digester.addObjectCreate("*/fieldDictionary", "com.projectlibre1.configuration.FieldDictionary");
 		digester.addFactoryCreate("*/fieldDictionary", "com.projectlibre1.configuration.FieldDictionaryFactory");
-		digester.addSetNext("*/fieldDictionary", "setFieldDictionary", "com.projectlibre1.configuration.FieldDictionary");	//TODO can we do this more easily
+		digester.addSetNext("*/fieldDictionary", "setFieldDictionary", "com.projectlibre1.configuration.FieldDictionary");
 	    digester.addSetProperties("*/fieldDictionary/class","name","className"); // object is field dictionary
 		digester.addObjectCreate("*/fieldDictionary/class/field", "com.projectlibre1.field.Field");
 		digester.addSetProperties("*/fieldDictionary/class/field");
@@ -312,15 +311,13 @@ public class FieldDictionary {
 		fieldsToHtmlTable(result,"Dependency Fields",FieldDictionary.getInstance().getProjectFields());
 		result.append("</body></html>");
 		
-		try {
-			new FileOutputStream(fileName).write(result.toString().getBytes());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	try {
+		new FileOutputStream(fileName).write(result.toString().getBytes());
+	} catch (FileNotFoundException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Failed to write field dictionary: " + fileName, e);
+	} catch (IOException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Failed to write field dictionary: " + fileName, e);
+	}
 	}
 	public static void main(String args[]) {
 		generateFieldDoc("d:/pod/fields.html");

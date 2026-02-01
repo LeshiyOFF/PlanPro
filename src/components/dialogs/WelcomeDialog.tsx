@@ -3,9 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { 
   Dialog, 
   DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+  DialogTitle 
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';

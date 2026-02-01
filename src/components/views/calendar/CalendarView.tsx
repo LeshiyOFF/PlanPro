@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ViewType, ViewSettings } from '@/types/ViewTypes';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { CalendarService } from '@/domain/calendar/services/CalendarService';
-import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore, createTaskFromView } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { CalendarGrid } from './CalendarGrid';
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
@@ -13,7 +13,9 @@ import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenu
 import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Task } from '@/store/project/interfaces';
+import { ITaskMenuTarget } from '@/types/contextmenu/IContextMenuTypes';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * CalendarView - Календарное представление проекта
@@ -23,12 +25,12 @@ import { cn } from '@/lib/utils';
  * @version 8.14
  */
 export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType 
+  viewType: _viewType 
 }) => {
   const { t } = useTranslation();
   const helpContent = useHelpContent();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { tasks, updateTask, addTask, deleteTask } = useProjectStore();
+  const { tasks, addTask, deleteTask } = useProjectStore();
   const calendarService = useMemo(() => new CalendarService(), []);
   const { handleDragStart, handleDragEnd, handleDrop } = useCalendarDnD();
   const { showMenu } = useContextMenu();
@@ -60,24 +62,26 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
   };
 
   const handleEventContextMenu = (e: React.MouseEvent, event: ICalendarEvent) => {
-    showMenu(ContextMenuType.TASK, {
-      target: {
-        ...event,
-        type: 'task',
-        onShowProperties: async (t: any) => {
-          setSelectedEvent(event);
-          setIsDialogOpen(true);
-        },
-        onDelete: async (t: any) => {
-          deleteTask(t.id);
-        }
+    const taskMenuTarget: ITaskMenuTarget = {
+      ...event,
+      type: 'task',
+      onShowProperties: async (_task: Task) => {
+        setSelectedEvent(event);
+        setIsDialogOpen(true);
       },
+      onDelete: async (task: Task) => {
+        deleteTask(task.id);
+      }
+    };
+
+    showMenu(ContextMenuType.TASK, {
+      target: taskMenuTarget as JsonObject,
       position: { x: e.clientX, y: e.clientY }
     });
   };
 
   const handleAddEvent = () => {
-    addTask({
+    addTask(createTaskFromView({
       id: `TASK-${tasks.length + 1}`,
       name: t('sheets.new_task'),
       startDate: new Date(),
@@ -86,7 +90,7 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
       color: 'hsl(var(--primary))',
       level: 1,
       predecessors: []
-    });
+    }));
   };
 
   // Навигационные контролы
@@ -158,4 +162,3 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
     </div>
   );
 };
-

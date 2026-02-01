@@ -3,9 +3,8 @@ import { useProjectStore } from '@/store/projectStore';
 import { CalendarEditorDialog } from '@/components/dialogs/calendar/CalendarEditorDialog';
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
 import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Plus, Edit, Trash2, Calendar, Lock } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
 
 interface CalendarManagerProps {
@@ -18,7 +17,6 @@ interface CalendarManagerProps {
  * Stage 8.15: Эталонное управление календарями
  */
 export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = '' }) => {
-  const { t } = useTranslation();
   const { toast } = useToast();
   const { calendars, addCalendar, updateCalendar, deleteCalendar } = useProjectStore();
   const templateService = CalendarTemplateService.getInstance();

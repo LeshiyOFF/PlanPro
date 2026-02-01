@@ -29,7 +29,6 @@ export const Card: React.FC<CardProps> = ({
   className = '',
   children,
   variant = 'default',
-  color = 'neutral',
   padding = 'md',
   rounded = true,
   shadow = 'sm',

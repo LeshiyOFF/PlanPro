@@ -1,9 +1,9 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { logger } from '@/utils/logger';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
+  fallback?: ReactNode | ((error: Error, reset: () => void) => ReactNode);
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
@@ -26,16 +26,25 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logger.error('Error Boundary caught an error:', { error, errorInfo });
+  private resetError = () => {
+    this.setState({ hasError: false, error: undefined });
+  };
+
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    logger.error('Error Boundary caught an error:', { 
+      message: error.message, 
+      stack: error.stack || '',
+      componentStack: errorInfo.componentStack || ''
+    });
 
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
     }
 
-    // Здесь можно добавить интеграцию с Sentry или другим error tracking
-    if (window.sentry) {
-      window.sentry.captureException(error, {
+    // Интеграция с Sentry при наличии глобального объекта
+    const win = window as Window & { sentry?: { captureException: (err: Error, opts?: { contexts?: Record<string, object> }) => void } };
+    if (win.sentry) {
+      win.sentry.captureException(error, {
         contexts: {
           react: {
             componentStack: errorInfo.componentStack,
@@ -45,9 +54,12 @@ export class ErrorBoundary extends Component<Props, State> {
     }
   }
 
-  render(): ReactNode {
+  public override render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
+        if (typeof this.props.fallback === 'function') {
+          return this.props.fallback(this.state.error!, this.resetError);
+        }
         return this.props.fallback;
       }
 

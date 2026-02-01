@@ -1,12 +1,13 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { SentryService } from '@/services/SentryService';
+import { Component, ErrorInfo, ReactNode } from 'react';
+import { SentryService, type SentryContextValue } from '@/services/SentryService';
+import type { JsonObject } from '@/types/json-types';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
   tags?: Record<string, string>;
-  userContext?: Record<string, any>;
+  userContext?: Record<string, SentryContextValue>;
 }
 
 interface State {
@@ -28,7 +29,7 @@ export class SentryErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     const sentryService = SentryService.getInstance();
 
     // Установка тегов и контекста
@@ -38,22 +39,22 @@ export class SentryErrorBoundary extends Component<Props, State> {
 
     if (this.props.userContext) {
       Object.entries(this.props.userContext).forEach(([key, value]) => {
-        sentryService.setTags({ [`user.${key}`]: value });
+        sentryService.setTags({ [`user.${key}`]: String(value) });
       });
     }
 
-    // Отправка ошибки в Sentry с детальной информацией
+    // Отправка ошибки в Sentry с детальной информацией (контекст — примитивы или вложенные объекты)
     sentryService.captureException(error, {
       react: {
-        componentStack: errorInfo.componentStack,
+        componentStack: errorInfo.componentStack || '',
         errorBoundary: true,
         errorBoundaryName: this.constructor.name,
-      },
+      } as JsonObject,
       props: {
         hasTags: !!this.props.tags,
         hasUserContext: !!this.props.userContext,
         hasCustomHandler: !!this.props.onError,
-      },
+      } as JsonObject,
     });
 
     // Вызов кастомного обработчика если предоставлен
@@ -72,14 +73,14 @@ export class SentryErrorBoundary extends Component<Props, State> {
     }
   }
 
-  componentDidUpdate(prevProps: Props) {
+  public override componentDidUpdate(prevProps: Props) {
     // Сброс ошибки при смене children
     if (this.state.hasError && prevProps.children !== this.props.children) {
       this.setState({ hasError: false, error: undefined });
     }
   }
 
-  render(): ReactNode {
+  public override render(): ReactNode {
     if (this.state.hasError) {
       if (this.props.fallback) {
         return this.props.fallback;
@@ -135,4 +136,3 @@ export class SentryErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-

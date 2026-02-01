@@ -57,6 +57,7 @@ package com.projectlibre1.functor;
 
 import org.apache.commons.collections.Predicate;
 import java.lang.reflect.*;
+import com.projectlibre1.server.access.ErrorLogger;
 
 /**
  *
@@ -78,14 +79,11 @@ public class ReflectionPredicate implements Predicate {
 		try {
 			return ((Boolean)method.invoke(arg0,null)).booleanValue();
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in ReflectionPredicate", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in ReflectionPredicate", e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in ReflectionPredicate", e);
 		}
 		return false;
 	}

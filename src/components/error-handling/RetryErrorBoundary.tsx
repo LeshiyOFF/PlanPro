@@ -1,4 +1,4 @@
-import React, { Component, ReactNode, ErrorInfo } from 'react';
+import { Component, ReactNode, ErrorInfo } from 'react';
 import { NetworkErrorFallback } from './NetworkErrorFallback';
 import { GeneralErrorFallback } from './GeneralErrorFallback';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
@@ -30,7 +30,7 @@ export class RetryErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public override componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
     const { handleError } = useErrorHandler();
     
     this.setState(prev => ({
@@ -44,12 +44,14 @@ export class RetryErrorBoundary extends Component<Props, State> {
     if (this.props.onRetry && 
         this.state.retries < (this.props.maxRetries || 3)) {
       setTimeout(() => {
-        this.props.onRetry();
+        if (this.props.onRetry) {
+          this.props.onRetry();
+        }
       }, 1000 * this.state.retries);
     }
   }
 
-  render(): ReactNode {
+  public override render(): ReactNode {
     if (this.state.hasError) {
       const isNetworkError = this.state.error?.message.includes('fetch') ||
                              this.state.error?.message.includes('network');

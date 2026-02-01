@@ -220,7 +220,7 @@ public class SelectFrom implements HasStartAndEnd {
 			if (generator == null) // will be null on first call, and after the previously active generator has been evaluated
 				generator = fromGenerators.earliestEndingGenerator();
 
-			if (generator == null) { //could be case if there are no from generatros at all TODO is this test needed?
+			if (generator == null) { //could be case if there are no from generators at all
 				finished = true;
 				break;
 			}
@@ -265,7 +265,6 @@ public class SelectFrom implements HasStartAndEnd {
 	 */
 	private SelectFrom() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

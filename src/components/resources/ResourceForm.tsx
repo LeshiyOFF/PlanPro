@@ -10,7 +10,7 @@ interface ResourceFormProps {
     availability: number;
     costPerHour: number;
   };
-  onFormChange: (data: any) => void;
+  onFormChange: (data: Partial<ResourceFormProps['formData']>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isLoading: boolean;

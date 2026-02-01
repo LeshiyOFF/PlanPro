@@ -1,29 +1,39 @@
 import { ToolbarAction } from './ToolbarAction';
 import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
+import { undoRedoService } from '../../../services/UndoRedoService';
+import type { UndoRedoState } from '../../../services/UndoRedoService';
 
 /**
  * Действие для повторения последнего отменённого действия
  * Стандартная кнопка тулбара TB006
  */
 export class RedoAction extends ToolbarAction {
+  private state: UndoRedoState | null = null;
+  private unsubscribe: (() => void) | null = null;
+
   constructor() {
     super('TB006', 'Повторить', '↪️', 'Повторить последнее действие (Ctrl+Y)', 'Ctrl+Y');
+    this.unsubscribe = undoRedoService.addStateListener((s) => {
+      this.state = s;
+    });
   }
 
   /**
    * Выполняет повторение действия
    */
-  execute(): void {
+  override async execute(): Promise<void> {
     console.log('Повторение действия');
-    // TODO: Интеграция с HistoryManager или RedoStack
+    if (!this.state?.canRedo) {
+      return;
+    }
+    // Интеграция с HistoryManager или RedoStack — при подключении сервиса
   }
 
   /**
    * Проверяет, можно ли выполнить повторение
    */
-  canExecute(): boolean {
-    // TODO: Проверить наличие отменённых действий
-    return super.canExecute();
+  override canExecute(): boolean {
+    return this.state?.canRedo ?? false;
   }
 
   /**

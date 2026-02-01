@@ -2,9 +2,9 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface EVMetrics {
@@ -71,12 +71,16 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
     return 'Poor';
   };
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   if (!currentMetrics) {
     return (
       <BaseDialog
         title="Earned Value Analysis"
-        size="fullscreen"
-        {...props}
+        size="large"
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+        {...dialogProps}
         onClose={onClose}
         footer={
           <div className="flex justify-end">
@@ -98,8 +102,10 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
   return (
     <BaseDialog
       title="Earned Value Analysis"
-      size="fullscreen"
-      {...props}
+      size="large"
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -108,7 +114,7 @@ export const EarnedValueDialog: React.FC<EarnedValueDialogProps> = ({
               <Label htmlFor="period">Analysis Period:</Label>
               <Select
                 value={selectedPeriod}
-                onValueChange={setSelectedPeriod}
+                onValueChange={(value: string) => setSelectedPeriod(value as 'weekly' | 'monthly' | 'quarterly')}
               >
                 <SelectTrigger className="w-32">
                   <SelectValue />

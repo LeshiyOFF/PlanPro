@@ -1,10 +1,20 @@
 import React, { KeyboardEvent, useEffect, useRef } from 'react';
 import { ICellEditorProps } from './ICellEditorProps';
 import { format, parse } from 'date-fns';
+import { CellValue } from '@/types/sheet/CellValueTypes';
+
+/**
+ * Преобразует значение в формат для input type="date"
+ */
+function getInputValue(val: CellValue): string {
+  if (!val) return '';
+  const date = new Date(val as string | Date);
+  if (isNaN(date.getTime())) return '';
+  return format(date, 'yyyy-MM-dd');
+}
 
 /**
  * Редактор дат для ячеек таблицы.
- * Использует нативный календарь для максимальной совместимости и производительности в таблице.
  */
 export const DateCellEditor: React.FC<ICellEditorProps> = ({
   value,
@@ -16,14 +26,6 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
   errorMessage
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Преобразуем входящее значение (Date или ISO строку) в формат yyyy-MM-dd для input type="date"
-  const getInputValue = (val: any): string => {
-    if (!val) return '';
-    const date = new Date(val);
-    if (isNaN(date.getTime())) return '';
-    return format(date, 'yyyy-MM-dd');
-  };
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -37,12 +39,9 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
       onChange(null);
       return;
     }
-    
-    // Парсим введенную дату. Мы сохраняем локальное время, чтобы избежать сдвигов.
+
     const date = parse(newVal, 'yyyy-MM-dd', new Date());
     if (!isNaN(date.getTime())) {
-      // Устанавливаем время в начало дня для startDate и конец дня для endDate
-      // Но здесь мы просто передаем объект Date, а TaskSheet решит что с ним делать
       onChange(date);
     }
   };
@@ -56,7 +55,6 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
   };
 
   const handleClick = (e: React.MouseEvent<HTMLInputElement>) => {
-    // Форсируем открытие нативного календаря при клике
     if (e.currentTarget.showPicker) {
       try {
         e.currentTarget.showPicker();
@@ -88,4 +86,3 @@ export const DateCellEditor: React.FC<ICellEditorProps> = ({
     </div>
   );
 };
-

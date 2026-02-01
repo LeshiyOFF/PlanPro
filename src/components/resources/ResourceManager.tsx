@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useJavaApi, Resource } from '@/hooks/useJavaApi';
 import { logger } from '@/utils/logger';
-import { ResourceForm } from './ResourceForm';
-import { ResourceCard } from './ResourceCard';
+import type { ResourceUpdateRequest } from '@/types/api/request-types';
 
 /**
  * Компонент управления ресурсами с реальной Java API интеграцией
@@ -61,11 +60,11 @@ export const ResourceManager: React.FC = () => {
     try {
       const resource = await javaApi.createResource(formData);
       if (resource) {
-        logger.info('Resource created successfully:', resource);
+        logger.info('Resource created successfully:', { resourceId: resource.id });
         resetForm();
       }
     } catch (error) {
-      logger.error('Failed to create resource:', error);
+      logger.error('Failed to create resource:', { message: error instanceof Error ? error.message : String(error) });
     }
   };
   
@@ -80,14 +79,20 @@ export const ResourceManager: React.FC = () => {
     }
     
     try {
-      const updated = await javaApi.javaApiService.updateResource(editingResource.id, formData);
-      if (updated) {
-        logger.info('Resource updated successfully:', updated);
+      const updates: ResourceUpdateRequest = {
+        id: editingResource.id,
+        name: formData.name,
+        email: formData.email,
+        costPerHour: formData.costPerHour
+      };
+      const updated = await javaApi.javaApiService.updateResource(editingResource.id, updates);
+      if (updated?.data) {
+        logger.info('Resource updated successfully:', { resourceId: editingResource.id });
         await javaApi.loadResources();
         resetForm();
       }
     } catch (error) {
-      logger.error('Failed to update resource:', error);
+      logger.error('Failed to update resource:', { message: error instanceof Error ? error.message : String(error) });
     }
   };
   
@@ -106,10 +111,10 @@ export const ResourceManager: React.FC = () => {
     if (result.response === 0) {
       try {
         await javaApi.javaApiService.deleteResource(resource.id);
-        logger.info('Resource deleted successfully:', resource);
+        logger.info('Resource deleted successfully:', { resourceId: resource.id });
         await javaApi.loadResources();
       } catch (error) {
-        logger.error('Failed to delete resource:', error);
+        logger.error('Failed to delete resource:', { message: error instanceof Error ? error.message : String(error) });
       }
     }
   };

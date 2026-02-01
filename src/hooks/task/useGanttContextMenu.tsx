@@ -1,13 +1,33 @@
 import React from 'react';
-import { 
-  Info, Trash2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, 
-  Link2, Link2Off, Diamond, Scissors, Combine 
+import type { TFunction } from 'i18next';
+import {
+  Info, Trash2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown,
+  Link2, Link2Off, Diamond, Scissors, Combine
 } from 'lucide-react';
 import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
-import { Task } from '@/store/project/interfaces';
+import type { IContextMenuContext } from '@/domain/contextmenu/entities/ContextMenu';
+import type { Task } from '@/store/project/interfaces';
+import type { JsonObject } from '@/types/json-types';
+
+/** Действия контекстного меню Ганта */
+export interface GanttContextMenuActions {
+  onInfo: (id: string) => void;
+  onToggleMilestone: (id: string) => void;
+  onStartLink: (id: string) => void;
+  onUnlink: (id: string) => void;
+  onSplit: (id: string) => void;
+  onMerge: (id: string) => void;
+  onIndent: (id: string) => void;
+  onOutdent: (id: string) => void;
+  onMove: (id: string, direction: 'up' | 'down') => void;
+  onDelete: (id: string) => void;
+}
 
 export const useGanttContextMenu = (
-  showMenu: any, t: any, actions: any, isDeletionAllowed: boolean
+  showMenu: (type: ContextMenuType, context: IContextMenuContext) => Promise<void>,
+  t: TFunction,
+  actions: GanttContextMenuActions,
+  isDeletionAllowed: boolean
 ) => {
   return (event: React.MouseEvent, task: Task, tasks: Task[]) => {
     event.preventDefault();
@@ -19,11 +39,6 @@ export const useGanttContextMenu = (
     // Indent: можно сделать подзадачей только если сверху есть кто-то того же уровня или глубже
     const indentParent = prevTask && prevTask.level >= task.level ? prevTask : null;
     
-    // Outdent: ищем задачу, которая является текущим родителем (уровень на 1 меньше)
-    const currentParent = task.level > 1 
-      ? tasks.slice(0, taskIndex).reverse().find(t => t.level < task.level)
-      : null;
-
     // Outdent Target: ищем задачу, которая станет НОВЫМ родителем после поднятия уровня
     // Если уровень станет (task.level - 1), то новым родителем будет ближайшая задача выше с уровнем < (task.level - 1)
     const outdentTarget = task.level > 2
@@ -37,14 +52,14 @@ export const useGanttContextMenu = (
         : t('help.outdent');
 
     showMenu(ContextMenuType.TASK, {
-      target: task,
+      target: task as JsonObject,
       position: { x: event.clientX, y: event.clientY },
       actions: [
         { label: t('sheets.task_info'), onClick: () => actions.onInfo(task.id), icon: <Info size={14} className="text-primary" /> },
         { 
-          label: task.milestone ? t('help.make_regular') : t('help.make_milestone'), 
+          label: task.isMilestone ? t('help.make_regular') : t('help.make_milestone'), 
           onClick: () => actions.onToggleMilestone(task.id), 
-          icon: <Diamond size={14} className={task.milestone ? "text-slate-400" : "text-amber-600"} /> 
+          icon: <Diamond size={14} className={task.isMilestone ? "text-slate-400" : "text-amber-600"} /> 
         },
         { divider: true },
         { label: t('help.link_tasks'), onClick: () => actions.onStartLink(task.id), icon: <Link2 size={14} className="text-amber-500" /> },
@@ -96,4 +111,3 @@ export const useGanttContextMenu = (
     });
   };
 };
-

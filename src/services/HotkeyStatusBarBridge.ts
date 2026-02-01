@@ -7,7 +7,7 @@ import { logger } from '@/utils/logger';
  * Обеспечивает UI обратную связь для горячих клавиш
  */
 
-class HotkeyStatusBarBridge {
+export class HotkeyStatusBarBridge {
   private static instance: HotkeyStatusBarBridge;
   private statusBarService: StatusBarService;
   private isInitialized: boolean = false;

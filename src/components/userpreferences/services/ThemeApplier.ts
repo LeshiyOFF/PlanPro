@@ -9,9 +9,6 @@ import { APP_FONTS } from '../constants/FontConstants';
  * Внедрена Dynamic Accent System для эталонного дизайна 2026.
  */
 export class ThemeApplier {
-  private static readonly ROOT_SELECTOR = ':root';
-  private static readonly DARK_SELECTOR = '.dark';
-
   /**
    * Применяет акцентный цвет к корневому элементу приложения
    * Создаёт полный спектр CSS-переменных для профессионального дизайна

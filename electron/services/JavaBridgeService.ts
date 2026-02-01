@@ -5,6 +5,9 @@ import { ConfigService } from './ConfigService';
 import { JavaLauncher, IJavaLauncher, JavaLaunchOptions, ProcessInfo } from './JavaLauncher';
 import { JavaProcessManager } from './JavaProcessManager';
 import { JavaApiClient } from './JavaApiClient';
+import type { JavaBridgeEventPayload } from '../types/JavaBridgeEventPayload';
+import type { JavaCommandArgs } from '../types/JavaCommandArgs';
+import type { JsonValue } from '../types/JsonValue';
 
 /**
  * Сервис для взаимодействия с Java backend
@@ -121,13 +124,13 @@ export class JavaBridgeService extends EventEmitter {
     });
   }
 
-  public on(event: string, listener: (...args: any[]) => void): this {
+  public on(event: string, listener: (payload?: JavaBridgeEventPayload) => void): this {
     this.eventEmitter.on(event, listener);
     return this;
   }
 
-  public emit(event: string, ...args: any[]): boolean {
-    return this.eventEmitter.emit(event, ...args);
+  public emit(event: string, payload?: JavaBridgeEventPayload): boolean {
+    return this.eventEmitter.emit(event, payload);
   }
 
   /**
@@ -154,7 +157,7 @@ export class JavaBridgeService extends EventEmitter {
   /**
    * Выполнение команды через Java API
    */
-  public async executeCommand(command: string, args: any[] = []): Promise<any> {
+  public async executeCommand(command: string, args: JavaCommandArgs = []): Promise<JsonValue> {
     try {
       return await this.apiClient.makeRequest(command, args);
     } catch (error) {

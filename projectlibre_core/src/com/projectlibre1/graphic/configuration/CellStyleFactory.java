@@ -79,16 +79,9 @@ public class CellStyleFactory {
 	public CellStyle getCellStyle() throws InvalidFormulaException{
 		if (formulaClass!=null){
 			try {
-				return (CellStyle)Class.forName(formulaClass).newInstance();
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				return (CellStyle)Class.forName(formulaClass).getDeclaredConstructor().newInstance();
+			} catch (Exception e) {
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to instantiate cell style class: " + formulaClass, e);
 			}
 			return null;
 		}else if (formulaText!=null){
@@ -107,7 +100,7 @@ public class CellStyleFactory {
 	//		GroovyClassLoader loader = new GroovyClassLoader(new TracingClassLoader(getClass().getClassLoader()));
 			try {
 				Class groovyClass = loader.parseClass(classText.toString());
-				CellStyle style= (CellStyle)groovyClass.newInstance();
+				CellStyle style= (CellStyle)groovyClass.getDeclaredConstructor().newInstance();
 				return style;
 			} catch (Exception e) {
 				throw new InvalidFormulaException(e);

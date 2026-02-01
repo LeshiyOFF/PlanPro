@@ -1,22 +1,31 @@
 import { ISheetColumn, SheetColumnType } from '../interfaces/ISheetColumn';
 import { formatDate } from '@/utils/formatUtils';
+import { CellValue, isDurationValue } from '@/types/sheet/CellValueTypes';
+import { ReactNode } from 'react';
+import type { JsonValue } from '@/types/json-types';
+import type { JsonValue } from '@/types/json-types';
 
 /**
- * Сервис для извлечения и форматирования значений ячеек для поиска и сортировки.
+ * Типы для внутренних операций сервиса
+ */
+type RowData = Record<string, JsonValue>;
+
+/**
+ * Сервис для извлечения и форматирования значений ячеек.
  */
 export class SheetValueService {
-  /**
-   * Возвращает текстовое представление значения для фильтрации.
-   */
-  public static getFilterableValue(item: any, column: ISheetColumn): string {
-    // 1. Пытаемся получить значение через valueGetter, иначе через field
-    const rawValue = column.valueGetter ? column.valueGetter(item) : item[column.field as string];
-    
+  public static getFilterableValue<T extends RowData>(
+    item: T,
+    column: ISheetColumn<T>
+  ): string {
+    const rawValue = column.valueGetter
+      ? column.valueGetter(item)
+      : (item[column.field as string] as CellValue);
+
     if (rawValue === null || rawValue === undefined) return '';
 
     let displayText = '';
 
-    // 2. Если есть форматер, используем его для получения того, что видит пользователь
     if (column.formatter) {
       try {
         const formatted = column.formatter(rawValue, item);
@@ -26,35 +35,16 @@ export class SheetValueService {
         displayText = String(rawValue);
       }
     } else {
-      // Стандартная логика по типам если нет форматера
-      switch (column.type) {
-        case SheetColumnType.DATE:
-          displayText = formatDate(rawValue);
-          break;
-        case SheetColumnType.PERCENT:
-          displayText = `${Math.round((Number(rawValue) || 0) * 100)}%`;
-          break;
-        case SheetColumnType.SELECT:
-          if (column.options) {
-            const option = column.options.find(o => o.value === rawValue);
-            displayText = option ? option.label : String(rawValue);
-          } else {
-            displayText = String(rawValue);
-          }
-          break;
-        default:
-          displayText = String(rawValue);
-      }
+      displayText = this.formatValueByType(rawValue, column as ISheetColumn<RowData>);
     }
 
-    // 3. НОРМАЛИЗАЦИЯ ДЛЯ ПОИСКА (Эталонный стандарт)
-    // Убираем неразрывные пробелы (\u00A0) и любые лишние пробелы
-    const normalized = displayText.replace(/[\u00A0\s]+/g, ' ').trim();
-    
-    // Для числовых полей, валют и длительности добавляем в строку поиска "чистое" число без пробелов,
-    // чтобы поиск по "1000" находил "1 000 ₽"
-    if (column.type === SheetColumnType.NUMBER || column.type === SheetColumnType.PERCENT || column.type === SheetColumnType.DURATION) {
-      // Извлекаем только цифры и точку/запятую из сырого значения
+    const normalized = displayText.replace(/[\u00a0\s]+/g, ' ').trim();
+
+    if (
+      column.type === SheetColumnType.NUMBER ||
+      column.type === SheetColumnType.PERCENT ||
+      column.type === SheetColumnType.DURATION
+    ) {
       const pureNumber = String(rawValue).replace(/[^\d.,]/g, '');
       return `${normalized} | ${pureNumber}`;
     }
@@ -62,27 +52,30 @@ export class SheetValueService {
     return normalized;
   }
 
-  /**
-   * Возвращает значение для сравнения при сортировке.
-   */
-  public static getSortableValue(item: any, column: ISheetColumn): any {
-    const value = column.valueGetter ? column.valueGetter(item) : item[column.field as string];
+  public static getSortableValue<T extends RowData>(
+    item: T,
+    column: ISheetColumn<T>
+  ): string | number {
+    const value = column.valueGetter
+      ? column.valueGetter(item)
+      : (item[column.field as string] as CellValue);
 
     if (value === null || value === undefined) {
-      return column.type === SheetColumnType.NUMBER || column.type === SheetColumnType.PERCENT || column.type === SheetColumnType.DURATION 
-        ? -Infinity 
+      return column.type === SheetColumnType.NUMBER ||
+        column.type === SheetColumnType.PERCENT ||
+        column.type === SheetColumnType.DURATION
+        ? -Infinity
         : '';
     }
 
     switch (column.type) {
       case SheetColumnType.DATE:
-        return value instanceof Date ? value.getTime() : new Date(value).getTime();
+        return value instanceof Date ? value.getTime() : new Date(value as string).getTime();
       case SheetColumnType.NUMBER:
       case SheetColumnType.PERCENT:
         return Number(value);
       case SheetColumnType.DURATION:
-        // Если значение - объект длительности, берем его числовое представление
-        if (value && typeof value === 'object' && 'value' in value) {
+        if (isDurationValue(value)) {
           return value.value;
         }
         return Number(value);
@@ -91,19 +84,40 @@ export class SheetValueService {
     }
   }
 
-  /**
-   * Вспомогательная функция для извлечения чистого текста из React-элементов.
-   */
-  private static extractTextFromFormatted(value: any): string {
+  private static formatValueByType(value: CellValue, column: ISheetColumn<RowData>): string {
+    switch (column.type) {
+      case SheetColumnType.DATE:
+        return value != null ? formatDate(value as string | number | Date) : '';
+      case SheetColumnType.PERCENT:
+        return `${Math.round((Number(value) || 0) * 100)}%`;
+      case SheetColumnType.SELECT:
+        if (column.options) {
+          const option = column.options.find((o) => o.value === value);
+          return option ? option.label : String(value);
+        }
+        return String(value);
+      default:
+        return String(value);
+    }
+  }
+
+  private static extractTextFromFormatted(value: ReactNode): string {
     if (value === null || value === undefined || typeof value === 'boolean') return '';
     if (typeof value === 'string' || typeof value === 'number') return String(value);
-    
+
     if (Array.isArray(value)) {
-      return value.map(v => this.extractTextFromFormatted(v)).join('');
+      return value.map((v) => this.extractTextFromFormatted(v)).join('');
     }
 
-    if (value && typeof value === 'object' && value.props && 'children' in value.props) {
-      return this.extractTextFromFormatted(value.props.children);
+    if (
+      value &&
+      typeof value === 'object' &&
+      'props' in value &&
+      value.props &&
+      typeof value.props === 'object' &&
+      'children' in value.props
+    ) {
+      return this.extractTextFromFormatted((value.props as { children?: ReactNode }).children);
     }
 
     return String(value);

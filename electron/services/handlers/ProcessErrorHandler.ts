@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { JavaLauncherError } from '../JavaLauncherError';
 
 /**
@@ -43,8 +44,8 @@ export class ProcessErrorHandler {
    * Эмиссия расширенных событий ошибок
    */
   public static emitEnhancedErrorEvents(
-    error: Error, 
-    eventEmitter: any,
+    error: Error,
+    eventEmitter: EventEmitter,
     config: {
       classpath: string;
       mainClass: string;

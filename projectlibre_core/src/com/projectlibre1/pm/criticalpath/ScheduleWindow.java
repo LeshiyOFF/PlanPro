@@ -128,7 +128,7 @@ public interface ScheduleWindow  {
 //	Collection getScheduleChildren();
 
 	/**
-	 * @param dependencyDate TODO
+	 * @param dependencyDate
 	 * @param dependency
 	 * @param duration
 	 * @return

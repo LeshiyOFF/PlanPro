@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -18,6 +18,7 @@ export interface Calendar {
 export interface NewBaseCalendarDialogProps extends Omit<BaseDialogProps, 'children'> {
   existingCalendars?: Calendar[];
   onSave?: (calendar: Partial<Calendar>, copyFrom?: string) => void;
+  onClose?: () => void;
 }
 
 export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
@@ -35,7 +36,8 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
       required: true,
       minLength: 1,
       maxLength: 255,
-      validate: (value) => {
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Calendar name is required';
         if (!value.trim()) return 'Calendar name is required';
         if (existingCalendars.some(c => c.name === value.trim())) {
           return 'Calendar with this name already exists';
@@ -45,7 +47,7 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
     },
     copyFromId: {
       required: mode === 'copy',
-      validate: (value) => {
+      custom: (value) => {
         if (mode === 'copy' && !value) return 'Please select a calendar to copy';
         return null;
       }
@@ -78,11 +80,15 @@ export const NewBaseCalendarDialog: React.FC<NewBaseCalendarDialogProps> = ({
 
   const availableCalendarsForCopy = existingCalendars.filter(c => c.isBase);
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title="New Base Calendar"
       size="medium"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-end space-x-2">

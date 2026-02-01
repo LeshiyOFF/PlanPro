@@ -4,9 +4,9 @@ import './ToolbarStyles.css';
 import {
   IToolbarContainer,
   IToolbarGroup,
-  IToolbarButton,
-  ToolbarType
+  IToolbarButton
 } from './interfaces/ToolbarInterfaces';
+import type { IAction } from '@/services/actions/BaseAction';
 import {
   // Стандартный тулбар (TB001-TB007)
   NewAction,
@@ -47,23 +47,23 @@ export const ToolbarContainer: React.FC<IToolbarContainer> = ({ className, onAct
     fontFamily: new FontFamilyAction()
   }));
 
-  // Регистрация действий при монтировании
+  // Регистрация действий при монтировании (приведение к IAction для ActionManager)
   useEffect(() => {
     // Регистрация стандартных действий
-    actionManager.registerAction(actions.new, 'file');
-    actionManager.registerAction(actions.open, 'file');
-    actionManager.registerAction(actions.save, 'file');
-    actionManager.registerAction(actions.print, 'file');
-    actionManager.registerAction(actions.undo, 'edit');
-    actionManager.registerAction(actions.redo, 'edit');
-    actionManager.registerAction(actions.find, 'edit');
-    
+    actionManager.registerAction(actions.new as IAction, 'file');
+    actionManager.registerAction(actions.open as IAction, 'file');
+    actionManager.registerAction(actions.save as IAction, 'file');
+    actionManager.registerAction(actions.print as IAction, 'file');
+    actionManager.registerAction(actions.undo as IAction, 'edit');
+    actionManager.registerAction(actions.redo as IAction, 'edit');
+    actionManager.registerAction(actions.find as IAction, 'edit');
     // Регистрация действий форматирования
-    actionManager.registerAction(actions.bold, 'format');
-    actionManager.registerAction(actions.italic, 'format');
-    actionManager.registerAction(actions.underline, 'format');
-    actionManager.registerAction(actions.fontSize, 'format');
-    actionManager.registerAction(actions.fontFamily, 'format');
+    actionManager.registerAction(actions.bold as IAction, 'format');
+    actionManager.registerAction(actions.italic as IAction, 'format');
+    actionManager.registerAction(actions.underline as IAction, 'format');
+    actionManager.registerAction(actions.fontSize as IAction, 'format');
+    actionManager.registerAction(actions.fontFamily as IAction, 'format');
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- регистрация один раз при монтировании
   }, []);
 
   const [toolbarGroups, setToolbarGroups] = useState<IToolbarGroup[]>([]);

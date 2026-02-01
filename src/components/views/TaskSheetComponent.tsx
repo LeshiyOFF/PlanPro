@@ -4,8 +4,10 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { TaskSheet } from '@/components/sheets/table/TaskSheet';
 import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalSheet';
 import { EventType, TaskEventData } from '@/types/EventFlowTypes';
+import type { Task as CatalogTask, StrictData } from '@/types/Master_Functionality_Catalog';
 import { useEventFlow } from '@/providers/hooks';
-import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore, createTaskFromView } from '@/store/projectStore';
+import { Task } from '@/store/project/interfaces';
 import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
@@ -17,6 +19,8 @@ import { CalendarMathService } from '@/domain/services/CalendarMathService';
 import { CalendarPreferences } from '@/types/Master_Functionality_Catalog';
 import { useToast } from '@/hooks/use-toast';
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject, JsonValue } from '@/types/json-types';
 
 /**
  * Task Sheet компонент - Лист задач
@@ -26,14 +30,14 @@ import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
  * 
  * @version 8.16
  */
-export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, 
-  settings 
+export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+  viewType: _viewType,
+  settings: _settings
 }) => {
   const { t } = useTranslation();
   const { dispatch: emitEvent } = useEventFlow();
   const { tasks, updateTask, addTask } = useProjectStore();
-  const { deleteTask, isDeletionAllowed } = useTaskDeletion();
+  const { deleteTask } = useTaskDeletion();
   const { preferences } = useUserPreferences();
   const { showMenu } = useContextMenu();
   const { toast } = useToast();
@@ -46,14 +50,14 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
 
   // Обработчики событий с Event Flow интеграцией
   const handleAddTask = () => {
-    const { schedule, calendar } = preferences as any;
-    const calendarPrefs: CalendarPreferences = calendar || {
+    const schedulePrefs = preferences.schedule;
+    const calendarPrefs: CalendarPreferences = preferences.calendar ?? {
       hoursPerDay: 8,
       hoursPerWeek: 40,
       daysPerMonth: 20
     };
 
-    const startDate = schedule.newTasksStartToday ? new Date() : new Date(); // TODO: get project start date if not today
+    const startDate = schedulePrefs.newTasksStartToday ? new Date() : (tasks.length > 0 ? new Date(Math.min(...tasks.map(t => t.startDate.getTime()))) : new Date());
     
     // Используем CalendarMathService для расчета даты окончания
     const endDate = CalendarMathService.calculateFinishDate(
@@ -62,7 +66,7 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
       calendarPrefs
     );
 
-    const newTask = {
+    const payload = {
       id: `TASK-${String(tasks.length + 1).padStart(3, '0')}`,
       name: t('sheets.new_task') || 'Новая задача',
       startDate: startDate,
@@ -70,16 +74,23 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
       progress: 0,
       color: 'hsl(var(--primary))',
       level: 1,
-      predecessors: []
+      predecessors: [] as string[]
     };
+    const newTask = createTaskFromView(payload);
     addTask(newTask);
     
     const eventData: TaskEventData = {
       taskId: newTask.id,
-      taskData: newTask,
+      taskData: newTask as CatalogTask,
       newValues: { description: 'Задача создана через Лист задач' }
     };
-    emitEvent(EventType.TASK_CREATED, eventData);
+    emitEvent({
+      id: crypto.randomUUID?.() ?? String(Date.now()),
+      type: EventType.TASK_CREATED,
+      timestamp: new Date(),
+      source: 'TaskSheetComponent',
+      data: eventData as StrictData
+    });
   };
 
   /**
@@ -87,31 +98,22 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
    */
   const handleExport = async () => {
     if (!sheetRef.current || isExporting) return;
-
+    const api = getElectronAPI();
+    if (!api?.showSaveDialog || !api?.saveBinaryFile) return;
     try {
       setIsExporting(true);
-
-      // 1. Диалог сохранения
-      const result = await window.electronAPI.showSaveDialog({
+      const result = await api.showSaveDialog({
         title: t('common.export') || 'Экспорт',
         defaultPath: `Tasks_${new Date().toISOString().split('T')[0]}.csv`,
-        filters: [
-          { name: 'CSV (Excel)', extensions: ['csv'] }
-        ]
-      });
-
+        filters: [{ name: 'CSV (Excel)', extensions: ['csv'] }]
+      } as Record<string, JsonObject>);
       if (result.canceled || !result.filePath) {
         setIsExporting(false);
         return;
       }
-
-      // 2. Генерируем CSV Blob
       const blob = await sheetRef.current.exportToCSV();
-      
-      // 3. Сохраняем через мост
       const arrayBuffer = await blob.arrayBuffer();
-      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
-
+      const saveResult = await api.saveBinaryFile(result.filePath, arrayBuffer);
       if (saveResult.success) {
         toast({
           title: t('common.success') || 'Успех',
@@ -132,20 +134,20 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
     }
   };
 
-  const handleContextMenu = (event: React.MouseEvent, task: any) => {
+  const handleContextMenu = (event: React.MouseEvent, task: Task) => {
     event.preventDefault();
     showMenu(ContextMenuType.TASK, {
       target: {
         ...task,
         type: 'task',
-        onShowProperties: async (t: any) => {
-          setSelectedTaskId(t.id);
+        onShowProperties: async (taskForProps: Task) => {
+          setSelectedTaskId(taskForProps.id);
           setIsPropertiesDialogOpen(true);
         },
-        onDelete: async (t: any) => {
-          deleteTask(t.id);
+        onDelete: async (taskToDelete: Task) => {
+          deleteTask(taskToDelete.id);
         }
-      },
+      } as JsonObject,
       position: { x: event.clientX, y: event.clientY }
     });
   };
@@ -205,4 +207,3 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
     </div>
   );
 };
-

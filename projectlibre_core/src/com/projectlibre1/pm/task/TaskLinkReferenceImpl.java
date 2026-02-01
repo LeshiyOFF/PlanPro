@@ -80,12 +80,22 @@ public class TaskLinkReferenceImpl implements TaskLinkReference{
 	public void setProject(Project project) {
 		this.project = project;
 	}
+	
+	/**
+	 * TaskLinkReference is a lightweight reference object, not a full task implementation.
+	 * Dependency checking should be performed on the actual task, not the reference.
+	 * @return false always
+	 */
 	public boolean dependsOn(HasDependencies other) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/**
+	 * TaskLinkReference does not have a calendar.
+	 * Calendar information is available through the actual task instance.
+	 * @return null
+	 */
 	public HasCalendar getHasCalendar() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	public AssociationList getPredecessorList() {

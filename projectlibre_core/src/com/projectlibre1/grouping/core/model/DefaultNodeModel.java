@@ -151,9 +151,7 @@ public class DefaultNodeModel implements NodeModel {
 		}
 		siblings.add(newNode);
 		add(parent,siblings,(firstChild)?0:(parent.getIndex(previous)+1),NodeModel.SILENT);
-
 		getDataFactory().setGroupDirty(true);
-		//TODO need undo here
 	}
 
 	public void addBefore(Node sibling,Node newNode,int actionType){
@@ -171,15 +169,12 @@ public class DefaultNodeModel implements NodeModel {
 		ArrayList children=new ArrayList();
 		children.add(child);
 		add(parent,children,position,actionType);
-		//hierarchy.add(parent,child,position,actionType);
 	}
 	public void add(Node parent,List children,int actionType){
 		add(parent,children,-1,actionType);
-		//hierarchy.add(parent,children,actionType);
 	}
 	public void add(Node parent,List children,int position,int actionType){
 		hierarchy.add(parent,children,position,actionType);
-		//Undo
 		if (isUndo(actionType)) postEdit(new NodeCreationEdit(this,parent,children,position));
 
 	}
@@ -245,7 +240,6 @@ public class DefaultNodeModel implements NodeModel {
 		if (!testAncestorOrDescendant(parent,nodes)) // don't allow circular
 			return;
 		List cutNodes=cut(nodes,false,actionType);
-		//List cutNodes=cut(nodes,actionType&UNDO); //TODO fixes bug 225 but it's probably breaking undo
 		paste(parent,cutNodes,position,actionType);
 	}
 
@@ -275,8 +269,6 @@ public class DefaultNodeModel implements NodeModel {
 		ArrayList nodes=new ArrayList();
 		nodes.add(node);
 		remove(nodes,actionType,filterAssignments,removeDependencies);
-		//hierarchy.remove(node,this,actionType);
-		//it calls back removeApartFromHierarchy for each node to remove
 	}
 	public void remove(List nodes,int actionType){
 		remove(nodes, actionType, true);
@@ -319,10 +311,8 @@ public class DefaultNodeModel implements NodeModel {
 			}
 
 			hierarchy.remove(roots,this,actionType,removeDependencies);
-			//it calls back removeApartFromHierarchy for each node to remove
 			hierarchy.checkEndVoidNodes(actionType);
 
-			//Undo
 			if (undoController!=null){
 				if (!containsSubprojects&&isUndo(actionType)){
 					postEdit(new NodeDeletionEdit(this,parents,roots,positions));
@@ -342,23 +332,11 @@ public class DefaultNodeModel implements NodeModel {
 	public boolean removeApartFromHierarchy(Node node,boolean cleanAssignment,int actionType,boolean removeDependencies){
 		if (!isEvent(actionType))
 			return true;
-//		try {
-//			beginUpdate();
-			if (node.getImpl() instanceof Assignment){
-				Assignment assignment=(Assignment)node.getImpl();
-//				if (cleanAssignment)
-					AssignmentService.getInstance().remove(assignment,cleanAssignment,this,isUndo(actionType)); //LC 8/4/2006 - hk 7/8/2006 changed null to this so event will be fired
-//				else if (assignment.getResource()!=ResourceImpl.getUnassignedInstance()){
-//					assignment.getResource().removeAssignment(assignment);
-//				}
-
-
-			//AssignmentService.getInstance().remove((Assignment)node.getImpl(),this);
-			}else if (dataFactory!=null&&!node.isVoid())
-				dataFactory.remove(node.getImpl(),this,false,isUndo(actionType),removeDependencies); //TODO make this work properly with subproject
-//		} finally {
-//			endUpdate();
-//		}
+		if (node.getImpl() instanceof Assignment){
+			Assignment assignment=(Assignment)node.getImpl();
+			AssignmentService.getInstance().remove(assignment,cleanAssignment,this,isUndo(actionType)); //LC 8/4/2006 - hk 7/8/2006 changed null to this so event will be fired
+		}else if (dataFactory!=null&&!node.isVoid())
+			dataFactory.remove(node.getImpl(),this,false,isUndo(actionType),removeDependencies);
 		return true;
 	}
 
@@ -369,11 +347,6 @@ public class DefaultNodeModel implements NodeModel {
 		List newNodes=copy(nodes,clone,actionType);
 		remove(nodes,actionType);
 		return newNodes;
-//		ArrayList parentNodes=new ArrayList(nodes.size());
-//		HierarchyUtils.extractParents(nodes,parentNodes);
-//		remove(parentNodes,actionType);
-//		//TODO check parent is null
-//		return parentNodes;
 	}
 
 
@@ -427,7 +400,6 @@ public class DefaultNodeModel implements NodeModel {
 				d.setDirty(true);
 				predecessor.getDependencyList(false).add(d);
 				successor.getDependencyList(true).add(d);
-				//successors.remove(d);
 			}
 
 		}else{
@@ -438,7 +410,6 @@ public class DefaultNodeModel implements NodeModel {
 					if (predecessor!=null&&successor!=null){
 						Dependency d=Dependency.getInstance(predecessor, successor, dependency.getDependencyType(), dependency.getLag());
 						d.setDirty(true);
-						//Serializer.connectDependency(dependency, predecessor, successor);
 						predecessor.getDependencyList(false).add(d);
 						successor.getDependencyList(true).add(d);
 					}
@@ -496,7 +467,7 @@ public class DefaultNodeModel implements NodeModel {
 					return ((NormalTask)impl).clone();
 				}else if (impl instanceof ResourceImpl){
 					return ((ResourceImpl)impl).clone();
-				}//TOTO assignments
+				}
 		return null;
 	}
 
@@ -600,8 +571,12 @@ public class DefaultNodeModel implements NodeModel {
 		}
 	}
 
+	/**
+	 * Searches for a node with the given key.
+	 * @param key the key to search for
+	 * @return the found node or null
+	 */
 	public Node search(Object key) {
-		//TODO consider using a hashtable instead of searching like this
 		return search(key,getImplComparatorInstance());
 	}
 
@@ -669,18 +644,8 @@ public class DefaultNodeModel implements NodeModel {
 	public void setFieldValue(Field field, Node node, Object eventSource, Object value, FieldContext context,int actionType) throws FieldParseException {
 		Object oldValue=field.getValue(node,this,context);
 
-//		// this prevents the field from sending an update message.  However, ideally the field will send the message and the hiearchy event wont
-//		if (context != null)
-//			context.setUserObject(FieldContext.getNoUpdateInstance());
-
-
 		field.setValue(node, this,eventSource, value, context);
 
-//		No longer sending update event
-//		if (isEvent(actionType)) hierarchy.fireUpdate(new Node[]{node});
-		//TODO treat the ObjectEvent instead
-
-		//Undo
 		if (isUndo(actionType)) postEdit(new ModelFieldEdit(this,field,node,eventSource,value,oldValue,context));
 
 	}
@@ -705,29 +670,6 @@ public class DefaultNodeModel implements NodeModel {
 				return replaceImplAndSetFieldValue(node,newPrevious,factory.createUnvalidatedObject(this, parentImpl),field,eventSource,value,context,actionType);
 
 			}
-//			if (p!=null&&p.getImpl() instanceof NormalTask){
-//				Task task=(Task)p.getImpl();
-//				boolean subprojectParent=false;
-//				while (task.getOwningProject()!=task.getProject()){
-//					Node pParent=(Node)p.getParent();
-//					if (pParent.getIndex(p)==pParent.getChildCount()-1){
-//						p=pParent;
-//						subprojectParent=true;
-//					}else{
-//						subprojectParent=false;
-//						break;
-//					}
-//				}
-//				if (subprojectParent){
-//					LinkedList newPrevious=(LinkedList)previous.clone();
-//					newPrevious.set(0, p);
-//					Object parentImpl = p.getImpl();
-//					NodeModelDataFactory factory = getFactory(parentImpl);
-//					return replaceImplAndSetFieldValue(node,newPrevious,factory.createUnvalidatedObject(this, parentImpl),field,eventSource,value,context,actionType);
-//
-//				}
-//			}
-
 		}
 
 		Node parent=(Node)node.getParent();
@@ -759,7 +701,6 @@ public class DefaultNodeModel implements NodeModel {
 			}
 			remove(p, NodeModel.SILENT);
 			add(parent,p,parent.getIndex(sibling)+1,NodeModel.SILENT);
-			//TODO need undo here
 		}
 
 
@@ -784,7 +725,7 @@ public class DefaultNodeModel implements NodeModel {
 
 //		dataFactory.fireCreated(newImpl);
 		hierarchy.checkEndVoidNodes(actionType^NodeModel.EVENT);
-		getHierarchy().fireInsertion(new Node[]{node}); //TODO Cause critical path to run twice
+		getHierarchy().fireInsertion(new Node[]{node});
 
 		//Undo
 		if (isUndo(actionType)) postEdit(new NodeImplChangeAndValueSetEdit(this,node,previous,previousPosition,oldImpl,field,value,context,eventSource));
@@ -803,7 +744,7 @@ public class DefaultNodeModel implements NodeModel {
 		hierarchy.renumber();
 
 //		dataFactory.fireCreated(newImpl);
-		getHierarchy().fireRemoval(new Node[]{node}); //TODO Cause critical path to run twice
+		getHierarchy().fireRemoval(new Node[]{node});
 
 		hierarchy.checkEndVoidNodes(actionType);
 		//Undo
@@ -857,9 +798,6 @@ public class DefaultNodeModel implements NodeModel {
 		if (undoController==null) return null;
 		return undoController.getEditSupport();
 	}
-//	public void setUndoableEditSupport(UndoableEditSupport undoableEditSupport) {
-//		this.undoableEditSupport = undoableEditSupport;
-//	}
 
 	public void postEdit(UndoableEdit edit){
 		if (getUndoableEditSupport()!=null){
@@ -890,20 +828,5 @@ public class DefaultNodeModel implements NodeModel {
 	public void setMaster(boolean master) {
 		this.master = master;
 	}
-
-
-
-
-//	protected int updateLevel=0;
-//	protected synchronized void beginUpdate(){
-//		updateLevel++;
-//	}
-//	protected synchronized void endUpdate(){
-//		updateLevel--;
-//	}
-//	protected synchronized int getUpdateLevel(){
-//		return updateLevel;
-//	}
-
 
 }

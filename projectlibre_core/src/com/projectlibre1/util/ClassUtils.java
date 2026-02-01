@@ -70,6 +70,7 @@ import com.projectlibre1.datatype.Rate;
 import com.projectlibre1.datatype.TimeUnit;
 import com.projectlibre1.datatype.Work;
 import com.projectlibre1.field.Field;
+import com.projectlibre1.server.access.ErrorLogger;
 
 
 /**
@@ -109,12 +110,11 @@ public class ClassUtils {
 			return defaultRate;
 		else {
 			try {
-				System.out.println("making default for class" + clazz);
 				return clazz.newInstance();
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				ErrorLogger.log("Failed to instantiate default for class: " + clazz, e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				ErrorLogger.log("Illegal access creating default for class: " + clazz, e);
 			}
 			return null;
 		}
@@ -247,19 +247,16 @@ public class ClassUtils {
  
 	public static java.lang.reflect.Field staticFieldFromFullName(String nameAndField) {
 		int lastDot = nameAndField.lastIndexOf(".");
-		String className = nameAndField.substring(0,lastDot);
-		String fieldName = nameAndField.substring(lastDot+1);
+		String className = nameAndField.substring(0, lastDot);
+		String fieldName = nameAndField.substring(lastDot + 1);
 		try {
 			return ClassUtils.forName(className).getDeclaredField(fieldName);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception accessing field: " + nameAndField, e);
 		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Field not found: " + nameAndField, e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Class not found for field: " + nameAndField, e);
 		}
 		return null;
 	}
@@ -270,19 +267,16 @@ public class ClassUtils {
 	
 	public static Method staticMethodFromFullName(String nameAndField, Class[] args) {
 		int lastDot = nameAndField.lastIndexOf(".");
-		String className = nameAndField.substring(0,lastDot);
-		String methodName = nameAndField.substring(lastDot+1);
+		String className = nameAndField.substring(0, lastDot);
+		String methodName = nameAndField.substring(lastDot + 1);
 		try {
 			return ClassUtils.forName(className).getDeclaredMethod(methodName, args);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception accessing method: " + nameAndField, e);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Class not found for method: " + nameAndField, e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method not found: " + nameAndField, e);
 		}
 		return null;
 	}	
@@ -291,28 +285,24 @@ public class ClassUtils {
 	 * @param boundsField
 	 */	
 		public static void setStaticField(String field, int value) {
-			try {
-				staticFieldFromFullName(field).setInt(null,value);
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			staticFieldFromFullName(field).setInt(null, value);
+		} catch (IllegalArgumentException e) {
+			ErrorLogger.log("Illegal argument setting field: " + field, e);
+		} catch (IllegalAccessException e) {
+			ErrorLogger.log("Illegal access setting field: " + field, e);
 		}
+	}
 		
-		public static void setStaticField(String field, String value) {
-			try {
-				staticFieldFromFullName(field).set(null,value);
-			} catch (IllegalArgumentException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}		
+	public static void setStaticField(String field, String value) {
+		try {
+			staticFieldFromFullName(field).set(null, value);
+		} catch (IllegalArgumentException e) {
+			ErrorLogger.log("Illegal argument setting string field: " + field, e);
+		} catch (IllegalAccessException e) {
+			ErrorLogger.log("Illegal access setting string field: " + field, e);
+		}
+	}		
 
 		/**
 		 * Safe Class.forName.  See http://radio.weblogs.com/0112098/stories/2003/02/12/classfornameIsEvil.html
@@ -331,16 +321,15 @@ public class ClassUtils {
 			return theClass;
 		}
 		
-		public static boolean setSimpleProperty(Object bean, String name, Object value) {
-			try {
-				PropertyUtils.setSimpleProperty(bean,name,value);
-				return true;
-			} catch (Exception e) { //claur
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return false;
+	public static boolean setSimpleProperty(Object bean, String name, Object value) {
+		try {
+			PropertyUtils.setSimpleProperty(bean, name, value);
+			return true;
+		} catch (Exception e) {
+			ErrorLogger.log("Failed to set property: " + name, e);
 		}
+		return false;
+	}
 
 		private static Class[] getterParams = new Class[] {};
 		public static boolean isObjectReadOnly(Object object){

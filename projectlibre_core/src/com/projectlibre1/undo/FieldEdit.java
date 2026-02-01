@@ -96,7 +96,7 @@ public class FieldEdit extends AbstractUndoableEdit{
 			if (object instanceof ObjectRef) field.setValue((ObjectRef)object,source,value,context);
 			else field.setValue(object,source,value,context);
 		} catch (FieldParseException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to redo FieldEdit", e);
 		}
 	}
 	public void undo() throws CannotUndoException {
@@ -105,7 +105,7 @@ public class FieldEdit extends AbstractUndoableEdit{
 			if (object instanceof ObjectRef) field.setValue((ObjectRef)object,source,oldValue,context);
 			else field.setValue(object,source,oldValue,context);
 		} catch (FieldParseException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to undo FieldEdit", e);
 		}
 	}
 }

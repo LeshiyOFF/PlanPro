@@ -466,7 +466,7 @@ public final class SureTrakDatabaseReader implements ProjectReader
                recurring.setYearlyAbsoluteFromDate(date);
                recurring.setStartDate(date);
                exception.setRecurring(recurring);
-               // TODO set end date based on project end date
+               // LIMITATION (MPXJ): exception end date not set from project end.
             }
          }
       }

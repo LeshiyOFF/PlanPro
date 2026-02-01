@@ -28,14 +28,14 @@ interface SelectProps {
   children: React.ReactNode;
 }
 
-export const Select: React.FC<SelectProps> = ({ 
-  value, 
-  onValueChange, 
-  defaultValue,
-  placeholder,
+export const Select: React.FC<SelectProps> = ({
+  value,
+  onValueChange,
+  defaultValue: _defaultValue,
+  placeholder: _placeholder,
   disabled = false,
   className,
-  children 
+  children
 }) => {
   const [open, setOpen] = React.useState(false);
   const [displayValue, setDisplayValue] = React.useState<React.ReactNode>(null);
@@ -101,11 +101,13 @@ export const Select: React.FC<SelectProps> = ({
 interface SelectTriggerProps {
   className?: string;
   children: React.ReactNode;
+  /** Идентификатор для связи с Label (a11y). */
+  id?: string;
 }
 
-export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, children }) => {
+export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, children, id }) => {
   const context = useContext(SelectContext);
-  
+
   const handleClick = () => {
     if (!context?.disabled) {
       context?.onOpenChange?.(!context?.open);
@@ -114,6 +116,8 @@ export const SelectTrigger: React.FC<SelectTriggerProps> = ({ className, childre
 
   return (
     <button
+      id={id}
+      type="button"
       onClick={handleClick}
       disabled={context?.disabled}
       className={cn(

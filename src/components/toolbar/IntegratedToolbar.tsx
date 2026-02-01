@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useActionManager } from '@/providers/hooks/useActionManager';
 import './ToolbarStyles.css';
 import './IntegratedToolbarStyles.css';
 import {
@@ -44,12 +43,12 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
     return lastSlash === -1 ? currentFilePath : currentFilePath.substring(lastSlash + 1);
   }, [currentFilePath]);
 
-  // Создаём действия
+  // Создаём действия (обёртки возвращают void для совместимости с () => void | Promise<void>)
   const actions = useMemo(() => ({
-    new: new NewAction(createNewProject),
-    open: new OpenAction(openProject),
-    save: new SaveAction(saveProject),
-    saveAs: new SaveAsAction(saveProjectAs)
+    new: new NewAction(() => { void createNewProject(); }),
+    open: new OpenAction(() => { void openProject(); }),
+    save: new SaveAction(() => { void saveProject(); }),
+    saveAs: new SaveAsAction(() => { void saveProjectAs(); })
   }), [createNewProject, openProject, saveProject, saveProjectAs]);
 
   const lastClickTimeRef = useRef<Map<string, number>>(new Map());
@@ -70,7 +69,13 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
   }, [onAction]);
 
   // Вспомогательный компонент кнопки
-  const ToolbarButton = ({ action, id, icon: Icon, tooltip }: any) => (
+  interface ToolbarButtonProps {
+    action: { label: string };
+    id: string;
+    icon: React.ComponentType<{ className?: string }>;
+    tooltip?: string;
+  }
+  const ToolbarButton = ({ action, id, icon: Icon, tooltip }: ToolbarButtonProps) => (
     <button
       className="toolbar-button"
       onClick={() => handleAction(id, action.label)}

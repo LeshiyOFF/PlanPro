@@ -1,13 +1,11 @@
 import { Task } from '@/store/project/interfaces';
 import { CalendarDateService } from '@/services/CalendarDateService';
-import { GanttDataExtender } from '@/domain/canvas/services/GanttDataExtender';
 import { ViewMode } from 'gantt-task-react';
 
 /**
  * GanttRangeService - Сервис для расчета временного диапазона проекта.
  */
 export class GanttRangeService {
-  private static dataExtender = new GanttDataExtender();
 
   /**
    * Вычисляет начальную и конечную даты для отображения Ганта.

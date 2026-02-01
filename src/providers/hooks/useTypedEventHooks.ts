@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useEventFlow } from '../EventFlowContext';
 import { EventHandler } from '@/types/EventFlowTypes';
 import { EventType } from '@/types/EventFlowTypes';

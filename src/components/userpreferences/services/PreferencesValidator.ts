@@ -33,14 +33,14 @@ export class PreferencesValidator {
   /**
    * Валидация настроек редактирования
    */
-  public static validateEditing(preferences: IEditingPreferences): boolean {
+  public static validateEditing(_preferences: IEditingPreferences): boolean {
     return true;
   }
 
   /**
    * Валидация настроек расчетов
    */
-  public static validateCalculations(preferences: ICalculationPreferences): boolean {
+  public static validateCalculations(_preferences: ICalculationPreferences): boolean {
     return true;
   }
 

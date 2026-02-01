@@ -52,7 +52,7 @@ export class TaskWorkVisualizationService {
    * @param isEnabled Включен ли показ базового плана
    * @returns string CSS
    */
-  public getBaselineStyles(tasks: Task[], isEnabled: boolean): string {
+  public getBaselineStyles(_tasks: Task[], isEnabled: boolean): string {
     if (!isEnabled) return '';
 
     // В данной реализации мы используем CSS для стилизации, но для реальных 

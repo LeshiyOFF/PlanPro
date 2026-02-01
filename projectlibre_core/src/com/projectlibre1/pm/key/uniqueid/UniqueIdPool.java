@@ -92,7 +92,7 @@ public class UniqueIdPool {
 				try{
 					makeServerReservationSync(idCount,session);
 				}catch(Exception e){
-					e.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Server exception during ID reservation", e);
 					throw new UniqueIdException("Server exception");
 				}
 //			}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { GanttChart, GanttTask } from './GanttPrototype';
+import type { MemoryMeasurement, BenchmarkResult, BenchmarkReport } from '../types/MemoryTestTypes';
 
 interface PerformanceMetrics {
   renderTime: number;
@@ -19,17 +20,17 @@ const PerformanceTest: React.FC = () => {
   const generateLargeDataset = (count: number): GanttTask[] => {
     console.log(`Generating ${count} tasks...`);
     const startTime = performance.now();
-    
+
     const tasks: GanttTask[] = [];
     const startDate = new Date(2024, 0, 1);
-    
+
     for (let i = 0; i < count; i++) {
       const taskStart = new Date(startDate);
       taskStart.setDate(startDate.getDate() + Math.floor(i * 0.5));
-      
+
       const taskEnd = new Date(taskStart);
       taskEnd.setDate(taskStart.getDate() + Math.floor(Math.random() * 20) + 5);
-      
+
       tasks.push({
         id: `task-${i}`,
         name: `Task ${i + 1}`,
@@ -44,35 +45,40 @@ const PerformanceTest: React.FC = () => {
         baselineEnd: Math.random() > 0.5 ? taskEnd.toISOString().split('T')[0] : undefined
       });
     }
-    
+
     const endTime = performance.now();
     console.log(`Generated ${count} tasks in ${endTime - startTime}ms`);
-    
+
     return tasks;
   };
 
   // Измерение производительности
   const measurePerformance = async () => {
     if (!ganttRef.current) return;
-    
+
     setIsTestRunning(true);
     console.log(`Starting performance test with ${taskCount} tasks...`);
-    
+
     // Генерация данных
     const tasks = generateLargeDataset(taskCount);
-    
+
     // Измерение времени первого рендера
     const renderStart = performance.now();
-    
+
     // Принудительный перерендер
     setMetrics(null);
     await new Promise(resolve => setTimeout(resolve, 100));
-    
+
     const renderEnd = performance.now();
     const renderTime = renderEnd - renderStart;
-    
+
     // Измерение использования памяти (если доступно)
-    const memoryInfo = (performance as any).memory;
+    interface MemoryInfo {
+      usedJSHeapSize: number;
+      totalJSHeapSize: number;
+      jsHeapSizeLimit: number;
+    }
+    const memoryInfo = (performance as { memory?: MemoryInfo }).memory;
     const memoryUsage = memoryInfo ? memoryInfo.usedJSHeapSize / 1024 / 1024 : 0;
     
     // Измерение FPS при скроллинге
@@ -128,7 +134,7 @@ const PerformanceTest: React.FC = () => {
   // Автоматический тест с разными размерами данных
   const runAutomatedTests = async () => {
     const testSizes = [100, 500, 1000, 2000, 5000];
-    const results: any[] = [];
+    const results: BenchmarkResult[] = [];
     
     for (const size of testSizes) {
       console.log(`Testing with ${size} tasks...`);

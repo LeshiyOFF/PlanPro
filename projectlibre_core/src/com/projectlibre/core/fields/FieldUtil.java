@@ -191,11 +191,11 @@ public class FieldUtil {
 				
 				//set
 				Method method=null;
-				Method methods[]=inClass.getMethods();
-				String methodToFind=toSetterMethodName(fieldName2);
-				for (Method m : methods){
-					if (m.getName().equals(methodToFind)){ //TODO check types too
-						Class<?>[] parameterTypes=m.getParameterTypes();
+			Method methods[]=inClass.getMethods();
+			String methodToFind=toSetterMethodName(fieldName2);
+			for (Method m : methods){
+				if (m.getName().equals(methodToFind)){
+					Class<?>[] parameterTypes=m.getParameterTypes();
 						if ((index2==-1&&parameterTypes.length==1) ||
 								(index2!=-1&&parameterTypes.length==2&&"int".equals(parameterTypes[0].getName()))){
 							method=m;
@@ -217,28 +217,21 @@ public class FieldUtil {
 
 				
 			}
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	} catch (InstantiationException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Failed to instantiate class", e);
+	} catch (ClassNotFoundException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Class not found", e);
+	} catch (SecurityException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Security exception during field access", e);
+	} catch (IllegalArgumentException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Illegal argument during field set", e);
+	} catch (NoSuchMethodException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Method not found", e);
+	} catch (IllegalAccessException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Illegal access during field set", e);
+	} catch (InvocationTargetException e) {
+		com.projectlibre1.server.access.ErrorLogger.log("Invocation target exception during field set", e);
+	}
 	}
 	
 	protected static String toGetterMethodName(String s){

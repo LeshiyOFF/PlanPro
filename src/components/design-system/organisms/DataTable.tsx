@@ -1,76 +1,59 @@
 /**
  * Organism DataTable - таблица данных с пагинацией и действиями
  * Следует SOLID принципам и Atomic Design
+ * Полностью типизированный Generic компонент без any
  */
 
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { cn } from '@/utils/cn';
-import { AtomBadge, AtomButton } from '../atoms';
 import { Card, ButtonGroup } from '../molecules';
-import { BaseAtomicProps } from '../atoms/types';
+import {
+  ITableRowData,
+  ITableColumn,
+  IDataTableProps,
+  IDataTableConfig,
+  SortDirection,
+  TableSize
+} from '@/types/table/IDataTableTypes';
 
-/**
- * Типы для DataTable
- */
-export interface TableColumn<T = any> {
-  key: keyof T;
-  title: string;
-  sortable?: boolean;
-  width?: string;
-  render?: (value: any, row: T, index: number) => React.ReactNode;
-}
-
-export interface PaginationData {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-}
-
-/**
- * Props для DataTable Organism
- */
-export interface DataTableProps<T = any> extends BaseAtomicProps {
-  data: T[];
-  columns: TableColumn<T>[];
-  loading?: boolean;
-  pagination?: PaginationData;
-  selectable?: boolean;
-  selectedRows?: number[];
-  onRowSelect?: (rowIds: number[]) => void;
-  onSort?: (column: keyof T, direction: 'asc' | 'desc') => void;
-  onPageChange?: (page: number) => void;
-  onRowClick?: (row: T, index: number) => void;
-  emptyMessage?: string;
-  size?: 'sm' | 'md' | 'lg';
+export interface DataTableProps<TData extends ITableRowData> extends IDataTableProps<TData> {
+  readonly size?: TableSize;
 }
 
 /**
  * DataTable (Organism)
  * Сложный компонент таблицы с множеством функций
+ * Generic параметр TData обеспечивает полную типизацию
  */
-export const DataTable = <T extends Record<string, any>>({
+export const DataTable = <TData extends ITableRowData>({
   className = '',
   data,
   columns,
-  loading = false,
   pagination,
-  selectable = false,
   selectedRows = [],
   onRowSelect,
   onSort,
   onPageChange,
   onRowClick,
-  emptyMessage = 'No data available',
-  size = 'md',
+  onRowDoubleClick,
+  config,
+  size,
   testId
-}: DataTableProps<T>) => {
-  const [localSelected, setLocalSelected] = useState<number[]>(selectedRows);
+}: DataTableProps<TData>) => {
+  const mergedConfig: IDataTableConfig = {
+    loading: config?.loading ?? false,
+    selectable: config?.selectable ?? false,
+    size: size ?? config?.size ?? 'md',
+    emptyMessage: config?.emptyMessage ?? 'Нет данных для отображения',
+    showPagination: config?.showPagination ?? true
+  };
 
-  const handleRowSelect = useCallback((rowIndex: number) => {
-    const newSelection = localSelected.includes(rowIndex)
-      ? localSelected.filter(i => i !== rowIndex)
-      : [...localSelected, rowIndex];
+  const [localSelected, setLocalSelected] = useState<ReadonlyArray<string | number>>(selectedRows);
+
+  const handleRowSelect = useCallback((rowId: string | number) => {
+    const newSelection = localSelected.includes(rowId)
+      ? localSelected.filter(id => id !== rowId)
+      : [...localSelected, rowId];
     
     setLocalSelected(newSelection);
     onRowSelect?.(newSelection);
@@ -81,37 +64,38 @@ export const DataTable = <T extends Record<string, any>>({
       setLocalSelected([]);
       onRowSelect?.([]);
     } else {
-      setLocalSelected(data.map((_, index) => index));
-      onRowSelect?.(data.map((_, index) => index));
+      const allIds = data.map(row => row.id);
+      setLocalSelected(allIds);
+      onRowSelect?.(allIds);
     }
   }, [localSelected.length, data, onRowSelect]);
 
-  const handleSort = useCallback((column: TableColumn<T>) => {
-    if (column.sortable && onSort) {
-      const direction = 'asc'; // Здесь можно хранить состояние сортировки
+  const handleSort = useCallback((column: ITableColumn<TData>) => {
+    if (column.sortable !== false && onSort) {
+      const direction: SortDirection = 'asc';
       onSort(column.key, direction);
     }
   }, [onSort]);
 
-  const sizeClasses = {
+  const sizeClasses: Record<TableSize, string> = {
     sm: 'text-xs',
     md: 'text-sm',
     lg: 'text-base'
   };
 
-  if (loading) {
+  if (mergedConfig.loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Loading...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-slate-600">Загрузка...</span>
       </div>
     );
   }
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        {emptyMessage}
+      <div className="text-center py-8 text-slate-500">
+        {mergedConfig.emptyMessage}
       </div>
     );
   }
@@ -122,14 +106,14 @@ export const DataTable = <T extends Record<string, any>>({
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                {selectable && (
-                  <th className="px-4 py-3 text-left">
+              <tr className="bg-slate-50 border-b border-slate-200">
+                {mergedConfig.selectable && (
+                  <th className="px-4 py-3 text-left w-12">
                     <input
                       type="checkbox"
-                      checked={localSelected.length === data.length}
+                      checked={localSelected.length === data.length && data.length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-gray-300 text-primary focus:ring-blue-500"
+                      className="rounded border-slate-300 text-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                   </th>
                 )}
@@ -137,78 +121,88 @@ export const DataTable = <T extends Record<string, any>>({
                   <th
                     key={String(column.key)}
                     className={cn(
-                      'px-4 py-3 text-left font-medium text-gray-700',
-                      sizeClasses[size],
-                      column.sortable && 'cursor-pointer hover:bg-gray-100'
+                      'px-4 py-3 text-left font-semibold text-slate-700 uppercase tracking-wide',
+                      sizeClasses[mergedConfig.size],
+                      column.sortable && 'cursor-pointer hover:bg-slate-100 transition-colors'
                     )}
                     style={{ width: column.width }}
                     onClick={() => handleSort(column)}
                   >
-                    <div className="flex items-center">
-                      {column.title}
+                    <div className="flex items-center gap-2">
+                      <span>{column.title}</span>
                       {column.sortable && (
-                        <span className="ml-1 text-gray-400">⇅</span>
+                        <span className="text-slate-400 text-xs">⇅</span>
                       )}
                     </div>
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {data.map((row, rowIndex) => (
-                <tr
-                  key={rowIndex}
-                  className={cn(
-                    'hover:bg-gray-50 transition-colors cursor-pointer',
-                    localSelected.includes(rowIndex) && 'bg-primary/10'
-                  )}
-                  onClick={() => onRowClick?.(row, rowIndex)}
-                >
-                  {selectable && (
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={localSelected.includes(rowIndex)}
-                        onChange={() => handleRowSelect(rowIndex)}
-                        className="rounded border-gray-300 text-primary focus:ring-blue-500"
-                      />
-                    </td>
-                  )}
-                  {columns.map((column) => (
-                    <td key={String(column.key)} className={cn('px-4 py-3', sizeClasses[size])}>
-                      {column.render ? 
-                        column.render(row[column.key], row, rowIndex) : 
-                        String(row[column.key] || '')
-                      }
-                    </td>
-                  ))}
-                </tr>
-              ))}
+            <tbody className="bg-white divide-y divide-slate-200">
+              {data.map((row, rowIndex) => {
+                const isSelected = localSelected.includes(row.id);
+                return (
+                  <tr
+                    key={String(row.id)}
+                    className={cn(
+                      'hover:bg-slate-50 transition-colors cursor-pointer',
+                      isSelected && 'bg-primary/10'
+                    )}
+                    onClick={() => onRowClick?.(row, rowIndex)}
+                    onDoubleClick={() => onRowDoubleClick?.(row, rowIndex)}
+                  >
+                    {mergedConfig.selectable && (
+                      <td className="px-4 py-3">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleRowSelect(row.id)}
+                          className="rounded border-slate-300 text-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                        />
+                      </td>
+                    )}
+                    {columns.map((column) => (
+                      <td 
+                        key={String(column.key)} 
+                        className={cn(
+                          'px-4 py-3 text-slate-700',
+                          sizeClasses[mergedConfig.size]
+                        )}
+                      >
+                        {column.render ? 
+                          column.render(row[column.key], row, rowIndex) : 
+                          String(row[column.key] ?? '')
+                        }
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
 
-        {pagination && (
-          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 rounded-b-lg">
+        {mergedConfig.showPagination && pagination && (
+          <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-700">
-                Showing {pagination.currentPage * pagination.itemsPerPage - pagination.itemsPerPage + 1} to{' '}
-                {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
-                {pagination.totalItems} results
+              <div className="text-xs text-slate-600 font-medium">
+                Показано {pagination.currentPage * pagination.itemsPerPage - pagination.itemsPerPage + 1}-
+                {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} из{' '}
+                {pagination.totalItems} записей
               </div>
               
               <ButtonGroup
                 buttons={[
                   {
                     id: 'prev',
-                    children: 'Previous',
+                    children: 'Назад',
                     color: 'secondary',
                     disabled: pagination.currentPage === 1,
                     onClick: () => onPageChange?.(pagination.currentPage - 1)
                   },
                   {
                     id: 'next',
-                    children: 'Next',
+                    children: 'Вперед',
                     color: 'secondary',
                     disabled: pagination.currentPage === pagination.totalPages,
                     onClick: () => onPageChange?.(pagination.currentPage + 1)

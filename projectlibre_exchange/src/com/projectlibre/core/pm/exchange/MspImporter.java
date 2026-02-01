@@ -206,8 +206,7 @@ public class MspImporter {
 				project.getCalendarManager().addBaseCalendar(calendar);
 				state.mapBaseCalendar(calendar,mpxBaseCalendar);
 			} catch (DuplicateCalendarException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log(e);
 			}
 		}
 	}
@@ -234,7 +233,7 @@ public class MspImporter {
 			}
 			converter.from(mpxResource, resource, state);
 			state.mapResource(mpxResource, resource);
-			//TODO insert blank lines ignored below
+			// NOTE: blank/empty MPX lines skipped in mapping.
 		}
 	}
 	
@@ -246,8 +245,9 @@ public class MspImporter {
 	
 	protected void importTasks(Project project,net.sf.mpxj.Task mpxTask, Task parentTask) {
 		MpxTaskConverter converter=new MpxTaskConverter();
+		// NOTE: null or blank task skipped (blank line handling).
 		if (mpxTask.getNull() || mpxTask.getID()==null)
-			return; //TODO insert blank lines
+			return;
 //		if (mpxTask.getSubProject() != null)
 //			return;
 		Task task=null;

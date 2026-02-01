@@ -15,10 +15,12 @@ interface PasswordPolicyData {
   lockoutDuration: number;
 }
 
+type PasswordPolicyValue = boolean | number;
+
 interface PasswordPolicySectionProps {
   data: PasswordPolicyData;
-  onChange: (field: keyof PasswordPolicyData, value: any) => void;
-  errors?: Record<string, string>;
+  onChange: (field: keyof PasswordPolicyData, value: PasswordPolicyValue) => void;
+  errors?: Record<string, string | null>;
 }
 
 export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
@@ -35,7 +37,10 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           label="Минимальная длина"
           type="number"
           value={data.minLength}
-          onChange={(value) => onChange('minLength', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.minLength;
+            onChange('minLength', num);
+          }}
           error={errors.minLength}
           min="6"
           max="128"
@@ -45,7 +50,10 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           label="Срок действия пароля (дней)"
           type="number"
           value={data.maxAge}
-          onChange={(value) => onChange('maxAge', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxAge;
+            onChange('maxAge', num);
+          }}
           error={errors.maxAge}
           min="1"
           max="365"
@@ -55,7 +63,10 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           label="Количество паролей в истории"
           type="number"
           value={data.historyCount}
-          onChange={(value) => onChange('historyCount', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.historyCount;
+            onChange('historyCount', num);
+          }}
           error={errors.historyCount}
           min="0"
           max="24"
@@ -65,7 +76,10 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           label="Порог блокировки (попыток)"
           type="number"
           value={data.lockoutThreshold}
-          onChange={(value) => onChange('lockoutThreshold', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutThreshold;
+            onChange('lockoutThreshold', num);
+          }}
           error={errors.lockoutThreshold}
           min="3"
           max="10"
@@ -75,7 +89,10 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
           label="Длительность блокировки (минут)"
           type="number"
           value={data.lockoutDuration}
-          onChange={(value) => onChange('lockoutDuration', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.lockoutDuration;
+            onChange('lockoutDuration', num);
+          }}
           error={errors.lockoutDuration}
           min="5"
           max="1440"
@@ -90,7 +107,7 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
             <Checkbox
               id="requireUppercase"
               checked={data.requireUppercase}
-              onCheckedChange={(checked) => onChange('requireUppercase', checked)}
+              onCheckedChange={(checked) => onChange('requireUppercase', checked === true)}
             />
             <Label htmlFor="requireUppercase" className="text-sm">
               Требовать заглавные буквы (A-Z)
@@ -101,7 +118,7 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
             <Checkbox
               id="requireLowercase"
               checked={data.requireLowercase}
-              onCheckedChange={(checked) => onChange('requireLowercase', checked)}
+              onCheckedChange={(checked) => onChange('requireLowercase', checked === true)}
             />
             <Label htmlFor="requireLowercase" className="text-sm">
               Требовать строчные буквы (a-z)
@@ -112,7 +129,7 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
             <Checkbox
               id="requireNumbers"
               checked={data.requireNumbers}
-              onCheckedChange={(checked) => onChange('requireNumbers', checked)}
+              onCheckedChange={(checked) => onChange('requireNumbers', checked === true)}
             />
             <Label htmlFor="requireNumbers" className="text-sm">
               Требовать цифры (0-9)
@@ -123,7 +140,7 @@ export const PasswordPolicySection: React.FC<PasswordPolicySectionProps> = ({
             <Checkbox
               id="requireSpecialChars"
               checked={data.requireSpecialChars}
-              onCheckedChange={(checked) => onChange('requireSpecialChars', checked)}
+              onCheckedChange={(checked) => onChange('requireSpecialChars', checked === true)}
             />
             <Label htmlFor="requireSpecialChars" className="text-sm">
               Требовать специальные символы (!@#$%^&*)

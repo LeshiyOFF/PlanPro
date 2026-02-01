@@ -31,6 +31,7 @@ export interface JavaLaunchOptions {
   mainClass?: string | null;
   executableJarPath?: string | null;
   jvmOptions?: string[];
+  args?: string[];
   env?: Record<string, string>;
   timeout?: number;
 }

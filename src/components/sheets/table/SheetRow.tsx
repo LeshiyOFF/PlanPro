@@ -1,21 +1,23 @@
 import React from 'react';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
+import { CellValue } from '@/types/sheet/CellValueTypes';
 import { SheetCell } from '../cells/SheetCell';
+import type { JsonValue } from '@/types/json-types';
 
-interface SheetRowProps<T> {
+interface SheetRowProps<T extends Record<string, JsonValue>> {
   row: T;
   rowId: string;
   columns: ISheetColumn<T>[];
   isEditing: (rowId: string, columnId: string) => boolean;
   isSelected: boolean;
   onRowClick: (rowId: string, isMulti: boolean, isRange: boolean) => void;
-  editValue: any;
+  editValue: CellValue;
   isValid: boolean;
   errorMessage?: string;
-  onStartEdit: (address: ISheetCellAddress, value: any) => void;
-  onValueChange: (value: any) => void;
-  onCommit: () => void;
+  onStartEdit: (address: ISheetCellAddress, value: CellValue) => void;
+  onValueChange: (value: CellValue) => void;
+  onCommit: (value?: CellValue) => void;
   onCancel: () => void;
   onContextMenu?: (event: React.MouseEvent, row: T, columnId?: string) => void;
   isDisabled?: boolean;
@@ -24,7 +26,7 @@ interface SheetRowProps<T> {
 /**
  * Строка профессиональной таблицы
  */
-export const SheetRow = <T extends Record<string, any>>({
+export const SheetRow = <T extends Record<string, JsonValue>>({
   row,
   rowId,
   columns,
@@ -57,20 +59,23 @@ export const SheetRow = <T extends Record<string, any>>({
   };
 
   return (
-    <tr 
+    <tr
       className={`transition-colors ${
-        isDisabled ? 'opacity-40 grayscale pointer-events-none' : 
-        isSelected ? 'bg-primary/10' : 'hover:bg-gray-50/50'
+        isDisabled
+          ? 'opacity-40 grayscale pointer-events-none'
+          : isSelected
+            ? 'bg-primary/10'
+            : 'hover:bg-gray-50/50'
       }`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
-      {columns.map(column => (
+      {columns.map((column) => (
         <SheetCell
           key={`${rowId}-${column.id}`}
           rowId={rowId}
           column={column}
-          value={column.valueGetter ? column.valueGetter(row) : row[column.field as keyof T]}
+          value={column.valueGetter ? column.valueGetter(row) : (row[column.field as keyof T] as CellValue)}
           isEditing={isEditing(rowId, column.id)}
           editValue={editValue}
           isValid={isValid}
@@ -86,5 +91,3 @@ export const SheetRow = <T extends Record<string, any>>({
     </tr>
   );
 };
-
-

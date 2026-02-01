@@ -302,20 +302,14 @@ public class Dependency implements Association, BelongsToDocument, DataObject {
 
 	//DataObject
     public String getName() {
-        // TODO Auto-generated method stub
         return null;
     }
     public void setName(String name) {
-        // TODO Auto-generated method stub
-
     }
     public long getUniqueId() {
-        // TODO Auto-generated method stub
         return 0;
     }
     public void setUniqueId(long id) {
-        // TODO Auto-generated method stub
-
     }
     public String getUniqueIdString() {
     	return getPredecessorId() + "." + getSuccessorId();

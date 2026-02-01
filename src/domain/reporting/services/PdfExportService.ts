@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { PdfStyleService } from './PdfStyleService';
+import { getElectronAPI } from '@/utils/electronAPI';
 
 /**
  * Сервис для экспорта отчётов в PDF формат.
@@ -63,10 +64,13 @@ export class PdfExportService {
    */
   public async exportAndSave(element: HTMLElement, defaultFilename: string): Promise<boolean> {
     try {
+      const api = getElectronAPI();
+      if (!api?.showSaveDialog || !api?.saveBinaryFile) return false;
+
       const blob = await this.exportToPdf(element, defaultFilename);
       const arrayBuffer = await blob.arrayBuffer();
-      
-      const result = await window.electronAPI.showSaveDialog({
+
+      const result = await api.showSaveDialog({
         title: 'Сохранить PDF',
         defaultPath: `${defaultFilename}.pdf`,
         filters: [{ name: 'PDF Documents', extensions: ['pdf'] }]
@@ -76,7 +80,7 @@ export class PdfExportService {
         return false;
       }
 
-      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
+      const saveResult = await api.saveBinaryFile(result.filePath, arrayBuffer);
       return saveResult.success;
     } catch (error) {
       console.error('[PdfExportService] Export failed:', error);

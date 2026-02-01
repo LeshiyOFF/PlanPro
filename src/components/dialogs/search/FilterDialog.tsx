@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,11 +15,14 @@ export interface FilterField {
   operator?: 'equals' | 'not-equals' | 'greater' | 'less' | 'contains' | 'starts-with' | 'ends-with';
 }
 
+/** Допустимое значение условия фильтра */
+export type FilterValue = string | number | boolean;
+
 export interface FilterCondition {
   id: string;
   field: string;
   operator: string;
-  value: any;
+  value: FilterValue;
   enabled: boolean;
 }
 
@@ -216,11 +219,12 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
 
   const activeFiltersCount = filters.filter(f => f.enabled).length;
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Filter Data"
       size="large"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

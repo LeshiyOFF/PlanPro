@@ -89,8 +89,7 @@ public class WorkRange extends ImmutableInterval implements Cloneable,Serializab
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone WorkRange", e);
 			return null;
 		}
 		

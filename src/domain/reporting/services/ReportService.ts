@@ -131,7 +131,7 @@ export class ReportService {
   }
 
   private getCriticalTasksSections(tasks: Task[]): IReportSection[] {
-    const criticalTasks = tasks.filter(t => t.critical);
+    const criticalTasks = tasks.filter(t => t.isCritical);
     
     if (criticalTasks.length === 0) {
       return [{ 
@@ -209,7 +209,7 @@ export class ReportService {
 
   private countAssignedTasks(resourceId: string, tasks: Task[]): number {
     return tasks.filter(t => 
-      t.resourceAssignments?.some(a => a.resourceId === resourceId) || t.resourceIds?.includes(resourceId)
+      t.resourceAssignments?.some(a => a.resourceId === resourceId) || (() => { const ids = t.resourceAssignments ? t.resourceAssignments.map(a => a.resourceId) : []; return ids.includes(resourceId); })()
     ).length;
   }
 
@@ -223,7 +223,7 @@ export class ReportService {
   }
 
   private getMilestoneSections(tasks: Task[]): IReportSection[] {
-    const milestones = tasks.filter(t => t.milestone);
+    const milestones = tasks.filter(t => t.isMilestone);
     
     if (milestones.length === 0) {
       return [{ 

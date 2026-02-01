@@ -162,8 +162,7 @@ public void recycleList(List list) {
 		list.clear();
 		pool.returnObject(list);
 	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+		com.projectlibre1.server.access.ErrorLogger.log("Failed to recycle list in NodeSorter", e);
 	}
 }
 

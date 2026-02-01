@@ -19,7 +19,7 @@ export interface UndoRedoState {
   historySize: number;
 }
 
-class UndoRedoService extends BaseJavaService {
+export class UndoRedoService extends BaseJavaService {
   private static instance: UndoRedoService;
   private listeners: Set<(state: UndoRedoState) => void> = new Set();
 

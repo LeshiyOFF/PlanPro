@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import DialogService from '@/services/DialogService';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DialogService } from '@/services/DialogService';
 import { ProjectDialog, TaskPropertiesDialog, ResourceInformationDialog } from '@/components/dialogs';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * Тестовая страница для проверки диалоговых компонентов
@@ -19,7 +20,7 @@ export const DialogTestPage: React.FC = () => {
       addResult('🚀 Тестирование ProjectDialog...');
       
       // Для демонстрации просто проверим регистрацию и создание компонента
-      const isRegistered = DialogService.getDialog('project') !== null;
+      const isRegistered = DialogService.getInstance().getDialog('project') !== null;
       if (isRegistered) {
         addResult('✅ ProjectDialog успешно зарегистрирован');
         addResult('📝 Данные проекта: {name: "Тестовый проект", manager: "Тестовый менеджер"}');
@@ -38,7 +39,7 @@ export const DialogTestPage: React.FC = () => {
     try {
       addResult('🚀 Тестирование TaskPropertiesDialog...');
       
-      const isRegistered = DialogService.getDialog('task-properties') !== null;
+      const isRegistered = DialogService.getInstance().getDialog('task-properties') !== null;
       if (isRegistered) {
         addResult('✅ TaskPropertiesDialog успешно зарегистрирован');
         addResult('📝 Данные задачи: {taskId: "TASK-001", progress: 0.5}');
@@ -57,7 +58,7 @@ export const DialogTestPage: React.FC = () => {
     try {
       addResult('🚀 Тестирование ResourceInformationDialog...');
       
-      const isRegistered = DialogService.getDialog('resource-information') !== null;
+      const isRegistered = DialogService.getInstance().getDialog('resource-information') !== null;
       if (isRegistered) {
         addResult('✅ ResourceInformationDialog успешно зарегистрирован');
         addResult('📝 Данные ресурса: {resourceId: "RES-001", type: "human"}');
@@ -75,53 +76,48 @@ export const DialogTestPage: React.FC = () => {
   const testDialogService = () => {
     try {
       addResult('🔍 Тестирование DialogService...');
-      
+      const dialogService = DialogService.getInstance();
+
       // Регистрация диалогов
-      DialogService.registerDialog({
+      dialogService.registerDialog({
         id: 'project',
         category: 'project',
-        component: ProjectDialog,
+        component: ProjectDialog as React.ComponentType<Record<string, JsonObject>>,
         config: {
           width: 800,
           height: 600,
-          modal: true,
-          resizable: true,
-          closable: true
+          modal: true
         }
       });
-      
-      DialogService.registerDialog({
+
+      dialogService.registerDialog({
         id: 'task-properties',
         category: 'task',
-        component: TaskPropertiesDialog as unknown as React.ComponentType,
+        component: TaskPropertiesDialog as React.ComponentType<Record<string, JsonObject>>,
         config: {
           width: 550,
           height: 600,
-          modal: true,
-          resizable: false,
-          closable: true
+          modal: true
         }
       });
-      
-      DialogService.registerDialog({
+
+      dialogService.registerDialog({
         id: 'resource-information',
         category: 'resource',
-        component: ResourceInformationDialog,
+        component: ResourceInformationDialog as React.ComponentType<Record<string, JsonObject>>,
         config: {
           width: 600,
           height: 500,
-          modal: true,
-          resizable: false,
-          closable: true
+          modal: true
         }
       });
-      
+
       addResult('✅ Все диалоги успешно зарегистрированы в DialogService');
-      
+
       // Проверка получения диалогов
-      const projectDialog = DialogService.getDialog('project');
-      const taskDialog = DialogService.getDialog('task-properties');
-      const resourceDialog = DialogService.getDialog('resource-information');
+      const projectDialog = dialogService.getDialog('project');
+      const taskDialog = dialogService.getDialog('task-properties');
+      const resourceDialog = dialogService.getDialog('resource-information');
       
       if (projectDialog && taskDialog && resourceDialog) {
         addResult('✅ Все диалоги успешно получены из DialogService');
@@ -222,4 +218,3 @@ export const DialogTestPage: React.FC = () => {
     </div>
   );
 };
-

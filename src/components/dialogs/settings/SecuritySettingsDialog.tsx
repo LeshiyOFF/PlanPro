@@ -2,11 +2,12 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useDialogForm } from '../hooks/useDialogForm';
+import { useDialogForm, type FormFieldValue } from '../hooks/useDialogForm';
 import { PasswordPolicySection } from './PasswordPolicySection';
 import { SessionPolicySection } from './SessionPolicySection';
 import { AccessPolicySection } from './AccessPolicySection';
 import { AuditPolicySection } from './AuditPolicySection';
+import type { JsonObject, JsonValue } from '@/types/json-types';
 
 export interface SecurityPolicy {
   passwordPolicy: {
@@ -40,6 +41,7 @@ export interface SecurityPolicy {
     alertOnFailedLogin: boolean;
     alertOnPermissionChange: boolean;
   };
+  [key: string]: FormFieldValue;
 }
 
 export interface SecuritySettingsDialogProps extends Omit<BaseDialogProps, 'children'> {
@@ -129,15 +131,18 @@ export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
     onResetPassword?.();
   };
 
-  const handleSectionChange = (section: keyof SecurityPolicy, field: string, value: any) => {
-    handleFieldChange(`${section}.${field}` as any, value);
+  const handleSectionChange = (section: keyof SecurityPolicy, field: string, value: string | number | boolean) => {
+    // Используем type casting к unknown перед приведением к нужному типу для корректной работы с вложенными полями в useDialogForm
+    handleFieldChange(`${section}.${field}` as keyof SecurityPolicy, value as SecurityPolicy[keyof SecurityPolicy]);
   };
 
   const canEditSettings = currentUserRole === 'admin';
   const hasUnsavedChanges = JSON.stringify(settings) !== JSON.stringify(currentSettings);
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Настройки безопасности"
       open={open}
       onOpenChange={onOpenChange}
@@ -147,7 +152,6 @@ export const SecuritySettingsDialog: React.FC<SecuritySettingsDialogProps> = ({
       isValid={isFormValid && hasUnsavedChanges}
       width="800px"
       height="auto"
-      {...props}
     >
       <div className="space-y-8">
         {!canEditSettings && (

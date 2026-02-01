@@ -3,11 +3,11 @@
  * Centralized exports for UI components
  */
 
-export * from './Badge';
-export * from './Card';
-export * from './Tooltip';
-export * from './ContextHelp';
+export * from './badge';
+export * from './card';
+export * from './tooltip';
+export * from './context-help';
 export * from './dialog';
 export * from './button';
-export * from './UsageStatsCard';
+export * from './usage-stats-card';
 export { EnhancedToast, LoadingSpinner } from './enhanced-ui';

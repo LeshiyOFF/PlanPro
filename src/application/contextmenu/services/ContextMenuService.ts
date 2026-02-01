@@ -7,6 +7,7 @@ import {
 import { ShowContextMenuUseCase } from '@/application/contextmenu/usecases/ShowContextMenuUseCase';
 import { ExecuteMenuActionUseCase } from '@/application/contextmenu/usecases/ExecuteMenuActionUseCase';
 import { logger } from '@/utils/logger';
+import { getErrorMessage } from '@/utils/errorUtils';
 
 /**
  * Сервис контекстных меню
@@ -41,16 +42,17 @@ export class ContextMenuService implements IContextMenuService {
       const menu = await this.showMenuUseCase.execute(type, context);
       
       // Установить статус видимый
-      this.activeMenu = {
+      const activeMenu: IContextMenu = {
         ...menu,
         status: ContextMenuStatus.VISIBLE
       };
+      this.activeMenu = activeMenu;
 
-      logger.info(`Context menu created with ID: ${this.activeMenu.id}`);
-      return this.activeMenu;
+      logger.info(`Context menu created with ID: ${activeMenu.id}`);
+      return activeMenu;
 
     } catch (error) {
-      logger.error(`Failed to show context menu: ${error.message}`);
+      logger.error(`Failed to show context menu: ${getErrorMessage(error)}`);
       throw error;
     }
   }
@@ -65,7 +67,7 @@ export class ContextMenuService implements IContextMenuService {
         this.activeMenu = null;
       }
     } catch (error) {
-      logger.error(`Failed to hide context menu: ${error.message}`);
+      logger.error(`Failed to hide context menu: ${getErrorMessage(error)}`);
       throw error;
     }
   }
@@ -90,7 +92,7 @@ export class ContextMenuService implements IContextMenuService {
       logger.info(`Executed menu action: ${actionId}`);
 
     } catch (error) {
-      logger.error(`Failed to execute menu action: ${error.message}`);
+      logger.error(`Failed to execute menu action: ${getErrorMessage(error)}`);
       throw error;
     }
   }

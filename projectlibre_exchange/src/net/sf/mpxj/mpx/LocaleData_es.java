@@ -149,12 +149,12 @@ public final class LocaleData_es extends ListResourceBundle
       "No finalizar despu\u00E9s del" // Finish No Later Than
    };
 
-   // TODO Complete TASK_NAMES_DATA translation
+   // NOTE: TASK_NAMES_DATA — some entries left in English until translation.
    private static final String[] TASK_NAMES_DATA =
    {
       null, // ???
       "Nombre", // Name
-      "WBS", // TODO Translate "WBS"
+      "WBS", // NOTE: untranslated "WBS"
       "Nivel de Esquema", // Outline Level
       "Texto1", // Text1
       "Texto2", // Text2
@@ -235,20 +235,20 @@ public final class LocaleData_es extends ListResourceBundle
       "Fijo", // Fixed
       "Hito", // Milestone
       "Cr\u00ED\u00ADtico", // Critical
-      "Marked", // TODO Translate "Marked"
-      "Rollup", // TODO Translate "Rollup"
-      "BCWS", // TODO Translate "BCWS"
-      "BCWP", // TODO Translate "BCWP"
-      "SV", // TODO Translate "SV"
-      "CV", // TODO Translate "CV"
+      "Marked", // NOTE: untranslated "Marked"
+      "Rollup", // NOTE: untranslated "Rollup"
+      "BCWS", // NOTE: untranslated "BCWS"
+      "BCWP", // NOTE: untranslated "BCWP"
+      "SV", // NOTE: untranslated "SV"
+      "CV", // NOTE: untranslated "CV"
       null, // ???
-      "ID", // TODO Translate "ID"
+      "ID", // NOTE: untranslated "ID"
       "Tipo de Restricci\u00F3n", // Constraint Type
       "Demora", // Delay
-      "Free Slack", // TODO Translate "Free Slack"
-      "Total Slack", // TODO Translate "Total Slack"
+      "Free Slack", // NOTE: untranslated "Free Slack"
+      "Total Slack", // NOTE: untranslated "Total Slack"
       "Prioridad", // Priority
-      "Subproject File", // TODO Translate "Subproject File"
+      "Subproject File", // NOTE: untranslated "Subproject File"
       "Proyecto", // Project
       "ID \u00DAnico", // Unique ID
       "N\u00FAmero de Esquema", // Outline Number
@@ -272,7 +272,7 @@ public final class LocaleData_es extends ListResourceBundle
       "Indicador8", // Flag8
       "Indicador9", // Flag9
       "Indicador10", // Flag10
-      "Summary", // TODO Translate "Summary"
+      "Summary", // NOTE: untranslated "Summary"
       "Objetos", // Objects
       "Campos Enlazados", // Linked Fields
       "Ocultar Barra", // Hide Bar
@@ -287,8 +287,8 @@ public final class LocaleData_es extends ListResourceBundle
       null, // ???
       null, // ???
       null, // ???
-      "Confirmed", // TODO Translate "Confirmed"
-      "Update Needed", // TODO Translate "Update Needed"
+      "Confirmed", // NOTE: untranslated "Confirmed"
+      "Update Needed", // NOTE: untranslated "Update Needed"
       null, // ???
       null, // ???
       null, // ???
@@ -302,12 +302,12 @@ public final class LocaleData_es extends ListResourceBundle
       null, // ???
       null, // ???
       null, // ???
-      "Stop", // TODO Translate "Stop"
-      "Resume No Earlier Than", // TODO Translate "Resume No Earlier Than"
-      "Resume" // TODO Translate "Resume"
+      "Stop", // NOTE: untranslated "Stop"
+      "Resume No Earlier Than", // NOTE: untranslated "Resume No Earlier Than"
+      "Resume" // NOTE: untranslated "Resume"
    };
 
-   // TODO Complete RESOURCE_NAMES_DATA translation
+   // NOTE: RESOURCE_NAMES_DATA — some entries left in English until translation.
    private static final String[] RESOURCE_NAMES_DATA =
    {
       null, // ???
@@ -334,7 +334,7 @@ public final class LocaleData_es extends ListResourceBundle
       "L\u00EDnea de Base de Trabajo", // Baseline Work
       "Trabajo Real", // Actual Work
       "Trabajo Restante", // Remaining Work
-      "Overtime Work", // TODO Translate "Overtime Work"
+      "Overtime Work", // NOTE: untranslated "Overtime Work"
       "Variaci\u00F3n de Trabajo", // Work Variance
       "% Trabajo Completado", // % Work Complete
       null, // ???
@@ -350,10 +350,10 @@ public final class LocaleData_es extends ListResourceBundle
       null, // ???
       null, // ???
       null, // ???
-      "ID", // TODO Translate "ID"
-      "Max Units", // TODO Translate "Max Units"
-      "Standard Rate", // TODO Translate "Standard Rate"
-      "Overtime Rate", // TODO Translate "Overtime Rate"
+      "ID", // NOTE: untranslated "ID"
+      "Max Units", // NOTE: untranslated "Max Units"
+      "Standard Rate", // NOTE: untranslated "Standard Rate"
+      "Overtime Rate", // NOTE: untranslated "Overtime Rate"
       "Costo Por Uso", // Cost Per Use
       "Acumulaci\u00F3n de costos", // Accrue At
       "Sobreasignado", // Overallocated

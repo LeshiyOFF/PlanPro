@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Separator } from '@/components/ui/separator';
 import { GeneralPreferences, DisplayPreferences, SchedulePreferences, CalendarPreferences, EditingPreferences, CalculationPreferences, SecurityPreferences } from './components';
 import { useUserPreferences } from './hooks/useUserPreferences';
-import { IUserPreferences, PreferencesCategory } from './interfaces/UserPreferencesInterfaces';
 import { WebImportDialog } from './components/WebImportDialog';
 import { AboutDialog } from '@/components/dialogs/information/AboutDialog';
 import { Info } from 'lucide-react';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject } from '@/types/json-types';
 import './UserPreferencesStyles.css';
 
 /**
@@ -16,13 +15,14 @@ import './UserPreferencesStyles.css';
  */
 export const UserPreferencesContainer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('general');
-  const { preferences, resetToDefaults, exportPreferences, importPreferences } = useUserPreferences();
+  const { preferences, exportPreferences, importPreferences } = useUserPreferences();
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
 
   const handleExport = async () => {
     try {
-      if (!window.electronAPI) {
+      const api = getElectronAPI();
+      if (!api?.showSaveDialog) {
         const data = exportPreferences();
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -32,29 +32,30 @@ export const UserPreferencesContainer: React.FC = () => {
         return;
       }
 
-      const result = await window.electronAPI.showSaveDialog({
+      const result = await api.showSaveDialog({
         title: 'Экспорт настроек',
         defaultPath: 'projectlibre-settings.json',
         filters: [{ name: 'JSON Files', extensions: ['json'] }]
-      });
+      } as Record<string, JsonObject>);
 
-      if (!result.canceled && result.filePath) {
-        await window.electronAPI.exportPreferencesToFile(result.filePath, preferences);
+      if (!result.canceled && result.filePath && api.exportPreferencesToFile) {
+        await api.exportPreferencesToFile(result.filePath, preferences as JsonObject);
       }
     } catch (e) { console.error('Export failed:', e); }
   };
 
   const handleImport = async () => {
-    if (!window.electronAPI) { setIsImportDialogOpen(true); return; }
+    const api = getElectronAPI();
+    if (!api?.showOpenDialog) { setIsImportDialogOpen(true); return; }
     try {
-      const result = await window.electronAPI.showOpenDialog({
+      const result = await api.showOpenDialog({
         title: 'Импорт настроек',
         properties: ['openFile'],
         filters: [{ name: 'JSON Files', extensions: ['json'] }]
-      });
+      } as Record<string, JsonObject>);
 
-      if (!result.canceled && result.filePaths?.length > 0) {
-        const res = await window.electronAPI.importPreferencesFromFile(result.filePaths[0]);
+      if (!result.canceled && result.filePaths?.length > 0 && api.importPreferencesFromFile) {
+        const res = await api.importPreferencesFromFile(result.filePaths[0]);
         if (res.success && res.data) await importPreferences(JSON.stringify(res.data));
       }
     } catch (e) { console.error('Import failed:', e); }
@@ -88,7 +89,7 @@ export const UserPreferencesContainer: React.FC = () => {
               <TabsTrigger value="editing">Редактирование</TabsTrigger>
             </TabsList>
           </Tabs>
-
+          
           <div className="flex gap-3">
             <Button variant="outline" size="sm" onClick={handleImport} className="rounded-xl border-border/40 hover:bg-primary/5 transition-all">Импорт</Button>
             <Button variant="outline" size="sm" onClick={handleExport} className="rounded-xl border-border/40 hover:bg-primary/5 transition-all">Экспорт</Button>
@@ -128,4 +129,3 @@ export const UserPreferencesContainer: React.FC = () => {
     </div>
   );
 };
-

@@ -73,18 +73,15 @@ public class ScheduleChangedEvent extends EventObject {
 	 */
 	public ScheduleChangedEvent(Object source) {
 		super(source);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public Object getSource() {
-		// TODO Auto-generated method stub
 		return super.getSource();
 	}
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return super.toString();
 	}
 

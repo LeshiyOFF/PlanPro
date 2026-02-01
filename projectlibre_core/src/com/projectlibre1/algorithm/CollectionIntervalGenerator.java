@@ -148,7 +148,6 @@ public class CollectionIntervalGenerator implements IntervalGenerator, HasStartA
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Object arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -168,9 +167,6 @@ public class CollectionIntervalGenerator implements IntervalGenerator, HasStartA
 	 */
 	public long currentEnd() {
 		long curEnd = (current == null) ? Long.MAX_VALUE : ((HasStartAndEnd)current).getEnd();
-		
-		if (curEnd == 1)
-			System.out.println(" 1 cur end");
 		return active ? curEnd : ((HasStartAndEnd)current).getStart();		
 	}
 

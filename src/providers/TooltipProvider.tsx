@@ -1,5 +1,5 @@
 import React from 'react';
-import { TooltipProvider as RadixTooltipProvider } from '@/components/ui/Tooltip';
+import { TooltipProvider as RadixTooltipProvider } from '@/components/ui/tooltip';
 
 interface TooltipProviderProps {
   children: React.ReactNode;

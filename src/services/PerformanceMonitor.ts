@@ -1,4 +1,6 @@
 import { SentryService } from '@/services/SentryService';
+import type { JsonValue } from '@/types/json-types';
+import type { JsonValue } from '@/types/json-types';
 
 /**
  * Интерфейс для метрик производительности
@@ -17,13 +19,15 @@ interface TransactionOptions {
   name: string;
   operation: string;
   tags?: Record<string, string>;
-  data?: Record<string, any>;
+  data?: Record<string, JsonValue>;
 }
 
-/**
- * Тип для Sentry транзакции
- */
-type SentryTransaction = any;
+/** Объект с методами setTag/setData/finish для совместимости с Sentry span/transaction */
+interface SentryTransactionLike {
+  setTag(key: string, value: string): void;
+  setData(key: string, value: unknown): void;
+  finish?(status?: string): void;
+}
 
 /**
  * Performance monitoring сервис
@@ -31,7 +35,7 @@ type SentryTransaction = any;
  */
 export class PerformanceMonitor {
   private sentryService: SentryService;
-  private transactions: Map<string, SentryTransaction> = new Map();
+  private transactions: Map<string, SentryTransactionLike> = new Map();
   private metrics: PerformanceMetrics[] = [];
 
   constructor(sentryService: SentryService) {
@@ -41,21 +45,18 @@ export class PerformanceMonitor {
   /**
    * Начать измерение производительности
    */
-  public startTransaction(options: TransactionOptions): SentryTransaction | undefined {
-    const transaction = this.sentryService.startTransaction(options.name, options.operation);
-    
+  public startTransaction(options: TransactionOptions): SentryTransactionLike | undefined {
+    const raw = this.sentryService.startTransaction(options.name, options.operation);
+    const transaction = raw as SentryTransactionLike | undefined;
+
     if (transaction) {
       this.transactions.set(options.name, transaction);
-      
-      // Установка тегов если предоставлены
       if (options.tags) {
         transaction.setTag('component', options.name);
         Object.entries(options.tags).forEach(([key, value]) => {
           transaction.setTag(key, value);
         });
       }
-
-      // Установка данных если предоставлены
       if (options.data) {
         Object.entries(options.data).forEach(([key, value]) => {
           transaction.setData(key, value);
@@ -71,10 +72,10 @@ export class PerformanceMonitor {
    */
   public finishTransaction(name: string, status?: 'ok' | 'cancelled' | 'unknown' | 'internal_error' | 'deadline_exceeded'): void {
     const transaction = this.transactions.get(name);
-    if (transaction) {
+    if (transaction?.finish) {
       transaction.finish(status);
-      this.transactions.delete(name);
     }
+    this.transactions.delete(name);
   }
 
   /**
@@ -106,14 +107,19 @@ export class PerformanceMonitor {
     return renderTime;
   }
 
+  /** Chrome/Node: performance.memory (не в стандарте Performance) */
+  private static getMemoryInfo(): { usedJSHeapSize: number } | undefined {
+    const p = performance as Performance & { memory?: { usedJSHeapSize: number } };
+    return p.memory;
+  }
+
   /**
    * Измерить использование памяти
    */
   public measureMemoryUsage(): number | null {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
+    const memory = PerformanceMonitor.getMemoryInfo();
+    if (memory) {
       const memoryUsage = memory.usedJSHeapSize / 1024 / 1024; // MB
-      
       this.recordMetrics({
         renderTime: 0,
         componentCount: 0,
@@ -156,10 +162,11 @@ export class PerformanceMonitor {
       try {
         return await originalFetch.apply(window, args);
       } catch (error) {
-        this.sentryService.captureException(error, {
+        const err = error instanceof Error ? error : new Error(String(error));
+        this.sentryService.captureException(err, {
           type: 'network',
           requestCount,
-          url: args[0]
+          url: typeof args[0] === 'string' ? args[0] : String(args[0])
         });
         throw error;
       }

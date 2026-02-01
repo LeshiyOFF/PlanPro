@@ -1,11 +1,12 @@
 import { ActionCategory } from '../ActionManager';
-import { logger } from '@/utils/logger';
+import type { IActionManager } from '../ActionManagerTypes';
+import type { IAction } from '../BaseAction';
 
 /**
  * Сервис валидации регистрации действий
  */
 export class ActionRegistryValidator {
-  constructor(private actionManager: any) {}
+  constructor(private actionManager: IActionManager) {}
 
   /**
    * Валидация регистрации
@@ -37,7 +38,7 @@ export class ActionRegistryValidator {
     const allActions = this.actionManager.getAllActions();
     const shortcuts = new Map<string, string[]>();
     
-    allActions.forEach(action => {
+    allActions.forEach((action: IAction) => {
       if (action.shortcut) {
         if (!shortcuts.has(action.shortcut)) {
           shortcuts.set(action.shortcut, []);

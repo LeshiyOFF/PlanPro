@@ -1,6 +1,8 @@
-import { 
+import {
   IUserPreferences
 } from '../interfaces/UserPreferencesInterfaces';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * Хранилище настроек (Инфраструктурный слой)
@@ -15,8 +17,9 @@ export class PreferencesStorage {
    */
   public static async save(preferences: IUserPreferences): Promise<void> {
     try {
-      if (window.electronAPI && window.electronAPI.savePreferences) {
-        const response = await window.electronAPI.savePreferences(preferences);
+      const api = getElectronAPI();
+      if (api?.savePreferences) {
+        const response = await api.savePreferences(preferences as JsonObject);
         if (!response.success) {
           throw new Error(response.error);
         }
@@ -35,25 +38,26 @@ export class PreferencesStorage {
    */
   public static async load(): Promise<Partial<IUserPreferences> | null> {
     try {
-      if (window.electronAPI && window.electronAPI.loadPreferences) {
-        const response = await window.electronAPI.loadPreferences();
+      const api = getElectronAPI();
+      if (api?.loadPreferences) {
+        const response = await api.loadPreferences();
         if (response.success && response.data) {
           return response.data as Partial<IUserPreferences>;
         }
-        
+
         // Если данных в файле нет, пробуем мигрировать из localStorage (однократно)
         const legacy = localStorage.getItem('user_preferences');
         if (legacy) {
           console.info('[PreferencesStorage] Migrating legacy settings from localStorage');
-          return JSON.parse(legacy);
+          return JSON.parse(legacy) as Partial<IUserPreferences>;
         }
-        
+
         return null;
       }
 
       // Fallback для окружения без Electron
       const stored = localStorage.getItem('user_preferences');
-      return stored ? JSON.parse(stored) : null;
+      return stored ? (JSON.parse(stored) as Partial<IUserPreferences>) : null;
     } catch (error) {
       console.warn('[PreferencesStorage] Failed to load preferences from file:', error);
       return null;
@@ -65,8 +69,9 @@ export class PreferencesStorage {
    */
   public static async clear(): Promise<void> {
     try {
-      if (window.electronAPI && window.electronAPI.savePreferences) {
-        await window.electronAPI.savePreferences(null);
+      const api = getElectronAPI();
+      if (api?.savePreferences) {
+        await api.savePreferences(null);
       }
       localStorage.removeItem('user_preferences');
     } catch (error) {
@@ -74,4 +79,3 @@ export class PreferencesStorage {
     }
   }
 }
-

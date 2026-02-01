@@ -2,6 +2,9 @@
  * Типы для задач ProjectLibre
  */
 
+import type { ReactNode } from 'react';
+import type { JsonValue } from '@/types/json-types';
+
 export interface Task {
   id: string
   name: string
@@ -27,9 +30,10 @@ export interface Task {
   segments?: TaskSegment[];
 }
 
+/** Сегмент задачи (прерывания). Единый тип для store и Gantt. */
 export interface TaskSegment {
-  start: Date;
-  finish: Date;
+  startDate: Date;
+  endDate: Date;
 }
 
 export interface Dependency {
@@ -51,12 +55,15 @@ export interface TaskFilter {
   searchText?: string
 }
 
-export interface TableColumn<T = unknown> {
+/** Дефолтный тип строки таблицы (вместо unknown) */
+export type DefaultTableRow = Record<string, JsonValue>;
+
+export interface TableColumn<T = DefaultTableRow> {
   id: keyof T
   header: string
   width: number
   sortable: boolean
   resizable: boolean
-  formatter?: (value: unknown, row: T) => React.ReactNode
+  formatter?: (value: JsonValue, row: T) => ReactNode
 }
 

@@ -65,7 +65,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * abastract Base class for selection lists
+ * Abstract base class for selection lists.
+ * Provides partial Map implementation - only get() is functional through getValue().
+ * Other Map operations throw UnsupportedOperationException.
+ * @see #get(Object)
+ * @see #getValue(Object)
  */
 public abstract class Select implements Map {
 
@@ -126,139 +130,99 @@ public abstract class Select implements Map {
 		this.name = name;
 	}
 
+	/**
+	 * Exception thrown when an invalid selection choice is made.
+	 */
 	public static class InvalidChoiceException extends Exception {
-		/**
-		 * 
-		 */
+		private static final long serialVersionUID = 1L;
+
+		/** Creates exception with no message. */
 		public InvalidChoiceException() {
 			super();
-			// TODO Auto-generated constructor stub
 		}
 
-		/**
-		 * @param arg0
-		 */
-		public InvalidChoiceException(String arg0) {
-			super(arg0);
-			// TODO Auto-generated constructor stub
+		/** Creates exception with the specified message. */
+		public InvalidChoiceException(String message) {
+			super(message);
 		}
 
-		/**
-		 * @param arg0
-		 */
-		public InvalidChoiceException(Throwable arg0) {
-			super(arg0);
-			// TODO Auto-generated constructor stub
+		/** Creates exception with the specified cause. */
+		public InvalidChoiceException(Throwable cause) {
+			super(cause);
 		}
 
-		/**
-		 * @param arg0
-		 * @param arg1
-		 */
-		public InvalidChoiceException(String arg0, Throwable arg1) {
-			super(arg0, arg1);
-			// TODO Auto-generated constructor stub
+		/** Creates exception with the specified message and cause. */
+		public InvalidChoiceException(String message, Throwable cause) {
+			super(message, cause);
 		}
-
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#size()
-	 */
+	// Partial Map implementation - only get() is functional
+	
+	/** Not supported - use getKeyArrayWithoutNull().length instead. */
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		Object[] keys = getKeyArrayWithoutNull();
+		return keys != null ? keys.length : 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#clear()
-	 */
+	/** Not supported - Select is read-only. */
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException("Select is read-only");
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#isEmpty()
-	 */
+	/** Checks if the selection list is empty. */
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return size() == 0;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#containsKey(java.lang.Object)
-	 */
-	public boolean containsKey(Object arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	/** Not supported - use get() and check for null. */
+	public boolean containsKey(Object key) {
+		return get(key) != null;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#containsValue(java.lang.Object)
-	 */
-	public boolean containsValue(Object arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	/** Not supported - iterate values manually. */
+	public boolean containsValue(Object value) {
+		List valueList = getValueListWithoutNull();
+		return valueList != null && valueList.contains(value);
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#values()
-	 */
+	/** Returns the value list. */
 	public Collection values() {
-		// TODO Auto-generated method stub
-		return null;
+		return getValueListWithoutNull();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#putAll(java.util.Map)
-	 */
-	public void putAll(Map arg0) {
-		// TODO Auto-generated method stub
-		
+	/** Not supported - Select is read-only. */
+	public void putAll(Map map) {
+		throw new UnsupportedOperationException("Select is read-only");
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#entrySet()
-	 */
+	/** Not supported - use getKeyArrayWithoutNull() instead. */
 	public Set entrySet() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Use getKeyArrayWithoutNull() instead");
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#keySet()
-	 */
+	/** Not supported - use getKeyArrayWithoutNull() instead. */
 	public Set keySet() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("Use getKeyArrayWithoutNull() instead");
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#get(java.lang.Object)
-	 */
-	public Object get(Object arg0) {
+	/** Gets value by key using getValue(). */
+	public Object get(Object key) {
 		try {
-			return getValue(arg0);
+			return getValue(key);
 		} catch (InvalidChoiceException e) {
 			return null;
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#remove(java.lang.Object)
-	 */
-	public Object remove(Object arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	/** Not supported - Select is read-only. */
+	public Object remove(Object key) {
+		throw new UnsupportedOperationException("Select is read-only");
 	}
 
-	/* (non-Javadoc)
-	 * @see java.util.Map#put(java.lang.Object, java.lang.Object)
-	 */
-	public Object put(Object arg0, Object arg1) {
-		// TODO Auto-generated method stub
-		return null;
+	/** Not supported - Select is read-only. */
+	public Object put(Object key, Object value) {
+		throw new UnsupportedOperationException("Select is read-only");
 	}
 	/**
 	 * @return Returns the allowNull.

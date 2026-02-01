@@ -112,8 +112,8 @@ public class DataObjectImpl extends CommonDataObject{
 	/* (non-Javadoc)
 	 * @see com.projectlibre1.pm.task.HasKey#getCreated()
 	 */
+	// NOTE: getCreated() not persisted; returns null.
 	public Date getCreated() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -121,8 +121,7 @@ public class DataObjectImpl extends CommonDataObject{
 	/* (non-Javadoc)
 	 * @see com.projectlibre1.pm.task.HasKey#setCreated(java.util.Date)
 	 */
+	// NOTE: setCreated() no-op; created not persisted.
 	public void setCreated(Date created) {
-		// TODO Auto-generated method stub
-		
 	}
 }

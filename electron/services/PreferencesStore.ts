@@ -1,6 +1,7 @@
 import { app } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
+import type { PreferencesData } from '../types/PreferencesData';
 
 /**
  * Класс для надежного хранения настроек в файловой системе.
@@ -23,7 +24,7 @@ export class PreferencesStore {
   /**
    * Сохранение данных в JSON файл (атомарно)
    */
-  public save(data: any): void {
+  public save(data: PreferencesData): void {
     try {
       const jsonContent = JSON.stringify(data, null, 2);
       
@@ -43,7 +44,7 @@ export class PreferencesStore {
   /**
    * Загрузка данных из JSON файла
    */
-  public load(): any {
+  public load(): PreferencesData | null {
     try {
       if (!fs.existsSync(this.configPath)) {
         return null;

@@ -3,6 +3,8 @@
  * Заменяют использование `any` для строгой типизации
  */
 
+import type { JsonObject } from '../json-types';
+
 // Базовые типы диалогов
 export interface BaseDialogOptions {
   title: string
@@ -109,7 +111,7 @@ export interface UIEvent {
   type: string
   timestamp: Date
   source: string
-  data?: unknown
+  data?: JsonObject
 }
 
 export interface WindowEvent extends UIEvent {
@@ -127,10 +129,9 @@ export interface MenuEvent extends UIEvent {
 export interface UIError {
   code: string
   message: string
-  details?: Record<string, unknown>
+  details?: JsonObject
   stack?: string
   timestamp: Date
   recoverable?: boolean
   userAction?: string
 }
-

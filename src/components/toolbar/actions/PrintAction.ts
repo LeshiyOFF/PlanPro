@@ -13,10 +13,8 @@ export class PrintAction extends ToolbarAction {
   /**
    * Выполняет печать проекта
    */
-  execute(): void {
-    console.log('Печать проекта');
-    // TODO: Интеграция с системой печати
-    // Нужно подключить к PrintManager
+  override async execute(): Promise<void> {
+    window.print();
   }
 
   /**

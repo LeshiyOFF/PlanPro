@@ -70,7 +70,6 @@ public abstract class DoubleSum implements Closure, DoubleValue {
 	 */
 	public DoubleSum() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)
@@ -78,8 +77,6 @@ public abstract class DoubleSum implements Closure, DoubleValue {
 	 */
 	public void execute(Object arg0) {
 		sum += getValueForElement(arg0);
-		// TODO Auto-generated method stub
-		
 	}
 	
 	protected abstract double getValueForElement(Object object);

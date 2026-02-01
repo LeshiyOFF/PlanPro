@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PreferencesSection } from './PreferencesSection';
 import { useUserPreferences } from '../hooks/useUserPreferences';

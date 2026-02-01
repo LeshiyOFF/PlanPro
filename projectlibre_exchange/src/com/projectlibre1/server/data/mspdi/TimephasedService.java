@@ -132,7 +132,8 @@ public class TimephasedService {
 //		if (TimeDistributedTypeMapper.isCurrent(t.getType().intValue()))// && assignment.getWorkContourType() != ContourTypes.CONTOURED)
 //			return;
 
-		if (!TimeDistributedHelper.isWork(t.getType())) //TODO do not treat costs for now
+		// LIMITATION: timephased costs not applied; only work type considered here.
+		if (!TimeDistributedHelper.isWork(t.getType()))
 			return;
 
 		Object type = TimeDistributedTypeMapper.getOPPrField(t.getType());

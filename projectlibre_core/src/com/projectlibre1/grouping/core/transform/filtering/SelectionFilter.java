@@ -88,9 +88,9 @@ public class SelectionFilter extends NodeFilter {
     public boolean evaluate(Object o) {
         Object impl=((Node)o).getImpl();
         if (impl==null)
-        	return false; //TODO Shouldn't happen. But cannot reproduce 
+        	return false;
         if (implToShow == null)
-        	return false; //TODO Shouldn't happen. to reproduce, create a new project, select a sub view and then unselect it.  Then create a task
+        	return false;
         if (impl instanceof HasAssignments)
             return implToShow.contains(impl);
         else if (impl instanceof Assignment){

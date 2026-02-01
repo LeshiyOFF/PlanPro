@@ -1,21 +1,27 @@
 import { useState, useMemo, useCallback } from 'react';
-import { ISortRule, IFilterRule, SortDirection } from '@/domain/sheets/interfaces/IDataProcessing';
+import { ISortRule, IFilterRule, SortDirection, FilterOperator } from '@/domain/sheets/interfaces/IDataProcessing';
 import { SheetDataProcessorService } from '@/domain/sheets/services/SheetDataProcessorService';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
+import { CellValue } from '@/types/sheet/CellValueTypes';
+import type { JsonValue } from '@/types/json-types';
+import type { JsonValue } from '@/types/json-types';
 
 /**
  * Хук для управления обработкой данных (сортировка, фильтрация).
+ * Возвращает processedData того же типа T[].
  */
-export const useSheetDataProcessor = <T>(initialData: T[], columns: ISheetColumn<T>[]) => {
+export const useSheetDataProcessor = <T extends Record<string, JsonValue>>(
+  initialData: T[],
+  columns: ISheetColumn<T>[]
+) => {
   const [sortRules, setSortRules] = useState<ISortRule[]>([]);
   const [filterRules, setFilterRules] = useState<IFilterRule[]>([]);
   
   const processor = useMemo(() => new SheetDataProcessorService(), []);
 
-  const processedData = useMemo(() => {
-    let result = processor.filter(initialData, filterRules, columns);
-    result = processor.sort(result, sortRules, columns);
-    return result;
+  const processedData = useMemo((): T[] => {
+    const filtered = processor.filter(initialData, filterRules, columns);
+    return processor.sort(filtered, sortRules, columns);
   }, [initialData, sortRules, filterRules, processor, columns]);
 
   const toggleSort = useCallback((columnId: string, multiSort: boolean) => {
@@ -40,7 +46,7 @@ export const useSheetDataProcessor = <T>(initialData: T[], columns: ISheetColumn
     });
   }, []);
 
-  const setFilter = useCallback((columnId: string, operator: any, value: any) => {
+  const setFilter = useCallback((columnId: string, operator: FilterOperator, value: CellValue) => {
     setFilterRules(prev => {
       const filtered = prev.filter(r => r.columnId !== columnId);
       if (value === '' || value === null || value === undefined) return filtered;
@@ -56,5 +62,3 @@ export const useSheetDataProcessor = <T>(initialData: T[], columns: ISheetColumn
     setFilter
   };
 };
-
-

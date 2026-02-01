@@ -1,27 +1,31 @@
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
-import type { 
+import {
   ExtendedAppState,
-  ProjectState, 
-  TaskState, 
-  ResourceState, 
+  ProjectState as CatalogProjectState,
+  TaskState,
+  ResourceState,
   UIState,
   ValidationErrors,
-  ResourceAllocation,
-  TaskDependencies,
-  TaskResourceAssignments,
   UserPreferences,
-  Project,
   ID,
   View,
-  AppState,
-  AppNotification as Notification
+  AppNotification as Notification,
+  TimeUnit,
+  TaskType,
+  ViewType,
+  Theme
 } from '../types/Master_Functionality_Catalog';
-import { TimeUnit, TaskType } from '../types/Master_Functionality_Catalog';
+import type { Project } from '@/types/project-types';
 
-interface AppStore extends ExtendedAppState {
+/** Состояние проектов в сторе: current — project-types.Project (источник правды UI). */
+export type StoreProjectState = Omit<CatalogProjectState, 'current'> & { current: Project | null };
+
+export type StoreExtendedAppState = Omit<ExtendedAppState, 'projects'> & { projects: StoreProjectState };
+
+interface AppStore extends StoreExtendedAppState {
   // Project actions
-  setProjectState: (state: Partial<ProjectState>) => void;
+  setProjectState: (state: Partial<StoreProjectState>) => void;
   setCurrentProject: (project: Project | null) => void;
   setProjectLoading: (loading: boolean) => void;
   setProjectError: (error: string | null) => void;
@@ -54,10 +58,10 @@ interface AppStore extends ExtendedAppState {
 
   // Global actions
   resetStore: () => void;
-  initializeStore: (initialState?: Partial<AppState>) => void;
+  initializeStore: (initialState?: Partial<StoreExtendedAppState>) => void;
 }
 
-const initialState: ExtendedAppState = {
+const initialState: StoreExtendedAppState = {
   projects: {
     current: null,
     loading: false,
@@ -104,7 +108,7 @@ const initialState: ExtendedAppState = {
     general: {
       userName: '',
       companyName: '',
-      defaultView: 'gantt' as any,
+      defaultView: ViewType.GANTT,
       autoSave: false,
       autoSaveInterval: 5,
       defaultCalendar: { value: 0, type: 'calendar' },
@@ -122,7 +126,7 @@ const initialState: ExtendedAppState = {
       highContrast: false,
       fontSize: 14,
       fontFamily: 'Inter',
-      theme: 'light' as any
+      theme: Theme.LIGHT
     },
     editing: {
       autoCalculate: true,
@@ -171,7 +175,7 @@ const initialState: ExtendedAppState = {
 
 export const useAppStore = create<AppStore>()(
   devtools(
-    subscribeWithSelector((set, get) => ({
+    subscribeWithSelector((set) => ({
       ...initialState,
 
       // Project actions
@@ -270,10 +274,11 @@ export const useAppStore = create<AppStore>()(
       // Global actions
       resetStore: () => set(initialState, false, 'resetStore'),
 
-      initializeStore: (initialStateOverride) => set({
+      initializeStore: (initialStateOverride) => set((state) => ({
+        ...state,
         ...initialState,
         ...initialStateOverride
-      }, false, 'initializeStore')
+      }), false, 'initializeStore')
     })),
     { name: 'projectlibre-app-store' }
   )

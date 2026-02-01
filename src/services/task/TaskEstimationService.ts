@@ -14,7 +14,7 @@ export class TaskEstimationService {
    * @param preferences Текущие настройки пользователя
    * @returns boolean
    */
-  public shouldShowEstimation(task: Task, preferences: IUserPreferences): boolean {
+  public shouldShowEstimation(_task: Task, _preferences: IUserPreferences): boolean {
     return false;
   }
 

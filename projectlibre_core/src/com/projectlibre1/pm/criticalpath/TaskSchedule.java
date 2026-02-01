@@ -88,7 +88,6 @@ public final class TaskSchedule implements Cloneable {
 	
 
 	// Calculated fields that are transient
-//TODO don't bother serializing these.  When I make them transient, the program hangs
 	private Task task;
 	private int type;
 	private boolean forward = true;
@@ -149,6 +148,7 @@ public final class TaskSchedule implements Cloneable {
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone TaskSchedule", e);
 			throw new InternalError();
 		}
 	}
@@ -357,7 +357,6 @@ public final class TaskSchedule implements Cloneable {
 				currentSchedule.setDependencyDate(dependencyDate);
 				// for parents, set current schedule's duration
 				if (context.taskReferenceType == PredecessorTaskList.TaskReference.PARENT_END) {
-					//TODO this only needs to be done if advancement changed on a task
 					currentSchedule.updateDurationFromDates(); // calculate duration based on parent start/end
 					((NormalTask)(currentSchedule.task)).assignActualDatesFromChildren();
 				}

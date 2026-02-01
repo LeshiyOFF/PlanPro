@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { ViewRouteManager } from '@/services/ViewRouteManager';
 import { ViewType, ViewConfig } from '@/types/ViewTypes';
-import { 
-  BarChart, 
-  Network, 
-  Table, 
-  Users, 
-  BarChart2, 
-  PieChart, 
-  Calendar, 
-  FileText, 
-  TrendingUp, 
-  GitBranch 
+import {
+  BarChart,
+  Network,
+  Table,
+  Users,
+  BarChart2,
+  PieChart,
+  Calendar,
+  FileText,
+  TrendingUp,
+  GitBranch,
+  Settings
 } from 'lucide-react';
 
 /**
@@ -41,20 +42,23 @@ export const NavigationMenu: React.FC = () => {
     }
   };
 
-  const getIcon = (viewType: ViewType) => {
-    const icons = {
-      [ViewType.GANTT]: BarChart,
-      [ViewType.NETWORK]: Network,
-      [ViewType.TASK_SHEET]: Table,
-      [ViewType.RESOURCE_SHEET]: Users,
-      [ViewType.TASK_USAGE]: BarChart2,
-      [ViewType.RESOURCE_USAGE]: PieChart,
-      [ViewType.CALENDAR]: Calendar,
-      [ViewType.REPORTS]: FileText,
-      [ViewType.TRACKING_GANTT]: TrendingUp,
-      [ViewType.WBS]: GitBranch
+  type NavIconProps = { className?: string; size?: number };
+  const getIcon = (viewType: ViewType): React.ComponentType<NavIconProps> => {
+    const icons: Record<ViewType, React.ComponentType<NavIconProps>> = {
+      [ViewType.GANTT]: BarChart as React.ComponentType<NavIconProps>,
+      [ViewType.NETWORK]: Network as React.ComponentType<NavIconProps>,
+      [ViewType.TASK_SHEET]: Table as React.ComponentType<NavIconProps>,
+      [ViewType.RESOURCE_SHEET]: Users as React.ComponentType<NavIconProps>,
+      [ViewType.TASK_USAGE]: BarChart2 as React.ComponentType<NavIconProps>,
+      [ViewType.RESOURCE_USAGE]: PieChart as React.ComponentType<NavIconProps>,
+      [ViewType.CALENDAR]: Calendar as React.ComponentType<NavIconProps>,
+      [ViewType.REPORTS]: FileText as React.ComponentType<NavIconProps>,
+      [ViewType.TRACKING_GANTT]: TrendingUp as React.ComponentType<NavIconProps>,
+      [ViewType.WBS]: GitBranch as React.ComponentType<NavIconProps>,
+      [ViewType.SETTINGS]: Settings as React.ComponentType<NavIconProps>,
+      [ViewType.DETAILS]: FileText as React.ComponentType<NavIconProps>
     };
-    return icons[viewType] || BarChart;
+    return icons[viewType] ?? (BarChart as React.ComponentType<NavIconProps>);
   };
 
   return (

@@ -79,6 +79,7 @@ import org.apache.commons.collections.Predicate;
 
 import com.projectlibre1.configuration.Configuration;
 import com.projectlibre1.datatype.Duration;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.datatype.Money;
 import com.projectlibre1.datatype.Rate;
 import com.projectlibre1.field.Field;
@@ -154,7 +155,7 @@ public class DataSourceProvider implements JRDataSourceProvider {
 			newOne.setName(field.getId());
 			newOne.setDescription(field.getName());
 			newOne.setValueClass(field.getClazz());
-			newOne.setValueClassName(field.getDisplayType().getName()); //TODO what should this be?
+			newOne.setValueClassName(field.getDisplayType().getName()); // NOTE: value class name from field display type for JR field metadata.
 			map.put(newOne,field);
 		}
 	}
@@ -380,8 +381,7 @@ public class DataSourceProvider implements JRDataSourceProvider {
 			}
 
 		} catch (JRException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log(e);
 		}
 		return design;
       

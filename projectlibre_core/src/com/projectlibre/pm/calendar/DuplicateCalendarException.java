@@ -56,30 +56,25 @@
 package com.projectlibre.pm.calendar;
 
 /**
+ * Exception thrown when attempting to create a calendar with a duplicate name.
  * @author Laurent Chretienneau
- *
  */
 public class DuplicateCalendarException extends Exception {
 	private static final long serialVersionUID = 8193999318288365428L;
 
 	public DuplicateCalendarException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public DuplicateCalendarException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public DuplicateCalendarException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	public DuplicateCalendarException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
-
 }

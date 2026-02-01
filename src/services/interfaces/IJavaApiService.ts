@@ -6,14 +6,14 @@ import type {
   ResourceCreateRequest,
   ResourceUpdateRequest,
   CalendarUpdateRequest,
-  ConfigurationUpdateRequest,
-  ReportGenerateRequest
+  ConfigurationUpdateRequest
 } from '@/types/api/request-types';
 
 import type {
   DataResponse,
   ProjectResponse,
   ProjectsListResponse,
+  ProjectDataResponse,
   TaskResponse,
   TasksListResponse,
   ResourceResponse,
@@ -25,8 +25,7 @@ import type {
   ExportResponse,
   ImportResponse,
   ConfigurationResponse,
-  ApiStatusResponse,
-  OperationResponse
+  ApiStatusResponse
 } from '@/types/api/response-types';
 
 /**
@@ -41,7 +40,7 @@ export interface IJavaApiService {
   updateProject(projectId: string, updates: ProjectUpdateRequest): Promise<DataResponse<ProjectResponse>>;
   deleteProject(projectId: string): Promise<DataResponse<void>>;
   getAllProjects(): Promise<DataResponse<ProjectsListResponse>>;
-  recalculateProject(projectId: string): Promise<DataResponse<OperationResponse>>;
+  recalculateProject(projectId: string): Promise<DataResponse<ProjectDataResponse>>;
   
   // Task operations
   createTask(projectId: string, taskData: TaskCreateRequest): Promise<DataResponse<TaskResponse>>;

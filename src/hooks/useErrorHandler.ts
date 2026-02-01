@@ -3,12 +3,7 @@ import { logger } from '@/utils/logger';
 import { SentryService } from '@/services/SentryService';
 
 interface ErrorHandler {
-  (error: Error, errorInfo?: any): void;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
+  (error: Error, errorInfo?: { componentStack?: string }): void;
 }
 
 /**
@@ -40,10 +35,10 @@ export const useErrorHandler = () => {
   }, []);
 
   const createRetryHandler = useCallback(
-    (operation: () => Promise<any>, maxRetries: number = 3) => {
+    <T>(operation: () => Promise<T>, maxRetries: number = 3): Promise<T> => {
       let attempt = 0;
 
-      const executeWithRetry = async (): Promise<any> => {
+      const executeWithRetry = async (): Promise<T> => {
         try {
           return await operation();
         } catch (error) {
@@ -67,7 +62,7 @@ export const useErrorHandler = () => {
   const createBoundaryErrorHandler = useCallback((
     errorHandler: ErrorHandler
   ) => {
-    return (error: Error, errorInfo: any) => {
+    return (error: Error, errorInfo?: { componentStack?: string }) => {
       errorHandler(error, errorInfo);
     };
   }, []);

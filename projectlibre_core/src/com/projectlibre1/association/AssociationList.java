@@ -159,7 +159,7 @@ public class AssociationList implements List {
 		AssociationListFormat format = AssociationListFormat.getInstance(associationFormat);
 		AssociationList result = (AssociationList)format.parseObject(associations,new ParsePosition(0));
 		if (result == null) {
-			System.out.println(associationFormat.getParameters().getError());
+			com.projectlibre1.server.access.ErrorLogger.log(associationFormat.getParameters().getError(), null);
 			throw new FieldParseException(associationFormat.getParameters().getError());
 		}
 		LinkedList oldList = list; // (LinkedList) list.clone(); // make a copy of original list since we'll be modifying real list
@@ -169,9 +169,7 @@ public class AssociationList implements List {
 		try {
 			result.testValid(true);
 		} catch (InvalidAssociationException e) {
-//			newList = oldList;
-			
-        	System.out.println(e.getMessage());
+			com.projectlibre1.server.access.ErrorLogger.log(e.getMessage(), e);
 			throw new FieldParseException(e.getMessage());				
         }	
 
@@ -183,8 +181,7 @@ public class AssociationList implements List {
         	association = (Association)i.next();
         	// if duplicate
         	if (AssociationList.findAssociation(newList,association.getLeft(),association.getRight(),association) != null) {
-//        		newList = oldList;
-        		throw new FieldParseException("Duplicate association"); //TODO better message
+        		throw new FieldParseException("Duplicate association");
         	}
         }		
 		
@@ -204,10 +201,10 @@ public class AssociationList implements List {
         	if (newAssociation == null) { 
         		removed.add(oldAssociation);
         	} else {
-        		if (associationFormat.getParameters().isAllowDetailsEntry()) // some fields don't allow you to enter details. In which case, ignore values
+        		if (associationFormat.getParameters().isAllowDetailsEntry()) {
         			modified.add(oldAssociation); // for later use?
         			oldAssociation.copyPrincipalFieldsFrom(newAssociation);
-        		//TODO fire update event?
+        		}
         	}
         }
         
@@ -242,7 +239,6 @@ public class AssociationList implements List {
         	((Association)i.next()).doUpdateService(this); // will send update message
         }        
         // sort the resulting list
-        // TODO sort inverse lists too
         Collections.sort(list,new AssociationComparator(associationFormat.getParameters().getIdField()));
 		return result;
 	}
@@ -475,7 +471,6 @@ public class AssociationList implements List {
 	   	Association association;
         for ( Iterator i = list.iterator(); i.hasNext();) {
         	association = (Association)i.next();
-            System.out.println(getObject(association,leftObject));
         }
 	}
 }

@@ -17,7 +17,7 @@ export const useProjectCore = () => {
    */
   const handleSetProject = useCallback((newProject: Project | null) => {
     setProject(newProject)
-    setCurrentProject(newProject as any)
+    setCurrentProject(newProject)
     if (newProject) {
       setProjectState({ lastModified: new Date() })
     }
@@ -29,14 +29,13 @@ export const useProjectCore = () => {
   const updateProjectMetadata = useCallback((updates: Partial<Project>) => {
     if (!project) return
 
-    const updatedProject = {
+    const updatedProject: Project = {
       ...project,
-      ...updates,
-      modified: new Date(),
+      ...updates
     }
 
     setProject(updatedProject)
-    setCurrentProject(updatedProject as any)
+    setCurrentProject(updatedProject)
     
     // Синхронизация с глобальным стором для автосохранения
     setProjectState({ 
@@ -116,7 +115,7 @@ export const useProjectLifecycle = () => {
     if (project.tasks.length === 0) return project.start
 
     const taskDates = project.tasks
-      .filter(task => task.start)
+      .filter((task): task is typeof task & { start: Date } => task.start != null)
       .map(task => new Date(task.start))
 
     return taskDates.length > 0
@@ -131,7 +130,7 @@ export const useProjectLifecycle = () => {
     if (project.tasks.length === 0) return project.finish
 
     const taskDates = project.tasks
-      .filter(task => task.finish)
+      .filter((task): task is typeof task & { finish: Date } => task.finish != null)
       .map(task => new Date(task.finish))
 
     return taskDates.length > 0

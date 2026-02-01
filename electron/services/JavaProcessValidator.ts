@@ -1,6 +1,6 @@
 import { ChildProcess } from 'child_process';
 import { JavaLaunchOptions } from './JavaLauncher';
-// import { JreManager } from './JreManager'; // TODO: Use for enhanced validation
+import { JreManager } from './JreManager';
 import { JavaExecutableValidator } from './validators/JavaExecutableValidator';
 import { JarFileValidator } from './validators/JarFileValidator';
 import { ValidationResult, ValidationOptions, ValidationDetails } from './interfaces/ValidationInterfaces';
@@ -10,12 +10,12 @@ import { ValidationResult, ValidationOptions, ValidationDetails } from './interf
  * Следует принципу Single Responsibility из SOLID
  */
 export class JavaProcessValidator {
-  // private readonly jreManager: JreManager; // TODO: Use for enhanced validation
+  private readonly jreManager: JreManager;
   private readonly javaValidator: JavaExecutableValidator;
   private readonly jarValidator: JarFileValidator;
   
   constructor() {
-    // this.jreManager = new JreManager(); // TODO: Use for enhanced validation
+    this.jreManager = new JreManager();
     this.javaValidator = new JavaExecutableValidator();
     this.jarValidator = new JarFileValidator();
   }
@@ -26,97 +26,45 @@ export class JavaProcessValidator {
   async validateLaunchConfig(
     jarPath: string,
     options: Partial<JavaLaunchOptions> = {},
-    validationOptions: ValidationOptions = {}
+    vOptions: ValidationOptions = {}
   ): Promise<ValidationResult> {
     try {
       const warnings: string[] = [];
       const details: ValidationDetails = {
-        javaValid: false,
-        jarValid: false,
-        portAvailable: true,
-        memorySufficient: true,
-        versionCompatible: false
+        javaValid: false, jarValid: false, portAvailable: true,
+        memorySufficient: true, versionCompatible: false
       };
 
-      // Валидация Java executable
-      const javaValidation = await this.javaValidator.validateJavaExecutable();
-      details.javaValid = javaValidation.isValid;
-      if (!javaValidation.isValid) {
-        return {
-          isValid: false,
-          errorMessage: javaValidation.errorMessage,
-          warnings,
-          details
-        };
-      }
-      if (javaValidation.warnings) {
-        warnings.push(...javaValidation.warnings);
+      const javaVal = await this.javaValidator.validateJavaExecutable();
+      details.javaValid = javaVal.isValid;
+      if (!javaVal.isValid) return { isValid: false, errorMessage: javaVal.errorMessage, warnings, details };
+      if (javaVal.warnings) warnings.push(...javaVal.warnings);
+
+      if (vOptions.checkVersion !== false) {
+        const vVal = await this.javaValidator.validateJavaVersion();
+        details.versionCompatible = vVal.isValid;
+        if (!vVal.isValid) return { isValid: false, errorMessage: vVal.errorMessage, warnings, details };
+        if (vVal.warnings) warnings.push(...vVal.warnings);
       }
 
-      // Валидация версии Java
-      if (validationOptions.checkVersion !== false) {
-        const versionValidation = await this.javaValidator.validateJavaVersion();
-        details.versionCompatible = versionValidation.isValid;
-        if (!versionValidation.isValid) {
-          return {
-            isValid: false,
-            errorMessage: versionValidation.errorMessage,
-            warnings,
-            details
-          };
-        }
-        if (versionValidation.warnings) {
-          warnings.push(...versionValidation.warnings);
-        }
+      if (vOptions.checkJar !== false) {
+        const jVal = await this.jarValidator.validateJarFile(jarPath);
+        details.jarValid = jVal.isValid;
+        if (!jVal.isValid) return { isValid: false, errorMessage: jVal.errorMessage, warnings, details };
+        if (jVal.warnings) warnings.push(...jVal.warnings);
+      } else details.jarValid = true;
+
+      const port = this.extractPortFromArgs(options);
+      if (vOptions.checkPort !== false && port) {
+        const pVal = await this.jarValidator.validatePortAvailability(port);
+        details.portAvailable = pVal.isValid;
+        if (!pVal.isValid) return { isValid: false, errorMessage: pVal.errorMessage, warnings, details };
+        if (pVal.warnings) warnings.push(...pVal.warnings);
       }
 
-      // Валидация JAR файла
-      if (validationOptions.checkJar !== false) {
-        const jarValidation = await this.jarValidator.validateJarFile(jarPath);
-        details.jarValid = jarValidation.isValid;
-        if (!jarValidation.isValid) {
-          return {
-            isValid: false,
-            errorMessage: jarValidation.errorMessage,
-            warnings,
-            details
-          };
-        }
-        if (jarValidation.warnings) {
-          warnings.push(...jarValidation.warnings);
-        }
-      } else {
-        details.jarValid = true;
-      }
-
-      // Валидация порта
-      if (validationOptions.checkPort !== false && this.extractPortFromArgs(options)) {
-        const port = this.extractPortFromArgs(options)!;
-        const portValidation = await this.jarValidator.validatePortAvailability(port);
-        details.portAvailable = portValidation.isValid;
-        if (!portValidation.isValid) {
-          return {
-            isValid: false,
-            errorMessage: portValidation.errorMessage,
-            warnings,
-            details
-          };
-        }
-        if (portValidation.warnings) {
-          warnings.push(...portValidation.warnings);
-        }
-      }
-
-      return {
-        isValid: true,
-        warnings: warnings.length > 0 ? warnings : undefined,
-        details
-      };
+      return { isValid: true, warnings: warnings.length > 0 ? warnings : undefined, details };
     } catch (error) {
-      return {
-        isValid: false,
-        errorMessage: error instanceof Error ? error.message : 'Unknown validation error'
-      };
+      return { isValid: false, errorMessage: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 
@@ -210,24 +158,17 @@ export class JavaProcessValidator {
    * Извлекает порт из опций
    */
   private extractPortFromArgs(options: Partial<JavaLaunchOptions>): number | null {
-    if (options.jvmOptions) {
-      for (const option of options.jvmOptions) {
-        const match = option.match(/-D(?:server\.)?port(?:=)?(\d+)/);
-        if (match) {
-          return parseInt(match[1] || '0', 10);
-        }
-      }
+    const jvmOptions = options.jvmOptions || [];
+    for (const option of jvmOptions) {
+      const match = option.match(/-D(?:server\.)?port(?:=)?(\d+)/);
+      if (match) return parseInt(match[1] || '0', 10);
     }
 
-    // TODO: Implement port validation when args are added to options
-    // if (options && options.args) {
-    //   for (const arg of options.args) {
-    //     const match = arg.match(/--server\.port(?:=)?(\d+)/);
-    //     if (match) {
-    //       return parseInt(match[1] || '0', 10);
-    //     }
-    //   }
-    // }
+    const args = options.args ?? [];
+    for (const arg of args) {
+      const match = arg.match(/--server\.port(?:=)?(\d+)/);
+      if (match) return parseInt(match[1] || '0', 10);
+    }
 
     return null;
   }

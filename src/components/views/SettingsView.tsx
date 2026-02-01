@@ -5,6 +5,7 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { ViewType } from '@/types/ViewTypes';
 import { Settings, Download, Upload } from 'lucide-react';
+import { settingsImportExportService } from '@/services/SettingsImportExportService';
 
 /**
  * SettingsView - Настройки приложения
@@ -15,19 +16,34 @@ import { Settings, Download, Upload } from 'lucide-react';
  * @version 8.13
  */
 export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({ 
-  viewType = ViewType.SETTINGS 
+  viewType: _viewType = ViewType.SETTINGS 
 }) => {
   const { t } = useTranslation();
   const helpContent = useHelpContent();
 
   const handleImport = () => {
-    // TODO: Реализовать импорт настроек
-    console.log("Import settings...");
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        try {
+          await settingsImportExportService.importSettings(file);
+        } catch (error) {
+          console.error('Import failed:', error);
+        }
+      }
+    };
+    input.click();
   };
 
-  const handleExport = () => {
-    // TODO: Реализовать экспорт настроек
-    console.log("Export settings...");
+  const handleExport = async () => {
+    try {
+      await settingsImportExportService.exportSettings();
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
   };
 
   return (

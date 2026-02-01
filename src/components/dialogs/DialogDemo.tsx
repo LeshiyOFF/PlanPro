@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { useDialogManager } from './DialogManager';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useTypedDialog } from './context/TypedDialogContext';
+import { DialogType } from '@/types/dialog/IDialogRegistry';
 import { 
   FileText, 
   Users, 
@@ -28,7 +29,7 @@ interface DialogCategory {
 }
 
 export const DialogDemo: React.FC = () => {
-  const { openDialog } = useDialogManager();
+  const { openDialog } = useTypedDialog();
 
   const categories: DialogCategory[] = [
     {
@@ -264,12 +265,14 @@ export const DialogDemo: React.FC = () => {
   ];
 
   const handleOpenDialog = (type: string) => {
-    openDialog(type as any, {
-      // Sample data for testing
-      projectId: 'demo-project-123',
-      taskId: 'demo-task-456',
-      resourceId: 'demo-resource-789'
-    });
+    // Проверяем, зарегистрирован ли диалог
+    const registeredTypes: DialogType[] = ['about', 'welcome', 'task-details'];
+    
+    if (registeredTypes.includes(type as DialogType)) {
+      openDialog(type as DialogType, {});
+    } else {
+      console.warn(`Dialog type "${type}" is not yet registered in TypedDialogService`);
+    }
   };
 
   return (

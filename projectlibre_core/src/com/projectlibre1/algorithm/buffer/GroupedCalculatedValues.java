@@ -68,7 +68,7 @@ import com.projectlibre1.pm.calendar.WorkCalendar;
  */
 public class GroupedCalculatedValues implements CalculatedValues, Serializable {
 	static final long serialVersionUID = 8900927827L;
-	ArrayList values = new ArrayList(); //(x,y pairs) //TODO a set would be better because this is often sparse
+	ArrayList values = new ArrayList(); //(x,y pairs)
 	double yScale;
 	private static final Double ZERO = new Double(0.0D);
 //	boolean dayByDay;
@@ -122,10 +122,8 @@ public class GroupedCalculatedValues implements CalculatedValues, Serializable {
 	}
 	final public double getUnscaledValue(int index) {
 		if (values.isEmpty()) {
-			System.out.println("empty values in GroupedCalculatedValues");
 			return 0;
 		} else if (index >= values.size()) {
-			System.out.println("index out of bounds in GroupedCalculatedValues " + index);
 			return 0;
 		}
 		Point point = (Point) values.get(index);
@@ -136,10 +134,8 @@ public class GroupedCalculatedValues implements CalculatedValues, Serializable {
 	
 	public Double getValue(int index) {
 		if (values.isEmpty()) {
-			System.out.println("empty values in GroupedCalculatedValues");
 			return ZERO;
 		} else if (index >= values.size()) {
-			System.out.println("index out of bounds in GroupedCalculatedValues " + index);
 			return ZERO;
 		}
 		Point point = (Point) values.get(index);
@@ -204,8 +200,6 @@ public class GroupedCalculatedValues implements CalculatedValues, Serializable {
 	}
  
  	public void dump() {
-		for (int i = 0; i < values.size(); i++)
-			System.out.println(i + " " +  new java.util.Date(getDate(i).longValue()) +" "+ getValue(i));
  	}
 	
  	public ListIterator iterator(int index){
@@ -252,7 +246,6 @@ public class GroupedCalculatedValues implements CalculatedValues, Serializable {
  		Point previousAddPoint = null;
  		Point addPoint = addIterator.hasNext() ? (Point)addIterator.next() : null;
  		while (basePoint != null && addPoint != null) {
- 			//TODO handle overlaps
  			if (basePoint.compareTo(addPoint) >= 0) {
  				if (addPoint.date >= start) {
  					basePoint.value += addPoint.value;

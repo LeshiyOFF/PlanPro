@@ -138,8 +138,10 @@ public abstract class CommonTransform {
         if (parameters==null) return; //no parameters
         if (parameterDialog==null){
             try {
-                parameterDialog=(Closure)Class.forName(REGISTERED_PARAMETER_DIALOG).newInstance();
-            } catch (Exception e) {e.printStackTrace();}
+                parameterDialog=(Closure)Class.forName(REGISTERED_PARAMETER_DIALOG).getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                com.projectlibre1.server.access.ErrorLogger.log("Failed to create transform parameter dialog", e);
+            }
         }
         if (parameterDialog!=null){
             parameterDialog.execute(this);

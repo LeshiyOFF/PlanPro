@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/Input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 export interface ExtendedDependency {
   id: string;
@@ -90,10 +90,6 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
     onClose?.();
   };
 
-  const selectedDependenciesData = dependencies.filter(d => 
-    selectedDependencies.includes(d.id)
-  );
-
   const getTaskName = (taskId: string) => {
     return tasks.find(t => t.id === taskId)?.name || 'Unknown';
   };
@@ -108,11 +104,12 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
     return variants[type] || 'outline';
   };
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
       title="Extended Dependencies Management"
       size="fullscreen"
-      {...props}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -121,7 +118,7 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
               <Checkbox
                 id="showAdvanced"
                 checked={showAdvanced}
-                onCheckedChange={setShowAdvanced}
+                onCheckedChange={(checked) => setShowAdvanced(checked === true)}
               />
               <Label htmlFor="showAdvanced">Advanced Options</Label>
             </div>
@@ -221,7 +218,7 @@ export const XbsDependencyDialog: React.FC<XbsDependencyDialogProps> = ({
                 <Label htmlFor="bulkType">Dependency Type</Label>
                 <Select
                   value={bulkUpdate.type}
-                  onValueChange={(value) => setBulkUpdate(prev => ({ ...prev, type: value as any }))}
+                  onValueChange={(value) => setBulkUpdate(prev => ({ ...prev, type: value as 'FS' | 'SS' | 'FF' | 'SF' }))}
                 >
                   <SelectTrigger>
                     <SelectValue />

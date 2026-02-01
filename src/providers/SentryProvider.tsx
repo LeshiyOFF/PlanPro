@@ -63,6 +63,7 @@ export const SentryProvider: React.FC<SentryProviderProps> = ({
       };
     } catch (error) {
       console.error('Failed to initialize Sentry provider:', error);
+      return undefined;
     }
   }, []);
 
@@ -94,7 +95,7 @@ export const useSentry = () => {
     /**
      * Отправить ошибку в Sentry
      */
-    captureError: (error: Error, context?: Record<string, any>) => {
+    captureError: (error: Error, context?: Record<string, string | number | boolean | null | undefined>) => {
       sentryService.captureException(error, context);
     },
 

@@ -79,7 +79,8 @@ public class DateHoursMinsConverter extends FieldTypeConverter {
 		if (o==null) return null;
 		long l=(Long)o;
 		if (l==-1L) return null;
-		return new Date(l); //TODO convert
+		// NOTE: raw long interpreted as millis; no explicit timezone conversion.
+		return new Date(l);
 	}
 
 }

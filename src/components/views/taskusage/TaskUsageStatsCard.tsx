@@ -1,5 +1,5 @@
 import React from 'react';
-import { UsageStatsCard, StatsCardColorScheme } from '@/components/ui/UsageStatsCard';
+import { UsageStatsCard, StatsCardColorScheme } from '@/components/ui/usage-stats-card';
 
 /**
  * Пропсы для карточки статистики задач

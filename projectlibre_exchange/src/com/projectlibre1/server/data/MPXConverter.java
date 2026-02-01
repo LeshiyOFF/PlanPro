@@ -55,6 +55,8 @@
  *******************************************************************************/
 package com.projectlibre1.server.data;
 
+import com.projectlibre1.server.access.ErrorLogger;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -129,7 +131,8 @@ public class MPXConverter {
 		WorkCalendar baseCalendar=project.getBaseCalendar();
 		projectHeader.setDefaultCalendarName(baseCalendar.getName()); // use unique id for name - this is a hack
 		projectHeader.setName(project.getName());
-		projectHeader.setProjectTitle(project.getName()); //TODO separate title and name
+		// LIMITATION: project title and name both set from project.getName().
+		projectHeader.setProjectTitle(project.getName());
 		projectHeader.setComments(project.getNotes());
 		projectHeader.setManager(project.getManager());
 		projectHeader.setComments(removeInvalidChars(project.getNotes()));
@@ -143,7 +146,8 @@ public class MPXConverter {
 
 	public static void toMpxCalendar(WorkingCalendar workCalendar,ProjectCalendar mpx) {
 		mpx.setName(workCalendar.getName());
-//		mpx.setUniqueID((int) workCalendar.getId()); // TODO watch out for int overrun
+//		// NOTE: setUniqueID((int) id) omitted; int overrun risk for large ids.
+//		mpx.setUniqueID((int) workCalendar.getId());
 
 		WorkingCalendar wc = workCalendar;
 		if (workCalendar.isBaseCalendar())
@@ -233,7 +237,7 @@ public class MPXConverter {
 				.getStandardRate()));
 		mpxResource.setOvertimeRate(toMPXRate(projectlibreResource
 				.getOvertimeRate()));
-		//TODO set calendar
+		// LIMITATION: resource calendar not set on mpxResource here.
 		mpxResource.setGroup(projectlibreResource.getGroup());
 		mpxResource.setEmailAddress(projectlibreResource.getEmailAddress());
 		mpxResource.setIsGeneric(projectlibreResource.isGeneric()); // fix for 2024492
@@ -252,12 +256,12 @@ public class MPXConverter {
 			try {
 				mpxCalendar = mpxResource.addResourceCalendar();
 			} catch (MPXJException e) {
-				e.printStackTrace();
+				ErrorLogger.log(e);
 				return;
 			}
 				toMpxCalendar(projectlibreCalendar,mpxCalendar);
 		}
-		//TODO The follwing only work because the UID of the resource is the id and not the unique id. A big unique id value  overflows the UID element of the custom field.  It works
+		// LIMITATION: UID uses id not uniqueId; large uniqueId overflows custom field UID.
 		// here because the id is small
 		toMpxCustomFields(projectlibreResource.getCustomFields(),mpxResource, CustomFieldsMapper.getInstance().resourceMaps);
 
@@ -427,7 +431,7 @@ private static int autoId = 0;
 
 	public static net.sf.mpxj.Duration toMPXDuration(long duration) {
 		//		return net.sf.mpxj.Duration.getInstance(Duration.getValue(duration),TimeUnit.getInstance(Duration.getType(duration)));
-		//		//TODO put the correct formula
+		//		// NOTE: correct formula not implemented.
 
 
 		
@@ -502,7 +506,7 @@ private static int autoId = 0;
 
 	public static final String dateToXMLString(long time) {
 	    Calendar date = DatatypeConverter.printDate(new Date(time));
-	  //TODO claur - find replacement. Not working anymore and not good anyway
+	  // NOTE: legacy DateTimeType.serializeJavaObject usage removed; replacement TBD.
 //	    String result = com.sun.msv.datatype.xsd.DateTimeType.theInstance.serializeJavaObject(date, null); 
 	    String result=(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")).format(date.getTime()); 
 	    //claur

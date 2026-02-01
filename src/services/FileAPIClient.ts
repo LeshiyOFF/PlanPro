@@ -1,15 +1,18 @@
-import { BaseAPIClient, type APIClientConfig } from './BaseAPIClient';
-import type { 
-  FileSaveRequest, 
-  FileSaveResponse, 
-  FileLoadRequest, 
-  FileLoadResponse, 
+import { BaseAPIClient, type APIClientConfig, APIError } from './BaseAPIClient';
+import type { StrictData } from '@/types/Master_Functionality_Catalog';
+import type {
+  FileSaveRequest,
+  FileSaveResponse,
+  FileLoadRequest,
+  FileLoadResponse,
   FileListResponse,
   ProjectDataResponse,
   TaskSyncRequest,
-  TaskSyncResponse
+  TaskSyncResponse,
+  ProjectSyncRequest
 } from '@/types/api';
-import type { FileAPI } from '@/types';
+import type { FileAPI } from '@/types/api/file-api.types';
+import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError';
 
 /**
  * FileAPIClient handles native .pod file operations.
@@ -45,7 +48,7 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       return response.data;
     } catch (error) {
       console.error('[FileAPIClient] Save error:', error);
-      throw this.handleFileError(error, 'Failed to save project');
+      throw this.handleFileError(toCaughtError(error), 'Failed to save project');
     }
   }
 
@@ -67,7 +70,7 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       return response.data;
     } catch (error) {
       console.error('[FileAPIClient] Load error:', error);
-      throw this.handleFileError(error, 'Failed to load project');
+      throw this.handleFileError(toCaughtError(error), 'Failed to load project');
     }
   }
 
@@ -80,7 +83,7 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       const response = await this.get<FileListResponse>('/files/list', params);
       return response.data;
     } catch (error) {
-      throw this.handleFileError(error, 'Failed to list project files');
+      throw this.handleFileError(toCaughtError(error), 'Failed to list project files');
     }
   }
 
@@ -92,7 +95,7 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       const response = await this.get<boolean>('/files/exists', { filePath });
       return response.data;
     } catch (error) {
-      throw this.handleFileError(error, 'Failed to check file existence');
+      throw this.handleFileError(toCaughtError(error), 'Failed to check file existence');
     }
   }
 
@@ -118,7 +121,7 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       return response.data;
     } catch (error) {
       console.error('[FileAPIClient] GetProjectData error:', error);
-      throw this.handleFileError(error, 'Failed to get project data');
+      throw this.handleFileError(toCaughtError(error), 'Failed to get project data');
     }
   }
 
@@ -136,13 +139,16 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
         taskCount: request.tasks.length
       });
       
-      const response = await this.post<TaskSyncResponse>('/files/sync-tasks', request);
+      const response = await this.post<TaskSyncResponse>(
+        '/files/sync-tasks',
+        request as StrictData
+      );
       
       console.log('[FileAPIClient] Sync response:', response.data);
       return response.data;
     } catch (error) {
       console.error('[FileAPIClient] Sync error:', error);
-      throw this.handleFileError(error, 'Failed to sync tasks');
+      throw this.handleFileError(toCaughtError(error), 'Failed to sync tasks');
     }
   }
 
@@ -153,15 +159,18 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
    * @param request - Запрос с projectId, задачами и ресурсами
    * @returns Результат синхронизации
    */
-  async syncProjectToCore(request: import('@/types/api/request-types').ProjectSyncRequest): Promise<TaskSyncResponse> {
+  async syncProjectToCore(request: ProjectSyncRequest): Promise<TaskSyncResponse> {
     try {
       console.log('[FileAPIClient] Syncing project to Core:', {
         projectId: request.projectId,
         taskCount: request.tasks.length,
         resourceCount: request.resources.length
       });
-      
-      const response = await this.post<TaskSyncResponse>('/files/sync-project', request);
+
+      const response = await this.post<TaskSyncResponse>(
+        '/files/sync-project',
+        request as StrictData
+      );
       
       console.log('[FileAPIClient] Sync response:', response.data);
       return response.data;
@@ -169,11 +178,12 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       console.error('[FileAPIClient] Sync error:', error);
       
       // Проверяем, есть ли детальное сообщение от бэкенда (например, про календарь)
-      if (error instanceof APIError && error.status === 400 && error.details?.message) {
-        throw new Error(error.details.message);
+      const apiErr = error instanceof APIError ? error : null;
+      if (apiErr?.status === 400 && apiErr.details && typeof apiErr.details === 'object' && 'message' in apiErr.details) {
+        throw new Error(String(apiErr.details.message));
       }
       
-      throw this.handleFileError(error, 'Failed to sync project');
+      throw this.handleFileError(toCaughtError(error), 'Failed to sync project');
     }
   }
 
@@ -185,14 +195,14 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
       const response = await this.get<string>('/files/version');
       return response.data;
     } catch (error) {
-      throw this.handleFileError(error, 'Failed to get format version');
+      throw this.handleFileError(toCaughtError(error), 'Failed to get format version');
     }
   }
 
   /**
    * Centralized file error handling.
    */
-  private handleFileError(error: unknown, context: string): Error {
+  private handleFileError(error: CaughtError, context: string): Error {
     if (error instanceof Error) {
       return new Error(`${context}: ${error.message}`);
     }

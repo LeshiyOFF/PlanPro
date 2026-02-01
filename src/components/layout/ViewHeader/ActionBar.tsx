@@ -2,7 +2,7 @@ import React from 'react';
 import { ActionBarProps } from './ViewHeaderTypes';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { SafeTooltip } from '@/components/ui/Tooltip';
+import { SafeTooltip } from '@/components/ui/tooltip';
 
 /**
  * ActionBar - Tier 2: Action Bar

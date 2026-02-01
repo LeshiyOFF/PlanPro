@@ -1,13 +1,14 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
 export interface ProjectData {
+  [key: string]: string | number | boolean | undefined;
   name: string;
   manager: string;
   notes: string;
@@ -65,7 +66,8 @@ export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
     },
     startDate: {
       required: true,
-      validate: (value) => {
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Invalid date format';
         const date = new Date(value);
         return !isNaN(date.getTime()) ? null : 'Invalid date format';
       }
@@ -79,12 +81,10 @@ export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
   }, [projectData]);
 
   React.useEffect(() => {
-    Object.keys(formData).forEach(key => {
-      validate(key, formData[key as keyof ProjectData]);
-    });
+    validate(formData);
   }, [formData]);
 
-  const handleFieldChange = (field: keyof ProjectData, value: any) => {
+  const handleFieldChange = (field: keyof ProjectData, value: ProjectData[keyof ProjectData]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -97,11 +97,15 @@ export const UpdateProjectDialog: React.FC<UpdateProjectDialogProps> = ({
 
   const canUpdate = isValid();
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title="Update Project"
       size="large"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-end space-x-2">

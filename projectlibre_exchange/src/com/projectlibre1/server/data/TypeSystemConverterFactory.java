@@ -55,6 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.server.data;
 
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.strings.Messages;
 
 public class TypeSystemConverterFactory {
@@ -73,14 +74,11 @@ public class TypeSystemConverterFactory {
 				try {
 					converter=(TypeSystemConverter)Class.forName(className).newInstance();
 				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log(e);
 				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log(e);
 				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					ErrorLogger.log(e);
 				}
 			}
 		}

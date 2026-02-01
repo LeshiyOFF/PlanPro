@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/Dialog';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { IWorkCalendar, IWorkingDay, CalendarTemplateType } from '@/domain/calendar/interfaces/IWorkCalendar';
 import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService';
-import { useTranslation } from 'react-i18next';
 import { Calendar, Clock, Save, X } from 'lucide-react';
 
 interface CalendarEditorDialogProps {
@@ -27,7 +26,6 @@ export const CalendarEditorDialog: React.FC<CalendarEditorDialogProps> = ({
   onSave,
   calendar
 }) => {
-  const { t } = useTranslation();
   const templateService = CalendarTemplateService.getInstance();
   const allTemplates = templateService.getAllTemplates();
 

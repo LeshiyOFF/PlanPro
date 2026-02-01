@@ -55,6 +55,8 @@
  *******************************************************************************/
 package com.projectlibre1.server.data;
 
+import com.projectlibre1.server.access.ErrorLogger;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -223,7 +225,8 @@ public class MSPDISerializer implements ProjectSerializer {
     		if (obj instanceof Assignment)
     			continue;
     		if (obj instanceof VoidNodeImpl) {
-    			if (taskCount == 0) //TODO see why there is a void node at the beginning always
+    			// NOTE: Leading void node possible when taskCount==0; skipped here.
+    			if (taskCount == 0)
     				continue;
     			voidTasksQueue.add(obj);
     		} else {
@@ -350,7 +353,7 @@ public class MSPDISerializer implements ProjectSerializer {
 			data.write(data.getProjectFile(),out);
 			if (job!=null) job.setProgress(1.0f);
 		} catch (Exception e) {
-			e.printStackTrace();
+			ErrorLogger.log(e);
 			return false;
 		}
 		return true;

@@ -13,7 +13,11 @@ export const ContextMenuTestPage: React.FC = () => {
     setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
   };
 
-  const handleContextMenu = (event: React.MouseEvent, targetType: string, targetData: any) => {
+  const handleContextMenu = (
+    event: React.MouseEvent,
+    targetType: string,
+    targetData: Record<string, string | number | undefined>
+  ) => {
     event.preventDefault();
     
     const position = { x: event.clientX, y: event.clientY };

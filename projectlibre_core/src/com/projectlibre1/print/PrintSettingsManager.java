@@ -77,7 +77,7 @@ public class PrintSettingsManager {
 						tmpLocalSettings=(PrintSettings)in.readObject();
 						in.close();
 					} catch (Exception e) {
-						e.printStackTrace();
+						com.projectlibre1.server.access.ErrorLogger.log("Failed to load local print settings", e);
 					}
 				}
 				if (tmpLocalSettings==null){
@@ -110,7 +110,7 @@ public class PrintSettingsManager {
 							out.close();
 							Preferences.userNodeForPackage(PrintSettings.class).putByteArray("printSettings",buf.toByteArray());
 						} catch (Exception e) {
-							e.printStackTrace();
+							com.projectlibre1.server.access.ErrorLogger.log("Failed to save local print settings", e);
 						}
 					}
 			}

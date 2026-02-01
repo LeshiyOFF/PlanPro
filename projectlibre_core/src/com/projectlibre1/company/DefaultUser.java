@@ -56,31 +56,26 @@
 package com.projectlibre1.company;
 
 /**
- * Default stub implementation of the user
+ * Default implementation of the user
  */
 public class DefaultUser implements ApplicationUser {
 
 	public long getResourceId() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public long getUniqueId() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	public boolean isAdministrator() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	public boolean isExternal() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

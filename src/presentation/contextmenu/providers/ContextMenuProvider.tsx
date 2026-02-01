@@ -7,6 +7,8 @@ import { ContextMenuService } from '@/application/contextmenu/services/ContextMe
 import { ResourceContextMenuFactory } from '@/infrastructure/contextmenu/factories/ResourceContextMenuFactory';
 import { TaskContextMenuFactory } from '@/infrastructure/contextmenu/factories/TaskContextMenuFactory';
 import { logger } from '@/utils/logger';
+import type { CaughtError } from '@/errors/CaughtError';
+import { toCaughtError, getCaughtErrorMessage } from '@/errors/CaughtError';
 
 /**
  * Контекст для управления контекстными меню
@@ -117,7 +119,8 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
 
     } catch (criticalError: unknown) {
-      const errMsg = criticalError instanceof Error ? criticalError.message : String(criticalError);
+      const caughtError = toCaughtError(criticalError);
+      const errMsg = getCaughtErrorMessage(caughtError);
       logger.error(`[ContextMenuProvider] CRITICAL ERROR: ${errMsg}`);
     }
   }, [contextMenuService]);
@@ -140,7 +143,8 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
         await menuItem.action.execute();
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const caughtError = toCaughtError(error);
+      const errorMessage = getCaughtErrorMessage(caughtError);
       logger.error(`Failed to execute menu action: ${errorMessage}`);
     }
   }, [currentMenu]);

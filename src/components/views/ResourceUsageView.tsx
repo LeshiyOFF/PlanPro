@@ -5,6 +5,7 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { ResourceUsageSheet } from '@/components/sheets/table/ResourceUsageSheet';
 import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalSheet';
 import { useProjectStore } from '@/store/projectStore';
+import { getTaskResourceIds } from '@/store/project/interfaces';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, PieChart, Download, Loader2 } from 'lucide-react';
@@ -13,14 +14,18 @@ import { ResourceHistogramChart } from './resources/ResourceHistogramChart';
 import { ResourceUsageStatsCard } from './resourceusage/ResourceUsageStatsCard';
 import { useResourceUsageStats } from '@/hooks/resource/useResourceUsageStats';
 import { useResourceUsageData } from '@/hooks/resource/useResourceUsageData';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject, JsonValue } from '@/types/json-types';
+import type { CellValue } from '@/types/sheet/CellValueTypes';
 
 /**
  * Resource Usage View компонент - Использование ресурсов
  * Отображает детальную загрузку ресурсов с гистограммой и статистикой.
  * @version 9.0
  */
-export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, settings 
+export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+  viewType: _viewType,
+  settings: _settings
 }) => {
   const { t } = useTranslation();
   const { resources, tasks, addResource, updateResource, deleteResource } = useProjectStore();
@@ -52,7 +57,7 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
     // Находим задачи, назначенные на выбранный ресурс
     const resourceTasks = tasks.filter(t => 
       t.resourceAssignments?.some(a => a.resourceId === selectedResourceId) ||
-      t.resourceIds?.includes(selectedResourceId)
+      getTaskResourceIds(t).includes(selectedResourceId)
     );
     
     if (resourceTasks.length === 0) return null;
@@ -105,10 +110,10 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
     return loadingService.calculateHistogram(resource, tasks, startDate, endDate);
   }, [selectedResourceId, resources, tasks, loadingService, histogramDateRange]);
 
-  const handleUpdate = useCallback((id: string, field: string, value: unknown) => {
-    const updates: Record<string, unknown> = {};
-    if (field === 'resourceName') updates.name = value;
-    if (field === 'assignedPercent') updates.maxUnits = value;
+  const handleUpdate = useCallback((id: string, field: string, value: CellValue) => {
+    const updates: Partial<Resource> = {};
+    if (field === 'resourceName' && typeof value === 'string') updates.name = value;
+    if (field === 'assignedPercent' && typeof value === 'number') updates.maxUnits = value;
     updateResource(id, updates);
   }, [updateResource]);
 
@@ -130,19 +135,19 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
 
   const handleExport = useCallback(async () => {
     if (!sheetRef.current || isExporting) return;
+    const api = getElectronAPI();
+    if (!api?.showSaveDialog || !api?.saveBinaryFile) return;
     try {
       setIsExporting(true);
-      const result = await window.electronAPI.showSaveDialog({
+      const result = await api.showSaveDialog({
         title: t('common.export'),
         defaultPath: `ResourceUsage_${new Date().toISOString().split('T')[0]}.csv`,
         filters: [{ name: 'CSV (Excel)', extensions: ['csv'] }]
-      });
+      } as Record<string, JsonObject>);
       if (result.canceled || !result.filePath) return;
-      
       const blob = await sheetRef.current.exportToCSV();
       const arrayBuffer = await blob.arrayBuffer();
-      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
-      
+      const saveResult = await api.saveBinaryFile(result.filePath, arrayBuffer);
       if (saveResult.success) {
         toast({ title: t('common.success'), description: t('sheets.export_success') });
       } else {

@@ -17,19 +17,13 @@
     "strict": false,
     "skipDefaultLibCheck": true,
     "types": [],
-    
     "lib": ["ES2018"],
     "typeRoots": ["electron/types", "node_modules/@types"],
-    
-    "strict": false,
-    "noImplicitAny": false,
     "strictNullChecks": false,
     "resolveJsonModule": true,
-    "suppressImplicitAnyIndexErrors": true,
     "noImplicitThis": false,
     "noImplicitReturns": false,
     "noImplicitOverride": false,
-    
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
@@ -48,7 +42,6 @@
     "release/**/*",
     "projectlibre_build/**/*",
     "projectlibre_contrib/**/*",
-    "projectlibre_core/**/*",
-    "projectlibre_ui/**/*"
+    "projectlibre_core/**/*"
   ]
 }

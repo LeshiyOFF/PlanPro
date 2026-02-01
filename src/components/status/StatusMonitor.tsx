@@ -28,13 +28,14 @@ export const StatusMonitor: React.FC = () => {
 
     setIsRefreshing(true);
     try {
-      const detailedStatus = await getJavaStatus();
-      if (detailedStatus) {
+      const response = await getJavaStatus();
+      if (response.success && response.data) {
+        const d = response.data;
         setStatusInfo({
-          javaVersion: detailedStatus.version,
-          memoryUsage: detailedStatus.memoryUsage,
-          uptime: detailedStatus.uptime,
-          activeConnections: detailedStatus.activeConnections,
+          javaVersion: d.version,
+          memoryUsage: d.memoryUsage,
+          uptime: d.uptime,
+          activeConnections: d.activeConnections,
           lastCheck: new Date()
         });
       }

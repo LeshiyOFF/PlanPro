@@ -7,7 +7,7 @@
     "skipLibCheck": true,
 
     // Модульное разрешение
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
@@ -53,8 +53,7 @@
     "emitDecoratorMetadata": true,
 
     // Современные возможности
-    "useDefineForClassFields": true,
-    "verbatimModuleSyntax": false
+    "useDefineForClassFields": true
   },
   "include": [
     "src/**/*",
@@ -67,10 +66,6 @@
     "release",
     "projectlibre_build",
     "projectlibre_contrib",
-    "projectlibre_core",
-    "projectlibre_ui"
-  ],
-  "references": [
-    { "path": "./tsconfig.electron.json" }
+    "projectlibre_core"
   ]
 }

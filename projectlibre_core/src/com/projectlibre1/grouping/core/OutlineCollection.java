@@ -62,7 +62,7 @@ import com.projectlibre1.grouping.core.model.NodeModel;
  */
 public interface OutlineCollection {
 	public static final int DEFAULT_OUTLINE = 0;
-//TODO maybe use NodeHierarchy instead of node model?
+
 	NodeModel getOutline();
 	NodeModel getDefaultOutline();
 	NodeModel getOutline(int outlineNumber);

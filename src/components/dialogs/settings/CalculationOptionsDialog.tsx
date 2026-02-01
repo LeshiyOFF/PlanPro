@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -115,13 +115,13 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
       required: true,
       min: 0,
       max: 30,
-      validate: (value) => (value >= 0 && value <= 30) ? null : 'Look ahead must be between 0 and 30 days'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 30) ? null : 'Look ahead must be between 0 and 30 days'
     },
     'advancedSettings.criticalSlack': {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => (value >= 0 && value <= 100) ? null : 'Critical slack must be between 0 and 100 days'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 100) ? null : 'Critical slack must be between 0 and 100 days'
     }
   });
 
@@ -136,17 +136,29 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
     validate('advancedSettings.criticalSlack', options.advancedSettings.criticalSlack);
   }, [options.levelingSettings.lookAhead, options.advancedSettings.criticalSlack]);
 
-  const handleOptionChange = (category: string, field: string, value: any) => {
-    setOptions(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category as keyof CalculationOptions],
-        [field]: value
+  const handleOptionChange = (category: string, field: string, value: string | number | boolean) => {
+    setOptions(prev => {
+      if (!category) {
+        return { ...prev, [field]: value };
       }
-    }));
+      const catKey = category as keyof CalculationOptions;
+      const categoryData = prev[catKey];
+      
+      if (typeof categoryData !== 'object' || categoryData === null) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [catKey]: {
+          ...categoryData,
+          [field]: value
+        }
+      };
+    });
   };
 
-  const handleAdvancedChange = (field: string, value: any) => {
+  const handleAdvancedChange = (field: string, value: string | number | boolean) => {
     setOptions(prev => ({
       ...prev,
       advancedSettings: {
@@ -170,11 +182,12 @@ export const CalculationOptionsDialog: React.FC<CalculationOptionsDialogProps> =
 
   const canSave = isValid();
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Calculation Options"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

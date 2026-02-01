@@ -1,4 +1,6 @@
 import { ipcService } from './IpcService';
+import type { JavaCommandArgs } from '@/types/ipc';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * Базовый класс для Java API сервисов.
@@ -12,7 +14,11 @@ export abstract class BaseJavaService {
    * @param args Аргументы команды
    * @param silent Если true, ошибки не выводятся в консоль (для фоновых задач)
    */
-  protected async executeApiCommand(command: string, args: any[] = [], silent: boolean = false): Promise<any> {
+  protected async executeApiCommand<T = JsonObject>(
+    command: string,
+    args: JavaCommandArgs[] = [],
+    silent: boolean = false
+  ): Promise<T | undefined> {
     try {
       const result = await ipcService.executeJavaApiRequest(command, args);
       

@@ -68,7 +68,12 @@ import com.projectlibre1.pm.scheduling.TimeSheetSchedule;
 import com.projectlibre1.pm.time.MutableHasStartAndEnd;
 import com.projectlibre1.server.data.ExtendedDistributionData;
 
-public class DistributionHolder implements HasId,HasName,MutableHasStartAndEnd,TimeDistributedFields,TimeSheetSchedule{
+/**
+ * Data holder for time-distributed fields in scripting context.
+ * Provides minimal implementation of TimeDistributedFields and TimeSheetSchedule interfaces.
+ * Most methods return default values as this is primarily a data container for distribution data.
+ */
+public class DistributionHolder implements HasId, HasName, MutableHasStartAndEnd, TimeDistributedFields, TimeSheetSchedule {
 	protected long id,uniqueId;
 	protected String name;
 	protected long start,end,c;
@@ -177,132 +182,143 @@ public class DistributionHolder implements HasId,HasName,MutableHasStartAndEnd,T
 	}
 	
 	
+	/** Fields are always visible in data holder. */
 	public boolean fieldHideActualCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Fields are always visible in data holder. */
 	public boolean fieldHideActualFixedCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Fields are always visible in data holder. */
 	public boolean fieldHideActualWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Baseline fields are always visible in data holder. */
 	public boolean fieldHideBaselineCost(int numBaseline, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Baseline fields are always visible in data holder. */
 	public boolean fieldHideBaselineWork(int numBaseline, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Fields are always visible in data holder. */
 	public boolean fieldHideCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Fields are always visible in data holder. */
 	public boolean fieldHideWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	public double getActualCost(FieldContext fieldContext) {
 		return getActualCost();
 	}
+	/** Fixed costs not tracked in data holder. */
 	public double getActualFixedCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
 	public long getActualWork(FieldContext fieldContext) {
-		return Duration.getInstance(Math.round(getActualWork()),TimeUnit.DAYS);
+		return Duration.getInstance(Math.round(getActualWork()), TimeUnit.DAYS);
 	}
+	
+	/** Baselines not tracked in data holder. */
 	public double getBaselineCost(int numBaseline, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/** Baselines not tracked in data holder. */
 	public long getBaselineWork(int numBaseline, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
 	public double getCost(FieldContext fieldContext) {
-		 return getCost();
+		return getCost();
 	}
+	
+	/** Fixed costs not tracked in data holder. */
 	public double getFixedCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/** Remaining values not tracked in data holder. */
 	public double getRemainingCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/** Remaining values not tracked in data holder. */
 	public long getRemainingWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	public long getWork(FieldContext fieldContext) {
 		return Duration.getInstance(Math.round(getWork()),TimeUnit.DAYS);
 	}
+	/** Data holder fields are not read-only. */
 	public boolean isReadOnlyActualWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Data holder fields are not read-only. */
 	public boolean isReadOnlyFixedCost(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Data holder fields are not read-only. */
 	public boolean isReadOnlyRemainingWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	/** Data holder fields are not read-only. */
 	public boolean isReadOnlyWork(FieldContext fieldContext) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 	public void setActualWork(long actualWork, FieldContext fieldContext) {
 		setActualWork(actualWork);
 	}
-	public void setFixedCost(double fixedCost, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
-		
-	}
-	public void setRemainingWork(long remainingWork, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
-		
-	}
-	public void setWork(long work, FieldContext fieldContext) {
-		// TODO Auto-generated method stub
-		
-	}
-	//TimeSheetSchedule
 	
+	/** Fixed cost not tracked in data holder - no-op. */
+	public void setFixedCost(double fixedCost, FieldContext fieldContext) {
+	}
+	
+	/** Remaining work not tracked in data holder - no-op. */
+	public void setRemainingWork(long remainingWork, FieldContext fieldContext) {
+	}
+	
+	/** Work setting through context not supported in data holder - no-op. */
+	public void setWork(long work, FieldContext fieldContext) {
+	}
+	
+	// TimeSheetSchedule implementation
 	
 	public double getPercentComplete() {
-		return work==0?0.0:actualWork/work;
+		return work == 0 ? 0.0 : actualWork / work;
 	}
+	
+	/** Duration tracking not supported in data holder. */
 	public long getRemainingDuration() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+	
+	/** Completion status based on percent complete. */
 	public boolean isComplete() {
-		// TODO Auto-generated method stub
-		return false;
+		return getPercentComplete() >= 1.0;
 	}
+	
+	/** Completion flag not separately tracked - no-op. */
 	public void setComplete(boolean complete) {
-		// TODO Auto-generated method stub
-		
 	}
+	
+	/** Percent complete set through actualWork/work - no-op. */
 	public void setPercentComplete(double percentComplete) {
-		// TODO Auto-generated method stub
-		
 	}
+	
+	/** Duration tracking not supported in data holder - no-op. */
 	public void setRemainingDuration(long remainingDuration) {
-		// TODO Auto-generated method stub
-		
 	}
-	
-	//Schedule?
-	
-	
-	
-	
-	
 }

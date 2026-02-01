@@ -85,7 +85,6 @@ public class ConfigurationFile {
 	    		for (int i=0;i<OPENPROJ_CONF_DIRS.length;i++){
 	    			f=new File(home+File.separator+OPENPROJ_CONF_DIRS[i]);
 	        		if (f.isDirectory()){
-	        			System.out.println("Conf file "+f.getPath()+" found");
 	        			confFile=f;
 	        			return f;
 	        		}
@@ -239,21 +238,9 @@ public class ConfigurationFile {
 			ResourceBundle rb=ResourceBundle.getBundle(name, Locale.getDefault(), cl);
 			return rb;
 		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Malformed URL for directory bundle: " + directory, e1);
 		}
 		
-//			Locale locale=Locale.getDefault();
-//			try {
-////				FileReader in = new FileReader(dir+File.separator+"client_"+locale+".properties");
-//				FileInputStream in = new FileInputStream(dir+File.separator+name+"_"+locale+".properties");
-//				return new PropertyResourceBundle(in);
-//			} catch (FileNotFoundException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
 		
 		return null;
 	}

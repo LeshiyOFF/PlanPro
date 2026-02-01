@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { DatePicker } from '@/components/ui/date-picker';
 import { 
   SplitTaskData, 
   IDialogActions, 
@@ -41,7 +41,9 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
   });
 
   const actions: IDialogActions = {
-    onOk: async () => splitData,
+    onOk: async () => {
+      onClose({ success: true, data: splitData });
+    },
     onCancel: () => onClose({ success: false, action: 'cancel' })
   };
 
@@ -62,7 +64,7 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
           <Label htmlFor="split-date">{t('dialogs.split_task.split_date') || 'Дата прерывания'}</Label>
           <DatePicker 
             date={splitData.splitDate} 
-            onChange={(date) => date && setSplitData(prev => ({ ...prev, splitDate: date }))}
+            onChange={(date) => date && setSplitData((prev: SplitTaskData) => ({ ...prev, splitDate: date }))}
           />
           <p className="text-[10px] text-slate-500">
             {t('dialogs.split_task.split_hint') || 'Выберите дату внутри интервала задачи'}
@@ -76,7 +78,7 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
             type="number"
             min={1}
             value={splitData.gapDays}
-            onChange={(e) => setSplitData(prev => ({ ...prev, gapDays: parseInt(e.target.value) || 1 }))}
+            onChange={(e) => setSplitData((prev: SplitTaskData) => ({ ...prev, gapDays: parseInt(e.target.value) || 1 }))}
           />
         </div>
       </div>

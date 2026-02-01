@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Resource } from '@/types/resource-types';
 import { ResourceAssignment } from '@/store/project/interfaces';

@@ -57,19 +57,18 @@ package com.projectlibre.pm.calendar;
 
 
 /**
+ * Calendar exception representing a date range with special working hours.
  * @author Laurent Chretienneau
- *
  */
-public class WorkCalendarException extends WorkRange{
+public class WorkCalendarException extends WorkRange {
 	protected long start, end;
+
 	public WorkCalendarException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public WorkCalendarException(DayType type) {
 		super(type);
-		// TODO Auto-generated constructor stub
 	}
 
 	public long getStart() {

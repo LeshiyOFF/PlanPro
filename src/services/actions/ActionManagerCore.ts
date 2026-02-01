@@ -1,7 +1,5 @@
 import { IAction } from './BaseAction';
 import { logger } from '@/utils/logger';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
-import { EventType } from '@/types/Master_Functionality_Catalog';
 
 /**
  * Ядро Action Manager - основная логика управления действиями
@@ -103,6 +101,39 @@ export class ActionManagerCore {
     this.actions.clear();
     this.categoryMap.clear();
     logger.info('All actions cleared');
+  }
+
+  /**
+   * Получение списка категорий
+   */
+  public getCategories(): string[] {
+    return Array.from(this.categoryMap.keys());
+  }
+
+  /**
+   * Обновление состояний действий (резерв для расширения IAction)
+   */
+  public updateActionStates(): void {
+    // Состояния обновляются при регистрации; при необходимости можно добавить итерацию по actions
+  }
+
+  /**
+   * Статистика по действиям
+   */
+  public getStats(): {
+    totalActions: number;
+    totalCategories: number;
+    enabledActions: number;
+    disabledActions: number;
+  } {
+    const totalActions = this.actions.size;
+    const totalCategories = this.categoryMap.size;
+    return {
+      totalActions,
+      totalCategories,
+      enabledActions: totalActions,
+      disabledActions: 0
+    };
   }
 }
 

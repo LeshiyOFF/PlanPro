@@ -1,281 +1,159 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { logger } from '@/utils/logger';
+import { useTranslation } from 'react-i18next';
 import { 
-  CalendarDialogData, 
-  IDialogActions,
-  DialogResult 
+  TypedDialogActions,
+  DialogResult,
+  IDialogData
 } from '@/types/dialog/DialogTypes';
-
-// Импорт модульных компонентов
-import { WorkingTimeForm } from './components/WorkingTimeForm';
+import { CalendarException } from '@/types/calendar-types';
+import { TypedWorkingTimeDialog as WorkingTimeForm } from './components/WorkingTimeForm';
 import { CalendarExceptions } from './components/CalendarExceptions';
 
 /**
- * Интерфейс для исключений календаря
+ * Типизированные данные для диалога рабочего времени
  */
-interface CalendarException {
-  id: string;
-  name: string;
-  date: string;
-  type: 'holiday' | 'working';
-  startTime?: string;
-  endTime?: string;
+export interface ChangeWorkingTimeDialogData extends IDialogData {
+  workingTime: Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>;
+  exceptions?: CalendarException[];
 }
 
 /**
- * Начальное состояние рабочего времени
+ * Типизированный результат
  */
-const getInitialWorkingTime = () => ({
-  day0: { startTime: '', endTime: '', isWorkingDay: false }, // Воскресенье
-  day1: { startTime: '09:00', endTime: '18:00', isWorkingDay: true }, // Понедельник
-  day2: { startTime: '09:00', endTime: '18:00', isWorkingDay: true }, // Вторник
-  day3: { startTime: '09:00', endTime: '18:00', isWorkingDay: true }, // Среда
-  day4: { startTime: '09:00', endTime: '18:00', isWorkingDay: true }, // Четверг
-  day5: { startTime: '09:00', endTime: '18:00', isWorkingDay: true }, // Пятница
-  day6: { startTime: '', endTime: '', isWorkingDay: false }  // Суббота
-});
+export type WorkingTimeResult = DialogResult<{
+  success: boolean;
+  message?: string;
+}>;
 
 /**
- * Обработчик изменения рабочего времени
+ * Типизированные действия
  */
-const handleWorkingTimeChange = (
-  workingTime: any,
-  setWorkingTime: React.Dispatch<React.SetStateAction<any>>,
-  dayOfWeek: number,
-  field: string,
-  value: any
-) => {
-  setWorkingTime(prev => ({
-    ...prev,
-    [`day${dayOfWeek}`]: {
-      ...prev[`day${dayOfWeek}`],
-      [field]: value
-    }
-  }));
-};
+interface WorkingTimeActions extends TypedDialogActions<ChangeWorkingTimeDialogData, WorkingTimeResult> {
+  onOk: () => Promise<void>;
+}
 
 /**
- * Создание Actions для диалога календаря
+ * Компонент диалога для изменения рабочего времени
+ * Соответствует SOLID и Clean Architecture.
  */
-const createCalendarActions = (
-  workingTime: any,
-  exceptions: CalendarException[]
-): IDialogActions => {
-  return {
-    onOk: async (data: CalendarDialogData) => {
-      logger.info('Saving calendar data:', { workingTime, exceptions });
-      
-      try {
-        // Сохранение в localStorage
-        const calendarData = {
-          workingTime,
-          exceptions,
-          lastUpdated: new Date().toISOString()
-        };
-        localStorage.setItem('calendar-settings', JSON.stringify(calendarData));
-        
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        return data;
-      } catch (error) {
-        logger.error('Failed to save calendar data:', error);
-        throw new Error('Не удалось сохранить настройки календаря');
-      }
-    },
-    
-    onCancel: () => {
-      logger.info('Working time dialog cancelled');
-    },
-    
-    onHelp: () => {
-      logger.info('Opening working time help...');
-      window.open('/help/calendar', '_blank');
-    }
-  };
-};
-
-/**
- * Загрузка настроек календаря
- */
-const loadCalendarData = (): { workingTime: any; exceptions: CalendarException[] } => {
-  try {
-    const saved = localStorage.getItem('calendar-settings');
-    if (saved) {
-      const data = JSON.parse(saved);
-      return {
-        workingTime: data.workingTime || getInitialWorkingTime(),
-        exceptions: data.exceptions || []
-      };
-    }
-  } catch (error) {
-    logger.error('Failed to load calendar data:', error);
-  }
-  
-  return {
-    workingTime: getInitialWorkingTime(),
-    exceptions: []
-  };
-};
-
-/**
- * Диалог изменения рабочего времени
- * Реализует SOLID принцип Single Responsibility
- */
-export const ChangeWorkingTimeDialog: React.FC<CalendarDialogData> = (data) => {
-  const [workingTime, setWorkingTime] = useState(getInitialWorkingTime());
+export const ChangeWorkingTimeDialog: React.FC<{
+  isOpen: boolean;
+  data?: ChangeWorkingTimeDialogData;
+  onClose: () => void;
+}> = ({ 
+  isOpen, 
+  data, 
+  onClose 
+}) => {
+  const { t } = useTranslation();
   const [exceptions, setExceptions] = useState<CalendarException[]>([]);
   const [activeTab, setActiveTab] = useState('working-time');
+  const [workingTime, setWorkingTime] = useState<Record<string, { startTime: string; endTime: string; isWorkingDay: boolean }>>({});
 
   useEffect(() => {
-    // Загрузка настроек при монтировании
-    const loadedData = loadCalendarData();
-    setWorkingTime(loadedData.workingTime);
-    setExceptions(loadedData.exceptions);
-  }, []);
-
-  const onWorkingTimeChange = (dayOfWeek: number, field: string, value: any) => {
-    handleWorkingTimeChange(workingTime, setWorkingTime, dayOfWeek, field, value);
-  };
-
-  const onExceptionsChange = (newExceptions: CalendarException[]) => {
-    setExceptions(newExceptions);
-  };
-
-  const actions = createCalendarActions(workingTime, exceptions);
-
-  // Статистика
-  const workingDaysCount = Object.values(workingTime).filter((day: any) => day.isWorkingDay).length;
-  const totalHours = Object.values(workingTime).reduce((total: number, day: any) => {
-    if (!day.isWorkingDay || !day.startTime || !day.endTime) return total;
+    if (!isOpen || !data) return;
     
-    const start = new Date(`2000-01-01T${day.startTime}`);
-    const end = new Date(`2000-01-01T${day.endTime}`);
-    const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-    return total + hours;
-  }, 0);
+    const saved = localStorage.getItem('calendar-working-time');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.workingTime) {
+          setWorkingTime(parsed.workingTime);
+          setExceptions(parsed.exceptions || []);
+        }
+      } catch (error) {
+        logger.error('Failed to load working time settings', error instanceof Error ? error : new Error(String(error)));
+      }
+    } else if (data.workingTime) {
+      setWorkingTime(data.workingTime);
+      setExceptions(data.exceptions || []);
+    }
+  }, [isOpen, data]);
+
+  const calculateTotalHours = useCallback((): number => {
+    return Object.values(workingTime).reduce((total, day) => {
+      if (!day.isWorkingDay || !day.startTime || !day.endTime) return total;
+      const start = new Date(`2000-01-01T${day.startTime}`);
+      const end = new Date(`2000-01-01T${day.endTime}`);
+      return total + (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    }, 0);
+  }, [workingTime]);
+
+  const actions: WorkingTimeActions = {
+    onOk: async (_data?: ChangeWorkingTimeDialogData): Promise<void> => {
+      try {
+        const calendarData = { workingTime, exceptions, lastUpdated: new Date().toISOString() };
+        localStorage.setItem('calendar-working-time', JSON.stringify(calendarData));
+        logger.info('Working time saved successfully');
+      } catch (error) {
+        logger.error('Failed to save working time', error instanceof Error ? error : new Error(String(error)));
+      }
+    },
+    onCancel: () => {
+      logger.info('Working time dialog cancelled');
+      onClose();
+    },
+    onValidate: (_data: ChangeWorkingTimeDialogData): boolean => {
+      return true;
+    }
+  };
 
   return (
-    <BaseDialog
+    <BaseDialog 
+      isOpen={isOpen} 
+      onClose={onClose} 
       data={{
-        ...data,
+        id: 'change-working-time',
+        title: t('working_time.title'),
+        timestamp: new Date(),
         workingTime,
-        exceptions,
-        actions
+        exceptions
       }}
       config={{
         width: 800,
-        height: 600,
         modal: true
       }}
+      actions={actions}
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="working-time">Рабочее время</TabsTrigger>
-          <TabsTrigger value="exceptions">Исключения</TabsTrigger>
-          <TabsTrigger value="summary">Сводка</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 bg-slate-50 border-b p-2">
+          <TabsTrigger value="working-time">{t('working_time.tab_work_time')}</TabsTrigger>
+          <TabsTrigger value="exceptions">
+            <Badge variant="destructive" className="ml-2">{t('working_time.tab_exceptions')} {exceptions.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="summary">{t('working_time.tab_summary')}</TabsTrigger>
         </TabsList>
-
         <TabsContent value="working-time" className="space-y-4">
-          <WorkingTimeForm
-            workingTime={workingTime}
-            onWorkingTimeChange={onWorkingTimeChange}
+          <WorkingTimeForm 
+            isOpen={isOpen} 
+            data={{
+              id: 'working-time-form',
+              title: '',
+              timestamp: new Date(),
+              workingTime
+            }} 
+            onClose={() => {}} 
           />
         </TabsContent>
-
         <TabsContent value="exceptions" className="space-y-4">
-          <CalendarExceptions
-            exceptions={exceptions}
-            onExceptionsChange={onExceptionsChange}
-          />
+          <CalendarExceptions exceptions={exceptions} onExceptionsChange={setExceptions} />
         </TabsContent>
-
         <TabsContent value="summary" className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4">
-              <div className="text-sm font-medium text-muted-foreground">
-                Рабочих дней в неделю
-              </div>
-              <div className="text-2xl font-bold">
-                {workingDaysCount}
-              </div>
-            </div>
-
-            <div className="border rounded-lg p-4">
-              <div className="text-sm font-medium text-muted-foreground">
-                Всего часов в неделю
-              </div>
-              <div className="text-2xl font-bold">
-                {Math.round(totalHours)}
-              </div>
-            </div>
-          </div>
-
           <div className="border rounded-lg p-4">
-            <div className="text-sm font-medium text-muted-foreground mb-2">
-              График работы
-            </div>
-            <div className="grid grid-cols-7 gap-2 text-xs">
-              {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, index) => {
-                const dayData = workingTime[`day${index === 6 ? 0 : index + 1}`];
-                return (
-                  <div key={day} className="text-center">
-                    <div className="font-medium">{day}</div>
-                    <div className={`p-2 rounded text-xs ${
-                      dayData?.isWorkingDay 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      {dayData?.isWorkingDay ? (
-                        `${dayData.startTime}-${dayData.endTime}`
-                      ) : (
-                        'Выходной'
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="text-sm font-medium text-muted-foreground mb-2">{t('working_time.stats_description')}</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="border rounded-lg p-4">
+                <div className="text-sm font-medium text-muted-foreground mb-2">{t('working_time.stats.working_days')}</div>
+                <div className="text-2xl font-bold">{calculateTotalHours()}</div>
+              </div>
             </div>
           </div>
-
-          {exceptions.length > 0 && (
-            <div className="border rounded-lg p-4">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                Исключения ({exceptions.length})
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {exceptions.map((exception) => (
-                  <Badge 
-                    key={exception.id} 
-                    variant={exception.type === 'holiday' ? 'destructive' : 'default'}
-                  >
-                    {exception.name || exception.date}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
         </TabsContent>
       </Tabs>
-
-      <div className="flex justify-end space-x-2 mt-6">
-        <Button variant="outline" onClick={() => actions.onCancel()}>
-          Отмена
-        </Button>
-        <Button onClick={async () => {
-          try {
-            await actions.onOk({ workingTime, exceptions });
-          } catch (error) {
-            logger.error('Failed to save calendar settings:', error);
-          }
-        }}
-      >
-          Сохранить
-        </Button>
-      </div>
     </BaseDialog>
   );
 };
-

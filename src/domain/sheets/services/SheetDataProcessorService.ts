@@ -1,16 +1,17 @@
 import { ISortRule, SortDirection, IFilterRule, FilterOperator } from '../interfaces/IDataProcessing';
 import { ISheetColumn } from '../interfaces/ISheetColumn';
 import { SheetValueService } from './SheetValueService';
+import type { JsonValue } from '@/types/json-types';
+import type { JsonValue } from '@/types/json-types';
+
+type RowData = Record<string, JsonValue>;
 
 /**
  * Сервис для обработки данных таблицы (сортировка и фильтрация).
  * Соответствует принципу Single Responsibility.
  */
 export class SheetDataProcessorService {
-  /**
-   * Применяет правила сортировки к данным.
-   */
-  public sort<T>(data: T[], rules: ISortRule[], columns: ISheetColumn<T>[]): T[] {
+  public sort<T extends RowData>(data: T[], rules: ISortRule[], columns: ISheetColumn<T>[]): T[] {
     if (rules.length === 0) return [...data];
 
     const sortedRules = [...rules].sort((a, b) => a.priority - b.priority);
@@ -19,7 +20,7 @@ export class SheetDataProcessorService {
       for (const rule of sortedRules) {
         if (rule.direction === SortDirection.NONE) continue;
 
-        const column = columns.find(c => c.field === rule.columnId || c.id === rule.columnId);
+        const column = columns.find((c) => c.field === rule.columnId || c.id === rule.columnId);
         if (!column) continue;
 
         const valA = SheetValueService.getSortableValue(a, column);
@@ -34,25 +35,25 @@ export class SheetDataProcessorService {
     });
   }
 
-  /**
-   * Применяет правила фильтрации к данным.
-   */
-  public filter<T>(data: T[], rules: IFilterRule[], columns: ISheetColumn<T>[]): T[] {
+  public filter<T extends RowData>(data: T[], rules: IFilterRule[], columns: ISheetColumn<T>[]): T[] {
     if (rules.length === 0) return data;
 
-    return data.filter(item => {
-      return rules.every(rule => this.matchesRule(item, rule, columns));
+    return data.filter((item) => {
+      return rules.every((rule) => this.matchesRule(item, rule, columns));
     });
   }
 
-  private matchesRule(item: any, rule: IFilterRule, columns: ISheetColumn[]): boolean {
-    const column = columns.find(c => c.field === rule.columnId || c.id === rule.columnId);
+  private matchesRule<T extends RowData>(
+    item: T,
+    rule: IFilterRule,
+    columns: ISheetColumn<T>[]
+  ): boolean {
+    const column = columns.find((c) => c.field === rule.columnId || c.id === rule.columnId);
     if (!column) return true;
 
     const displayValue = SheetValueService.getFilterableValue(item, column).toLowerCase();
     const filterValue = String(rule.value).toLowerCase();
 
-    // Если фильтр пустой - совпадает
     if (filterValue === '') return true;
 
     switch (rule.operator) {
@@ -67,5 +68,3 @@ export class SheetDataProcessorService {
     }
   }
 }
-
-

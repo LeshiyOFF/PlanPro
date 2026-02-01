@@ -1,5 +1,6 @@
+import React from 'react';
 import { ViewType, ViewConfig, ViewRoute, ViewSettings } from '@/types/ViewTypes';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 /**
  * Интерфейс для навигационного сервиса

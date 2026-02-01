@@ -28,10 +28,33 @@ export interface AuthToken {
   };
 }
 
+/**
+ * Определение прав доступа по ролям
+ */
+const ROLE_PERMISSIONS: Record<string, string[]> = {
+  admin: ['read', 'write', 'delete', 'manage_users', 'manage_settings'],
+  user: ['read', 'write'],
+  viewer: ['read']
+};
+
+/**
+ * Учётные данные для локальной аутентификации (desktop).
+ * Только для тестов и разработки. В production заменить на AuthAPI / LDAP / OAuth.
+ */
+const LOCAL_CREDENTIALS = [
+  { username: 'admin', password: 'password', role: 'admin' },
+  { username: 'user', password: 'user123', role: 'user' },
+  { username: 'viewer', password: 'viewer123', role: 'viewer' }
+];
+
+/**
+ * Сервис аутентификации
+ * Реализует локальную аутентификацию для desktop-приложения
+ */
 class AuthService {
   private static instance: AuthService;
   private readonly TOKEN_KEY = 'auth_token';
-  private readonly API_ENDPOINT = '/api/auth';
+  private readonly TOKEN_EXPIRY_HOURS = 24;
 
   private constructor() {}
 
@@ -46,7 +69,6 @@ class AuthService {
     try {
       logger.dialog('Login attempt initiated', { username: credentials.username }, 'Login');
 
-      // TODO: Replace with actual API call
       const response = await this.authenticateUser(credentials);
       
       if (response.success && response.token && response.user) {
@@ -58,7 +80,7 @@ class AuthService {
 
       return response;
     } catch (error) {
-      logger.dialogError('Login error', error, 'Login');
+      logger.dialogError('Login error', error instanceof Error ? error : String(error), 'Login');
       return {
         success: false,
         error: 'Authentication service unavailable'
@@ -71,14 +93,12 @@ class AuthService {
       const token = this.getAuthToken();
       
       if (token) {
-        // TODO: Call API to invalidate token
         logger.dialog('User logged out', { userId: token.user.id }, 'Auth');
       }
 
       this.removeAuthToken();
     } catch (error) {
-      logger.dialogError('Logout error', error, 'Auth');
-      // Still remove local token even if API call fails
+      logger.dialogError('Logout error', error instanceof Error ? error : String(error), 'Auth');
       this.removeAuthToken();
     }
   }
@@ -90,7 +110,6 @@ class AuthService {
 
       const token: AuthToken = JSON.parse(tokenData);
       
-      // Check if token is expired
       if (new Date(token.expiresAt) <= new Date()) {
         this.removeAuthToken();
         return null;
@@ -98,7 +117,7 @@ class AuthService {
 
       return token;
     } catch (error) {
-      logger.dialogError('Token parsing error', error, 'Auth');
+      logger.dialogError('Token parsing error', error instanceof Error ? error : String(error), 'Auth');
       this.removeAuthToken();
       return null;
     }
@@ -117,31 +136,12 @@ class AuthService {
     const token = this.getAuthToken();
     if (!token) return false;
 
-    // TODO: Implement proper permission checking
-    const rolePermissions: Record<string, string[]> = {
-      admin: ['read', 'write', 'delete', 'manage_users', 'manage_settings'],
-      user: ['read', 'write'],
-      viewer: ['read']
-    };
-
-    const userPermissions = rolePermissions[token.user.role] || [];
+    const userPermissions = ROLE_PERMISSIONS[token.user.role] || [];
     return userPermissions.includes(permission);
   }
 
   private async authenticateUser(credentials: LoginCredentials): Promise<AuthResponse> {
-    // TODO: Replace with actual API implementation
-    // This is a temporary implementation for development
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    // Development credentials for testing
-    const validCredentials = [
-      { username: 'admin', password: 'password', role: 'admin' },
-      { username: 'user', password: 'user123', role: 'user' },
-      { username: 'viewer', password: 'viewer123', role: 'viewer' }
-    ];
-
-    const validUser = validCredentials.find(
+    const validUser = LOCAL_CREDENTIALS.find(
       uc => uc.username === credentials.username && uc.password === credentials.password
     );
 
@@ -155,7 +155,7 @@ class AuthService {
           id: `user_${validUser.username}`,
           username: validUser.username,
           role: validUser.role,
-          permissions: this.getRolePermissions(validUser.role)
+          permissions: ROLE_PERMISSIONS[validUser.role] || []
         }
       };
     }
@@ -167,31 +167,20 @@ class AuthService {
   }
 
   private generateToken(user: { username: string; role: string }): string {
-    // TODO: Replace with proper JWT token generation
     const payload = {
       sub: user.username,
       role: user.role,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60) // 24 hours
+      exp: Math.floor(Date.now() / 1000) + (this.TOKEN_EXPIRY_HOURS * 60 * 60)
     };
 
     return btoa(JSON.stringify(payload));
   }
 
-  private getRolePermissions(role: string): string[] {
-    const permissions: Record<string, string[]> = {
-      admin: ['read', 'write', 'delete', 'manage_users', 'manage_settings'],
-      user: ['read', 'write'],
-      viewer: ['read']
-    };
-
-    return permissions[role] || [];
-  }
-
   private storeAuthToken(token: string, user: { id: string; username: string; role: string }): void {
     const authToken: AuthToken = {
       token,
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      expiresAt: new Date(Date.now() + this.TOKEN_EXPIRY_HOURS * 60 * 60 * 1000),
       user
     };
 
@@ -204,4 +193,3 @@ class AuthService {
 }
 
 export const authService = AuthService.getInstance();
-

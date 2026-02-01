@@ -65,7 +65,7 @@ import com.projectlibre1.pm.calendar.WorkCalendar;
  * Stores an array of values as a bunch of ordered values at dates.  
  */
 public class NonGroupedCalculatedValues  implements CalculatedValues  {
-	TreeMap values = new TreeMap(); //(x,y pairs) //TODO a set would be better because this is often sparse
+	TreeMap values = new TreeMap(); //(x,y pairs)
 	double yScale;
 	Long dates[];
 	Double vals[];
@@ -219,8 +219,6 @@ public class NonGroupedCalculatedValues  implements CalculatedValues  {
 
  
  	public void dump() {
-		for (int i = 0; i < vals.length; i++)
-			System.out.println(i + " " + new java.util.Date(dates[i].longValue()) + " " +  vals[i]);
  	}
 	
 

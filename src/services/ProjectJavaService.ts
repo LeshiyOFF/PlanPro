@@ -9,8 +9,7 @@ import type {
   ProjectsListResponse,
   ProjectDataResponse,
   ExportResponse,
-  ImportResponse,
-  OperationResponse
+  ImportResponse
 } from '@/types/api/response-types';
 
 /**

@@ -1,4 +1,4 @@
-import { Task } from '@/store/projectStore';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 import { Resource } from '@/types/resource-types';
 import { IResourceHistogramData, IResourceWorkloadDay } from '../interfaces/IResourceHistogram';
 
@@ -93,7 +93,7 @@ export class ResourceLoadingService {
         const assignment = task.resourceAssignments?.find(a => a.resourceId === resourceId);
         if (assignment) {
           totalUnits += assignment.units;
-        } else if (task.resourceIds?.includes(resourceId)) {
+        } else if (getTaskResourceIds(task).includes(resourceId)) {
           // Fallback: старый формат resourceIds (100% по умолчанию)
           totalUnits += ResourceLoadingService.BASE_CAPACITY;
         }

@@ -441,41 +441,6 @@ public class CalendarService {
 		}
 	}
 
-
-//	HashMap importedCalendarMap = new HashMap();
-//	public void addImportedCalendar(WorkingCalendar cal, MPXCalendar mpxCal) {
-//		importedCalendarMap.put(mpxCal,cal);
-//		if (cal.isBaseCalendar()) {
-//			if (findBaseCalendar(cal.getName(),true) != null)
-//				return;
-//// cal.setName(cal.getName() + PLACE_HOLDER_NAME);
-//		}
-//		add(cal);
-//	}
-//
-//	public WorkCalendar findImportedCalendar(MPXCalendar mpxCal) {
-//		return (WorkCalendar) importedCalendarMap.get(mpxCal);
-//	}
-//	public MPXCalendar findImportedMPXCalendar(String name) {
-//		Iterator i = importedCalendarMap.keySet().iterator();
-//		MPXCalendar cal;
-//		while (i.hasNext()) {
-//			cal = (MPXCalendar)i.next();
-//			if (cal.getName().equals(name))
-//				return cal;
-//		}
-//		return null;
-//	}
-//
-//	HashMap exportedCalendarMap = new HashMap();
-//	public void addExportedCalendar(MPXCalendar mpxCal,WorkingCalendar cal) {
-//		exportedCalendarMap.put(cal,mpxCal);
-//	}
-//
-//	public MPXCalendar findExportedCalendar(WorkCalendar cal) {
-//		return (MPXCalendar) exportedCalendarMap.get(cal);
-//	}
-
 	/**
 	 * Добавляет календарь в соответствующую коллекцию.
 	 * V5.0: Thread-safe с нормализацией имён и проверкой дубликатов.
@@ -552,38 +517,6 @@ public class CalendarService {
 		if (name == null) return "";
 		return name.trim().replaceAll("\\s+", " ").toLowerCase();
 	}
-//
-//
-//	public void invalidate(WorkingCalendar cal) {
-//		HashSet set = new HashSet();
-//		cal.invalidate();
-//		if (cal.isBaseCalendar()) {
-//			Iterator i = derivedCalendars.iterator();
-//			WorkingCalendar cur;
-//			while (i.hasNext()) {
-//				cur = (WorkingCalendar)i.next();
-//				if (cur.getBaseCalendar() == cal) {
-//					cur.invalidate();
-//					set.add(cur.getDocument());
-//				}
-//			}
-//		} else {
-//			set.add(cal.getDocument());
-//		}
-//
-//		// update all documents with modified calendars
-//		Iterator i = set.iterator();
-//		Document document;
-//		while (i.hasNext()) {
-//			document = (Document)i.next();
-//			if (document == null)
-//				continue;
-//			document.fireUpdateEvent(null,cal); // TODO should use correct cal
-//												// but for now docs update on
-//												// all
-//		}
-//	}
-//
 	public final ArrayList getBaseCalendars() {
 		return baseCalendars;
 	}

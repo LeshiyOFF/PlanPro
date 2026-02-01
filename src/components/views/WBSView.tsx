@@ -4,7 +4,7 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { WBSCanvasCore, WBSCanvasHandle } from '@/components/gantt/WBSCanvasCore';
 import { WBSNode } from '@/domain/wbs/interfaces/WBS';
 import { WBSCodeService } from '@/domain/wbs/services/WBSCodeService';
-import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore, createTaskFromView } from '@/store/projectStore';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { 
   ZoomIn, 
@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject, JsonValue } from '@/types/json-types';
 
 /**
  * Work Breakdown Structure (WBS) View - СДР (Структура декомпозиции работ)
@@ -71,12 +73,12 @@ export const WBSView: React.FC = () => {
         level: task.level,
         parentId: parentId,
         isExpanded: !collapsedNodes.has(task.id),
-        isSummary: !!(task.summary || task.type === 'summary'),
+        isSummary: !!task.isSummary,
         progress: task.progress,
         startDate: new Date(task.startDate),
         endDate: new Date(task.endDate),
         duration: calculateDuration(task.id),
-        critical: !!(task.critical || task.criticalPath),
+        critical: !!(task.isCritical ?? task.criticalPath),
         color: task.color,
         childrenIds: [],
         x: 0, y: 0, width: 180, height: 90
@@ -117,7 +119,7 @@ export const WBSView: React.FC = () => {
 
   const handleAddTask = () => {
     const newId = `TASK-${String(tasks.length + 1).padStart(3, '0')}`;
-    addTask({
+    addTask(createTaskFromView({
       id: newId,
       name: t('wbs.new_task_name', { number: tasks.length + 1 }),
       startDate: new Date(),
@@ -125,7 +127,7 @@ export const WBSView: React.FC = () => {
       progress: 0,
       color: 'hsl(var(--primary))',
       level: 1
-    });
+    }));
   };
 
   /**
@@ -133,33 +135,22 @@ export const WBSView: React.FC = () => {
    */
   const handleExport = async () => {
     if (!wbsCanvasRef.current || isExporting) return;
-
+    const api = getElectronAPI();
+    if (!api?.showSaveDialog || !api?.saveBinaryFile) return;
     try {
       setIsExporting(true);
-
-      // 1. Показываем диалог сохранения
-      const result = await window.electronAPI.showSaveDialog({
+      const result = await api.showSaveDialog({
         title: t('wbs.export_dialog_title') || 'Экспорт СДР',
         defaultPath: `WBS_${new Date().toISOString().split('T')[0]}.png`,
-        filters: [
-          { name: 'Images', extensions: ['png'] }
-        ]
-      });
-
+        filters: [{ name: 'Images', extensions: ['png'] }]
+      } as Record<string, JsonObject>);
       if (result.canceled || !result.filePath) {
         setIsExporting(false);
         return;
       }
-
-      // 2. Генерируем Blob изображения (масштаб 2x для четкости)
       const blob = await wbsCanvasRef.current.exportToBlob(2);
-      
-      // 3. Преобразуем Blob в ArrayBuffer для передачи через IPC
       const arrayBuffer = await blob.arrayBuffer();
-
-      // 4. Сохраняем файл через Electron Main Process
-      const saveResult = await window.electronAPI.saveBinaryFile(result.filePath, arrayBuffer);
-
+      const saveResult = await api.saveBinaryFile(result.filePath, arrayBuffer);
       if (saveResult.success) {
         toast({
           title: t('common.success') || 'Успех',
@@ -255,4 +246,3 @@ export const WBSView: React.FC = () => {
     </div>
   );
 };
-

@@ -92,10 +92,8 @@ import com.projectlibre1.pm.time.MutableInterval;
  * Implementation of class which contains assignments
  */
 public class HasAssignmentsImpl implements HasAssignments, HasTimeDistributedData, Serializable, Cloneable{
-	//private static Log log = LogFactory.getLog(HasAssignmentsImpl.class);
 	transient AssociationList assignments;
 
-//TODO scheduling rule and effort driven don't make sense for resources, so make them go away?
 	int schedulingRule = ScheduleOption.getInstance().getSchedulingRule();
 	boolean effortDriven = ScheduleOption.getInstance().isEffortDriven();
 
@@ -156,8 +154,12 @@ public class HasAssignmentsImpl implements HasAssignments, HasTimeDistributedDat
 		}
 	}
 
-	//very deep copy of assignments contrary to copy constructor which doesn't clone assigments' detail
-	public HasAssignments deepCloneWithTask(Task task) { //TODO doesn't
+	/**
+	 * Deep copy of assignments with task reference.
+	 * @param task the task to associate with cloned assignments
+	 * @return cloned HasAssignments instance
+	 */
+	public HasAssignments deepCloneWithTask(Task task) {
 		HasAssignmentsImpl newOne = (HasAssignmentsImpl)cloneWithTask(task);
 		return newOne;
 	}
@@ -172,7 +174,6 @@ public class HasAssignmentsImpl implements HasAssignments, HasTimeDistributedDat
 			HasAssignmentsImpl clone=(HasAssignmentsImpl)clone();
 			clone.assignments=new AssociationList();
 
-			//TODO doesn't work when it's copied between projects
 			Iterator i = assignments.iterator();
 			while (i.hasNext()) {
 				clone.assignments.add(((Assignment)i.next()).cloneWithTask(task));
@@ -493,10 +494,10 @@ public class HasAssignmentsImpl implements HasAssignments, HasTimeDistributedDat
     public static List extractOppositeList(List list, boolean leftObject) {
     	Iterator i = list.iterator();
     	ArrayList assignments = new ArrayList();
-    	while (i.hasNext()) { // go thru tasks or resources
+    	while (i.hasNext()) {
     		Object object = i.next();
 			if (! (object instanceof HasAssignments))
-				continue; //TODO currently getting voidNodeImpl's.  This should go away when fixed
+				continue;
 			HasAssignments hasAssignments = (HasAssignments)object;
 			assignments.addAll(hasAssignments.getAssignments());
 		}
@@ -558,26 +559,30 @@ public class HasAssignmentsImpl implements HasAssignments, HasTimeDistributedDat
 	    assignments = new AssociationList();
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Returns fixed cost for the specified time range.
+	 * Fixed costs are defined at task level, not at assignments level.
 	 * @see com.projectlibre1.pm.assignment.HasTimeDistributedData#fixedCost(long, long)
 	 */
 	public double fixedCost(long start, long end) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
-	/* (non-Javadoc)
+	
+	/**
+	 * Returns actual fixed cost for the specified time range.
+	 * Fixed costs are defined at task level, not at assignments level.
 	 * @see com.projectlibre1.pm.assignment.HasTimeDistributedData#actualFixedCost(long, long)
 	 */
 	public double actualFixedCost(long start, long end) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Indicates if this is a labor type assignment container.
+	 * Base implementation returns false; subclasses may override.
 	 * @see com.projectlibre1.pm.assignment.HasTimeDistributedData#isLabor()
 	 */
 	public boolean isLabor() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 

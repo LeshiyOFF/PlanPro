@@ -1,81 +1,55 @@
 import { useState, useCallback } from 'react'
-import type { Assignment } from '@/types'
+import type { Assignment } from '@/types/resource-types'
 import { AssignmentUtils } from '@/utils/assignment-utils'
 
 /**
- * Хук для управления состоянием назначений
- * Следует принципу Single Responsibility
+ * Хук для управления состоянием назначений (resource-types).
+ * Следует принципу Single Responsibility.
  */
 export const useAssignmentState = () => {
   const [assignments, setAssignments] = useState<Assignment[]>([])
 
-  /**
-   * Добавление нового назначения
-   */
   const addAssignment = useCallback((newAssignment: Assignment) => {
     setAssignments(prev => [...prev, newAssignment])
   }, [])
 
-  /**
-   * Обновление существующего назначения
-   */
   const updateAssignment = useCallback((
     id: string,
     updates: Partial<Assignment>,
   ): Assignment | undefined => {
-    setAssignments(prev =>
-      prev.map(assignment =>
-        assignment.id === id ? { ...assignment, ...updates } : assignment,
-      ),
-    )
-
-    return assignments.find(assignment => assignment.id === id)
+    const current = assignments.find(a => a.id === id)
+    if (!current) return undefined
+    const merged: Assignment = { ...current, ...updates }
+    setAssignments(prev => prev.map(a => (a.id === id ? merged : a)))
+    return merged
   }, [assignments])
 
-  /**
-   * Удаление назначения
-   */
   const deleteAssignment = useCallback((id: string): boolean => {
-    const exists = assignments.some(assignment => assignment.id === id)
+    const exists = assignments.some(a => a.id === id)
     if (exists) {
-      setAssignments(prev => prev.filter(assignment => assignment.id !== id))
+      setAssignments(prev => prev.filter(a => a.id !== id))
     }
     return exists
   }, [assignments])
 
-  /**
-   * Поиск назначения по ID
-   */
   const findAssignment = useCallback((id: string): Assignment | undefined => {
-    return assignments.find(assignment => assignment.id === id)
+    return assignments.find(a => a.id === id)
   }, [assignments])
 
-  /**
-   * Валидация назначения
-   */
   const validateAssignment = useCallback((assignment: Partial<Assignment>): string | null => {
     return AssignmentUtils.validateAssignment(assignment)
   }, [])
 
-  /**
-   * Очистка всех назначений
-   */
   const clearAssignments = useCallback(() => {
     setAssignments([])
   }, [])
 
-  /**
-   * Фильтрация назначений по задаче
-   */
   const getAssignmentsByTask = useCallback((taskId: string): Assignment[] => {
-    return assignments.filter(assignment => assignment.taskId === taskId)
+    return assignments.filter(a => a.taskId === taskId)
   }, [assignments])
 
-  /**
-   * Фильтрация назначений по ресурсу
-   */
   const getAssignmentsByResource = useCallback((resourceId: string): Assignment[] => {
-    return assignments.filter(assignment => assignment.resourceId === resourceId)
+    return assignments.filter(a => a.resourceId === resourceId)
   }, [assignments])
 
   return {

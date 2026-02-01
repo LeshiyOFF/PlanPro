@@ -88,7 +88,6 @@ public class Finder {
 		}
 		return null;
 	}
-	//TODO this is a temporary implementation.  Should work with hash table or check server
 	public static Object findByUniqueId(Object find, Collection container) {
 		Iterator i = container.iterator();
 		long uniqueId = ((Long)find).longValue();

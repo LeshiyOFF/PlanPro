@@ -59,58 +59,62 @@ import java.util.Collection;
 
 import com.projectlibre1.grouping.core.Node;
 
+/**
+ * Default no-op implementation of SubprojectHandler.
+ * This implementation is used when subproject functionality is not enabled.
+ * All methods return safe default values (null, 0, false) or perform no operation.
+ */
 public class DefaultSubprojectHandler implements SubprojectHandler {
-	public DefaultSubprojectHandler(Project dummy) {
-		
+	public DefaultSubprojectHandler(Project project) {
 	}
+
+	@Override
 	public Task getContainingSubprojectTask() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // No subproject hierarchy in default implementation
 	}
 
+	@Override
 	public long getReferringSubprojectTaskDependencyDate() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 0; // No cross-project dependencies in default implementation
 	}
 
+	@Override
 	public Collection getReferringSubprojectTasks() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // No referring tasks in default implementation
 	}
 
+	@Override
 	public String getSubprojectOf() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // Not a subproject in default implementation
 	}
 
+	@Override
 	public void setContainingSubprojectTask(Task containingSubprojectTask) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void setReferringSubprojectTasks(Collection referringSubprojectTasks) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void switchToResourcesOfProject(Project useMe) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void addSubproject(Project subproject, Node subprojectNode, boolean creating, boolean currentlyOpen) {
-		// TODO Auto-generated method stub
-		
+		// No-op in default implementation
 	}
 
+	@Override
 	public boolean canInsertProject(long projectId) {
-		// TODO Auto-generated method stub
-		return false;
+		return false; // Subproject insertion not supported in default implementation
 	}
 
+	@Override
 	public SubProj createSubProj(long subprojectUniqueId) {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // Subproject creation not supported in default implementation
 	}
-
 }

@@ -2,10 +2,10 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/Badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 export interface ProjectStats {
   id: string;
@@ -81,12 +81,16 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
     return 'text-red-600';
   };
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   if (!projectStats) {
     return (
       <BaseDialog
         title="Project Statistics"
-        size="fullscreen"
-        {...props}
+        size="large"
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+        {...dialogProps}
         onClose={onClose}
         footer={
           <div className="flex justify-end">
@@ -109,7 +113,9 @@ export const ProjectStatisticsDialog: React.FC<ProjectStatisticsDialogProps> = (
     <BaseDialog
       title={`Statistics - ${projectStats.name}`}
       size="fullscreen"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

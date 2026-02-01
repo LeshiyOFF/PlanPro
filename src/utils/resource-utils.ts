@@ -35,7 +35,8 @@ export class ResourceUtils {
   }
 
   /**
-   * Создание mock ресурса
+   * Создание ресурса для тестов и разработки.
+   * В production-потоке не использовать.
    */
   static createMockResource(data: Omit<Resource, 'id'>): Resource {
     return {
@@ -45,13 +46,12 @@ export class ResourceUtils {
   }
 
   /**
-   * Расчет загрузки ресурсов
+   * Расчёт загрузки ресурсов (без данных о назначениях возвращает 0).
    */
   static calculateUtilization(resources: Resource[]): number {
     if (resources.length === 0) return 0
     const totalCapacity = resources.reduce((sum, resource) => sum + resource.maxUnits, 0)
-    // Используем максимальное количество если нет данных о текущем использовании
-    const usedCapacity = Math.round(totalCapacity * 0.75) // mock: 75% utilization
+    const usedCapacity = 0
     return totalCapacity > 0 ? Math.round((usedCapacity / totalCapacity) * 100) : 0
   }
 }

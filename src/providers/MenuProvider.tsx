@@ -105,6 +105,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
         document.removeEventListener('click', handleClickOutside);
       };
     }
+    return undefined;
   }, [contextMenu?.visible, hideContextMenu]);
 
   const contextValue: MenuContextType = {

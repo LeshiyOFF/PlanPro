@@ -1,6 +1,5 @@
-import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu';
-import { IContextMenuContext } from '@/domain/contextmenu/entities/ContextMenu';
-import { ContextMenuType, ContextMenuStatus } from '@/domain/contextmenu/ContextMenuType';
+import { IContextMenu, IContextMenuContext } from '@/domain/contextmenu/entities/ContextMenu';
+import { ContextMenuType } from '@/domain/contextmenu/ContextMenuType';
 import { IMenuFactory } from '@/domain/contextmenu/services/IContextMenuService';
 
 /**

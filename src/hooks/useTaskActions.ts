@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import type { Task } from '@/types'
+import type { Task } from '@/store/project/interfaces'
+import type { Task as TaskTypesTask } from '@/types/task-types'
 import { useProjectState } from './useProjectState'
 import { useAsyncOperation } from './useAsyncOperation'
 import { TaskUtils } from '@/utils/task-utils'
@@ -21,7 +22,7 @@ export const useTaskActions = (execute: ReturnType<typeof useAsyncOperation>['ex
   const createTask = useCallback(async (
     taskData: Omit<Task, 'id'>,
   ): Promise<Task> => {
-    const validateResult = TaskUtils.validateTask(taskData)
+    const validateResult = TaskUtils.validateTask(taskData as Partial<TaskTypesTask>)
     if (validateResult) {
       throw new Error(validateResult)
     }
@@ -53,7 +54,7 @@ export const useTaskActions = (execute: ReturnType<typeof useAsyncOperation>['ex
     id: string,
     updates: Partial<Task>,
   ): Promise<Task> => {
-    const validateResult = TaskUtils.validateTask(updates)
+    const validateResult = TaskUtils.validateTask(updates as Partial<TaskTypesTask>)
     if (validateResult) {
       throw new Error(validateResult)
     }

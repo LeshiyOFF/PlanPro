@@ -41,9 +41,11 @@ export const AnimationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         event.key === 'import' || 
         (event.category === PreferencesCategory.DISPLAY && (event.key === 'display' || event.key === 'general'))
       ) {
+        const raw = event.newValue;
+        if (raw == null || typeof raw !== 'object') return;
         const prefs = (event.key === 'load' || event.key === 'import') 
-          ? event.newValue.display 
-          : event.newValue;
+          ? (raw as { display?: { animationEnabled?: boolean } }).display 
+          : raw as { animationEnabled?: boolean };
           
         const enabled = prefs?.animationEnabled;
         if (enabled !== undefined) {

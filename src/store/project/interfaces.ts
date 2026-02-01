@@ -1,10 +1,14 @@
+import {
+  Task as CatalogTask,
+  ProjectPriority,
+  TaskStatus,
+  TaskType
+} from '@/types/Master_Functionality_Catalog';
 import { Resource } from '@/types/resource-types';
+import type { TaskSegment } from '@/types/task-types';
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar';
 
-export interface TaskSegment {
-  startDate: Date;
-  endDate: Date;
-}
+export type { Resource, TaskSegment };
 
 /**
  * Назначение ресурса на задачу с указанием процента загрузки.
@@ -15,32 +19,91 @@ export interface ResourceAssignment {
   units: number;
 }
 
-export interface Task {
+/** Задача с полем resourceAssignments (сторевая или каталоговая). */
+export interface TaskWithResourceAssignments {
+  resourceAssignments?: Array<{ resourceId: string }>;
+}
+
+/**
+ * Возвращает массив id ресурсов задачи из resourceAssignments.
+ * Унифицированный доступ для стора и каталога.
+ */
+export function getTaskResourceIds(task: TaskWithResourceAssignments): string[] {
+  const assignments = task.resourceAssignments;
+  if (!assignments || !Array.isArray(assignments)) return [];
+  return assignments.map((a) => (typeof a.resourceId === 'string' ? a.resourceId : String(a.resourceId)));
+}
+
+/**
+ * Расширенный интерфейс задачи для стора (Frontend Task)
+ * Наследует базовые поля, но упрощает связи для плоского списка
+ */
+export interface Task extends Omit<CatalogTask, 'id' | 'parent' | 'children' | 'resources' | 'predecessors' | 'successors' | 'dates' | 'duration' | 'completion' | 'cost'> {
   id: string;
-  name: string;
   startDate: Date;
   endDate: Date;
   progress: number;
-  color: string;
-  level: number;
-  summary?: boolean;
-  type?: string;
+  duration: number; // в миллисекундах или днях (зависит от контекста)
+  parentId?: string | null;
   children?: string[];
   predecessors?: string[];
-  /** @deprecated Используйте resourceAssignments */
-  resourceIds?: string[];
-  /** Назначения ресурсов с указанием процента загрузки */
   resourceAssignments?: ResourceAssignment[];
-  critical?: boolean;
-  criticalPath?: boolean;
-  milestone?: boolean;
-  estimated?: boolean;
   baselineStartDate?: Date;
   baselineEndDate?: Date;
   slack?: number;
   totalSlack?: number;
   segments?: TaskSegment[];
-  notes?: string;
+  /** Цвет отображения (Gantt, WBS, Calendar). */
+  color?: string;
+  /** Признак критического пути (алиас для isCritical). */
+  criticalPath?: boolean;
+  /** ID ресурсов, назначенных на задачу (удобный доступ, дублирует resourceAssignments). */
+  resourceIds?: string[];
+  /** Начало (алиас для startDate). */
+  start?: Date;
+  /** Окончание (алиас для endDate). */
+  finish?: Date;
+  /** Позиция на сетевой диаграмме (NetworkView). */
+  x?: number;
+  y?: number;
+  isPinned?: boolean;
+}
+
+/** Минимальный набор полей для создания задачи из UI (вид, форма). */
+export type TaskCreatePayload = Pick<Task, 'id' | 'name' | 'startDate' | 'endDate' | 'progress'> & Partial<Pick<Task, 'color' | 'level' | 'predecessors' | 'resourceAssignments' | 'parentId'>>;
+
+/**
+ * Создаёт полный Task из минимального набора полей (для addTask из views).
+ * Подставляет значения по умолчанию для обязательных полей каталога.
+ */
+export function createTaskFromView(payload: TaskCreatePayload): Task {
+  const start = payload.startDate;
+  const end = payload.endDate;
+  const durationMs = end.getTime() - start.getTime();
+  const durationDays = Math.max(1, Math.round(durationMs / (24 * 60 * 60 * 1000)));
+  return {
+    ...payload,
+    type: TaskType.FIXED_DURATION,
+    status: TaskStatus.NOT_STARTED,
+    priority: ProjectPriority.MEDIUM,
+    wbs: '1',
+    level: payload.level ?? 1,
+    position: 0,
+    duration: durationDays,
+    notes: '',
+    milestones: [],
+    customFields: [],
+    constraints: [],
+    isCritical: false,
+    isMilestone: false,
+    isSummary: false,
+    isExternal: false,
+    predecessors: payload.predecessors ?? [],
+    resourceAssignments: payload.resourceAssignments ?? [],
+    startDate: start,
+    endDate: end,
+    progress: payload.progress ?? 0
+  };
 }
 
 export interface ProjectBaseline {

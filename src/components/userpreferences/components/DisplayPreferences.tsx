@@ -124,8 +124,8 @@ export const DisplayPreferences: React.FC = () => {
             max={24}
             step={1}
             value={[localFontSize]}
-            onValueChange={([value]) => handleFontSizeChange(value)}
-            onValueCommit={([value]) => handleFontSizeCommit(value)}
+            onValueChange={([val]: number[]) => handleFontSizeChange(val)}
+            onValueCommit={([val]: number[]) => handleFontSizeCommit(val)}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
@@ -152,7 +152,7 @@ export const DisplayPreferences: React.FC = () => {
 
         <div className="space-y-2">
           <Label htmlFor="theme">{t('preferences.theme')}</Label>
-          <Select value={displayPrefs.theme} onValueChange={handleThemeChange}>
+          <Select value={displayPrefs.theme} onValueChange={(val: string) => handleThemeChange(val as Theme)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

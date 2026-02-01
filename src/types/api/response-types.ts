@@ -1,3 +1,5 @@
+import { StrictData } from '../Master_Functionality_Catalog'
+
 /**
  * Конкретные типы для ответов API ProjectLibre
  * Заменяют использование `any` для строгой типизации
@@ -11,7 +13,7 @@ export interface BaseResponse {
   requestId?: string
 }
 
-export interface DataResponse<T> extends BaseResponse {
+export interface DataResponse<T = StrictData> extends BaseResponse {
   data: T
 }
 
@@ -19,8 +21,11 @@ export interface ErrorResponse extends BaseResponse {
   success: false
   error: string
   errorCode?: string
-  details?: Record<string, unknown>
+  details?: StrictData
 }
+
+// ... (rest of the file)
+
 
 // Ответы проекта
 export interface ProjectResponse {
@@ -242,7 +247,7 @@ export interface RpcCommandResponse extends BaseResponse {
 // Ответы конфигурации (статус)
 export interface ConfigStatusResponse extends BaseResponse {
   status: string
-  timestamp: number
+  configTimestamp: number
 }
 
 // Ответы Undo/Redo операций
@@ -344,7 +349,21 @@ export interface CoreResourceData {
 }
 
 /**
- * Полные данные проекта (tasks + resources) из Core модели.
+ * Данные календаря из API (совместимо с CalendarDataFromApi).
+ */
+export interface CoreCalendarData {
+  id: string;
+  name: string;
+  description?: string;
+  type: string;
+  workingDays: boolean[];
+  workingHours: { from: number; to: number }[];
+  hoursPerDay?: number;
+  exceptions?: Array<{ date: string; working?: boolean; from?: number; to?: number; name?: string }>;
+}
+
+/**
+ * Полные данные проекта (tasks + resources + calendars) из Core модели.
  * Ответ от GET /api/files/project/{id}/data
  */
 export interface ProjectDataResponse extends BaseResponse {
@@ -353,6 +372,7 @@ export interface ProjectDataResponse extends BaseResponse {
   projectName?: string
   tasks?: CoreTaskData[]
   resources?: CoreResourceData[]
+  calendars?: CoreCalendarData[]
   startDate?: string
   endDate?: string
   taskCount?: number

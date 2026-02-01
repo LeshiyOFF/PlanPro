@@ -225,7 +225,7 @@ public final class GroupClause
    private FontStyle m_font;
    private Color m_cellBackgroundColor;
    private BackgroundPattern m_pattern;
-   private int m_groupOn; // TODO can we do this as an enumeration?
+   private int m_groupOn; // NOTE: kept as int for schema compatibility; could be refactored to enum later.
    private Object m_startAt;
    private Object m_groupInterval;
 }

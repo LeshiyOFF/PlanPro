@@ -109,6 +109,5 @@ public class ReportColumns implements Cloneable {
 	
 	public SpreadSheetFieldArray getFieldArray() {
 		return SpreadSheetFieldArray.getFromId(getCategorySpreadSheet(), Messages.getString(getIdSpreadSheet()));
-		//TODO getFromId(getCategorySpreadSheet(), getIdSpreadSheet()) instead ?
 	}
 }

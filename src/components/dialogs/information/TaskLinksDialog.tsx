@@ -1,11 +1,11 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
 export interface TaskLink {
@@ -54,10 +54,16 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
 }) => {
   const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view');
   const [selectedLink, setSelectedLink] = React.useState<TaskLink | null>(null);
-  const [linkData, setLinkData] = React.useState({
+  const [linkData, setLinkData] = React.useState<{
+    taskId: string;
+    taskName: string;
+    linkType: 'hyperlink' | 'document' | 'webpage' | 'email';
+    url: string;
+    description: string;
+  }>({
     taskId: currentTaskId || '',
     taskName: currentTaskName,
-    linkType: 'hyperlink' as const,
+    linkType: 'hyperlink',
     url: '',
     description: ''
   });
@@ -65,7 +71,8 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
   const { validate, errors, isValid } = useDialogValidation({
     url: {
       required: true,
-      validate: (value) => {
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'URL is required';
         if (!value.trim()) return 'URL is required';
         
         // Basic URL validation
@@ -87,17 +94,23 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
     description: {
       required: true,
       minLength: 1,
-      validate: (value) => value.trim() ? null : 'Description is required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Description is required';
+        return value.trim() ? null : 'Description is required';
+      }
     }
   });
 
   React.useEffect(() => {
     Object.keys(linkData).forEach(key => {
-      validate(key, linkData[key as keyof typeof linkData]);
+      validate({ [key]: linkData[key as keyof typeof linkData] });
     });
   }, [linkData]);
 
-  const handleFieldChange = (field: keyof typeof linkData, value: any) => {
+  type LinkDataField = keyof typeof linkData;
+  type LinkDataValue = string | 'hyperlink' | 'document' | 'webpage' | 'email';
+  
+  const handleFieldChange = (field: LinkDataField, value: LinkDataValue) => {
     setLinkData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -163,11 +176,15 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
     }
   };
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title={`Task Links - ${currentTaskName}`}
       size="fullscreen"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -210,7 +227,7 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
                 <Label htmlFor="linkType">Link Type</Label>
                 <Select
                   value={linkData.linkType}
-                  onValueChange={(value) => handleFieldChange('linkType', value as any)}
+                  onValueChange={(value) => handleFieldChange('linkType', value as 'hyperlink' | 'document' | 'webpage' | 'email')}
                 >
                   <SelectTrigger>
                     <SelectValue />

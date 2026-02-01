@@ -14,7 +14,6 @@ import {
 import { PreferencesStorage } from './PreferencesStorage';
 import { PreferencesDefaultsFactory } from './PreferencesDefaultsFactory';
 import { PreferencesValidator } from './PreferencesValidator';
-import { javaApiService } from '@/services/JavaApiService';
 
 /**
  * Основной сервис пользовательских настроек (Слой Application/Domain).
@@ -80,7 +79,7 @@ export class UserPreferencesService {
 
     this.preferences[category] = newVal;
     this.notifyListeners({
-      category: category as unknown as PreferencesCategory,
+      category: category as PreferencesCategory,
       key: category,
       oldValue: oldVal,
       newValue: this.preferences[category]
@@ -143,7 +142,7 @@ export class UserPreferencesService {
     }
   }
 
-  private validate(category: keyof IUserPreferences, data: any): boolean {
+  private validate(category: keyof IUserPreferences, data: IUserPreferences[keyof IUserPreferences]): boolean {
     switch (category) {
       case 'general': return PreferencesValidator.validateGeneral(data);
       case 'display': return PreferencesValidator.validateDisplay(data);
@@ -159,7 +158,7 @@ export class UserPreferencesService {
 
   private resetCategory(cat: PreferencesCategory): void {
     const factory = PreferencesDefaultsFactory;
-    const mapping: Record<string, () => any> = {
+    const mapping: Record<PreferencesCategory, () => void> = {
       [PreferencesCategory.GENERAL]: () => this.preferences.general = factory.getGeneralPreferences(),
       [PreferencesCategory.DISPLAY]: () => this.preferences.display = factory.getDisplayPreferences(),
       [PreferencesCategory.EDITING]: () => this.preferences.editing = factory.getEditingPreferences(),

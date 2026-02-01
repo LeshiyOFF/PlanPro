@@ -1,4 +1,4 @@
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
+import type { StrictData } from '@/types/Master_Functionality_Catalog';
 import { EventType } from '@/types/Master_Functionality_Catalog';
 import { logger } from '@/utils/logger';
 
@@ -41,23 +41,10 @@ export abstract class BaseAction implements IAction {
   public abstract canExecute(): boolean;
 
   /**
-   * Создание UI события для логирования
+   * Логирование выполнения действия (данные передаются как StrictData)
    */
-  protected createEvent(type: EventType, data?: any): UIEvent {
-    return {
-      type,
-      source: this.constructor.name,
-      timestamp: new Date(),
-      data
-    };
-  }
-
-  /**
-   * Логирование выполнения действия
-   */
-  protected logAction(type: EventType, data?: any): void {
-    const event = this.createEvent(type, data);
-    logger.info(`Action executed: ${this.name}`, event);
+  protected logAction(_type: EventType, data?: Record<string, string | number | boolean>): void {
+    logger.info(`Action executed: ${this.name}`, (data ?? {}) as StrictData);
   }
 }
 

@@ -135,7 +135,7 @@ public class FieldConverter  {
 					if (contextConverter != null) {
 						contextConverter.convert(clazz,value);
 					} else {
-						System.out.println("no context converter found ");
+						com.projectlibre1.server.access.ErrorLogger.log("No context converter found for class " + clazz, null);
 						result = ConvertUtils.convert((String) value,clazz);
 					}
 				}
@@ -151,7 +151,7 @@ public class FieldConverter  {
 			// Because of stupidity of beanutils which assumes type string, I implement this by hand
 			Converter converter = ConvertUtils.lookup(clazz);                       
 			if (converter == null) {                         
-				System.out.println("converter is null for class " + clazz + " instance " + instance.hashCode() + " resetting") ;
+				com.projectlibre1.server.access.ErrorLogger.log("Converter is null for class " + clazz + ", resetting FieldConverter", null);
 				instance = new FieldConverter();
 				converter = ConvertUtils.lookup(String.class);  
 			} 
@@ -367,12 +367,6 @@ public class FieldConverter  {
 		}
 	};
 
-	/* TODO I have also experimented with the JADE library's Money class.  It is probably more useful
-	 * for performing currency conversions than as a datatype.  A possible source for currency exchange rates is the 
-	 * web service here: 
-	 * http://www.bindingpoint.com/service.aspx?skey=377e6659-061f-4956-8edb-19b5023bc33b
-	 *  
-	 */
 	private static class MoneyConverter implements Converter {
 		public Object convert(Class type, Object value) throws ConversionException {
 			if (value == null)
@@ -382,7 +376,7 @@ public class FieldConverter  {
 			} else if (value instanceof Number) {
 				double num = ((Number)value).doubleValue();
 			 	if (Double.isInfinite(num) || Double.isNaN(num)) {
-			 		System.out.println("Error: number is invalid double in MoneyConverter " +value );
+			 		com.projectlibre1.server.access.ErrorLogger.log("Invalid double in MoneyConverter: " + value, null);
 			 		num = 0.0;
 			 	}
 				return Money.getInstance(num);

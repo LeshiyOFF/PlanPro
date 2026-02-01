@@ -84,9 +84,13 @@ import com.projectlibre1.util.VersionUtils;
  * <groovy formula>
  */
 public class UpdateChecker {
-	private static final int UPDATE_CHECKER_VERSION=1;
-	private static final String updateAddress = "http://projectlibre.org/versions-"+UPDATE_CHECKER_VERSION; 
+	private static final int UPDATE_CHECKER_VERSION = 1;
+	private static final String updateAddress = "http://projectlibre.org/versions-" + UPDATE_CHECKER_VERSION; 
 	private static final String downloadAddress = "http://sourceforge.net/projects/projectlibre/files/latest/download";
+	
+	/** Cached formula to avoid repeated Groovy class parsing */
+	private static volatile UpdateCheckerFormula cachedFormula;
+	private static volatile String cachedFormulaDef;
 	private static void checkForUpdate() {
 		if (! Preferences.userNodeForPackage(UpdateChecker.class).getBoolean("checkForUpdates", true) ) {
 			return;
@@ -166,25 +170,53 @@ public class UpdateChecker {
 			}
 
 		} catch (Exception e) {
-			//e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Exception during update check", e);
 		}
 	}
 
 
 
-	private static UpdateCheckerFormula getFormula(String formulaDef){
-	    if (formulaDef.length()==0) return new UpdateCheckerFormula();
-	    StringBuffer classText=new StringBuffer();
-	    classText.append("package org.projectlibre1.util;\n");
-	    classText.append("public class UpdateCheckerFormulaImpl extends UpdateCheckerFormula{\n");
-	    classText.append("\tpublic int mainCompare(String currentVersion,String latestVersion){\n");
-	    classText.append("\t\t").append(formulaDef).append('\n');
-	    classText.append("\t}\n");
-	    classText.append("}\n");
-	    GroovyClassLoader loader = new GroovyClassLoader(UpdateChecker.class.getClassLoader());
-		try {
-			Class groovyClass = loader.parseClass(classText.toString()); //TODO this his horribly slow (~500ms)  Can we parse all at once or can we do this lazily or initialize in another thread?
-			return (UpdateCheckerFormula)groovyClass.newInstance();
+	/**
+	 * Gets or creates a formula from the given definition.
+	 * Uses caching to avoid repeated Groovy class parsing (~500ms per parse).
+	 * @param formulaDef the Groovy formula definition
+	 * @return the compiled formula, or default if parsing fails
+	 */
+	private static UpdateCheckerFormula getFormula(String formulaDef) {
+		if (formulaDef.length() == 0) {
+			return new UpdateCheckerFormula();
+		}
+		
+		// Return cached formula if definition unchanged
+		if (formulaDef.equals(cachedFormulaDef) && cachedFormula != null) {
+			return cachedFormula;
+		}
+		
+		UpdateCheckerFormula formula = parseGroovyFormula(formulaDef);
+		
+		// Cache the result for future calls
+		cachedFormulaDef = formulaDef;
+		cachedFormula = formula;
+		
+		return formula;
+	}
+	
+	/**
+	 * Parses a Groovy formula definition into an executable formula.
+	 * This is expensive (~500ms) so results should be cached.
+	 */
+	private static UpdateCheckerFormula parseGroovyFormula(String formulaDef) {
+		StringBuilder classText = new StringBuilder();
+		classText.append("package org.projectlibre1.util;\n");
+		classText.append("public class UpdateCheckerFormulaImpl extends UpdateCheckerFormula {\n");
+		classText.append("\tpublic int mainCompare(String currentVersion, String latestVersion) {\n");
+		classText.append("\t\t").append(formulaDef).append('\n');
+		classText.append("\t}\n");
+		classText.append("}\n");
+		
+		try (GroovyClassLoader loader = new GroovyClassLoader(UpdateChecker.class.getClassLoader())) {
+			Class<?> groovyClass = loader.parseClass(classText.toString());
+			return (UpdateCheckerFormula) groovyClass.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			return new UpdateCheckerFormula();
 		}

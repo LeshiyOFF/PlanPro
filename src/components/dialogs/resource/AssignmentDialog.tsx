@@ -2,11 +2,10 @@ import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export interface Resource {
   id: string;
@@ -52,14 +51,13 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
   onClose,
   ...props
 }) => {
+  const { title: _omitTitle, ...dialogProps } = props;
   const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
   const [selectedResources, setSelectedResources] = React.useState<string[]>([]);
   const [assignments, setAssignments] = React.useState<Assignment[]>([]);
   const [mode, setMode] = React.useState<'assign' | 'remove' | 'replace'>('assign');
 
   const availableResources = resources.filter(r => r.available);
-  const selectedTasksData = tasks.filter(t => selectedTasks.includes(t.id));
-  const selectedResourcesData = resources.filter(r => selectedResources.includes(r.id));
 
   React.useEffect(() => {
     // Initialize assignments based on current assignments
@@ -139,9 +137,9 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
 
   return (
     <BaseDialog
+      {...dialogProps}
       title="Resource Assignments"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

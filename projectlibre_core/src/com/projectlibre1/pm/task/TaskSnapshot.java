@@ -139,7 +139,7 @@ public class TaskSnapshot implements DataSnapshot, HasAssignments, Cloneable {
 			newOne.currentSchedule = (TaskSchedule) currentSchedule.clone();
 			newOne.hasAssignments = (HasAssignments) ((HasAssignmentsImpl)hasAssignments).cloneWithSchedule(newOne.currentSchedule);
 		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone TaskSnapshot", e);
 		}
 
 		return newOne;
@@ -152,7 +152,7 @@ public class TaskSnapshot implements DataSnapshot, HasAssignments, Cloneable {
 			newOne.currentSchedule = (TaskSchedule) currentSchedule.cloneWithTask(task);
 			newOne.hasAssignments = (HasAssignments) ((HasAssignmentsImpl)hasAssignments).deepCloneWithTask(task);
 		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to deep clone TaskSnapshot", e);
 		}
 
 		return newOne;

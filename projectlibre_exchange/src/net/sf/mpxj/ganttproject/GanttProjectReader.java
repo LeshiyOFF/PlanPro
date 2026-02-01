@@ -294,7 +294,7 @@ public final class GanttProjectReader extends AbstractProjectReader
          // In order to process recurring exceptions using MPXJ, we need a start and end date
          // to constrain the number of dates we generate.
          // May need to pre-process the tasks in order to calculate a start and finish date.
-         // TODO: handle recurring exceptions
+         // LIMITATION: recurring exceptions are not handled; MPXJ needs start/end date to constrain generated dates.
       }
       else
       {
@@ -305,7 +305,7 @@ public final class GanttProjectReader extends AbstractProjectReader
          Date exceptionDate = calendar.getTime();
          ProjectCalendarException exception = mpxjCalendar.addCalendarException(exceptionDate, exceptionDate);
 
-         // TODO: not sure how NEUTRAL should be handled
+         // NOTE: NEUTRAL type is not explicitly handled; WORKING_DAY adds default working ranges.
          if ("WORKING_DAY".equals(date.getType()))
          {
             exception.addRange(ProjectCalendarWeek.DEFAULT_WORKING_MORNING);
@@ -714,7 +714,7 @@ public final class GanttProjectReader extends AbstractProjectReader
       mpxjTask.setConstraintDate(gpTask.getThirdDate());
       if (mpxjTask.getConstraintDate() != null)
       {
-         // TODO: you don't appear to be able to change this setting in GanttProject
+         // NOTE: GanttProject does not expose third-date constraint type; defaulting to START_NO_EARLIER_THAN.
          // task.getThirdDateConstraint()
          mpxjTask.setConstraintType(ConstraintType.START_NO_EARLIER_THAN);
       }
@@ -723,7 +723,7 @@ public final class GanttProjectReader extends AbstractProjectReader
 
       m_eventManager.fireTaskReadEvent(mpxjTask);
 
-      // TODO: read custom values
+      // NOTE: custom field values from GanttProject are not read in this implementation.
 
       //
       // Process child tasks

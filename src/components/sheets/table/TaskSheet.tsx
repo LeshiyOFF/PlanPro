@@ -1,9 +1,14 @@
 import React, { forwardRef } from 'react';
-import { ProfessionalSheet, ProfessionalSheetHandle } from './ProfessionalSheet';
-import { Task } from '@/types/task-types';
+import { ProfessionalSheet, type ProfessionalSheetHandle } from './ProfessionalSheet';
+import { Task } from '@/store/project/interfaces';
+import { CellValue } from '@/types/sheet/CellValueTypes';
 import { toFraction } from '@/utils/ProgressFormatter';
 import { useTaskSheetCompactColumns } from '@/hooks/sheets/useTaskSheetCompactColumns';
 import { useTaskSheetFullColumns } from '@/hooks/sheets/useTaskSheetFullColumns';
+import type { JsonObject } from '@/types/json-types';
+
+/** Тип строки для ProfessionalSheet: Task с индексной сигнатурой для generic T */
+type TaskRow = Task & Record<string, JsonObject>;
 
 interface TaskSheetProps {
   tasks: Task[];
@@ -32,12 +37,10 @@ export const TaskSheet = forwardRef<ProfessionalSheetHandle, TaskSheetProps>(({
 }, ref) => {
   const compactColumns = useTaskSheetCompactColumns(disabledTaskIds);
   const fullColumns = useTaskSheetFullColumns();
-  
   const columns = variant === 'compact' ? compactColumns : fullColumns;
 
-  const handleDataChange = (rowId: string, field: string, value: unknown) => {
-    let finalValue = value;
-    
+  const handleDataChange = (rowId: string, field: string, value: CellValue) => {
+    let finalValue: CellValue | string[] = value;
     if (field === 'progress' && typeof value === 'string') {
       finalValue = toFraction(parseFloat(value) || 0);
     } else if (field === 'predecessors' && typeof value === 'string') {
@@ -53,15 +56,16 @@ export const TaskSheet = forwardRef<ProfessionalSheetHandle, TaskSheetProps>(({
         finalValue = date;
       }
     }
-    
-    onTaskUpdate(rowId, { [field]: finalValue });
+    onTaskUpdate(rowId, { [field]: finalValue } as Partial<Task>);
   };
+
+  const data = tasks as TaskRow[];
 
   return (
     <div className={`h-full flex flex-col bg-white overflow-hidden ${className}`}>
-      <ProfessionalSheet<Task>
+      <ProfessionalSheet<TaskRow>
         ref={ref}
-        data={tasks}
+        data={data}
         columns={columns}
         rowIdField="id"
         onDataChange={handleDataChange}

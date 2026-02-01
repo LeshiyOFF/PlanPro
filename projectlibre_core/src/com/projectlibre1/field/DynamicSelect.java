@@ -74,7 +74,6 @@ public class DynamicSelect extends Select implements Finder {
 	 */
 	public DynamicSelect() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	
 	public Object[] getKeyArrayWithoutNull() {

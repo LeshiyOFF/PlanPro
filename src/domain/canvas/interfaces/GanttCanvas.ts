@@ -1,7 +1,15 @@
 /**
- * Canvas interfaces for Gantt diagram
- * Following Clean Architecture principles
+ * Canvas interfaces for Gantt diagram.
+ * Following Clean Architecture principles.
  */
+
+import {
+  GanttRenderData,
+  HitTestTarget,
+  TypedCanvasRenderStrategy,
+  TypedCanvasEventHandlers,
+  TypedCanvasLayer
+} from '@/types/gantt/CanvasRenderTypes';
 
 /**
  * Base canvas rendering context
@@ -80,26 +88,14 @@ export interface GanttTimelineInterval {
 }
 
 /**
- * Canvas render strategy
+ * Canvas render strategy (re-export типизированной версии)
  */
-export interface CanvasRenderStrategy {
-  name: string;
-  render: (context: CanvasContext, data: any) => void;
-  hitTest: (point: CanvasPoint, context: CanvasContext, data: any) => any;
-}
+export type CanvasRenderStrategy = TypedCanvasRenderStrategy<GanttRenderData>;
 
 /**
- * Canvas event handlers
+ * Canvas event handlers (re-export типизированной версии)
  */
-export interface CanvasEventHandlers {
-  onClick: (point: CanvasPoint, target: any) => void;
-  onDoubleClick: (point: CanvasPoint, target: any) => void;
-  onRightClick: (point: CanvasPoint, target: any) => void;
-  onMouseMove: (point: CanvasPoint, target: any) => void;
-  onMouseDown: (point: CanvasPoint, target: any) => void;
-  onMouseUp: (point: CanvasPoint, target: any) => void;
-  onWheel: (delta: number) => void;
-}
+export type CanvasEventHandlers = TypedCanvasEventHandlers<HitTestTarget>;
 
 /**
  * Interaction types for Gantt bars
@@ -143,15 +139,9 @@ export interface CanvasViewport {
 }
 
 /**
- * Canvas layer system
+ * Canvas layer (re-export типизированной версии)
  */
-export interface CanvasLayer {
-  id: string;
-  name: string;
-  visible: boolean;
-  zIndex: number;
-  render: (context: CanvasContext, data: any) => void;
-}
+export type CanvasLayer = TypedCanvasLayer<GanttRenderData>;
 
 /**
  * Gantt canvas data
@@ -164,4 +154,3 @@ export interface GanttCanvasData {
   hoveredTask?: string;
   layers: CanvasLayer[];
 }
-

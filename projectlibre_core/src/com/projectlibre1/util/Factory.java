@@ -76,7 +76,7 @@ public class Factory {
 			try {
 				return (GregorianCalendar) pool.borrowObject();
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to borrow GregorianCalendar from pool", e);
 				return null;
 			}
 		}
@@ -85,7 +85,7 @@ public class Factory {
 			try {
 				pool.returnObject(object);
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to return GregorianCalendar to pool", e);
 			}
 		}
 	}
@@ -105,7 +105,7 @@ public class Factory {
 			try {
 				return (Date) pool.borrowObject();
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to borrow Date from pool", e);
 				return null;
 			}
 		}
@@ -114,7 +114,7 @@ public class Factory {
 			try {
 				pool.returnObject(object);
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to return Date to pool", e);
 			}
 		}
 	}	

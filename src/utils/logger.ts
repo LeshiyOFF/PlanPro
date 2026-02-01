@@ -1,3 +1,5 @@
+import { StrictData } from '@/types/Master_Functionality_Catalog';
+
 export enum LogLevel {
   ERROR = 'ERROR',
   WARNING = 'WARNING',
@@ -9,9 +11,15 @@ interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  data?: any;
+  data?: StrictData;
   component?: string;
 }
+
+/**
+ * Тип данных для логирования (строгая типизация без any/unknown)
+ * @deprecated Используйте StrictData из Master_Functionality_Catalog
+ */
+export type LogData = StrictData;
 
 class Logger {
   private static instance: Logger;
@@ -27,7 +35,7 @@ class Logger {
     return Logger.instance;
   }
 
-  private createLogEntry(level: LogLevel, message: string, data?: any, component?: string): LogEntry {
+  private createLogEntry(level: LogLevel, message: string, data?: LogData, component?: string): LogEntry {
     return {
       timestamp: new Date().toISOString(),
       level,
@@ -67,39 +75,44 @@ class Logger {
     }
   }
 
-  error(message: string, data?: any, component?: string): void {
+  error(message: string, data?: LogData, component?: string): void {
     const entry = this.createLogEntry(LogLevel.ERROR, message, data, component);
     this.addLog(entry);
   }
 
-  warning(message: string, data?: any, component?: string): void {
+  warning(message: string, data?: LogData, component?: string): void {
     const entry = this.createLogEntry(LogLevel.WARNING, message, data, component);
     this.addLog(entry);
   }
 
-  info(message: string, data?: any, component?: string): void {
+  info(message: string, data?: LogData, component?: string): void {
     const entry = this.createLogEntry(LogLevel.INFO, message, data, component);
     this.addLog(entry);
   }
 
-  debug(message: string, data?: any, component?: string): void {
+  debug(message: string, data?: LogData, component?: string): void {
     const entry = this.createLogEntry(LogLevel.DEBUG, message, data, component);
     this.addLog(entry);
   }
 
-  dialog(message: string, data?: any, dialogName?: string): void {
+  warn(message: string, data?: LogData, component?: string): void {
+    const entry = this.createLogEntry(LogLevel.WARNING, message, data, component);
+    this.addLog(entry);
+  }
+
+  dialog(message: string, data?: LogData, dialogName?: string): void {
     this.info(message, data, dialogName ? `Dialog:${dialogName}` : 'Dialog');
   }
 
-  dialogError(message: string, data?: any, dialogName?: string): void {
+  dialogError(message: string, data?: LogData, dialogName?: string): void {
     this.error(message, data, dialogName ? `Dialog:${dialogName}` : 'Dialog');
   }
 
-  api(message: string, data?: any): void {
+  api(message: string, data?: LogData): void {
     this.info(message, data, 'API');
   }
 
-  apiError(message: string, data?: any): void {
+  apiError(message: string, data?: LogData): void {
     this.error(message, data, 'API');
   }
 

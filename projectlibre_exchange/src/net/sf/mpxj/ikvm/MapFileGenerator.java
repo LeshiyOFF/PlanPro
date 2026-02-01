@@ -373,7 +373,7 @@ public class MapFileGenerator
          {
             if (Modifier.isStatic(method.getModifiers()))
             {
-               // TODO Handle static methods here
+               // LIMITATION (MPXJ): static methods not handled in this path.
             }
             else
             {

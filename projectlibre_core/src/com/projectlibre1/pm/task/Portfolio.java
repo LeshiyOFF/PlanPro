@@ -137,10 +137,8 @@ public class Portfolio implements Document, NodeModelDataFactory {
 		Node oldNode=nodeModel.search(project,comparator);
 		if (oldNode!=null){
 			if (Alert.confirm(Messages.getString("Message.projectAlreadyExists"))==1){
-				//TODO be sure all references are removed
 				return;
 			}else{
-			    //removeProject((Project)oldNode.getImpl());
 				job=getRemoveProjectJob((Project)oldNode.getImpl(),true);
 				if (job!=null&&!createJob){
 					//job.addSync(); //sync leads to a lock
@@ -347,19 +345,20 @@ public class Portfolio implements Document, NodeModelDataFactory {
 		objectEventManager.fireUpdateEvent(source,object);
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Portfolio does not support multiple transactions.
 	 * @see com.projectlibre1.document.Document#fireMultipleTransaction(int, boolean)
 	 */
 	public int fireMultipleTransaction(int id, boolean begin) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
-	/* (non-Javadoc)
+	/**
+	 * Portfolio does not have a default calendar.
+	 * Individual projects maintain their own calendars.
 	 * @see com.projectlibre1.document.Document#getDefaultCalendar()
 	 */
 	public WorkCalendar getDefaultCalendar() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -390,14 +389,23 @@ public class Portfolio implements Document, NodeModelDataFactory {
 	public void setAllChildrenDirty(boolean dirty) {
 	}
 
-	public boolean containsAssignments(){return false;}
+	public boolean containsAssignments(){
+		return false;
+	}
+	
+	/**
+	 * Portfolio does not participate in predicate evaluation.
+	 * @return false always
+	 */
 	public boolean evaluate(Object arg0) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
+	/**
+	 * Portfolio does not support object selection events.
+	 * @return null
+	 */
 	public ObjectSelectionEventManager getObjectSelectionEventManager() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

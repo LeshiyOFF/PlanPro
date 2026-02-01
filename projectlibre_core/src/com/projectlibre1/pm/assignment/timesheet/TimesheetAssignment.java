@@ -442,13 +442,10 @@ public class TimesheetAssignment implements Schedule, AssignmentSpecificFields, 
 	}
 
 	public Object backupDetail() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void restoreDetail(Object source,Object detail,boolean isChild) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public long getProjectUniqueId() {

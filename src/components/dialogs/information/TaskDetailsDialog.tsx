@@ -1,9 +1,8 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/Badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -101,12 +100,16 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   const totalCost = task?.assignments.reduce((sum, a) => sum + a.cost, 0) || 0;
   const remainingWork = task?.assignments.reduce((sum, a) => sum + a.remainingWork, 0) || 0;
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   if (!task) {
     return (
       <BaseDialog
         title="Task Details"
-        size="fullscreen"
-        {...props}
+        size="large"
+        open={props.open}
+        onOpenChange={props.onOpenChange}
+        {...dialogProps}
         onClose={onClose}
         footer={
           <div className="flex justify-end">
@@ -129,7 +132,9 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
     <BaseDialog
       title={`Task Details - ${task.name}`}
       size="fullscreen"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

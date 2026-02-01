@@ -1,7 +1,6 @@
 import { BaseAction } from './BaseAction';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
 import { EventType } from '@/types/Master_Functionality_Catalog';
-import { logger } from '@/utils/logger';
+import type { NavigationProviderPort } from './registry/BaseActionRegistry';
 import type { ViewType } from '@/types/ViewTypes';
 
 /**
@@ -12,8 +11,8 @@ export class SwitchViewAction extends BaseAction {
   public readonly description: string;
 
   constructor(
-    public viewType: string,
-    private navigationProvider: any,
+    public viewType: ViewType | string,
+    private navigationProvider: NavigationProviderPort,
     viewName: string,
     shortcut?: string
   ) {
@@ -27,7 +26,8 @@ export class SwitchViewAction extends BaseAction {
   }
 
   public canExecute(): boolean {
-    return this.navigationProvider.availableViews.some((v: any) => v.type === this.viewType);
+    const views = this.navigationProvider.availableViews ?? [];
+    return views.some((v) => v.type === this.viewType);
   }
 
   public async execute(): Promise<void> {

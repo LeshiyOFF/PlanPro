@@ -5,24 +5,8 @@ import { useResourceActions } from '../hooks/useResourceActions'
 import { useAssignmentActions } from '../hooks/useAssignmentActions'
 import { useAsyncOperation } from '../hooks/useAsyncOperation'
 import { useProjectState } from '../hooks/useProjectState'
-import { useProjectLibreAPI } from '../hooks/useProjectLibreAPI'
 
-// Master Functionality Catalog типы
-import type { 
-  ProjectContextType, 
-  ProjectProviderProps,
-  ProjectState,
-  TaskState,
-  ResourceState,
-  AssignmentState,
-  AppState,
-  Project,
-  Task,
-  Resource,
-  Assignment,
-  UIEvent,
-  ValidationResult
-} from '@/types'
+import type { ProjectContextType, ProjectProviderProps } from '@/types'
 import { apiLogger } from '@/utils/logger'
 
 const ProjectContext = createContext<ProjectContextType | null>(null)
@@ -36,7 +20,7 @@ export const useProject = (): ProjectContextType => {
 }
 
 export const ProjectProvider = ({ children }: ProjectProviderProps) => {
-  const { execute, isLoading, error, clearError } = useAsyncOperation()
+  const { execute, loading, error, clearError } = useAsyncOperation()
 
   const state = useProjectState()
   const projectActions = useProjectActions()
@@ -46,7 +30,6 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
 
   const value = useMemo(() => {
     apiLogger.debug('ProjectProvider value updated', {
-      project: state.project,
       tasksCount: state.tasks.length,
       resourcesCount: state.resources.length,
       assignmentsCount: state.assignments.length,
@@ -54,7 +37,7 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
 
     return {
       ...state,
-      isLoading,
+      isLoading: loading,
       error,
       clearError,
       projectActions,
@@ -80,10 +63,10 @@ export const ProjectProvider = ({ children }: ProjectProviderProps) => {
         findAssignment: state.assignmentActions.findAssignment,
         validateAssignment: state.assignmentActions.validateAssignment,
       },
-    }
+    } as ProjectContextType
   }, [
     state,
-    isLoading,
+    loading,
     error,
     clearError,
     projectActions,

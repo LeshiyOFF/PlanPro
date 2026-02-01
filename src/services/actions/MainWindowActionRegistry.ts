@@ -1,5 +1,10 @@
 import { getActionManager } from './ActionManager';
-import { MainWindowDependencies } from './registry/BaseActionRegistry';
+import {
+  MainWindowDependencies,
+  ProjectProviderPort,
+  NavigationProviderPort,
+  AppStorePort
+} from './registry/BaseActionRegistry';
 import { FileActionRegistry } from './registry/FileActionRegistry';
 import { EditActionRegistry } from './registry/EditActionRegistry';
 import { ViewActionRegistry } from './registry/ViewActionRegistry';
@@ -15,7 +20,6 @@ import { logger } from '@/utils/logger';
  */
 export class MainWindowActionRegistry {
   private actionManager = getActionManager();
-  private dependencies: MainWindowDependencies;
   private validator: ActionRegistryValidator;
 
   // Реестры категорий
@@ -26,7 +30,6 @@ export class MainWindowActionRegistry {
   private toolsRegistry: ToolsActionRegistry;
 
   constructor(dependencies: MainWindowDependencies) {
-    this.dependencies = dependencies;
     this.validator = new ActionRegistryValidator(this.actionManager);
     
     // Инициализация реестров
@@ -115,9 +118,9 @@ export class MainWindowActionRegistryFactory {
    * Получение зависимостей из провайдеров
    */
   static extractDependencies(
-    projectProvider: any,
-    appStore: any,
-    navigationProvider: any
+    projectProvider: ProjectProviderPort,
+    appStore: AppStorePort,
+    navigationProvider: NavigationProviderPort
   ): MainWindowDependencies {
     return {
       projectProvider,

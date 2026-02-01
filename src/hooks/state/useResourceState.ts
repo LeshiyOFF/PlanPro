@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Resource } from '@/types'
+import { Resource } from '@/types/resource-types'
 import { ResourceUtils } from '@/utils/resource-utils'
 
 /**
@@ -82,7 +82,7 @@ export const useResourceState = () => {
    * Фильтрация доступных ресурсов
    */
   const getAvailableResources = useCallback((): Resource[] => {
-    return resources.filter(resource => resource.available)
+    return resources.filter(resource => resource.available !== false)
   }, [resources])
 
   /**

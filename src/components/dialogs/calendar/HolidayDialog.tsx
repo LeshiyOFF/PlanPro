@@ -1,11 +1,11 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
 export interface Holiday {
@@ -30,6 +30,7 @@ export interface HolidayDialogProps extends Omit<BaseDialogProps, 'children'> {
   onSave?: (holiday: Omit<Holiday, 'id'>) => void;
   onUpdate?: (holiday: Holiday) => void;
   onDelete?: (holidayId: string) => void;
+  onClose?: () => void;
 }
 
 const HOLIDAY_TYPES = [
@@ -53,10 +54,18 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [holiday, setHoliday] = React.useState({
+  type HolidayType = 'holiday' | 'nonworking' | 'working';
+  
+  const [holiday, setHoliday] = React.useState<{
+    name: string;
+    date: string;
+    type: HolidayType;
+    recurring: boolean;
+    calendarIds: string[];
+  }>({
     name: '',
     date: new Date().toISOString().split('T')[0],
-    type: 'holiday' as const,
+    type: 'holiday',
     recurring: false,
     calendarIds: calendars.filter(c => c.isBase).map(c => c.id)
   });
@@ -68,18 +77,25 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
       required: true,
       minLength: 1,
       maxLength: 255,
-      validate: (value) => value.trim() ? null : 'Holiday name is required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Holiday name is required';
+        return value.trim() ? null : 'Holiday name is required';
+      }
     },
     date: {
       required: true,
-      validate: (value) => {
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Date is required';
         const date = new Date(value);
         return !isNaN(date.getTime()) ? null : 'Invalid date format';
       }
     },
     calendarIds: {
       required: true,
-      validate: (value) => value.length > 0 ? null : 'At least one calendar must be selected'
+      custom: (value) => {
+        if (!value || !Array.isArray(value)) return 'At least one calendar must be selected';
+        return value.length > 0 ? null : 'At least one calendar must be selected';
+      }
     }
   });
 
@@ -101,7 +117,10 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
     });
   }, [holiday]);
 
-  const handleFieldChange = (field: keyof typeof holiday, value: any) => {
+  type HolidayField = keyof typeof holiday;
+  type HolidayFieldValue = string | boolean | string[];
+  
+  const handleFieldChange = (field: HolidayField, value: HolidayFieldValue) => {
     setHoliday(prev => ({ ...prev, [field]: value }));
   };
 
@@ -147,11 +166,15 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
 
   const selectedCalendars = calendars.filter(c => holiday.calendarIds.includes(c.id));
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title={isEditing ? "Edit Holiday" : "Add Holiday"}
       size="large"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -207,7 +230,7 @@ export const HolidayDialog: React.FC<HolidayDialogProps> = ({
             <Label htmlFor="type">Holiday Type</Label>
             <Select
               value={holiday.type}
-              onValueChange={(value) => handleFieldChange('type', value as any)}
+              onValueChange={(value: string) => handleFieldChange('type', value)}
             >
               <SelectTrigger>
                 <SelectValue />

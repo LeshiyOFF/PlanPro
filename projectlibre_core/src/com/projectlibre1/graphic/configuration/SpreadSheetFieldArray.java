@@ -258,10 +258,11 @@ public class SpreadSheetFieldArray extends ArrayList implements NamedItem, Clone
 
 	}
 	/**
-	 * @return
+	 * Returns the next element.
+	 * Currently not implemented and returns null.
+	 * @return null
 	 */
 	public Object next() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

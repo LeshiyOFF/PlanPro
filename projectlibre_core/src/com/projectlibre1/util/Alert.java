@@ -82,8 +82,6 @@ public class Alert {
 		}
 	}
 	public static void warn(Object errorObject, Component parent) {
-		System.out.println("warning message " + errorObject);
-		
 		if (UIServiceAdapter.getInstance().hasDelegate()) {
 			UIServiceAdapter.getInstance().warn(errorObject);
 		} else if (allowPopups()) {
@@ -100,8 +98,6 @@ public class Alert {
 		}
 	}
 	public static void error(Object errorObject, Component parent) {
-		System.out.println("error message " + errorObject);
-		
 		if (UIServiceAdapter.getInstance().hasDelegate()) {
 			UIServiceAdapter.getInstance().error(errorObject);
 		} else if (allowPopups()) {
@@ -145,7 +141,7 @@ public class Alert {
 		try {
 			return (String)Class.forName(GRAPHIC_MANAGER).getMethod("doRenameProjectDialog",new Class[]{String.class,Set.class,boolean.class}).invoke(getGraphicManager(),new Object[]{name,projectNames,saveAs});
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to rename project via dialog", e);
 			return null;
 		}
 	}
@@ -156,7 +152,7 @@ public class Alert {
 		try {
 		    return (Frame)Class.forName(GRAPHIC_MANAGER).getMethod("getFrameInstance",null).invoke(null,null);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get frame instance", e);
 			return null;
 		}
 	}
@@ -164,7 +160,7 @@ public class Alert {
 		try {
 		    return Class.forName(GRAPHIC_MANAGER).getMethod("getInstance",null).invoke(null,null);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get graphic manager instance", e);
 			return null;
 		}
 	}
@@ -175,7 +171,7 @@ public class Alert {
 		try {
 			return Class.forName(GRAPHIC_MANAGER).getMethod(method,null).invoke(null,null);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get graphic manager method: " + method, e);
 			return null;
 		}
 	}
@@ -183,7 +179,7 @@ public class Alert {
 		try {
 			Class.forName(GRAPHIC_MANAGER).getMethod(method,new Class[] {Object.class}).invoke(null,new Object[] {value});
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to set graphic manager method: " + method, e);
 		}
 	}
 

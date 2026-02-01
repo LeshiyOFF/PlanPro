@@ -43,12 +43,19 @@ export const useUserPreferences = () => {
       setPreferences(currentPreferences => {
         // Если это полная перезагрузка (загрузка с диска, импорт или сброс настроек)
         if (event.key === 'load' || event.key === 'import' || event.key === 'reset') {
-          return { ...event.newValue };
+          const val = event.newValue;
+          if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+            return { ...val } as IUserPreferences;
+          }
+          return currentPreferences;
         }
 
         // Если это обновление конкретной категории
         const newPreferences = { ...currentPreferences };
-        (newPreferences as any)[event.key] = event.newValue;
+        const categoryKey = event.key as keyof IUserPreferences;
+        if (Object.prototype.hasOwnProperty.call(newPreferences, categoryKey)) {
+          (newPreferences as Record<keyof IUserPreferences, IUserPreferences[keyof IUserPreferences]>)[categoryKey] = event.newValue as IUserPreferences[keyof IUserPreferences];
+        }
         return newPreferences;
       });
     });

@@ -148,9 +148,7 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
 
     public void add(Node parent,List children,int position,int actionType){
     	Node p=(parent==null)?root:parent;
-//    	ArrayList trees=new ArrayList();
-//    	extractParents(children,trees);
-    	if (/*trees*/children.size()==0) return;
+    	if (children.size()==0) return;
 
     	int subprojectLevel=getChildrenSubprojectLevel(parent);
 
@@ -165,17 +163,15 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
     	}
 
     	int j=position;
-       	for (Iterator i=/*trees*/children.iterator();i.hasNext();){
+       	for (Iterator i=children.iterator();i.hasNext();){
        		Node node=(Node)i.next();
-        	//if (node.getImpl() instanceof Task) System.out.println("ADD parent="+parent+":"+(parent==null?"X":parent.isInSubproject())+", node="+node+":"+node.isInSubproject());
 			setSubprojectLevel(node,subprojectLevel);
-			//if (node.getImpl() instanceof Task) System.out.println("ADD node in sub="+node.isInSubproject());
     		if (position==-1) p.add(node);
 			else p.insert(node,j++);
        	}
     	if (isEvent(actionType)){
     		renumber();
-    		fireNodesInserted(this,addDescendants(children/*trees*/));
+    		fireNodesInserted(this,addDescendants(children));
     	}
     }
 
@@ -192,9 +188,6 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
     	int subprojectLevel=getChildrenSubprojectLevel(parent);
 
 
-//    	ArrayList trees=new ArrayList();
-//    	HierarchyUtils.extractParents(children,trees);
-
     	int childCount=p.getChildCount();
     	if (position>childCount){
     		NodeFactory nodeFactory=NodeFactory.getInstance();
@@ -208,19 +201,17 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
 
 
     	int j=position;
-       	for (Iterator i=/*trees*/children.iterator();i.hasNext();){
+       	for (Iterator i=children.iterator();i.hasNext();){
        		Node node=(Node)i.next();
        		if ((project!=null && node.getImpl() instanceof Task)||
        				(resourcePool!=null && node.getImpl() instanceof Resource)||
        				node.isVoid()){
-	        	//if (node.getImpl() instanceof Task) System.out.println("PASTE parent="+parent+":"+(parent==null?"X":parent.isInSubproject())+", node="+node+":"+node.isInSubproject());
     			setSubprojectLevel(node,subprojectLevel);
-				//if (node.getImpl() instanceof Task) System.out.println("PASTE node in sub="+node.isInSubproject());
 	    		if (position==-1) p.add(node);
 			else p.insert(node,j++);
        		}
        	}
-       	Node[] descendants=addDescendants(/*trees*/children);
+       	Node[] descendants=addDescendants(children);
 
 
        	ArrayList<Dependency> dependencies=new ArrayList<Dependency>();
@@ -431,29 +422,17 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
        	for (ListIterator i=nodes.listIterator();i.hasNext();){
        		Node node=(Node)i.next();
        		extractSameProjectBranch(node,descendants);
-//       		boolean rootNode=true;
-//        	for (Enumeration e=((NodeBridge)node).preorderEnumeration();e.hasMoreElements();rootNode=false){
-//        		Node current=(Node)e.nextElement();
-//        		if (!rootNode) descendants.add(current);
-//        	}
        	}
     	Node[] descendantsArray=(Node[]) descendants.toArray(new Node[descendants.size()]);
     	return descendantsArray;
     }
 
     private static void extractSameProjectBranch(Node parent,ArrayList descendants){
-//    	if (parent.getImpl() instanceof Subproject){
-//    		((NodeBridge)parent).removeAllChildren();
-//    		Subproject subproject=(Subproject)parent.getImpl();
-//    		//subproject.setProject(null);
-//
-//    	}else{
     	descendants.add(parent);
 	    	for (Enumeration e=parent.children();e.hasMoreElements();){
 	    		Node current=(Node)e.nextElement();
 	    		extractSameProjectBranch(current,descendants);
 	    	}
-//    	}
     }
 
 
@@ -890,7 +869,6 @@ public class MutableNodeHierarchy extends AbstractMutableNodeHierarchy{
 	 */
 	public void valueForPathChanged(TreePath path, Object newValue) {
     	Node aNode = (Node)path.getLastPathComponent();
-    	//TODO do we need to treat this?
 	}
 
 	protected boolean checkSubprojectEndVoidNodes(Node parent,List inserted){

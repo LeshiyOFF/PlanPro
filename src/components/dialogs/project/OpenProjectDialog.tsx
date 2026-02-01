@@ -1,11 +1,10 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 export interface Project {
   id: string;
@@ -52,11 +51,15 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
 
   const canOpen = selectedProjects.length > 0;
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title="Open Project"
       size="large"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -66,7 +69,7 @@ export const OpenProjectDialog: React.FC<OpenProjectDialogProps> = ({
                 <Checkbox 
                   id="readonly" 
                   checked={readOnly}
-                  onCheckedChange={setReadOnly}
+                  onCheckedChange={(checked) => setReadOnly(checked as boolean)}
                 />
                 <Label htmlFor="readonly">Open Read-Only</Label>
               </div>

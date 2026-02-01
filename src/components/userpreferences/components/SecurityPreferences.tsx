@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Plus, Trash2, ShieldCheck } from 'lucide-react';
 import { PreferencesSection } from './PreferencesSection';
 import { useUserPreferences } from '../hooks/useUserPreferences';

@@ -118,7 +118,6 @@ public class CalendarCatalog implements Document {
 	public void setAllChildrenDirty(boolean dirty) {
 	}
 	public ObjectSelectionEventManager getObjectSelectionEventManager() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

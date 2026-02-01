@@ -2,7 +2,9 @@
  * Типы для безопасной работы с API и Java сервисами
  */
 
-export interface ApiResponse<T = unknown> {
+import type { JsonObject } from '@/types/json-types';
+
+export interface ApiResponse<T = JsonObject> {
   success: boolean
   data?: T
   error?: string

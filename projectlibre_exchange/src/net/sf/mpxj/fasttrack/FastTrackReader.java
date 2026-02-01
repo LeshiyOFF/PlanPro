@@ -51,15 +51,8 @@ import net.sf.mpxj.common.NumberHelper;
 import net.sf.mpxj.listener.ProjectListener;
 import net.sf.mpxj.reader.ProjectReader;
 
-// TODO:
-// 1. Handle multiple bars per activity
-// 2. Parse the Task "created" attribute
-// 3. Resource rates
-// 4. Task and resource hyperlinks
-// 5. Project header data
-// 6. Calendars
-// 7. Handle resources with embedded commas in their names
-// 8. Parse the task and resource binary data blocks
+// NOTE: known limitations — multiple bars per activity; task "created" attribute; resource rates;
+// task/resource hyperlinks; project header data; calendars; resources with embedded commas; binary data blocks.
 
 /**
  * Reads FastTrack FTS files.

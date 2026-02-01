@@ -59,7 +59,6 @@ import com.projectlibre1.field.InvalidFormulaException;
 
 /**
  * Encapsulation of groovy formulas
- * TODO change this to bsf once bsf supports groovy:  2.3.0 rc2 or higher
  * Someday it might be nice to have a single class which holds all of the methods instead of a class per method.
  * This would allow formulas to call each other, or even other scripts
  */

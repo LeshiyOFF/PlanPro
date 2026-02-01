@@ -56,19 +56,18 @@
 package com.projectlibre.pm.calendar;
 
 /**
+ * Represents a working day with specific work hours.
  * @author Laurent Chretienneau
- *
  */
-public class WorkDay extends WorkRange{
-	protected static WorkDay nonWorkingInstance,defaultInstance;
+public class WorkDay extends WorkRange {
+	protected static WorkDay nonWorkingInstance, defaultInstance;
+
 	public WorkDay() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public WorkDay(DayType type) {
 		super(type);
-		// TODO Auto-generated constructor stub
 	}
 
 	public static WorkDay getNonWorkingDay(){

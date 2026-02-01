@@ -62,7 +62,6 @@ public class FormulaFactory {
 	private static  Hashtable formulaMap = new Hashtable();
 	public FormulaFactory() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	//	public Formula(String category,String formulaName, String variableName, String text) throws InvalidFormulaException {
 
@@ -70,18 +69,11 @@ public class FormulaFactory {
 		Formula formula = (Formula)formulaMap.get(className);
 		if (formula == null) {
 			try {
-				formula = (Formula)Class.forName(className).newInstance();
+				formula = (Formula)Class.forName(className).getDeclaredConstructor().newInstance();
 				formula.setFormulaName(formulaName);
 				formulaMap.put(className,formula);
-			} catch (InstantiationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} catch (Exception e) {
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to instantiate formula class: " + className, e);
 			}
 		}
 		return formula;

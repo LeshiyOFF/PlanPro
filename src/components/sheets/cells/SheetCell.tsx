@@ -1,19 +1,20 @@
 import React from 'react';
 import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
 import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
+import { CellValue } from '@/types/sheet/CellValueTypes';
 import { CellEditorFactory } from '../editors/CellEditorFactory';
 import { toPercent } from '@/utils/ProgressFormatter';
 
 interface SheetCellProps<T> {
   rowId: string;
   column: ISheetColumn<T>;
-  value: unknown;
+  value: CellValue;
   isEditing: boolean;
-  editValue: unknown;
+  editValue: CellValue;
   isValid: boolean;
   errorMessage?: string;
-  onStartEdit: (address: ISheetCellAddress, value: unknown) => void;
-  onValueChange: (value: unknown) => void;
+  onStartEdit: (address: ISheetCellAddress, value: CellValue) => void;
+  onValueChange: (value: CellValue) => void;
   onCommit: () => void;
   onCancel: () => void;
   onContextMenu?: (event: React.MouseEvent, row: T, columnId?: string) => void;
@@ -53,8 +54,7 @@ export const SheetCell = <T,>({
       : column.editable;
     
     if (isEditable) {
-      // Для PERCENT конвертируем дробь (0.28) в проценты (28)
-      const editableValue = column.type === SheetColumnType.PERCENT 
+      const editableValue: CellValue = column.type === SheetColumnType.PERCENT
         ? String(toPercent(Number(value) || 0))
         : value;
       onStartEdit({ rowId, columnId: column.id }, editableValue);
@@ -88,7 +88,8 @@ export const SheetCell = <T,>({
       return column.formatter(value, row);
     }
 
-    return <span className="truncate">{String(value ?? '')}</span>;
+    const displayValue = value === null || value === undefined ? '' : String(value);
+    return <span className="truncate">{displayValue}</span>;
   };
 
   return (

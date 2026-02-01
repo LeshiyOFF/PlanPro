@@ -246,7 +246,7 @@ public class JobQueue extends ThreadGroup{
 		try {
 		    return (Frame)Class.forName(GRAPHIC_MANAGER).getMethod(methodName,null).invoke(null,null);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get component from GraphicManager", e);
 			return null;
 		}
 	}

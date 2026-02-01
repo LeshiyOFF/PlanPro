@@ -2,10 +2,11 @@ import React from 'react';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 import { ISortRule, SortDirection } from '@/domain/sheets/interfaces/IDataProcessing';
 import { ArrowUp, ArrowDown, HelpCircle } from 'lucide-react';
-import { SafeTooltip, TooltipProvider } from '@/components/ui/Tooltip';
+import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip';
+import type { JsonValue } from '@/types/json-types';
 
 interface SheetHeaderProps {
-  columns: ISheetColumn[];
+  columns: ISheetColumn<Record<string, JsonValue>>[];
   sortRules?: ISortRule[];
   onSort?: (columnId: string, multiSort: boolean) => void;
 }
@@ -26,9 +27,9 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
     return null;
   };
 
-  const handleHeaderClick = (e: React.MouseEvent, column: ISheetColumn) => {
+  const handleHeaderClick = (e: React.MouseEvent, column: ISheetColumn<Record<string, JsonValue>>) => {
     if (column.sortable && onSort) {
-      onSort(column.field as string, e.ctrlKey || e.metaKey);
+      onSort(column.field, e.ctrlKey || e.metaKey);
     }
   };
 
@@ -49,7 +50,7 @@ export const SheetHeader: React.FC<SheetHeaderProps> = ({
               <div className="flex items-center">
                 <span className="truncate">{column.title}</span>
                 <div className="flex-shrink-0 min-w-[12px]">
-                  {getSortIcon(column.field as string)}
+                  {getSortIcon(column.field)}
                 </div>
                 {column.tooltip && (
                   <SafeTooltip content={column.tooltip} side="bottom">

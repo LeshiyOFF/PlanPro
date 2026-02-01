@@ -4,7 +4,7 @@
  */
 
 import { ViewType } from '@/types/ViewTypes';
-import { Duration } from '@/types/project-types';
+import type { Duration } from '@/types/Master_Functionality_Catalog';
 
 /**
  * Настройки диаграммы Ганта
@@ -143,7 +143,8 @@ export enum Theme {
   LIGHT = 'light',
   DARK = 'dark',
   HIGH_CONTRAST = 'high_contrast',
-  AUTO = 'auto'
+  AUTO = 'auto',
+  SYSTEM = 'system'
 }
 
 /**
@@ -166,8 +167,8 @@ export enum PreferencesCategory {
 export interface IPreferencesChangeEvent {
   category: PreferencesCategory;
   key: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: string | number | boolean | object | null;
+  newValue: string | number | boolean | object | null;
 }
 
 /**

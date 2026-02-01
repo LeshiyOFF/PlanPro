@@ -81,8 +81,6 @@ public abstract class AssignmentFieldOvertimeFunctor extends AssignmentFieldFunc
 	 * @see org.apache.commons.collections.Closure#execute(java.lang.Object)
 	 */
 	public void execute(Object arg0) {
-		// TODO Auto-generated method stub
-
 	}
 
 	protected double overtimeUnits;

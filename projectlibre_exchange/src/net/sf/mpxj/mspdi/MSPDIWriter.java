@@ -1999,7 +1999,7 @@ public class MSPDIWriter extends AbstractProjectWriter //claur final removed
       }
    }
 
-   // TODO share this
+   // NOTE: DAY_MASKS could be shared with other MSPDI/Planner writers if extracted to a common module.
    private static final int[] DAY_MASKS =
    {
       0x00,

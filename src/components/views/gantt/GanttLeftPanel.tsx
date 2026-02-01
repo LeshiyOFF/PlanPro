@@ -3,18 +3,19 @@ import { Button } from '@/components/ui';
 import { Plus, Link2, X } from 'lucide-react';
 import { TaskSheet } from '@/components/sheets/table/TaskSheet';
 import { Task } from '@/store/project/interfaces';
+import { IGanttTaskUpdate } from '@/types/gantt/IGanttTypes';
 
 interface GanttLeftPanelProps {
-  tasks: Task[];
-  linkingTaskId: string | null;
-  t: (key: string) => string;
-  onAddTask: () => void;
-  onCancelLink: () => void;
-  onTaskUpdate: (id: string, updates: any) => void;
-  onContextMenu: (e: React.MouseEvent, task: Task) => void;
-  onTaskSelect: (task: Task) => void;
-  onDeleteTask: (id: string) => void;
-  disabledTaskIds: string[];
+  readonly tasks: ReadonlyArray<Task>;
+  readonly linkingTaskId: string | null;
+  readonly t: (key: string) => string;
+  readonly onAddTask: () => void;
+  readonly onCancelLink: () => void;
+  readonly onTaskUpdate: (id: string, updates: IGanttTaskUpdate) => void;
+  readonly onContextMenu: (e: React.MouseEvent, task: Task) => void;
+  readonly onTaskSelect: (task: Task) => void;
+  readonly onDeleteTask: (id: string) => void;
+  readonly disabledTaskIds: ReadonlyArray<string>;
 }
 
 export const GanttLeftPanel: React.FC<GanttLeftPanelProps> = ({
@@ -43,10 +44,10 @@ export const GanttLeftPanel: React.FC<GanttLeftPanelProps> = ({
       </div>
       <div className="flex-1 min-h-0 overflow-hidden">
         <TaskSheet 
-          tasks={tasks} variant="compact" onTaskUpdate={onTaskUpdate} 
+          tasks={[...tasks]} variant="compact" onTaskUpdate={onTaskUpdate} 
           onContextMenu={onContextMenu} onRowSelect={onTaskSelect}
           onDeleteTasks={(ids) => ids.forEach(onDeleteTask)}
-          disabledTaskIds={disabledTaskIds}
+          disabledTaskIds={[...disabledTaskIds]}
         />
       </div>
     </div>

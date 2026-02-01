@@ -1,53 +1,19 @@
 import { logger } from '@/utils/logger';
+import { useProjectStore } from '@/store/projectStore';
+import type { Task } from '@/store/project/interfaces';
+import type { Resource } from '@/types/resource-types';
+import type { SearchQuery, SearchResult, SearchResponse, SearchFacets } from '@/types/search-types';
 
-export interface SearchQuery {
-  query: string;
-  type?: 'task' | 'resource' | 'project' | 'all';
-  filters?: {
-    status?: string;
-    priority?: string;
-    assignee?: string;
-    dateRange?: {
-      start: Date;
-      end: Date;
-    };
-    tags?: string[];
-  };
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
-  limit?: number;
-  offset?: number;
-}
+export type { SearchQuery, SearchResult, SearchResponse, SearchFacets };
 
-export interface SearchResult {
-  id: string;
-  type: 'task' | 'resource' | 'project';
-  title: string;
-  description?: string;
-  status?: string;
-  priority?: string;
-  assignee?: string;
-  createdDate: Date;
-  modifiedDate: Date;
-  relevanceScore?: number;
-  highlights?: string[];
-}
-
-export interface SearchResponse {
-  results: SearchResult[];
-  total: number;
-  hasMore: boolean;
-  suggestions?: string[];
-  facets?: {
-    statuses: { name: string; count: number }[];
-    priorities: { name: string; count: number }[];
-    assignees: { name: string; count: number }[];
-  };
-}
-
+/**
+ * Сервис поиска по проектным данным
+ * Интегрирован с projectStore для реального поиска
+ */
 class SearchService {
   private static instance: SearchService;
-  private readonly API_ENDPOINT = '/api/search';
+  private readonly RECENT_SEARCHES_KEY = 'recent_searches';
+  private readonly MAX_RECENT_SEARCHES = 20;
 
   private constructor() {}
 
@@ -60,217 +26,156 @@ class SearchService {
 
   async search(query: SearchQuery): Promise<SearchResponse> {
     try {
-      logger.dialog('Search initiated', { query }, 'Search');
-
-      // TODO: Replace with actual API call
-      const response = await this.performSearch(query);
-      
-      logger.dialog('Search completed', { 
-        resultsCount: response.results.length,
-        total: response.total 
-      }, 'Search');
-
+      logger.dialog('Search initiated', { query: query.query }, 'Search');
+      const response = this.performSearch(query);
+      logger.dialog('Search completed', { resultsCount: response.results.length, total: response.total }, 'Search');
       return response;
     } catch (error) {
-      logger.dialogError('Search failed', error, 'Search');
-      return {
-        results: [],
-        total: 0,
-        hasMore: false,
-        suggestions: []
-      };
+      logger.dialogError('Search failed', error instanceof Error ? error : String(error), 'Search');
+      return { results: [], total: 0, hasMore: false, suggestions: [] };
     }
   }
 
   async getSuggestions(query: string, limit: number = 5): Promise<string[]> {
     try {
-      // TODO: Replace with actual API call
-      const suggestions = await this.generateSuggestions(query, limit);
-      return suggestions;
+      return this.generateSuggestions(query, limit);
     } catch (error) {
-      logger.dialogError('Suggestions failed', error, 'Search');
+      logger.dialogError('Suggestions failed', error instanceof Error ? error : String(error), 'Search');
       return [];
     }
   }
 
   async getRecentSearches(limit: number = 10): Promise<string[]> {
     try {
-      // TODO: Replace with actual API call
-      const recentSearches = this.getStoredRecentSearches().slice(0, limit);
-      return recentSearches;
+      return this.getStoredRecentSearches().slice(0, limit);
     } catch (error) {
-      logger.dialogError('Recent searches failed', error, 'Search');
+      logger.dialogError('Recent searches failed', error instanceof Error ? error : String(error), 'Search');
       return [];
     }
   }
 
   saveRecentSearch(query: string): void {
     try {
-      const recentSearches = this.getStoredRecentSearches();
-      
-      // Remove if already exists
-      const filteredSearches = recentSearches.filter(search => search !== query);
-      
-      // Add to beginning
-      filteredSearches.unshift(query);
-      
-      // Keep only last 20
-      const limitedSearches = filteredSearches.slice(0, 20);
-      
-      localStorage.setItem('recent_searches', JSON.stringify(limitedSearches));
+      const searches = this.getStoredRecentSearches().filter(s => s !== query);
+      searches.unshift(query);
+      localStorage.setItem(this.RECENT_SEARCHES_KEY, JSON.stringify(searches.slice(0, this.MAX_RECENT_SEARCHES)));
     } catch (error) {
-      logger.dialogError('Save recent search failed', error, 'Search');
+      logger.dialogError('Save recent search failed', error instanceof Error ? error : String(error), 'Search');
     }
   }
 
   clearRecentSearches(): void {
     try {
-      localStorage.removeItem('recent_searches');
+      localStorage.removeItem(this.RECENT_SEARCHES_KEY);
     } catch (error) {
-      logger.dialogError('Clear recent searches failed', error, 'Search');
+      logger.dialogError('Clear recent searches failed', error instanceof Error ? error : String(error), 'Search');
     }
   }
 
-  private async performSearch(query: SearchQuery): Promise<SearchResponse> {
-    // TODO: Replace with actual API implementation
-    // This is a temporary implementation for development
-    
-    await new Promise(resolve => setTimeout(resolve, 800));
+  private performSearch(query: SearchQuery): SearchResponse {
+    const store = useProjectStore.getState();
+    const results: SearchResult[] = [];
+    const queryLower = query.query.toLowerCase();
 
-    // Mock data generation based on query
-    const mockResults = this.generateMockResults(query);
-    
+    if (query.type === 'all' || query.type === 'task' || !query.type) {
+      results.push(...this.searchTasks(store.tasks, queryLower));
+    }
+    if (query.type === 'all' || query.type === 'resource' || !query.type) {
+      results.push(...this.searchResources(store.resources, queryLower));
+    }
+
+    results.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+    const limit = query.limit || 20;
+    const offset = query.offset || 0;
+
     return {
-      results: mockResults,
-      total: mockResults.length + Math.floor(Math.random() * 50),
-      hasMore: mockResults.length < (query.limit || 20),
-      suggestions: this.generateMockSuggestions(query.query),
-      facets: {
-        statuses: [
-          { name: 'Новая', count: 15 },
-          { name: 'В работе', count: 23 },
-          { name: 'Завершена', count: 45 }
-        ],
-        priorities: [
-          { name: 'Высокий', count: 8 },
-          { name: 'Средний', count: 25 },
-          { name: 'Низкий', count: 50 }
-        ],
-        assignees: [
-          { name: 'Иван Петров', count: 12 },
-          { name: 'Мария Иванова', count: 18 },
-          { name: 'Алексей Сидоров', count: 23 }
-        ]
-      }
+      results: results.slice(offset, offset + limit),
+      total: results.length,
+      hasMore: offset + limit < results.length,
+      suggestions: this.generateSuggestions(query.query, 5),
+      facets: this.calculateFacets(results)
     };
   }
 
-  private generateMockResults(query: SearchQuery): SearchResult[] {
-    const mockTasks: SearchResult[] = [
-      {
-        id: 'task-1',
-        type: 'task',
-        title: 'Разработать пользовательский интерфейс',
-        description: 'Создать адаптивный интерфейс для управления задачами',
-        status: 'В работе',
-        priority: 'Высокий',
-        assignee: 'Иван Петров',
-        createdDate: new Date('2024-01-15'),
-        modifiedDate: new Date('2024-01-20'),
-        relevanceScore: 0.95,
-        highlights: ['разработать', 'интерфейс']
-      },
-      {
-        id: 'task-2',
-        type: 'task',
-        title: 'Настроить CI/CD pipeline',
-        description: 'Автоматизировать процесс сборки и развертывания',
-        status: 'Новая',
-        priority: 'Средний',
-        assignee: 'Мария Иванова',
-        createdDate: new Date('2024-01-10'),
-        modifiedDate: new Date('2024-01-10'),
-        relevanceScore: 0.87,
-        highlights: ['настроить', 'pipeline']
-      },
-      {
-        id: 'resource-1',
-        type: 'resource',
-        title: 'Frontend разработчик',
-        description: 'Специалист по React и TypeScript',
-        status: 'Доступен',
-        priority: 'Высокий',
-        assignee: 'Алексей Сидоров',
-        createdDate: new Date('2024-01-05'),
-        modifiedDate: new Date('2024-01-18'),
-        relevanceScore: 0.78,
-        highlights: ['frontend', 'разработчик']
-      },
-      {
-        id: 'project-1',
-        type: 'project',
-        title: 'Система управления проектами',
-        description: 'Веб-приложение для управления задачами и ресурсами',
+  private searchTasks(tasks: Task[], query: string): SearchResult[] {
+    return tasks
+      .filter(task => task.name.toLowerCase().includes(query) || (task.notes?.toLowerCase().includes(query)))
+      .map(task => ({
+        id: task.id,
+        type: 'task' as const,
+        title: task.name,
+        description: task.notes || '',
+        status: task.progress === 1 ? 'Завершена' : task.progress > 0 ? 'В работе' : 'Новая',
+        createdDate: task.startDate,
+        modifiedDate: task.endDate,
+        relevanceScore: this.calculateRelevance(task.name, query),
+        highlights: this.extractHighlights(task.name, query)
+      }));
+  }
+
+  private searchResources(resources: Resource[], query: string): SearchResult[] {
+    return resources
+      .filter(resource => resource.name.toLowerCase().includes(query))
+      .map(resource => ({
+        id: resource.id,
+        type: 'resource' as const,
+        title: resource.name,
+        description: resource.type || '',
         status: 'Активен',
-        priority: 'Высокий',
-        createdDate: new Date('2024-01-01'),
-        modifiedDate: new Date('2024-01-25'),
-        relevanceScore: 0.92,
-        highlights: ['проектами', 'управления']
-      }
-    ];
-
-    // Filter by type if specified
-    let filteredResults = mockTasks;
-    if (query.type && query.type !== 'all') {
-      filteredResults = mockTasks.filter(result => result.type === query.type);
-    }
-
-    // Filter by query text
-    if (query.query) {
-      const queryLower = query.query.toLowerCase();
-      filteredResults = filteredResults.filter(result =>
-        result.title.toLowerCase().includes(queryLower) ||
-        (result.description && result.description.toLowerCase().includes(queryLower))
-      );
-    }
-
-    // Sort by relevance
-    filteredResults.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
-
-    // Apply limit
-    const limit = query.limit || 20;
-    const offset = query.offset || 0;
-    return filteredResults.slice(offset, offset + limit);
+        createdDate: new Date(),
+        modifiedDate: new Date(),
+        relevanceScore: this.calculateRelevance(resource.name, query),
+        highlights: this.extractHighlights(resource.name, query)
+      }));
   }
 
-  private generateMockSuggestions(query: string): string[] {
-    const allSuggestions = [
-      'разработка интерфейса',
-      'управление задачами',
-      'CI/CD настройка',
-      'frontend разработка',
-      'проект менеджмент',
-      'реакт компоненты',
-      'typescript',
-      'автоматизация',
-      'deploy процесс',
-      'user interface'
-    ];
-
-    return allSuggestions
-      .filter(suggestion => suggestion.toLowerCase().includes(query.toLowerCase()))
-      .slice(0, 5);
+  private calculateRelevance(text: string, query: string): number {
+    const textLower = text.toLowerCase();
+    if (textLower === query) return 1.0;
+    if (textLower.startsWith(query)) return 0.9;
+    return textLower.includes(query) ? 0.7 : 0.5;
   }
 
-  private async generateSuggestions(query: string, limit: number): Promise<string[]> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return this.generateMockSuggestions(query).slice(0, limit);
+  private extractHighlights(text: string, query: string): string[] {
+    return text.match(new RegExp(`(${query})`, 'gi')) || [];
+  }
+
+  private generateSuggestions(query: string, limit: number): string[] {
+    const store = useProjectStore.getState();
+    const suggestions = new Set<string>();
+    const queryLower = query.toLowerCase();
+
+    store.tasks.forEach(task => {
+      if (task.name.toLowerCase().includes(queryLower)) suggestions.add(task.name);
+    });
+    store.resources.forEach(resource => {
+      if (resource.name.toLowerCase().includes(queryLower)) suggestions.add(resource.name);
+    });
+
+    return Array.from(suggestions).slice(0, limit);
+  }
+
+  private calculateFacets(results: SearchResult[]): SearchFacets {
+    const statuses = new Map<string, number>();
+    const priorities = new Map<string, number>();
+    const assignees = new Map<string, number>();
+
+    results.forEach(result => {
+      if (result.status) statuses.set(result.status, (statuses.get(result.status) || 0) + 1);
+      if (result.priority) priorities.set(result.priority, (priorities.get(result.priority) || 0) + 1);
+      if (result.assignee) assignees.set(result.assignee, (assignees.get(result.assignee) || 0) + 1);
+    });
+
+    return {
+      statuses: Array.from(statuses.entries()).map(([name, count]) => ({ name, count })),
+      priorities: Array.from(priorities.entries()).map(([name, count]) => ({ name, count })),
+      assignees: Array.from(assignees.entries()).map(([name, count]) => ({ name, count }))
+    };
   }
 
   private getStoredRecentSearches(): string[] {
     try {
-      const stored = localStorage.getItem('recent_searches');
+      const stored = localStorage.getItem(this.RECENT_SEARCHES_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch {
       return [];
@@ -280,4 +185,3 @@ class SearchService {
 
 export { SearchService };
 export const searchService = SearchService.getInstance();
-

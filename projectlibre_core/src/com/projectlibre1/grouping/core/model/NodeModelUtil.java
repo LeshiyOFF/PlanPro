@@ -101,8 +101,6 @@ public class NodeModelUtil {
 	}
 
 	private static void dumpTask(NodeModel nodeModel, Node parent, String indent) {
-		if (parent != null)
-			System.out.println(indent + ">" + parent.toString());
 		Collection children = nodeModel.getChildren(parent);
 		if (children != null) {
 			Iterator i = children.iterator();
@@ -110,9 +108,9 @@ public class NodeModelUtil {
 				Node n = (Node) i.next();
 				Object impl = n.getImpl();
 				if (impl instanceof Task) {
-					if (((Task) impl).getWbsParentTask() != (parent == null ? null : parent.getImpl()))
-						System.out.println("cached hierarchy error - child " + impl + " cached parent" + ((Task) impl).getWbsParentTask()
-								+ " parent " + parent.getImpl());
+					if (((Task) impl).getWbsParentTask() != (parent == null ? null : parent.getImpl())) {
+						// cached hierarchy error
+					}
 				}
 				dumpTask(nodeModel, n, indent + "--");
 			}
@@ -150,7 +148,6 @@ public class NodeModelUtil {
 				Object impl = child.getImpl();
 				if (impl instanceof Task) {
 					((Task) impl).setWbsParent(parent); // set cached wbs parent
-														// too
 					cacheWbs(nodeModel, child);
 				}
 			}

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { getActionManager, ActionManager, IActionManager } from '@/services/actions/ActionManager';
+import { getActionManager } from '@/services/actions/ActionManager';
 import { ActionContext, ActionContextType } from './ActionContext';
 import { useActionExecution } from './hooks/useActionExecution';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -24,7 +24,8 @@ export const ActionProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Контекстное значение
   const contextValue: ActionContextType = useMemo(() => ({
     actionManager,
-    ...actionExecution
+    ...actionExecution,
+    updateActionStates: actionManager.updateActionStates
   }), [
     actionManager,
     actionExecution

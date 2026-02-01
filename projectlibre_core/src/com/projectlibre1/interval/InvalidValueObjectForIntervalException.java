@@ -56,15 +56,12 @@
 package com.projectlibre1.interval;
 
 /**
- *
+ * Exception thrown when an invalid value is used for an interval operation.
  */
 public class InvalidValueObjectForIntervalException extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidValueObjectForIntervalException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidValueObjectForIntervalException(String message) {
+		super(message);
 	}
 }

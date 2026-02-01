@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { UserPreferencesService } from '@/components/userpreferences/services/UserPreferencesService';
 import { ThemeApplier } from '@/components/userpreferences/services/ThemeApplier';
-import { PreferencesCategory, Theme as AppTheme } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces';
-
-type Theme = 'dark' | 'light' | 'system' | 'high_contrast' | 'auto'
+import { PreferencesCategory, Theme } from '@/components/userpreferences/interfaces/UserPreferencesInterfaces';
 
 /**
  * Провайдер темы для приложения
@@ -22,7 +20,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: 'system',
+  theme: Theme.SYSTEM,
   setTheme: () => null,
 }
 
@@ -34,7 +32,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
-  defaultTheme = 'light',
+  defaultTheme = Theme.LIGHT,
   storageKey = 'projectlibre-ui-theme',
   ...props
 }) => {
@@ -42,7 +40,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   
   const [theme, setTheme] = useState<Theme>(() => {
     const prefs = service.getDisplayPreferences();
-    return (prefs.theme as Theme) || defaultTheme;
+    return prefs.theme ?? (defaultTheme as Theme);
   })
 
   useEffect(() => {
@@ -86,21 +84,20 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         (event.key === 'load' || event.key === 'import') ||
         (event.category === PreferencesCategory.DISPLAY && (event.key === 'display' || event.key === 'general'))
       ) {
-        const prefs = (event.key === 'load' || event.key === 'import') 
-          ? event.newValue.display 
-          : event.newValue;
-        
+        const raw = event.newValue;
+        if (raw == null || typeof raw !== 'object') return;
+        const prefs = (event.key === 'load' || event.key === 'import')
+          ? (raw as { display?: Record<string, string | number | boolean | undefined> }).display
+          : raw as Record<string, string | number | boolean | undefined>;
         if (!prefs) return;
         
-        if (prefs.theme && prefs.theme !== theme) {
+        if (typeof prefs.theme === 'string' && prefs.theme !== theme) {
           setTheme(prefs.theme as Theme);
         }
-        
-        if (prefs.accentColor) ThemeApplier.applyAccentColor(prefs.accentColor);
-        if (prefs.fontSize) ThemeApplier.applyFontSize(prefs.fontSize);
-        if (prefs.fontFamily) ThemeApplier.applyFontFamily(prefs.fontFamily);
-        
-        if (prefs.highContrast !== undefined) {
+        if (typeof prefs.accentColor === 'string') ThemeApplier.applyAccentColor(prefs.accentColor);
+        if (typeof prefs.fontSize === 'number') ThemeApplier.applyFontSize(prefs.fontSize);
+        if (typeof prefs.fontFamily === 'string') ThemeApplier.applyFontFamily(prefs.fontFamily);
+        if (typeof prefs.highContrast === 'boolean') {
           ThemeApplier.applyHighContrast(prefs.highContrast);
         }
       }
@@ -112,7 +109,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      service.updateDisplayPreferences({ theme: newTheme as any });
+      service.updateDisplayPreferences({ theme: newTheme });
       setTheme(newTheme);
     },
   }

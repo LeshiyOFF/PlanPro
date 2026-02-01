@@ -67,6 +67,7 @@ import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 import com.projectlibre1.configuration.Dictionary;
 import com.projectlibre1.configuration.ReportDefinition;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.graphic.configuration.SpreadSheetFieldArray;
 import com.projectlibre1.timescale.TimeIterator;
 import com.projectlibre1.util.ClassLoaderUtils;
@@ -85,8 +86,7 @@ public class ReportUtil {
 		try {
 			return url.openStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log(e);
 			return null;
 		}
 	}
@@ -98,8 +98,7 @@ public class ReportUtil {
 		try {
 			return url.openStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log(e);
 			return null;
 		}
 	}

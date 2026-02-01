@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { StatusBarService } from '../services/StatusBarService';
 import { 
   IStatusBarService, 
@@ -83,7 +83,7 @@ export const useStatusBar = (): IStatusBarService => {
  */
 export const useStatusBarState = (): IStatusBarState => {
   const statusBarService = StatusBarService.getInstance();
-  const [state, setState] = React.useState(statusBarService.getState());
+  const [state, setState] = useState(statusBarService.getState());
 
   useEffect(() => {
     const unsubscribe = statusBarService.subscribe(setState);

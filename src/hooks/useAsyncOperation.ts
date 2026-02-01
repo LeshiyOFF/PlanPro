@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { JsonObject } from '@/types/json-types';
 
 interface AsyncState<T> {
   data: T | null;
@@ -6,16 +7,21 @@ interface AsyncState<T> {
   error: string | null;
 }
 
-interface AsyncOperationOptions {
-  onSuccess?: (data: any) => void;
+/** Дефолтный тип данных асинхронной операции (вместо unknown) */
+export type DefaultAsyncData = JsonObject;
+
+export interface AsyncOperationOptions<T = DefaultAsyncData> {
+  onSuccess?: (data: T) => void;
   onError?: (error: Error) => void;
   loadingMessage?: string;
+  /** Сообщение для пользователя при ошибке (подставляется в state.error). */
+  errorMessage?: string;
 }
 
 /**
  * Hook для управления асинхронными операциями с loading и error states
  */
-export const useAsyncOperation = <T = any>(initialState: Partial<AsyncState<T>> = {}) => {
+export const useAsyncOperation = <T = DefaultAsyncData>(initialState: Partial<AsyncState<T>> = {}) => {
   const [state, setState] = useState<AsyncState<T>>({
     data: null,
     loading: false,
@@ -25,16 +31,20 @@ export const useAsyncOperation = <T = any>(initialState: Partial<AsyncState<T>> 
 
   const execute = useCallback(async (
     asyncFunction: () => Promise<T>,
-    options: AsyncOperationOptions = {}
+    optionsOrMessage: AsyncOperationOptions | string = {}
   ): Promise<T | null> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    const options: AsyncOperationOptions = typeof optionsOrMessage === 'string'
+      ? { errorMessage: optionsOrMessage }
+      : optionsOrMessage;
+
+    setState(prev => ({ ...prev, loading: true, error: null, data: prev.data ?? null }));
 
     try {
       const result = await asyncFunction();
-      
+
       setState(prev => ({
         ...prev,
-        data: result,
+        data: result ?? null,
         loading: false,
         error: null
       }));
@@ -45,12 +55,13 @@ export const useAsyncOperation = <T = any>(initialState: Partial<AsyncState<T>> 
 
       return result;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      
+      const displayError = options.errorMessage ?? (error instanceof Error ? error.message : 'An unknown error occurred');
+
       setState(prev => ({
         ...prev,
         loading: false,
-        error: errorMessage
+        error: displayError,
+        data: prev.data ?? null
       }));
 
       if (options.onError) {
@@ -85,26 +96,33 @@ export const useAsyncOperation = <T = any>(initialState: Partial<AsyncState<T>> 
 /**
  * Hook для batch асинхронных операций
  */
-export const useBatchOperations = <T = any>() => {
+export const useBatchOperations = <T = DefaultAsyncData>() => {
   const [operations, setOperations] = useState<Map<string, AsyncState<T>>>(new Map());
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   const execute = useCallback(async (
     key: string,
     asyncFunction: () => Promise<T>,
-    options: AsyncOperationOptions = {}
+    optionsOrMessage: AsyncOperationOptions<T> | string = {}
   ): Promise<T | null> => {
-    setOperations(prev => new Map(prev).set(key, { 
-      ...prev.get(key), 
-      loading: true, 
-      error: null 
-    }));
+    const options: AsyncOperationOptions<T> = typeof optionsOrMessage === 'string'
+      ? { errorMessage: optionsOrMessage }
+      : optionsOrMessage;
+
+    setOperations(prev => {
+      const current = prev.get(key);
+      return new Map(prev).set(key, {
+        data: current?.data ?? null,
+        loading: true,
+        error: null
+      });
+    });
 
     try {
       const result = await asyncFunction();
       
       setOperations(prev => new Map(prev).set(key, {
-        data: result,
+        data: result ?? null,
         loading: false,
         error: null
       }));
@@ -117,11 +135,14 @@ export const useBatchOperations = <T = any>() => {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       
-      setOperations(prev => new Map(prev).set(key, {
-        data: prev.get(key)?.data || null,
-        loading: false,
-        error: errorMessage
-      }));
+      setOperations(prev => {
+        const current = prev.get(key);
+        return new Map(prev).set(key, {
+          data: current?.data ?? null,
+          loading: false,
+          error: errorMessage
+        });
+      });
 
       setGlobalError(errorMessage);
 
@@ -150,7 +171,8 @@ export const useBatchOperations = <T = any>() => {
     setOperations(prev => {
       const newMap = new Map(prev);
       newMap.forEach((_, key) => {
-        newMap.set(key, { ...newMap.get(key), error: null });
+        const current = newMap.get(key);
+        newMap.set(key, { data: current?.data ?? null, loading: current?.loading ?? false, error: null });
       });
       return newMap;
     });

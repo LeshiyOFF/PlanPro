@@ -6,6 +6,7 @@ import { SearchService, type SearchResult } from '@/services/SearchService';
 import { 
   FindDialogData, 
   IDialogActions,
+  IDialogData,
   DialogResult 
 } from '@/types/dialog/DialogTypes';
 
@@ -42,11 +43,16 @@ const useSearchService = () => {
   const performSearch = useCallback(async (text: string, type: string): Promise<SearchResult[]> => {
     try {
       const searchService = SearchService.getInstance();
-      const filters = type !== 'all' ? { type: type as any } : undefined;
-      const results = await searchService.search(text, filters);
-      return results;
+      const query: Parameters<SearchService['search']>[0] = {
+        query: text,
+        type: type === 'all' ? undefined : (type as 'task' | 'resource' | 'project')
+      };
+      const response = await searchService.search(query);
+      return response.results;
     } catch (error) {
-      logger.error('Search failed in dialog:', error);
+      logger.error('Search failed in dialog:', {
+        error: error instanceof Error ? error.message : String(error)
+      });
       return [];
     }
   }, []);
@@ -118,29 +124,42 @@ const createSearchActions = (selectedResult: SearchResult | null): IDialogAction
   return {
     onOk: async () => {
       if (selectedResult) {
-        logger.info('Opening search result:', selectedResult);
-        // Здесь должна быть логика открытия найденного элемента
+        logger.info('Opening search result:', {
+          id: selectedResult.id,
+          type: selectedResult.type,
+          title: selectedResult.title
+        });
         window.open(`/open/${selectedResult.type}/${selectedResult.id}`, '_blank');
       }
-      return { success: true, data: selectedResult };
     },
-    
+
     onCancel: () => {
       logger.info('Search dialog cancelled');
     },
-    
+
     onHelp: () => {
       logger.info('Opening search help...');
       window.open('/help/search', '_blank');
-    }
+    },
+
+    onValidate: () => true
   };
 };
+
+/**
+ * Props для FindDialog (не наследуем FindDialogData из-за индексной сигнатуры IDialogData)
+ */
+export interface FindDialogProps {
+  data?: Partial<FindDialogData>;
+  isOpen: boolean;
+  onClose: (result: DialogResult<FindDialogData>) => void;
+}
 
 /**
  * Диалог поиска по проектным данным
  * Реализует SOLID принцип Single Responsibility
  */
-export const FindDialog: React.FC<FindDialogData> = (data) => {
+export const FindDialog: React.FC<FindDialogProps> = (props) => {
   const [searchState, setSearchState] = useState<SearchState>(getInitialSearchState());
   const [selectedResult, setSelectedResult] = useState<SearchResult | null>(null);
   const { performSearch } = useSearchService();
@@ -166,12 +185,20 @@ export const FindDialog: React.FC<FindDialogData> = (data) => {
     return () => clearTimeout(timer);
   }, [searchState.searchText, searchState.searchType, handleSearch]);
 
+  const dialogData: IDialogData & { query?: string } = {
+    id: props.data?.id ?? 'find-dialog',
+    title: props.data?.title ?? 'Поиск',
+    timestamp: props.data?.timestamp ?? new Date(),
+    description: props.data?.description,
+    query: props.data?.query
+  };
+
   return (
     <BaseDialog
-      data={{
-        ...data,
-        actions
-      }}
+      isOpen={props.isOpen}
+      onClose={props.onClose}
+      data={dialogData}
+      actions={actions}
       config={{
         width: 600,
         height: 500,
@@ -202,14 +229,16 @@ export const FindDialog: React.FC<FindDialogData> = (data) => {
               Выбран: {selectedResult.title}
             </div>
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => actions.onCancel()}>
+              <Button variant="outline" onClick={() => actions.onCancel?.()}>
                 Отмена
               </Button>
               <Button onClick={async () => {
                 try {
-                  await actions.onOk();
+                  await actions.onOk?.();
                 } catch (error) {
-                  logger.error('Failed to open search result:', error);
+                  logger.error('Failed to open search result:', {
+                    error: error instanceof Error ? error.message : String(error)
+                  });
                 }
               }}>
                 Открыть

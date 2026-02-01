@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigation } from '@/providers/NavigationProvider';
-import { Separator } from '@/components/ui/separator';
 
 /**
  * Секция информация о представлении

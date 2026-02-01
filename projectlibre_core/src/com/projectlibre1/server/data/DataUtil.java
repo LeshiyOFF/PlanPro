@@ -61,89 +61,78 @@ import java.util.Collection;
 
 import com.projectlibre1.pm.resource.ResourcePool;
 import com.projectlibre1.pm.task.Project;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.session.Session;
 
 public class DataUtil {
+	private static final String SERIALIZER_CLASS = "com.projectlibre1.server.data.Serializer";
 	protected Object obj;
 	protected Class clazz;
-	public DataUtil(){
+	
+	public DataUtil() {
 		try {
-			clazz=Class.forName("com.projectlibre1.server.data.Serializer");
-			obj=clazz.newInstance();
+			clazz = Class.forName(SERIALIZER_CLASS);
+			obj = clazz.newInstance();
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Serializer class not found: " + SERIALIZER_CLASS, e);
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Failed to instantiate Serializer", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access to Serializer", e);
 		}
 	}
 	
-    public DocumentData serializeDocument(Project project) throws Exception{
+	public DocumentData serializeDocument(Project project) throws Exception {
 		try {
-			return (DocumentData)clazz.getMethod("serializeDocument", new Class[]{Project.class}).invoke(obj, new Object[]{project});
+			return (DocumentData) clazz.getMethod("serializeDocument", new Class[]{Project.class})
+				.invoke(obj, new Object[]{project});
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in serializeDocument", e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception in serializeDocument", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in serializeDocument", e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in serializeDocument", e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method serializeDocument not found", e);
 		}
 		return null;
-    	
-    }
-    public Project deserializeLocalDocument(DocumentData documentData) throws IOException, ClassNotFoundException {
+	}
+	public Project deserializeLocalDocument(DocumentData documentData) throws IOException, ClassNotFoundException {
 		try {
-			return (Project)clazz.getMethod("deserializeLocalDocument", new Class[]{DocumentData.class}).invoke(obj, new Object[]{documentData});
+			return (Project) clazz.getMethod("deserializeLocalDocument", new Class[]{DocumentData.class})
+				.invoke(obj, new Object[]{documentData});
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in deserializeLocalDocument", e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception in deserializeLocalDocument", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in deserializeLocalDocument", e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in deserializeLocalDocument", e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method deserializeLocalDocument not found", e);
 		}
 		return null;
-    }
+	}
 	
-	public static void setEnterpriseResources(Collection resources,ResourcePool resourcePool) throws IOException, ClassNotFoundException{
+	public static void setEnterpriseResources(Collection resources, ResourcePool resourcePool) 
+			throws IOException, ClassNotFoundException {
 		try {
-			Class.forName("com.projectlibre1.server.data.Serializer").getMethod("setEnterpriseResources", new Class[]{Collection.class,ResourcePool.class, Session.class}).invoke(null, new Object[]{resources,resourcePool,null});
+			Class.forName(SERIALIZER_CLASS)
+				.getMethod("setEnterpriseResources", new Class[]{Collection.class, ResourcePool.class, Session.class})
+				.invoke(null, new Object[]{resources, resourcePool, null});
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in setEnterpriseResources", e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception in setEnterpriseResources", e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in setEnterpriseResources", e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in setEnterpriseResources", e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method setEnterpriseResources not found", e);
 		}
 	}
 

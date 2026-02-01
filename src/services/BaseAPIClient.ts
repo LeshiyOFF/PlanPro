@@ -1,21 +1,11 @@
 import { EnvironmentConfig } from '@/config/EnvironmentConfig';
+import { StrictData } from '@/types/Master_Functionality_Catalog';
+import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError';
 
 // Master Functionality Catalog типы
 import type {
-  ID,
-  Project,
-  Task,
-  Resource,
-  Assignment,
-  Dependency,
-  View,
-  ExportFormat,
-  ImportFormat,
-  DependencyType,
-  Percentage,
-  ValidationResult,
   ValidationError
-} from '@/types'
+} from '../types/Master_Functionality_Catalog'
 
 /**
  * Конфигурация API клиента
@@ -31,7 +21,7 @@ export interface APIClientConfig {
 /**
  * Базовый ответ API
  */
-export interface APIResponse<T> {
+export interface APIResponse<T = StrictData> {
   data: T;
   success: boolean;
   message?: string;
@@ -82,7 +72,7 @@ export abstract class BaseAPIClient {
    * Выполнение HTTP запроса с обработкой ошибок
    * Следует Single Responsibility Principle
    */
-  protected async request<T>(
+  protected async request<T = StrictData>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<APIResponse<T>> {
@@ -121,13 +111,14 @@ export abstract class BaseAPIClient {
 
       if (!response.ok) {
         // Пытаемся получить тело ответа для диагностики
-        let errorBody: any;
+        let errorBody: StrictData;
         try {
           const text = await response.text();
           console.error('[BaseAPIClient] Error response body:', text);
-          errorBody = JSON.parse(text);
+          errorBody = JSON.parse(text) as StrictData;
         } catch (e) {
           console.error('[BaseAPIClient] Could not parse error response body');
+          errorBody = { message: 'Could not parse error response body' };
         }
         
         throw new APIError(
@@ -138,46 +129,45 @@ export abstract class BaseAPIClient {
         );
       }
 
-      const result = await response.json();
+      const result = await response.json() as APIResponse<T>;
       console.log('[BaseAPIClient] Response data:', result);
       return result;
     } catch (error) {
       console.error('[BaseAPIClient] Request failed:', error);
-      throw this.handleRequestError(error);
+      throw this.handleRequestError(toCaughtError(error));
     }
   }
 
   /**
    * Обработка ошибок запроса
    */
-  private handleRequestError(error: unknown): APIError {
+  private handleRequestError(error: CaughtError): APIError {
     if (error instanceof APIError) {
       return error;
     }
 
-    if (error instanceof Error) {
-      return new APIError(error.message, 0, 'Network Error');
-    }
-
-    return new APIError('Unknown error occurred', 0, 'Unknown');
+    return new APIError(getErrorMessage(error), 0, 'Unknown');
   }
 
   /**
    * GET запрос
    */
-  protected async get<T>(
+  protected async get<T = StrictData>(
     endpoint: string,
-    params?: Record<string, any>
+    params?: Record<string, string | number | boolean | undefined>
   ): Promise<APIResponse<T>> {
     let url = endpoint;
     if (params) {
-      const searchParams = new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          acc[key] = String(value);
-          return acc;
-        }, {} as Record<string, string>)
-      );
-      url += `?${searchParams}`;
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, String(value));
+        }
+      });
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
     }
 
     return this.request<T>(url);
@@ -186,9 +176,9 @@ export abstract class BaseAPIClient {
   /**
    * POST запрос
    */
-  protected async post<T>(
+  protected async post<T = StrictData>(
     endpoint: string,
-    data?: any
+    data?: StrictData
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
@@ -199,9 +189,9 @@ export abstract class BaseAPIClient {
   /**
    * PUT запрос
    */
-  protected async put<T>(
+  protected async put<T = StrictData>(
     endpoint: string,
-    data?: any
+    data?: StrictData
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
@@ -212,7 +202,7 @@ export abstract class BaseAPIClient {
   /**
    * DELETE запрос
    */
-  protected async delete<T>(
+  protected async delete<T = StrictData>(
     endpoint: string
   ): Promise<APIResponse<T>> {
     return this.request<T>(endpoint, {
@@ -223,7 +213,7 @@ export abstract class BaseAPIClient {
   /**
    * Загрузка файла (для import/export)
    */
-  protected async upload<T>(
+  protected async upload<T = StrictData>(
     endpoint: string,
     file: File,
     additionalData?: Record<string, string>
@@ -239,11 +229,7 @@ export abstract class BaseAPIClient {
 
     return this.request<T>(endpoint, {
       method: 'POST',
-      body: formData,
-      headers: {
-        // Убираем Content-Type для FormData
-        'Content-Type': undefined
-      }
+      body: formData
     });
   }
 
@@ -252,17 +238,20 @@ export abstract class BaseAPIClient {
    */
   protected async download(
     endpoint: string,
-    params?: Record<string, any>
+    params?: Record<string, string | number | boolean | undefined>
   ): Promise<Blob> {
     let url = endpoint;
     if (params) {
-      const searchParams = new URLSearchParams(
-        Object.entries(params).reduce((acc, [key, value]) => {
-          acc[key] = String(value);
-          return acc;
-        }, {} as Record<string, string>)
-      );
-      url += `?${searchParams}`;
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, String(value));
+        }
+      });
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
     }
 
     const response = await fetch(`${this.baseURL}${url}`, {
@@ -290,7 +279,7 @@ export class APIError extends Error {
     message: string,
     public readonly status?: number,
     public readonly statusText?: string,
-    public readonly details?: any
+    public readonly details?: StrictData
   ) {
     super(message);
     this.name = 'APIError';

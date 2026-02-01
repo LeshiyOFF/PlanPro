@@ -81,7 +81,7 @@ public class PersonalContourBuilderFunctor extends AssignmentFieldFunctor{
 
 	private PersonalContourBuilderFunctor(Assignment assignment, WorkCalendar workCalendar, ContourBucketIntervalGenerator contourBucketIntervalGenerator, CollectionIntervalGenerator replacementGenerator, Collection collection) {
 		super(assignment, workCalendar, contourBucketIntervalGenerator);
-		assignmentWork = assignment.calcWork(); //TODO verify if need work or duration
+		assignmentWork = assignment.calcWork();
 		this.replacementGenerator = replacementGenerator;
 		this.collection = collection;
 	}

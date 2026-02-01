@@ -136,8 +136,7 @@ public class WorkingHours implements Cloneable, Serializable {
 				try {
 					list.add(new WorkRange(start,end));
 				} catch (WorkRangeException e) {
-					// this should never happen
-					e.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Unexpected WorkRangeException during intersection", e);
 				}
 		}
 		// make a new working hours and use the work ranges that were generated
@@ -177,8 +176,7 @@ public class WorkingHours implements Cloneable, Serializable {
 			setInterval(number,getHoursAndMinutes(start),getHoursAndMinutes(end));
 			return true;
 		} catch (WorkRangeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to set interval from dates", e);
 			return false;
 		}
 		
@@ -376,7 +374,7 @@ public class WorkingHours implements Cloneable, Serializable {
 				
 				
 			} catch (WorkRangeException e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize default working hours", e);
 			}
 		}
 		return defaultWorkingHours;
@@ -396,7 +394,7 @@ public class WorkingHours implements Cloneable, Serializable {
 				
 				
 			} catch (WorkRangeException e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize non-stop working hours", e);
 			}
 		}
 		return nonStopWorkingHours;

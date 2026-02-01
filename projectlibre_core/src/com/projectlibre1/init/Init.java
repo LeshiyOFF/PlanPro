@@ -67,9 +67,6 @@ public class Init {
 	private static Init instance = null;
 	private Init(boolean loadConfiguration) {
 		instance = this;
-		//if (loadConfiguration)System.setSecurityManager(null); // turn off security mananger so groovy will run.
-		//TODO figure out security issue
-
 		if (loadConfiguration) loadConfiguration();
 		FieldConverter.getInstance();
 		if (!Environment.getStandAlone()){

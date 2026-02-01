@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { PerformanceMetricsCollector } from '@/providers/ReactProfilerProvider';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { useSentry } from '@/providers/SentryProvider';
@@ -23,6 +23,7 @@ export const useAppInitialization = () => {
     const metricsCollector = PerformanceMetricsCollector.getInstance({
       enabled: process.env.NODE_ENV === 'development',
       collectInterval: 30000,
+      maxHistorySize: 100,
       performanceThresholds: {
         renderTime: 16,
         memoryUsage: 100,
@@ -43,14 +44,16 @@ export const useAppInitialization = () => {
         await ipcService.subscribeToJavaEvents();
         logger.info('Subscribed to Java events via IPC service');
       } catch (error) {
-        logger.error('Failed to subscribe to Java events:', error);
+        logger.error('Failed to subscribe to Java events:', {
+          message: error instanceof Error ? error.message : String(error),
+        });
       }
     };
 
     initializeJavaEvents();
   }, [ipcService]);
 
-  const handleGlobalError = useCallback((error: Error, errorInfo: any) => {
+  const handleGlobalError = useCallback((error: Error, errorInfo: React.ErrorInfo) => {
     handleError(error, 'App Root');
     captureError(error, {
       component: 'App',

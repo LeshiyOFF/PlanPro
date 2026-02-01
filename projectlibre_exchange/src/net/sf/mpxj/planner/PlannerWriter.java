@@ -362,9 +362,7 @@ public final class PlannerWriter extends AbstractProjectWriter
             }
          }
 
-         /**
-          * @TODO we need to deal with date ranges here
-          */
+         // LIMITATION: date ranges in calendar exceptions are not written; only single-day exceptions are handled.
       }
    }
 

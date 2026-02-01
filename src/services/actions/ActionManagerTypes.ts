@@ -1,5 +1,4 @@
 import type { IAction } from './BaseAction';
-import { logger } from '@/utils/logger';
 
 /**
  * Категории действий

@@ -124,8 +124,9 @@ public class PersonalContour extends AbstractContour {
 	
 	public void validate() {
 		for (int i = 0; i < this.contourBuckets.length; i++)
-			if (contourBuckets[i].getBucketDuration(0) < 0 || contourBuckets[i].getUnits()< 0)
-				System.out.println("error neg bucket!\n" + this.toString(0));
+			if (contourBuckets[i].getBucketDuration(0) < 0 || contourBuckets[i].getUnits()< 0) {
+				com.projectlibre1.server.access.ErrorLogger.log("Negative bucket in PersonalContour: " + this.toString(0), null);
+			}
 	}
 	
 	public static PersonalContour getInstance(AbstractContourBucket[] contourBuckets) {
@@ -155,9 +156,6 @@ public class PersonalContour extends AbstractContour {
 	 * @param newDuration: The new duration to set to.
 	 */	
 	public AbstractContour adjustDuration(long newDuration, long actualDuration) {
-		//TODO incorporate actual duration
-		
-		
 		PersonalContour newContour = constructUsingSizeOf(this);
 		
 		PersonalContourBucket bucket = null;

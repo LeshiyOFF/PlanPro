@@ -157,7 +157,7 @@ public final class DateHelper
 
    /**
     * Compare two dates, handling null values.
-    * TODO: correct the comparison order to align with Date.compareTo
+    * LIMITATION: comparison order for nulls differs from Date.compareTo (nulls are ordered last here).
     *
     * @param d1 Date instance
     * @param d2 Date instance

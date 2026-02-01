@@ -56,36 +56,24 @@
 package com.projectlibre1.field;
 
 /**
- * 
+ * Exception thrown when a field value cannot be parsed from user input.
  */
 public class FieldParseException extends Exception {
-	/**
-	 * 
-	 */
+	private static final long serialVersionUID = 1L;
+
 	public FieldParseException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
-	/**
-	 * @param arg0
-	 */
-	public FieldParseException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+
+	public FieldParseException(String message) {
+		super(message);
 	}
-	/**
-	 * @param arg0
-	 * @param arg1
-	 */
-	public FieldParseException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+
+	public FieldParseException(String message, Throwable cause) {
+		super(message, cause);
 	}
-	/**
-	 * @param arg0
-	 */
-	public FieldParseException(Throwable arg0) {
-		this(arg0.getMessage()); // use message from other one
-//		super(arg0);
+
+	public FieldParseException(Throwable cause) {
+		this(cause.getMessage());
 	}
 }

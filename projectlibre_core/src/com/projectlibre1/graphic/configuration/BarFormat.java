@@ -197,13 +197,9 @@ public class BarFormat implements NamedItem {
 	public ScheduleIntervalGenerator getScheduleIntervalGenerator() {
 		if (intervalGenerator!=null&&scheduleIntervalGenerator==null){
 			try {
-				scheduleIntervalGenerator=(ScheduleIntervalGenerator)Class.forName(intervalGenerator).newInstance();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				scheduleIntervalGenerator=(ScheduleIntervalGenerator)Class.forName(intervalGenerator).getDeclaredConstructor().newInstance();
+			} catch (Exception e) {
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to instantiate interval generator: " + intervalGenerator, e);
 			}
 		}
 		return scheduleIntervalGenerator;

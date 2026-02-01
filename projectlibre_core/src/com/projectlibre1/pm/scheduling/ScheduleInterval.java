@@ -165,8 +165,7 @@ public class ScheduleInterval implements HasStartAndEnd, Cloneable {
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone ScheduleInterval", e);
 			return null;
 		}
 	}

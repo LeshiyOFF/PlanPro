@@ -61,12 +61,18 @@ import com.projectlibre1.document.Document;
 import com.projectlibre1.grouping.core.Node;
 
 /**
- * 
+ * Interface for node models used by walkers.
  */
 public interface WalkersNodeModel {
 	public List getChildren(Node parent);
 	public Node getParent(Node child);
 	public Node search(Object key); 
 	public boolean isSummary(Node node);
-	public Document getDocument(); //for duration calculation (need calendar)
+
+	/**
+	 * Returns the document associated with this node model.
+	 * Used for duration calculations that require a calendar.
+	 * @return the document
+	 */
+	public Document getDocument();
 }

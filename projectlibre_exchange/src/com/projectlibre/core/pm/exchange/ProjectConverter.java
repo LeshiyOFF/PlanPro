@@ -90,7 +90,8 @@ public class ProjectConverter {
 	
 	public Object convert(String format, Type type, boolean from, Object externalObject, Object projectlibreObject, Object state) throws Exception{
 		String converterName;
-		if (format.toLowerCase().equals("mpx")) //TODO move to a configuration file
+		// NOTE: MPX converter name hardcoded; external config not used.
+		if (format.toLowerCase().equals("mpx"))
 			converterName="com.projectlibre.core.pm.exchange.converters.mpx.Mpx";
 		else if (format.toLowerCase().equals("op"))
 			converterName="com.projectlibre.core.pm.exchange.converters.op.Op";

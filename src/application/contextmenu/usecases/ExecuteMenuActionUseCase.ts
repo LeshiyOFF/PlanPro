@@ -1,4 +1,25 @@
 import { IContextMenu } from '@/domain/contextmenu/entities/ContextMenu';
+import { getErrorMessage } from '@/utils/errorUtils';
+
+/**
+ * Тип для подменю
+ */
+type ISubmenu = IMenuItem[];
+
+/**
+ * Пункт меню (локальный интерфейс для устранения конфликтов импорта)
+ */
+interface IMenuItem {
+  id: string;
+  label: string;
+  separator?: boolean;
+  disabled?: boolean;
+  action?: {
+    execute(): Promise<void>;
+    canExecute(): boolean;
+  };
+  submenu?: IMenuItem[];
+}
 
 /**
  * Use Case для выполнения действия пункта меню
@@ -36,14 +57,14 @@ export class ExecuteMenuActionUseCase {
     try {
       await menuItem.action.execute();
     } catch (error) {
-      throw new Error(`Failed to execute menu action ${actionId}: ${error.message}`);
+      throw new Error(`Failed to execute menu action ${actionId}: ${getErrorMessage(error)}`);
     }
   }
 
   /**
    * Найти пункт меню в дереве меню
    */
-  private findMenuItem(menu: IContextMenu, actionId: string): any {
+  private findMenuItem(menu: IContextMenu, actionId: string): IMenuItem | null {
     // Поиск в основных пунктах меню
     const item = menu.items.find(item => item.id === actionId);
     if (item) return item;
@@ -62,7 +83,7 @@ export class ExecuteMenuActionUseCase {
   /**
    * Рекурсивный поиск в подменю
    */
-  private searchInSubmenu(submenu: any[], actionId: string): any {
+  private searchInSubmenu(submenu: ISubmenu, actionId: string): IMenuItem | null {
     for (const item of submenu) {
       if (item.id === actionId) return item;
       

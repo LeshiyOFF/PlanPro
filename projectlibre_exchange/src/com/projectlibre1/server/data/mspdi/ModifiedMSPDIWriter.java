@@ -327,7 +327,8 @@ public class ModifiedMSPDIWriter extends MSPDIWriter {
 
 				timephasedList.add(t);
 			}
-			public boolean acceptValue(double value) { //TODO hack, consumeTimephased shouldn't give PT0H0M0S
+			// LIMITATION: zero value filtered (acceptValue); consumeTimephased may emit PT0H0M0S.
+			public boolean acceptValue(double value) {
 				return value!=0.0;
 			}
 		}, m_factory);

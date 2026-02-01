@@ -710,8 +710,8 @@ abstract class FieldMap
        * @param fixedDataBlockIndex identifies which block the data comes from
        * @param fixedDataOffset fixed data block offset
        * @param varDataKey var data block key
-       * @param mask TODO
-       * @param metaBlock TODO
+       * @param mask bit mask for the field
+       * @param metaBlock meta block index
        */
       FieldItem(FieldType type, FieldLocation location, int fixedDataBlockIndex, int fixedDataOffset, int varDataKey, long mask, int metaBlock)
       {

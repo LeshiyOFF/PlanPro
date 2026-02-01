@@ -70,7 +70,6 @@ public interface TimeDistributedConstants {
 	public static final Object WORK = Configuration.getFieldFromId("Field.work");
 	public static final Object ACTUAL_WORK = Configuration.getFieldFromId("Field.actualWork");
 	public static final Object REMAINING_WORK = Messages.getString("Field.remainingWork");	
-	//TODO add overtime work
 	public static final Object BASELINE_WORK = Configuration.getFieldFromId("Field.baselineWork");
 	
 	public static final Object COST = Configuration.getFieldFromId("Field.cost");

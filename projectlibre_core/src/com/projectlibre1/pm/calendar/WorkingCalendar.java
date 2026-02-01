@@ -74,6 +74,7 @@ import com.projectlibre1.grouping.core.Node;
 import com.projectlibre1.grouping.core.hierarchy.NodeHierarchy;
 import com.projectlibre1.options.CalendarOption;
 import com.projectlibre1.pm.key.HasCommonKeyImpl;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.strings.Messages;
 import com.projectlibre1.util.DateTime;
 /**
@@ -115,20 +116,19 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 		try {
 			cal.setBaseCalendar(base);
 		} catch (CircularDependencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Circular dependency setting base calendar", e);
 		}
 		return cal;
 	}
+	
 	public static WorkingCalendar getStandardBasedInstance() {
 		WorkingCalendar cal = getInstance();
 		try {
 			cal.setBaseCalendar(WorkingCalendar.getStandardInstance());
 		} catch (CircularDependencyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Circular dependency setting standard base calendar", e);
 		}
-		return cal; //TODO should share this instance
+		return cal;
 	}
 
 	public Object clone() throws CloneNotSupportedException {
@@ -140,15 +140,13 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 
 
 	public WorkingCalendar makeScratchCopy() {
-		WorkingCalendar newOne = null;
+		WorkingCalendar newOne = new WorkingCalendar();
+		newOne.baseCalendar = baseCalendar;
+		newOne.setName(getName());
 		try {
-			newOne = new WorkingCalendar();
-			newOne.baseCalendar = baseCalendar;
-			newOne.setName(getName());
 			newOne.differences = (CalendarDefinition) differences.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Failed to clone calendar differences", e);
 		}
 		return newOne;
 	}
@@ -351,7 +349,7 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 			working.getWorkingHours().setInterval(0,hourTime(8), hourTime(12));
 			working.getWorkingHours().setInterval(1,hourTime(13), hourTime(17));
 		} catch (WorkRangeException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize standard calendar intervals", e);
 		}
 
 
@@ -387,7 +385,7 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 		try {
 			working.getWorkingHours().setInterval(0,hourTime(0), hourTime(0));
 		} catch (WorkRangeException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize 24 hours calendar intervals", e);
 		}
 
 
@@ -417,7 +415,7 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 		try {
 			monday.getWorkingHours().setInterval(0,hourTime(23), hourTime(0));
 		} catch (WorkRangeException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize night shift monday interval", e);
 		}
 		nightShiftInstance.setWeekDay(Calendar.MONDAY-1,monday);
 
@@ -426,7 +424,7 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 			working.getWorkingHours().setInterval(1,hourTime(4), hourTime(8));
 			working.getWorkingHours().setInterval(2,hourTime(23), hourTime(0));
 		} catch (WorkRangeException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize night shift intervals", e);
 		}
 		nightShiftInstance.setWeekDay(Calendar.TUESDAY-1,working);
 		nightShiftInstance.setWeekDay(Calendar.WEDNESDAY-1,working);
@@ -438,7 +436,7 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 			saturday.getWorkingHours().setInterval(0,hourTime(0), hourTime(3));
 			saturday.getWorkingHours().setInterval(1,hourTime(4), hourTime(8));
 		} catch (WorkRangeException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to initialize night shift saturday interval", e);
 		}
 		nightShiftInstance.setWeekDay(Calendar.SATURDAY-1,saturday);
 
@@ -694,7 +692,6 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 		return dirty;
 	}
 	public void setDirty(boolean dirty) {
-		//System.out.println("WorkingCalendar _setDirty("+dirty+"): "+getName());
 		this.dirty = dirty;
 	}
 

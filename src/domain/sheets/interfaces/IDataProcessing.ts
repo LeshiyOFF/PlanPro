@@ -1,3 +1,5 @@
+import { CellValue } from '@/types/sheet/CellValueTypes';
+
 /**
  * Направление сортировки
  */
@@ -34,7 +36,7 @@ export enum FilterOperator {
 export interface IFilterRule {
   columnId: string;
   operator: FilterOperator;
-  value: any;
+  value: CellValue;
 }
 
 /**
@@ -45,5 +47,3 @@ export interface IDataProcessorResult<T> {
   activeSortRules: ISortRule[];
   activeFilterRules: IFilterRule[];
 }
-
-

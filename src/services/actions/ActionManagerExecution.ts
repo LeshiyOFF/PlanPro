@@ -1,7 +1,6 @@
-import { getActionManager, IActionManager } from './ActionManager';
+import { IActionManager } from './ActionManager';
 import { IAction } from './BaseAction';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
-import { EventType } from '@/types/Master_Functionality_Catalog';
+import type { StrictData } from '@/types/Master_Functionality_Catalog';
 import { logger } from '@/utils/logger';
 import { ActionCategory } from './ActionManagerTypes';
 
@@ -30,18 +29,12 @@ export class ActionManagerWithExecution implements IActionManager {
       await action.execute();
       logger.info(`Action executed successfully: ${action.name}`);
     } catch (error) {
-      const errorEvent: UIEvent = {
-        type: EventType.ERROR_OCCURRED,
-        source: 'ActionManager',
-        timestamp: new Date(),
-        data: {
-          actionId,
-          actionName: action.name,
-          error: error instanceof Error ? error.message : String(error)
-        }
+      const logData: StrictData = {
+        actionId,
+        actionName: action.name,
+        error: error instanceof Error ? error.message : String(error)
       };
-      
-      logger.error(`Action execution failed: ${action.name}`, errorEvent);
+      logger.error(`Action execution failed: ${action.name}`, logData);
       throw error;
     }
   }
@@ -95,18 +88,10 @@ export class ActionManagerWithExecution implements IActionManager {
   }
 
   /**
-   * Обновление состояний действий
+   * Обновление состояний действий (резерв для расширения IAction)
    */
   public updateActionStates(): void {
-    const actions = this.getAllActions();
-    if (!actions) return;
-    
-    actions.forEach(action => {
-      if (action.getState) {
-        const state = action.getState();
-        // Обновление UI на основе состояния
-      }
-    });
+    // Состояния обновляются при необходимости; IAction не определяет getState/updateState
   }
 
   /**
@@ -129,7 +114,9 @@ export class ActionManagerWithExecution implements IActionManager {
   public updateAllActionStates(): void {
     this.actions.forEach(action => {
       try {
-        action.updateState?.();
+        if ('updateState' in action && typeof (action as { updateState?: () => void }).updateState === 'function') {
+          (action as { updateState: () => void }).updateState();
+        }
       } catch (error) {
         console.warn(`Failed to update state for action ${action.id}:`, error);
       }

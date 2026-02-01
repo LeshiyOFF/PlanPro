@@ -113,7 +113,7 @@ public class AssignmentNodeModel extends DefaultNodeModel implements ObjectEvent
 		if (objectEvent.getObject() instanceof Assignment) {
 			Assignment assignment = ((Assignment)objectEvent.getObject());
 			if (assignment.isDefault()) return;
-			if (assignment.getDocument(containsLeftObjects) == document) { //TODO check if it's correct
+			if (assignment.getDocument(containsLeftObjects) == document) {
 				if (objectEvent.isCreate()) {
 					Object parentObject=containsLeftObjects ? assignment.getLeft() : assignment.getRight();
 							Node parent=search(parentObject);
@@ -210,7 +210,7 @@ public class AssignmentNodeModel extends DefaultNodeModel implements ObjectEvent
 		while (i.hasNext()) { // go thru tasks or resources
 			parent = (Node)i.next();
 			if (! (parent.getImpl() instanceof HasAssignments)) {
-				continue; //TODO currently getting voidNodeImpl's.  This should go away when fixed
+				continue;
 			}
 			HasAssignments hasAssignments = (HasAssignments)parent.getImpl();
 			for (j = hasAssignments.getAssignments().iterator();j.hasNext();) {
@@ -243,25 +243,6 @@ public class AssignmentNodeModel extends DefaultNodeModel implements ObjectEvent
 
 	public boolean confirmRemove(List nodes) {
 		return true;
-// This code is commented out since the user was getting prompted multiple times.  With Undo, it's less important
-//		if (Environment.isBatchMode())
-//			return true;
-//		Iterator i = nodes.iterator();
-//		Object impl;
-//		boolean hasActuals = false;
-//		while (i.hasNext()) {
-//			impl = ((Node)i.next()).getImpl();
-//			if (impl instanceof Schedule) {
-//				if (((Schedule)impl).getPercentComplete() > 0.0D) {
-//					hasActuals = true;
-//					break;
-//				}
-//			}
-//		}
-//		if (hasActuals)
-//			return Alert.okCancel(Messages.getString("Message.allowDeleteActuals"));
-//		else
-//			return true;
 	}
 
 

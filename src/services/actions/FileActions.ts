@@ -1,5 +1,4 @@
 import { BaseAction } from './BaseAction';
-import type { UIEvent } from '@/types/Master_Functionality_Catalog';
 import { EventType } from '@/types/Master_Functionality_Catalog';
 import { logger } from '@/utils/logger';
 import { MainWindowDependencies } from './registry/BaseActionRegistry';
@@ -22,10 +21,16 @@ export class NewProjectAction extends BaseAction {
 
   public async execute(): Promise<void> {
     this.logAction(EventType.FILE_ACTION, { action: 'new' });
-    if (this.dependencies.fileOperations) {
-      await this.dependencies.fileOperations.createNewProject();
+    const fileOps = this.dependencies.fileOperations;
+    if (fileOps) {
+      await fileOps.createNewProject();
     } else {
-      await this.dependencies.projectProvider.createProject();
+      const createProject = this.dependencies.projectProvider.createProject;
+      if (createProject) {
+        await createProject('');
+      } else {
+        logger.warning('NewProjectAction: ни fileOperations, ни createProject не доступны');
+      }
     }
   }
 }
@@ -74,9 +79,10 @@ export class SaveProjectAction extends BaseAction {
 
   public async execute(): Promise<void> {
     this.logAction(EventType.FILE_ACTION, { action: 'save' });
-    if (this.dependencies.fileOperations) {
-      await this.dependencies.fileOperations.saveProject();
-    } else if (this.dependencies.projectProvider.currentProject) {
+    const fileOps = this.dependencies.fileOperations;
+    if (fileOps?.saveProject) {
+      await fileOps.saveProject();
+    } else if (this.dependencies.projectProvider?.currentProject && this.dependencies.projectProvider?.saveProject) {
       await this.dependencies.projectProvider.saveProject(this.dependencies.projectProvider.currentProject);
     }
   }
@@ -124,8 +130,8 @@ export class PrintAction extends BaseAction {
 
   public async execute(): Promise<void> {
     this.logAction(EventType.FILE_ACTION, { action: 'print' });
-    // TODO: Implement print functionality
-    logger.info('Print functionality requested');
+    window.print();
+    logger.info('Print executed');
   }
 }
 

@@ -1,17 +1,26 @@
 import React, { useMemo } from 'react';
 import { ProjectBaseline } from '@/store/project/interfaces';
 import { ViewMode } from 'gantt-task-react';
-import { CalendarDateService } from '@/services/CalendarDateService';
 import { GanttNavigationService } from '@/services/GanttNavigationService';
 
+/**
+ * Типизированная задача для Baseline Overlay
+ */
+interface IBaselineTask {
+  readonly id: string;
+  readonly type?: string;
+  readonly originalTask?: {
+    readonly isFiller?: boolean;
+  };
+}
+
 interface BaselineOverlayProps {
-  tasks: any[];
-  activeBaseline: ProjectBaseline;
-  projectStartDate: Date;
-  columnWidth: number;
-  viewMode: ViewMode;
-  rowHeight: number;
-  headerHeight: number;
+  readonly tasks: ReadonlyArray<IBaselineTask>;
+  readonly activeBaseline: ProjectBaseline;
+  readonly projectStartDate: Date;
+  readonly columnWidth: number;
+  readonly viewMode: ViewMode;
+  readonly rowHeight: number;
 }
 
 export const BaselineOverlay: React.FC<BaselineOverlayProps> = ({
@@ -20,8 +29,7 @@ export const BaselineOverlay: React.FC<BaselineOverlayProps> = ({
   projectStartDate,
   columnWidth,
   viewMode,
-  rowHeight,
-  headerHeight
+  rowHeight
 }) => {
   const overlayElements = useMemo(() => {
     return tasks.map((task, index) => {

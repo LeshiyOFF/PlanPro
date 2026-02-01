@@ -1,5 +1,6 @@
 import React, { useEffect, useCallback } from 'react';
 import { useProjectStore } from '@/store/projectStore';
+import { getElectronAPI } from '@/utils/electronAPI';
 
 /**
  * Компонент-guard для предотвращения случайного выхода при несохраненных изменениях.
@@ -10,22 +11,23 @@ import { useProjectStore } from '@/store/projectStore';
 export const UnsavedChangesGuard: React.FC = () => {
   const isDirty = useProjectStore((state) => state.isDirty);
   
-  const handleBeforeUnload = useCallback((event: BeforeUnloadEvent) => {
+  const handleBeforeUnload = useCallback((event: BeforeUnloadEvent): string | undefined => {
     if (isDirty) {
-      // Стандартный способ показать диалог подтверждения в браузере
       event.preventDefault();
       event.returnValue = '';
       return '';
     }
+    return undefined;
   }, [isDirty]);
   
   const handleElectronClose = useCallback(async () => {
     if (!isDirty) return true;
-    
-    if (!window.electronAPI) return true;
-    
+
+    const api = getElectronAPI();
+    if (!api?.showMessageBox) return true;
+
     try {
-      const result = await window.electronAPI.showMessageBox({
+      const result = await api.showMessageBox({
         type: 'warning',
         title: 'Несохраненные изменения',
         message: 'В проекте есть несохраненные изменения. Вы уверены, что хотите выйти?',
@@ -47,8 +49,9 @@ export const UnsavedChangesGuard: React.FC = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     
     // Регистрируем обработчик для Electron
-    if (window.electronAPI?.onCloseRequested) {
-      window.electronAPI.onCloseRequested(handleElectronClose);
+    const api = getElectronAPI();
+    if (api?.onCloseRequested) {
+      api.onCloseRequested(handleElectronClose);
     }
     
     return () => {

@@ -1,11 +1,11 @@
-import type { Profiler, ProfilerOnRenderCallback } from 'react';
+import type { ProfilerOnRenderCallback } from 'react';
 
 /**
  * Интерфейс для метрик профилирования
  */
 export interface ProfilerMetrics {
   id: string;
-  phase: 'mount' | 'update';
+  phase: 'mount' | 'update' | 'nested-update';
   actualDuration: number;
   baseDuration: number;
   startTime: number;
@@ -72,19 +72,18 @@ export class ReactProfilerService {
   /**
    * Получить callback для React Profiler
    */
-  public getProfilerCallback(id: string): ProfilerOnRenderCallback {
+  public getProfilerCallback(_id: string): ProfilerOnRenderCallback {
     if (!this.enabled) {
       return () => {};
     }
 
-    return (
+    const callback: ProfilerOnRenderCallback = (
       id: string,
-      phase: 'mount' | 'update',
+      phase: 'mount' | 'update' | 'nested-update',
       actualDuration: number,
       baseDuration: number,
       startTime: number,
-      commitTime: number,
-      interactions: any[]
+      commitTime: number
     ) => {
       const metric: ProfilerMetrics = {
         id,
@@ -93,17 +92,16 @@ export class ReactProfilerService {
         baseDuration,
         startTime,
         commitTime,
-        interactions: interactions ? interactions.map(i => i.id || i.name) : [],
+        interactions: [],
       };
 
       this.recordMetric(metric);
       this.updateComponentProfile(id, actualDuration);
-      
-      // Вызов кастомного обработчика если предоставлен
       if (this.config.onMetrics) {
         this.config.onMetrics(metric);
       }
     };
+    return callback;
   }
 
   /**

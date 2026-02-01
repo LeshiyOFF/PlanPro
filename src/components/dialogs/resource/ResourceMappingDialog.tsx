@@ -1,11 +1,10 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
 export interface ResourceMapping {
@@ -58,12 +57,13 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
     accessLevel: 'read'
   });
 
-  const { validate, errors, isValid } = useDialogValidation({
+  const { errors } = useDialogValidation({
     sourceField: {
       required: true,
       validate: (value) => {
-        if (!value.trim()) return 'Source field is required';
-        if (currentMappings.some(m => m.sourceField === value)) {
+        const str = typeof value === 'string' ? value : String(value ?? '');
+        if (!str.trim()) return 'Source field is required';
+        if (currentMappings.some(m => m.sourceField === str)) {
           return 'Source field already mapped';
         }
         return null;
@@ -72,8 +72,9 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
     targetField: {
       required: true,
       validate: (value) => {
-        if (!value.trim()) return 'Target field is required';
-        if (currentMappings.some(m => m.targetField === value)) {
+        const str = typeof value === 'string' ? value : String(value ?? '');
+        if (!str.trim()) return 'Target field is required';
+        if (currentMappings.some(m => m.targetField === str)) {
           return 'Target field already mapped';
         }
         return null;
@@ -87,8 +88,8 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
         id: `mapping-${Date.now()}`,
         sourceField: newMapping.sourceField!,
         targetField: newMapping.targetField!,
-        editorType: newMapping.editorType as any,
-        accessLevel: newMapping.accessLevel as any
+        editorType: (newMapping.editorType ?? 'text') as ResourceMapping['editorType'],
+        accessLevel: (newMapping.accessLevel ?? 'read') as ResourceMapping['accessLevel']
       };
       
       setCurrentMappings(prev => [...prev, mapping]);
@@ -105,7 +106,7 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
     setCurrentMappings(prev => prev.filter(m => m.id !== mappingId));
   };
 
-  const handleMappingChange = (mappingId: string, field: keyof ResourceMapping, value: any) => {
+  const handleMappingChange = (mappingId: string, field: keyof ResourceMapping, value: string | number | boolean | string[]) => {
     setCurrentMappings(prev => 
       prev.map(m => m.id === mappingId ? { ...m, [field]: value } : m)
     );
@@ -120,11 +121,12 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
     !currentMappings.some(m => m.sourceField === newMapping.sourceField) &&
     !currentMappings.some(m => m.targetField === newMapping.targetField);
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Resource Mapping Configuration"
       size="large"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -210,7 +212,7 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
               <Label htmlFor="editorType">Editor Type</Label>
               <Select
                 value={newMapping.editorType}
-                onValueChange={(value) => setNewMapping(prev => ({ ...prev, editorType: value as any }))}
+                onValueChange={(value) => setNewMapping(prev => ({ ...prev, editorType: value as ResourceMapping['editorType'] }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -229,7 +231,7 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
               <Label htmlFor="accessLevel">Access Level</Label>
               <Select
                 value={newMapping.accessLevel}
-                onValueChange={(value) => setNewMapping(prev => ({ ...prev, accessLevel: value as any }))}
+                onValueChange={(value) => setNewMapping(prev => ({ ...prev, accessLevel: value as ResourceMapping['accessLevel'] }))}
               >
                 <SelectTrigger>
                   <SelectValue />

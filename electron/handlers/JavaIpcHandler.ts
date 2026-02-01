@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import { JavaBridgeService } from '../services/JavaBridgeService';
 import { IpcChannels } from '../types/IpcChannels';
 import { SanityService } from '../services/SanityService';
-import { SchemaValidatorService } from '../services/SchemaValidatorService';
+import { SchemaValidatorService, type RawJavaResponseShape } from '../services/SchemaValidatorService';
 import { JavaLauncherError } from '../services/JavaLauncherError';
 
 /**
@@ -35,13 +35,19 @@ export class JavaIpcHandler {
     ipcMain.handle(IpcChannels.JAVA_EXECUTE_COMMAND, async (_, { command, args }) => {
       const sanitizedArgs = SanityService.sanitize(args);
       const rawResult = await javaBridge.executeCommand(command, sanitizedArgs);
-      return SchemaValidatorService.validateResponse(rawResult);
+      if (typeof rawResult !== 'object' || rawResult === null) {
+        throw new Error('Invalid Java response: expected object');
+      }
+      return SchemaValidatorService.validateResponse(rawResult as RawJavaResponseShape);
     });
 
     ipcMain.handle(IpcChannels.JAVA_API_REQUEST, async (_, { command, args }) => {
       const sanitizedArgs = SanityService.sanitize(args);
       const rawResult = await javaBridge.getApiClient().makeRequest(command, sanitizedArgs);
-      return SchemaValidatorService.validateResponse(rawResult);
+      if (typeof rawResult !== 'object' || rawResult === null) {
+        throw new Error('Invalid Java response: expected object');
+      }
+      return SchemaValidatorService.validateResponse(rawResult as RawJavaResponseShape);
     });
 
     ipcMain.handle('java-subscribe-events', () => ({ success: true, message: 'Subscribed' }));

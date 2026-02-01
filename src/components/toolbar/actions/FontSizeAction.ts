@@ -1,12 +1,12 @@
 import { ToolbarAction } from './ToolbarAction';
 import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
+import { textFormattingService } from '@/services/TextFormattingService';
 
 /**
  * Действие для изменения размера шрифта
  * Кнопка форматирования TF004
  */
 export class FontSizeAction extends ToolbarAction {
-  private currentSize: number = 12;
   private readonly sizes: number[] = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 72];
 
   constructor() {
@@ -14,21 +14,26 @@ export class FontSizeAction extends ToolbarAction {
   }
 
   /**
+   * Выполняет действие (IAction). Открытие выбора размера — в createButton.
+   */
+  override async execute(): Promise<void> {
+    // Базовый вызов без аргумента; выбор размера через UI кнопки
+  }
+
+  /**
    * Устанавливает размер шрифта
    */
-  execute(size?: number): void {
-    if (size !== undefined && this.sizes.includes(size)) {
-      this.currentSize = size;
+  setSize(size: number): void {
+    if (this.sizes.includes(size)) {
+      textFormattingService.setFontSize(size);
     }
-    console.log(`Размер шрифта: ${this.currentSize}`);
-    // TODO: Интеграция с TextFormatter или FontManager
   }
 
   /**
    * Возвращает текущий размер шрифта
    */
   getCurrentSize(): number {
-    return this.currentSize;
+    return textFormattingService.getFontSize();
   }
 
   /**
@@ -42,22 +47,22 @@ export class FontSizeAction extends ToolbarAction {
    * Создаёт экземпляр кнопки для тулбара с dropdown
    */
   createButton(): IToolbarButton {
+    const currentSize = this.getCurrentSize();
     const dropdownItems = this.sizes.map(size => ({
       id: `${this.id}-${size}`,
       label: `${size}pt`,
-      icon: size === this.currentSize ? '✓' : '',
-      onClick: () => this.execute(size)
+      icon: size === currentSize ? '✓' : '',
+      onClick: () => this.setSize(size)
     }));
 
     return {
       id: this.id,
-      label: `${this.currentSize}pt`,
+      label: `${currentSize}pt`,
       icon: this.icon,
       tooltip: this.tooltip,
       disabled: this.disabled,
       dropdownItems,
       onClick: () => {
-        // Показать dropdown меню
         console.log('Показать меню выбора размера шрифта');
       }
     };

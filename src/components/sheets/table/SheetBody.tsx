@@ -1,21 +1,23 @@
 import React from 'react';
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn';
 import { ISheetCellAddress } from '@/domain/sheets/interfaces/ISheetCell';
+import { CellValue } from '@/types/sheet/CellValueTypes';
 import { SheetRow } from './SheetRow';
+import type { JsonValue } from '@/types/json-types';
 
-interface SheetBodyProps<T> {
+export interface SheetBodyProps<T extends Record<string, JsonValue>> {
   data: T[];
   columns: ISheetColumn<T>[];
   rowIdField: keyof T;
   isEditing: (rowId: string, columnId: string) => boolean;
   isSelected: (rowId: string) => boolean;
   onRowClick: (rowId: string, isMulti: boolean, isRange: boolean) => void;
-  editValue: any;
+  editValue: CellValue;
   isValid: boolean;
   errorMessage?: string;
-  onStartEdit: (address: ISheetCellAddress, value: any) => void;
-  onValueChange: (value: any) => void;
-  onCommit: () => void;
+  onStartEdit: (address: ISheetCellAddress, value: CellValue) => void;
+  onValueChange: (value: CellValue) => void;
+  onCommit: (value?: CellValue) => void;
   onCancel: () => void;
   onContextMenu?: (event: React.MouseEvent, row: T, columnId?: string) => void;
   disabledRowIds?: string[];
@@ -24,7 +26,7 @@ interface SheetBodyProps<T> {
 /**
  * Тело профессиональной таблицы
  */
-export const SheetBody = <T extends Record<string, any>>({
+export const SheetBody = <T extends Record<string, JsonValue>>({
   data,
   columns,
   rowIdField,
@@ -43,10 +45,10 @@ export const SheetBody = <T extends Record<string, any>>({
 }: SheetBodyProps<T>) => {
   return (
     <tbody className="divide-y divide-gray-100">
-      {data.map((row, index) => {
+      {data.map((row) => {
         const rowId = String(row[rowIdField]);
         const isDisabled = disabledRowIds.includes(rowId);
-        
+
         return (
           <SheetRow
             key={rowId}
@@ -71,5 +73,3 @@ export const SheetBody = <T extends Record<string, any>>({
     </tbody>
   );
 };
-
-

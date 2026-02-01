@@ -6,10 +6,13 @@ import type {
   Assignment,
   Percentage,
   ValidationResult,
-  ValidationError
-} from '@/types'
+  ValidationError,
+  ResourceAvailability,
+  StrictData
+} from '../types/Master_Functionality_Catalog'
 
-import { BaseAPIClient, type APIResponse, type APIClientConfig } from './BaseAPIClient'
+import { BaseAPIClient, type APIClientConfig, APIError } from './BaseAPIClient'
+import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError'
 
 /**
  * Валидация ресурса перед отправкой
@@ -30,12 +33,15 @@ class ResourceValidator {
       })
     }
 
-    if (resource.cost && resource.cost.standardRate.amount < 0) {
-      errors.push({
-        field: 'cost.standardRate',
-        message: 'Стандартная ставка не может быть отрицательной',
-        code: 'INVALID_COST'
-      })
+    if (resource.cost) {
+      const standardRate = typeof resource.cost.standardRate === 'number' ? resource.cost.standardRate : resource.cost.standardRate.amount;
+      if (standardRate < 0) {
+        errors.push({
+          field: 'cost.standardRate',
+          message: 'Стандартная ставка не может быть отрицательной',
+          code: 'INVALID_COST'
+        })
+      }
     }
 
     return {
@@ -43,6 +49,16 @@ class ResourceValidator {
       errors,
       warnings: []
     }
+  }
+}
+
+/**
+ * Расширенная ошибка валидации ресурса
+ */
+export class ResourceValidationError extends Error {
+  constructor(message: string, public readonly validationErrors: ValidationError[]) {
+    super(message);
+    this.name = 'ResourceValidationError';
   }
 }
 
@@ -67,7 +83,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
       const response = await this.get<Resource[]>(`/projects/${projectId.value}/resources`);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, 'Failed to fetch resources');
+      throw this.handleResourceError(toCaughtError(error), 'Failed to fetch resources');
     }
   }
 
@@ -79,7 +95,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
       const response = await this.get<Resource>(`/resources/${id.value}`);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to fetch resource ${id.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to fetch resource ${id.value}`);
     }
   }
 
@@ -90,16 +106,17 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     // Валидация перед созданием
     const validation = ResourceValidator.validateResource(resource);
     if (!validation.valid) {
-      const error = new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`);
-      (error as any).validationErrors = validation.errors;
-      throw error;
+      throw new ResourceValidationError(
+        `Validation failed: ${validation.errors.map(e => e.message).join(', ')}`,
+        validation.errors
+      );
     }
 
     try {
-      const response = await this.post<Resource>('/resources', resource);
+      const response = await this.post<Resource>('/resources', resource as StrictData);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, 'Failed to create resource');
+      throw this.handleResourceError(toCaughtError(error), 'Failed to create resource');
     }
   }
 
@@ -110,16 +127,17 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     // Валидация перед обновлением
     const validation = ResourceValidator.validateResource(resource);
     if (!validation.valid) {
-      const error = new Error(`Validation failed: ${validation.errors.map(e => e.message).join(', ')}`);
-      (error as any).validationErrors = validation.errors;
-      throw error;
+      throw new ResourceValidationError(
+        `Validation failed: ${validation.errors.map(e => e.message).join(', ')}`,
+        validation.errors
+      );
     }
 
     try {
-      const response = await this.put<Resource>(`/resources/${id.value}`, resource);
+      const response = await this.put<Resource>(`/resources/${id.value}`, resource as StrictData);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to update resource ${id.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to update resource ${id.value}`);
     }
   }
 
@@ -130,7 +148,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     try {
       await this.delete<void>(`/resources/${id.value}`);
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to delete resource ${id.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to delete resource ${id.value}`);
     }
   }
 
@@ -139,13 +157,14 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
    */
   async assignResource(taskId: ID, resourceId: ID, units: Percentage): Promise<Assignment> {
     try {
-      const response = await this.post<Assignment>(`/tasks/${taskId.value}/assignments`, {
-        resourceId,
-        units
-      });
+      const body: StrictData = {
+        resourceId: resourceId.value,
+        units: typeof units === 'number' ? units : Number(units)
+      };
+      const response = await this.post<Assignment>(`/tasks/${taskId.value}/assignments`, body);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to assign resource ${resourceId.value} to task ${taskId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to assign resource ${resourceId.value} to task ${taskId.value}`);
     }
   }
 
@@ -156,7 +175,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     try {
       await this.delete<void>(`/tasks/${taskId.value}/assignments/${resourceId.value}`);
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to unassign resource ${resourceId.value} from task ${taskId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to unassign resource ${resourceId.value} from task ${taskId.value}`);
     }
   }
 
@@ -165,10 +184,10 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
    */
   async updateAssignment(assignmentId: ID, assignment: Partial<Assignment>): Promise<Assignment> {
     try {
-      const response = await this.put<Assignment>(`/assignments/${assignmentId.value}`, assignment);
+      const response = await this.put<Assignment>(`/assignments/${assignmentId.value}`, assignment as StrictData);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to update assignment ${assignmentId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to update assignment ${assignmentId.value}`);
     }
   }
 
@@ -180,7 +199,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
       const response = await this.get<Assignment[]>(`/resources/${resourceId.value}/assignments`);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to fetch assignments for resource ${resourceId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to fetch assignments for resource ${resourceId.value}`);
     }
   }
 
@@ -192,7 +211,7 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
       const response = await this.get<Assignment[]>(`/tasks/${taskId.value}/assignments`);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to fetch assignments for task ${taskId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to fetch assignments for task ${taskId.value}`);
     }
   }
 
@@ -208,25 +227,25 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
     page?: number;
   }): Promise<Resource[]> {
     try {
-      const response = await this.get<Resource[]>('/resources/search', params);
+      const response = await this.get<Resource[]>('/resources/search', params as Record<string, string | number | boolean | undefined>);
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, 'Failed to search resources');
+      throw this.handleResourceError(toCaughtError(error), 'Failed to search resources');
     }
   }
 
   /**
    * Получение доступности ресурса
    */
-  async getResourceAvailability(resourceId: ID, startDate: Date, endDate: Date): Promise<any> {
+  async getResourceAvailability(resourceId: ID, startDate: Date, endDate: Date): Promise<ResourceAvailability> {
     try {
-      const response = await this.get<any>(`/resources/${resourceId.value}/availability`, {
+      const response = await this.get<ResourceAvailability>(`/resources/${resourceId.value}/availability`, {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString()
       });
       return response.data;
     } catch (error) {
-      throw this.handleResourceError(error, `Failed to get availability for resource ${resourceId.value}`);
+      throw this.handleResourceError(toCaughtError(error), `Failed to get availability for resource ${resourceId.value}`);
     }
   }
 
@@ -234,18 +253,30 @@ export class ResourceAPIClient extends BaseAPIClient implements ResourceAPI {
    * Обработка ошибок специфичных для ресурсов
    * Следует Single Responsibility Principle
    */
-  private handleResourceError(error: unknown, context: string): Error {
-    if (error instanceof Error && (error as any).validationErrors) {
-      const validationError = new Error(`${context}: ${(error as any).validationErrors.map((e: ValidationError) => e.message).join(', ')}`);
-      (validationError as any).validationErrors = (error as any).validationErrors;
-      return validationError;
+  private handleResourceError(error: CaughtError, context: string): Error {
+    if (error instanceof ResourceValidationError) {
+      return error;
+    }
+
+    if (error instanceof APIError && error.details && typeof error.details === 'object') {
+      const details = error.details as Record<string, StrictData & { validationErrors?: Array<Record<string, string>> }>;
+      if (Array.isArray(details.validationErrors)) {
+        const validationErrors: ValidationError[] = details.validationErrors.map((e: StrictData) => {
+          const r = e && typeof e === 'object' && !Array.isArray(e) ? (e as Record<string, string>) : {};
+          return { field: r.field ?? '', message: r.message ?? '', code: r.code ?? 'VALIDATION_ERROR' };
+        });
+        return new ResourceValidationError(
+          `${context}: ${String(details.message || 'Validation failed')}`,
+          validationErrors
+        );
+      }
     }
 
     if (error instanceof Error) {
       return new Error(`${context}: ${error.message}`);
     }
 
-    return new Error(`${context}: Unknown error occurred`);
+    return new Error(`${context}: ${getErrorMessage(error)}`);
   }
 }
 

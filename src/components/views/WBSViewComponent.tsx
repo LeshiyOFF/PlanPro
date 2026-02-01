@@ -6,8 +6,8 @@ import { WBSView } from './WBSView';
  * WBS (Work Breakdown Structure) компонент-обертка
  */
 export const WBSViewComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, 
-  settings 
+  viewType: _viewType, 
+  settings: _settings 
 }) => {
   return <WBSView />;
 };

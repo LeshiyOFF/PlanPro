@@ -23,8 +23,8 @@ interface WBSCanvasCoreProps {
  */
 export const WBSCanvasCore = forwardRef<WBSCanvasHandle, WBSCanvasCoreProps>(({
   nodes: initialNodes,
-  width = 2000,
-  height = 1200,
+  width: _width = 2000,
+  height: _height = 1200,
   zoomLevel = 1,
   onNodeToggle,
   onNodeSelect,
@@ -79,7 +79,6 @@ export const WBSCanvasCore = forwardRef<WBSCanvasHandle, WBSCanvasCoreProps>(({
   const getCanvasPoint = useCallback((e: React.MouseEvent | React.WheelEvent): CanvasPoint => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     return { 
       x: (e.clientX - rect.left) * (canvas.width / rect.width), 
       y: (e.clientY - rect.top) * (canvas.height / rect.height) 

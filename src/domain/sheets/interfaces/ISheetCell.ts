@@ -1,4 +1,10 @@
 /**
+ * Интерфейсы для ячеек таблицы.
+ */
+
+import { CellValue } from '@/types/sheet/CellValueTypes';
+
+/**
  * Координаты ячейки
  */
 export interface ISheetCellAddress {
@@ -11,10 +17,8 @@ export interface ISheetCellAddress {
  */
 export interface ISheetEditState {
   address: ISheetCellAddress;
-  originalValue: any;
-  currentValue: any;
+  originalValue: CellValue;
+  currentValue: CellValue;
   isValid: boolean;
   errorMessage?: string;
 }
-
-

@@ -88,8 +88,10 @@ public class MpxAssignmentConverter {
 		if (mpxAssignment.getResourceUniqueID().intValue() == Resource.UNASSIGNED_ID) 
 			resource=state.getResourcePool().getUnassignedResource();
 		else resource = state.getResource(mpxAssignment.getResource());
-		if (resource==null)
-			return; //TODO handle error or log
+		if (resource==null) {
+			com.projectlibre1.server.access.ErrorLogger.log("MpxAssignmentConverter: resource is null");
+			return;
+		}
 		assignment.setResource(resource);
 		
 		//convert fields

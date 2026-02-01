@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/Input';
-import { DatePicker } from '@/components/ui/DatePicker';
+import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Task } from '@/store/project/interfaces';
 import { ProgressSection, TaskType } from './ProgressSection';
 

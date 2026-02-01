@@ -56,42 +56,24 @@
 package com.projectlibre1.pm.key.uniqueid;
 
 /**
- *
+ * Exception thrown when a unique ID conflict or validation error occurs.
  */
 public class UniqueIdException extends Exception {
 	private static final long serialVersionUID = 173829993296L;
 
-	/**
-	 * 
-	 */
 	public UniqueIdException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param message
-	 */
 	public UniqueIdException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param cause
-	 */
 	public UniqueIdException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 */
 	public UniqueIdException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
-
 }

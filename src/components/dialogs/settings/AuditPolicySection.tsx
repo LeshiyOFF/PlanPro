@@ -12,10 +12,12 @@ interface AuditPolicyData {
   alertOnPermissionChange: boolean;
 }
 
+type AuditPolicyValue = boolean | number | 'error' | 'warning' | 'info' | 'debug';
+
 interface AuditPolicySectionProps {
   data: AuditPolicyData;
-  onChange: (field: keyof AuditPolicyData, value: any) => void;
-  errors?: Record<string, string>;
+  onChange: (field: keyof AuditPolicyData, value: AuditPolicyValue) => void;
+  errors?: Record<string, string | null>;
 }
 
 export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
@@ -42,7 +44,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
           <Checkbox
             id="enabled"
             checked={data.enabled}
-            onCheckedChange={(checked) => onChange('enabled', checked)}
+            onCheckedChange={(checked) => onChange('enabled', checked === true)}
           />
           <Label htmlFor="enabled" className="text-sm">
             Включить аудит безопасности
@@ -57,7 +59,11 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
               label="Уровень логирования"
               type="select"
               value={data.logLevel}
-              onChange={(value) => onChange('logLevel', value)}
+              onChange={(value) => {
+                if (value != null && typeof value === 'string' && ['error', 'warning', 'info', 'debug'].includes(value)) {
+                  onChange('logLevel', value as AuditPolicyData['logLevel']);
+                }
+              }}
               error={errors.logLevel}
               options={[
                 { value: 'error', label: 'Ошибка' },
@@ -71,7 +77,10 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
               label="Период хранения логов (дней)"
               type="number"
               value={data.retentionDays}
-              onChange={(value) => onChange('retentionDays', value)}
+              onChange={(value) => {
+                const num = typeof value === 'number' && !isNaN(value) ? value : data.retentionDays;
+                onChange('retentionDays', num);
+              }}
               error={errors.retentionDays}
               min="7"
               max="365"
@@ -92,7 +101,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
                 <Checkbox
                   id="alertOnFailedLogin"
                   checked={data.alertOnFailedLogin}
-                  onCheckedChange={(checked) => onChange('alertOnFailedLogin', checked)}
+                  onCheckedChange={(checked) => onChange('alertOnFailedLogin', checked === true)}
                 />
                 <Label htmlFor="alertOnFailedLogin" className="text-sm">
                   Уведомлять о неудачных попытках входа
@@ -103,7 +112,7 @@ export const AuditPolicySection: React.FC<AuditPolicySectionProps> = ({
                 <Checkbox
                   id="alertOnPermissionChange"
                   checked={data.alertOnPermissionChange}
-                  onCheckedChange={(checked) => onChange('alertOnPermissionChange', checked)}
+                  onCheckedChange={(checked) => onChange('alertOnPermissionChange', checked === true)}
                 />
                 <Label htmlFor="alertOnPermissionChange" className="text-sm">
                   Уведомлять об изменении прав доступа

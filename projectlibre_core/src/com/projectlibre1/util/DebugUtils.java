@@ -72,15 +72,13 @@ public class DebugUtils {
 	 */
 	public DebugUtils() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public static void dumpStack(String text) {
 		try {
 			throw new Exception(text);
 		} catch (Exception e) {
-			System.out.println(text);
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log(text, e);
 		}
 	}
 	
@@ -93,13 +91,11 @@ public class DebugUtils {
 				keyString = ""+((DataObject)key).getUniqueId();
 			else if (key instanceof HasId)
 				keyString = ""+((HasId)key).getId();
-			System.out.println("key="+ keyString + " value="+map.get(key));
 		}
 	}
 private static long LOW_MEMORY_LIMIT = 1000000L;
 	public static boolean isMemoryOk(boolean popup) {
 		long mem = Runtime.getRuntime().freeMemory();
-		System.out.println("Free Memory" + mem);
 		if (mem < LOW_MEMORY_LIMIT) {
 			System.gc();
 			mem = Runtime.getRuntime().freeMemory();

@@ -1,5 +1,5 @@
 import { ActionManagerWithExecution } from './ActionManagerExecution';
-import { ActionCategory, IActionManager } from './ActionManagerTypes';
+import { IActionManager } from './ActionManagerTypes';
 import { ActionManagerCore } from './ActionManagerCore';
 import { IAction } from './BaseAction';
 import { logger } from '@/utils/logger';
@@ -68,7 +68,7 @@ class ActionManagerComposite implements IActionManager {
         this.base.updateActionStates();
       }
     } catch (error) {
-      logger.error('Error in updateActionStates:', error);
+      logger.error('Error in updateActionStates:', error instanceof Error ? error : String(error));
     }
   };
 

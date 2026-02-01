@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useJavaApi, Task, Project, Resource } from '@/hooks/useJavaApi';
-import { useAsyncOperation } from '@/hooks/useAsyncOperation';
+import { useJavaApi, Task, Project } from '@/hooks/useJavaApi';
 import { logger } from '@/utils/logger';
-import { TaskForm } from './TaskForm';
-import { TaskCard } from './TaskCard';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { ErrorAlert } from '@/components/ui/ErrorAlert';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { TaskCardSkeleton } from '@/components/ui/SkeletonLoader';
 import { formatDuration } from '@/utils/formatUtils';
 
 /**
@@ -82,13 +75,14 @@ export const TaskManager: React.FC = () => {
     }
     
     try {
-      const task = await javaApi.createTask(selectedProject.id, formData);
+      const taskData = { ...formData, projectId: selectedProject.id };
+      const task = await javaApi.createTask(selectedProject.id, taskData);
       if (task) {
-        logger.info('Task created successfully:', task);
+        logger.info('Task created successfully:', { taskId: task.id, taskName: task.name });
         resetForm();
       }
     } catch (error) {
-      logger.error('Failed to create task:', error);
+      logger.error('Failed to create task:', { error: String(error) });
     }
   };
   
@@ -103,16 +97,27 @@ export const TaskManager: React.FC = () => {
     }
     
     try {
-      const updated = await javaApi.javaApiService.updateTask(editingTask.id, formData);
-      if (updated) {
-        logger.info('Task updated successfully:', updated);
+      const updatePayload = {
+        id: editingTask.id,
+        name: formData.name,
+        description: formData.description,
+        status: formData.status,
+        startDate: formData.startDate ? new Date(formData.startDate) : undefined,
+        endDate: formData.endDate ? new Date(formData.endDate) : undefined,
+        duration: formData.duration,
+        percentComplete: formData.progress,
+        assigneeId: formData.resourceId || undefined
+      };
+      const updated = await javaApi.javaApiService.updateTask(editingTask.id, updatePayload);
+      if (updated?.data) {
+        logger.info('Task updated successfully:', { taskId: editingTask.id });
         if (selectedProject) {
           await javaApi.loadProjectTasks(selectedProject.id);
         }
         resetForm();
       }
     } catch (error) {
-      logger.error('Failed to update task:', error);
+      logger.error('Failed to update task:', { error: String(error) });
     }
   };
   
@@ -131,12 +136,12 @@ export const TaskManager: React.FC = () => {
     if (result.response === 0) {
       try {
         await javaApi.javaApiService.deleteTask(task.id);
-        logger.info('Task deleted successfully:', task);
+        logger.info('Task deleted successfully:', { taskId: task.id, taskName: task.name });
         if (selectedProject) {
           await javaApi.loadProjectTasks(selectedProject.id);
         }
       } catch (error) {
-        logger.error('Failed to delete task:', error);
+        logger.error('Failed to delete task:', { error: String(error) });
       }
     }
   };
@@ -164,13 +169,13 @@ export const TaskManager: React.FC = () => {
    */
   const updateTaskProgress = async (task: Task, progress: number) => {
     try {
-      await javaApi.javaApiService.updateTask(task.id, { progress });
-      logger.info(`Task progress updated to ${progress}%:`, task);
+      await javaApi.javaApiService.updateTask(task.id, { id: task.id, percentComplete: progress });
+      logger.info(`Task progress updated to ${progress}%:`, { taskId: task.id, progress });
       if (selectedProject) {
         await javaApi.loadProjectTasks(selectedProject.id);
       }
     } catch (error) {
-      logger.error('Failed to update task progress:', error);
+      logger.error('Failed to update task progress:', { error: String(error) });
     }
   };
   

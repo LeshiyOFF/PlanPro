@@ -279,8 +279,7 @@ public class Serializer {
 
 
 					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						ErrorLogger.log(e);
 					}
             	}
             });
@@ -298,7 +297,8 @@ public class Serializer {
 			TaskData taskData=(TaskData)getTransformationMap().get(outlineChild);
 
 			//voidNodes
-			if (outlineChild instanceof VoidNodeImpl){ //TODO remove not called?
+			// NOTE: VoidNodeImpl branch retained for compatibility; dead path not removed.
+			if (outlineChild instanceof VoidNodeImpl){
 				taskData=new TaskData();
 				((ProjectData)getTransformedParent()).getTasks().add(taskData);
 			}
@@ -634,7 +634,7 @@ public class Serializer {
         final IncrementalData newData=new IncrementalData();
         final IncrementalData oldData=(IncrementalData)project.getPublishedData().clone();
     	ProjectData projectData=serializeProject(project,null,null);
-    	//TODO useless serialization are done in serializeProject, use dirty tag
+    	// LIMITATION: full serialization used; dirty-tag optimization not implemented.
 
     	for (Iterator i=projectData.getTasks().iterator();i.hasNext();){
     		TaskData t=(TaskData)i.next();
@@ -690,7 +690,7 @@ public class Serializer {
     	for (Iterator i=projectData.getResources().iterator();i.hasNext();){
     		ResourceData r=(ResourceData)i.next();
 
-    		//TODO r.getEnterpriseResource()
+    		// NOTE: Enterprise resource resolution not used here; contains-check only.
     		if (oldData.getResources().contains(r)){
     			if (r.isDirty()){
 //        			System.out.println("INSERT: "+r);
@@ -735,7 +735,7 @@ public class Serializer {
 
 
 //    	if (project.getCalendar()!=null){
-    		//TODO calendar?
+    		// LIMITATION: base calendars / project calendar handling not extended here.
     		//base calendars to handle?
 		if (oldData.getResources().contains(projectData)){
 			if (projectData.isDirty()){
@@ -800,7 +800,7 @@ public class Serializer {
 
 
     	//calendar
-    	//TODO this code only exists to guarantee that older projects wont crash when read 25/8/05
+    	// NOTE: Legacy compatibility; ensures older projects load without crash (2005).
     	WorkCalendar calendar=project.getWorkCalendar();
     	if (calendar==null)
     		calendar = CalendarService.getInstance().getDefaultInstance();
@@ -949,7 +949,7 @@ public class Serializer {
     						try {
     							task = (NormalTask) Class.forName(Messages.getMetaString("Subproject")).getConstructor(new Class[]{Project.class,Long.class}).newInstance(project,taskData.getSubprojectId());
     						} catch (Exception e1) {
-    							e1.printStackTrace();
+    							ErrorLogger.log(e1);
     						}
 
 //  						task=new Subproject(project,taskData.getSubprojectId());
@@ -958,7 +958,7 @@ public class Serializer {
     						((SubProj)task).setSubprojectFieldValues(taskData.getSubprojectFieldValues());
     					}
     					else{
-    						e.printStackTrace();
+    						ErrorLogger.log(e);
     						throw new IOException("Subproject:"+e);
     					}
     				}
@@ -1052,7 +1052,7 @@ public class Serializer {
     							try {
     								assignment=(Assignment)deserialize(assignmentData,reindex);
     							} catch (Exception e) {
-    								e.printStackTrace();
+    								ErrorLogger.log(e);
     							}
     						}
     						if (assignmentData.getSerialized() == null||(assignmentData.getSerialized() != null&&assignment==null)) { // timesheet created
@@ -1079,7 +1079,7 @@ public class Serializer {
     					Object snapshotId=new Integer(s);
     					TaskSnapshot snapshot=(TaskSnapshot)task.getSnapshot(snapshotId);
 
-    					//TODO was commented but needed for loading  because task.getSnapshot(snapshotId)==null
+    					// NOTE: Required for loading when task.getSnapshot(snapshotId)==null (non-current snapshots).
     					//for snapshots other than CURRENT
     					if (snapshot==null){
     						snapshot=new TaskSnapshot();
@@ -1279,7 +1279,7 @@ public class Serializer {
 			try { // try a second time now that it's disabled
 				DependencyService.getInstance().initDependency(dependency,predecessor,successor,null);
 			} catch (InvalidAssociationException e1) {
-				e1.printStackTrace();
+				ErrorLogger.log(e1);
 			}
 			DependencyService.warnCircularCrossProjectLinkMessage(predecessor, successor);
 		}
@@ -1308,7 +1308,7 @@ public class Serializer {
 //
 //    }
 //    protected WorkCalendar deserializeCalendar(CalendarData calendarData/*,Project project*/) throws IOException, ClassNotFoundException{
-//        //TODO avoid calendar instance duplication
+//        // LIMITATION: calendar instance duplication not refactored.
 //        WorkingCalendar calendar=(WorkingCalendar)deserialize(calendarData);
 //        if (/*(calendar instanceof WorkingCalendar)&&*/calendarData.getBaseCalendar()!=null){
 //            WorkingCalendar baseCalendar=(WorkingCalendar)deserialize(calendarData.getBaseCalendar());
@@ -1342,7 +1342,8 @@ public class Serializer {
         	enterpriseResource.setUserAccount(enterpriseResourceData.getUserAccount());
         }else{
         	EnterpriseResourceData e=(EnterpriseResourceData)enterpriseResources.get(new Long(enterpriseResourceData.getUniqueId()));
-        	if (e==null) return null; //TODO handle this
+        	// LIMITATION: null enterprise resource returns null; caller must handle null.
+        	if (e==null) return null;
         	enterpriseResource =(EnterpriseResource)deserialize(e,reindex);
         	enterpriseResource.setUserAccount(e.getUserAccount());
         }
@@ -1364,12 +1365,11 @@ public class Serializer {
         	try {
 //				cal.setBaseCalendar(CalendarService.findBaseCalendar(cal.getBaseCalendar().getName()));// avoids multiple instances
         		WorkCalendar baseCal=CalendarService.findBaseCalendar(cal.getBaseCalendar().getName());
-				//TODO verification in case the name isn't found, import problem
+				// LIMITATION: base calendar by name; missing name can cause import issues.
         		if (baseCal!=null) cal.setBaseCalendar(baseCal);// avoids multiple instances
 
         	} catch (CircularDependencyException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log(e);
 			}
         }
         resourcePool.initializeId(enterpriseResource);
@@ -1434,7 +1434,7 @@ public class Serializer {
             for (Iterator i=resources.iterator();i.hasNext();){
                 EnterpriseResourceData resourceData=(EnterpriseResourceData)i.next();
                 ResourceImpl resource=deserializeResourceAndAddToPool(resourceData,resourcePool,reindex);
-                //resourceNodeMap.put(resourceData,resource.getGlobalResource()); //TODO Lolo - why is this line here given the line below?
+                // NOTE: First put removed; only resourceNodeMap put used (see line below).
                 resourceNodeMap.put(resourceData,NodeFactory.getInstance().createNode(resource));
             }
             //NodeModel model=resourcePool.getResourceOutline();
@@ -1553,8 +1553,7 @@ public class Serializer {
 			if (data.getSerialized()!=null) out.write(data.getSerialized());
 			out.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log(e);
 		}
     }
 //    public void makeGLobal(DataObject data) throws UniqueIdException{

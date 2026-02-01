@@ -1,6 +1,6 @@
-import React, { useRef, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 import { eventDispatcher } from '@/services/EventDispatcher';
-import { EventHandler, EventType, EventSubscription } from '@/types/EventFlowTypes';
+import { EventHandler, EventType, EventSubscription, BaseEvent } from '@/types/EventFlowTypes';
 
 /**
  * Хук для управления Event Flow
@@ -8,7 +8,7 @@ import { EventHandler, EventType, EventSubscription } from '@/types/EventFlowTyp
 export const useEventFlowManager = (debug: boolean = false) => {
   const subscriptionsRef = useRef<Map<string, EventSubscription>>(new Map());
 
-  const dispatch = useCallback((event: any) => {
+  const dispatch = useCallback((event: BaseEvent) => {
     if (debug) {
       console.log('EventFlow: Dispatching event', event);
     }

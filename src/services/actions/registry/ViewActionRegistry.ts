@@ -35,10 +35,10 @@ export class ViewActionRegistry extends BaseActionRegistry {
   private getViewConfigs(): Array<{ type: string; name: string; shortcut?: string }> {
     const availableViews = this.dependencies.navigationProvider.availableViews || [];
     
-    return availableViews.map((view: any, index: number) => ({
+    return availableViews.map((view, index: number) => ({
       type: view.type,
-      name: view.title || view.name,
-      shortcut: view.shortcut || `Ctrl+${index + 1}`
+      name: view.title ?? `View ${index + 1}`,
+      shortcut: `Ctrl+${index + 1}`
     }));
   }
 }

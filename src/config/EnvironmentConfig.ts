@@ -1,4 +1,5 @@
 import type { SentryConfig } from '@/services/SentryService';
+import { getElectronAPI } from '@/utils/electronAPI';
 
 /**
  * Конфигурация для разных окружений
@@ -92,7 +93,7 @@ export class EnvironmentConfig {
     
     // В Electron приложении мы всегда обращаемся к локальному Java серверу,
     // если не задано обратное (например, для облачной версии)
-    if (window.electronAPI) {
+    if (getElectronAPI()) {
       return `http://localhost:${this.apiPort}`;
     }
 

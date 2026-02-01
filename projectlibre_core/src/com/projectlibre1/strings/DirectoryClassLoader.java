@@ -90,7 +90,7 @@ public class DirectoryClassLoader extends ClassLoader{
 			in.close();
 			return defineClass(name, b, 0, b.length);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to find class in directory: " + name, e);
 			throw new ClassNotFoundException(name);
 		}
         

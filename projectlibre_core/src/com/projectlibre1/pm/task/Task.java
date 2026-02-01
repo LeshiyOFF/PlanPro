@@ -323,12 +323,6 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 			}
 		};
 	}
-//	Don't know if need this or not.  In any case, need to work out hierarchy treatment.
-//	public NodeHierarchy getNodeHierarchy() {
-//		//TODO use correct view ?
-//		return Document.getTestInstance().getContextManager().getGlobalContext().getTaskContext(View.UNNAMED).getModel().getHierarchy();
-//	}
-//
 //
 	public static Closure forParent(Closure visitor) {
 		return new ObjectVisitor(visitor) {
@@ -497,10 +491,12 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 		}
 
 	/**
-	 * @return
+	 * Returns the effective work calendar for this task.
+	 * Base implementation returns null; subclasses override to provide actual calendar.
+	 * @return null in base implementation
 	 */
 	public WorkCalendar getEffectiveWorkCalendar() {
-		return null; // TODO figure out if this belong shere
+		return null;
 	}
 
 	public boolean isMilestone() {
@@ -595,7 +591,7 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 		if (this.markerStatus == markerStatus) // if task has been added, don't treat it again
 			return;
 
-		if (Environment.isImporting() && depth >= 1000) // in case circular link in imported project - TODO this is not a perfect solution
+		if (Environment.isImporting() && depth >= 1000) // in case circular link in imported project
 			throw new RuntimeException(CircularDependencyException.RUNTIME_EXCEPTION_TEXT);
 		// Arrange my parent
 
@@ -948,7 +944,7 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 	}
 
 	public boolean isSummary() {
-		return isWbsParent(); //TODO need to somehow hook into view and see if parent in view's node model.  yuck!
+		return isWbsParent();
 	}
 	public boolean isAssignment() {
 		return false;
@@ -975,7 +971,7 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 
 	/**
 	 * Flags all tasks which depend on this one for scheduling as dirty
-	 * @param doSelf TODO
+	 * @param doSelf
 	 *
 	 */
 	void markAllDependentTasksAsNeedingRecalculation(boolean doSelf) {
@@ -986,7 +982,6 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 		Iterator succ = getSuccessorList().iterator();
 		if (!succ.hasNext()) {
 			getProject().getSchedulingAlgorithm().markBoundsAsDirty();
-			//TODO what about reverse schedulded?
 		} else {
 			Task successor;
 			// mark successors as dirty
@@ -1018,7 +1013,6 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 
 
 	void cleanUp(Object eventSource,boolean deep,boolean undo,boolean cleanDependencies) {
-		//if (!cleanDependencies) return; //TODO was for undo of paste of linked tasks, but doesn't work
 		markAllDependentTasksAsNeedingRecalculation(false);
 
 		// remove sentinel dependencies if any

@@ -118,7 +118,7 @@ public class Messages {
 							buns.add(bundle);
 							foundBundles.add("com.projectlibre1.strings."+directoryBundleNames[i]);
 						}catch (Exception e) {
-							e.printStackTrace();
+							com.projectlibre1.server.access.ErrorLogger.log("Failed to load directory bundle: " + directoryBundleNames[i], e);
 						}
 					}
 

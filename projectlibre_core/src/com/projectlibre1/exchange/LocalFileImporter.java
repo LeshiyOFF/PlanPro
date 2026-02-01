@@ -99,7 +99,6 @@ public class LocalFileImporter extends FileImporter {
 	 */
 	public LocalFileImporter() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 	
 	
@@ -189,7 +188,7 @@ public class LocalFileImporter extends FileImporter {
 						}
 					} catch (Exception postDeserEx) {
 						System.err.println("❌ ERROR in postDeserialization for legacy format:");
-						postDeserEx.printStackTrace();
+						com.projectlibre1.server.access.ErrorLogger.log("ERROR in postDeserialization for legacy format", postDeserEx);
 						// Fall through to XML recovery if postDeserialization fails
 						project = null;
 						throw postDeserEx;
@@ -206,14 +205,14 @@ public class LocalFileImporter extends FileImporter {
 				
 			} catch (Exception e) {
 				System.err.println("❌ Exception during POD deserialization: " + e.getMessage());
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Exception during POD deserialization", e);
 				ex=e;
 				project=null;
 			}finally{
 				try {
 					bis.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Failed to close BufferedInputStream", e);
 				}
 			}
 		}
@@ -278,8 +277,7 @@ public class LocalFileImporter extends FileImporter {
 						try {
 							in.close();
 						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
+							com.projectlibre1.server.access.ErrorLogger.log("Failed to close InputStream after XML start found", e1);
 						}
 					}
 					fin=new FileInputStream(f);
@@ -335,13 +333,12 @@ public class LocalFileImporter extends FileImporter {
 					if (ex!=null) throw ex;
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to recover project with XML", e);
 				if (in!=null){
 					try {
 						in.close();
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
+						com.projectlibre1.server.access.ErrorLogger.log("Failed to close InputStream after XML recovery failure", e1);
 					}
 				}
 			}
@@ -374,13 +371,13 @@ public class LocalFileImporter extends FileImporter {
 			    }
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Exception in findString", e);
 		} finally {
 			if (in!=null){
 				try {
 					in.close();
 				} catch (Exception e1) {
-					e1.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Failed to close InputStream in findString", e1);
 				}
 			}
 		}
@@ -433,7 +430,7 @@ public class LocalFileImporter extends FileImporter {
 				System.out.println("Saving...Done in "+(t2-t1)+" ms"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (Exception e) {
 				error=true;
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Exception during POD serialization", e);
 			}
 			try{
 				BufferedOutputStream bout=new BufferedOutputStream(fout);
@@ -445,12 +442,12 @@ public class LocalFileImporter extends FileImporter {
 				
 			}catch (Exception e) {
 				error=true;
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Exception during XML part of POD save", e);
 			}
 			fout.close();
 		} catch (Exception e) {
 			error=true;
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Exception during POD save", e);
 		}
 
 		//Don't replace original file if an error occurred

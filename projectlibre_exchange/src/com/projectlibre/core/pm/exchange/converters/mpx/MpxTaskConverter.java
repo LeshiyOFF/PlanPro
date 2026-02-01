@@ -70,7 +70,7 @@ public class MpxTaskConverter {
 		"name", "name", "com.projectlibre.core.pm.exchange.converters.type.TruncatedStringConverter",
 		"wbs", "wBS", null,
 		"notes", "notes", null,
-		"id", "iD", null, //TODO could be null, auto-generate in this case
+		"id", "iD", null, // NOTE: task id may be null; caller/context expected to provide or generate.
 		"externalId", "uniqueID", null,
 		"estimated", "estimated", null,
 		"effortDriven", "effortDriven", null,

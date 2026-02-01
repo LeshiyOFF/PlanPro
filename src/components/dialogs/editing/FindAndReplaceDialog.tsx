@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { BaseDialog } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 // import { ScrollArea } from '@/components/ui/scroll-area'; // temporarily removed
 import { Search, Replace, FileText, Calendar, Users } from 'lucide-react';
 import { useDialogValidation } from '../hooks/useDialogValidation';
@@ -51,7 +51,6 @@ export const FindAndReplaceDialog: React.FC<FindAndReplaceDialogProps> = ({
   open,
   onOpenChange,
   initialFindText = '',
-  projectId,
   onFind,
   onReplace,
   onReplaceAll

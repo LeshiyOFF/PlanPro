@@ -1,6 +1,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 
 interface LinksTabProps {
   predecessorsInput: string;

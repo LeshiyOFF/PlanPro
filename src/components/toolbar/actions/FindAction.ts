@@ -13,9 +13,8 @@ export class FindAction extends ToolbarAction {
   /**
    * Выполняет открытие панели поиска
    */
-  execute(): void {
-    console.log('Поиск в проекте');
-    // TODO: Интеграция с SearchManager или FindPanel
+  override async execute(): Promise<void> {
+    window.dispatchEvent(new CustomEvent('search:open'));
   }
 
   /**

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/Card';
+import React, { useState, useEffect } from 'react';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { 
@@ -10,14 +10,14 @@ import {
   HotkeyList,
   HotkeySettings,
   useGlobalHotkey,
-  useHotkeyBind,
   useHotkeyAction,
   useFileHotkeys,
   useNavigationHotkeys,
   hotkeyService
 } from '@/components/hotkey';
-import type { HotkeyStatusBarBridge as HotkeyStatusBarBridgeType } from '@/services/HotkeyStatusBarBridge';
-import type { Hotkey, HotkeyConfig, HotkeyCategory } from '@/types/HotkeyTypes';
+import type { HotkeyStatusBarBridge } from '@/services/HotkeyStatusBarBridge';
+import type { HotkeyConfig } from '@/types/HotkeyTypes';
+import { HotkeyCategory } from '@/types/HotkeyTypes';
 import { logger } from '@/utils/logger';
 
 /**
@@ -28,7 +28,7 @@ const HotkeyDemoPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [count, setCount] = useState(0);
   const { isEnabled, toggleEnabled } = useGlobalHotkey();
-  const [hotkeyStatusBarBridge, setHotkeyStatusBarBridge] = useState<HotkeyStatusBarBridgeType | null>(null);
+  const [, setHotkeyStatusBarBridge] = useState<HotkeyStatusBarBridge | null>(null);
 
   // Глобальные горячие клавиши
   useFileHotkeys();
@@ -261,6 +261,7 @@ const HotkeyDemoPage: React.FC = () => {
 
         {/* Диалог настроек */}
         <HotkeySettings
+          title="Настройки горячих клавиш"
           open={showSettings}
           onOpenChange={setShowSettings}
           onSave={() => {

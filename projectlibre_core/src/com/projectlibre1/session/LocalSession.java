@@ -144,7 +144,7 @@ public class LocalSession extends AbstractSession{
 			}
         });
 		try {
-			final FileImporter importer = (FileImporter) ClassUtils.forName(opt.getImporter()).newInstance();
+			final FileImporter importer = (FileImporter) ClassUtils.forName(opt.getImporter()).getDeclaredConstructor().newInstance();
 	    	importer.setFileName(opt.getFileName());
 	    	importer.setFileInputStream(opt.getFileInputStream());
 	    	importer.setResourceMapping(opt.getResourceMapping());
@@ -179,8 +179,8 @@ public class LocalSession extends AbstractSession{
 	    	job.addJob(importer.getImportFileJob());
 	        job.addRunnable(new JobRunnable("LocalAccess: loadProject.end",1.0f){
 	    		public Object run() throws Exception{
-	    	    	Project project=importer.getProject();
-	    	    	project.setFileName(opt.getFileName()); //overrides project name
+	    			Project project=importer.getProject();
+	    			project.setFileName(opt.getFileName()); //overrides project name
 	    			if (MICROSOFT_PROJECT_IMPORTER.equals(opt.getImporter()))
 	    				project.getResourcePool().setName(project.getName());
 	    			if (Environment.getStandAlone()){ //force local in this case
@@ -192,15 +192,8 @@ public class LocalSession extends AbstractSession{
 	 			
 	    		}
 	    	});
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to load project job", e);
 		}
      	return job;
     }
@@ -209,16 +202,9 @@ public class LocalSession extends AbstractSession{
     public static FileImporter getImporter(String name){
 		FileImporter importer=null;
 		try {
-			importer=(FileImporter) ClassUtils.forName(name).newInstance();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			importer=(FileImporter) ClassUtils.forName(name).getDeclaredConstructor().newInstance();
+		} catch (Exception e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to instantiate importer: " + name, e);
 		}
     	return importer;
     }

@@ -35,13 +35,13 @@ export interface TableRowProps
  * Интерфейс для заголовочной ячейки
  */
 export interface TableHeadProps
-  extends React.HTMLAttributes<HTMLTableCellElement> {}
+  extends React.ThHTMLAttributes<HTMLTableCellElement> {}
 
 /**
  * Интерфейс для ячейки данных
  */
 export interface TableCellProps
-  extends React.HTMLAttributes<HTMLTableCellElement> {}
+  extends React.TdHTMLAttributes<HTMLTableCellElement> {}
 
 /**
  * Интерфейс для заголовка таблицы

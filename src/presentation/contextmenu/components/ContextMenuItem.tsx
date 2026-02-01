@@ -17,13 +17,15 @@ interface ContextMenuItemProps {
 /**
  * Компонент пункта контекстного меню
  */
-export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({ 
-  item, 
-  onSelect, 
-  depth = 0 
+export const ContextMenuItemComponent: React.FC<ContextMenuItemProps> = ({
+  item,
+  onSelect,
+  depth: _depth = 0
 }) => {
   const { preferences } = useAppStore();
-  const showTips = (preferences as any)?.display?.showTips ?? true;
+  const showTips = (preferences && typeof preferences === 'object' && 'display' in preferences && preferences.display && typeof preferences.display === 'object' && 'showTips' in preferences.display)
+    ? Boolean((preferences.display as { showTips?: boolean }).showTips)
+    : true;
 
   if (item.separator) {
     return (

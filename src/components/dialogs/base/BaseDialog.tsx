@@ -8,22 +8,24 @@ import {
   IDialogConfig, 
   DialogResult, 
   DialogStatus,
-  DialogEvent,
   ValidationRule
 } from '@/types/dialog/DialogTypes';
+import type { DialogDataValue } from '@/types/dialog/LegacyDialogTypes';
+
+export type DialogRenderFunction<T> = (data: T, errors: Record<string, string[]>) => React.ReactNode;
 
 /**
  * Интерфейс для BaseDialog компонента
  */
-export interface BaseDialogProps<T extends IDialogData = any> {
+export interface BaseDialogProps<T extends IDialogData = IDialogData> {
   data: T;
-  actions: IDialogActions;
+  actions: IDialogActions<T>;
   config?: IDialogConfig;
   validationRules?: ValidationRule[];
   isOpen: boolean;
   onClose: (result: DialogResult<T>) => void;
   className?: string;
-  children?: React.ReactNode;
+  children?: React.ReactNode | DialogRenderFunction<T>;
 }
 
 /**
@@ -54,7 +56,8 @@ export const BaseDialog = <T extends IDialogData>({
 
     // Валидация по правилам
     for (const rule of validationRules) {
-      const value = (dialogData as any)[rule.field];
+      const rawValue = dialogData[rule.field as keyof T] as DialogDataValue | undefined;
+      const value = typeof rawValue === 'string' ? rawValue : rawValue != null ? String(rawValue) : '';
       const fieldErrors: string[] = [];
 
       // Обязательное поле
@@ -73,8 +76,11 @@ export const BaseDialog = <T extends IDialogData>({
       }
 
       // Регулярное выражение
-      if (rule.pattern && value && !rule.pattern.test(value)) {
-        fieldErrors.push('Неверный формат');
+      if (rule.pattern && value) {
+        const regex = rule.pattern instanceof RegExp ? rule.pattern : new RegExp(rule.pattern);
+        if (!regex.test(value)) {
+          fieldErrors.push('Неверный формат');
+        }
       }
 
       // Кастомная валидация
@@ -114,7 +120,9 @@ export const BaseDialog = <T extends IDialogData>({
 
     setStatus(DialogStatus.LOADING);
     try {
-      await actions.onOk(data);
+      if (actions.onOk) {
+        await actions.onOk(data);
+      }
       setStatus(DialogStatus.SUCCESS);
       onClose({
         success: true,
@@ -133,7 +141,9 @@ export const BaseDialog = <T extends IDialogData>({
   const handleCancel = () => {
     setStatus(DialogStatus.INITIAL);
     setValidationErrors({});
-    actions.onCancel();
+    if (actions.onCancel) {
+      actions.onCancel();
+    }
     onClose({
       success: false,
       action: 'cancel'
@@ -191,8 +201,8 @@ export const BaseDialog = <T extends IDialogData>({
   useEffect(() => {
     if (isOpen && dialogRef.current) {
       const firstInput = dialogRef.current.querySelector('input, select, textarea, button');
-      if (firstInput) {
-        (firstInput as HTMLElement).focus();
+      if (firstInput instanceof HTMLElement) {
+        firstInput.focus();
       }
     }
   }, [isOpen]);
@@ -243,7 +253,7 @@ export const BaseDialog = <T extends IDialogData>({
               )}
             </div>
           </DialogTitle>
-          {data.description && (
+          {data.description && typeof data.description === 'string' && (
             <DialogDescription className="text-sm text-muted-foreground mt-1">
               {data.description}
             </DialogDescription>
@@ -251,7 +261,9 @@ export const BaseDialog = <T extends IDialogData>({
         </DialogHeader>
 
         <div className="dialog-body flex-1 overflow-y-auto">
-          {typeof children === 'function' ? children(data, validationErrors) : children}
+          {typeof children === 'function' 
+            ? (children as (data: T, errors: Record<string, string[]>) => React.ReactNode)(data, validationErrors) 
+            : children}
         </div>
 
         <DialogFooter className="dialog-footer">

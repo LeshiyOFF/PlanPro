@@ -188,7 +188,7 @@ public class DataSource implements JRDataSource, ObjectRef {
 		return null;
 	}
 	public NodeModelDataFactory getDataFactory() {
-		// TODO Auto-generated method stub
+		// NOTE: getDataFactory() not used in this JasperReports adapter; returns null.
 		return null;
 	}
 

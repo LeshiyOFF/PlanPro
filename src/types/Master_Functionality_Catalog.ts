@@ -1,9 +1,14 @@
 // Master Functionality Catalog - ProjectLibre React Migration
 // Полный каталог всех интерфейсов и типов для 100% сохранения функциональности
 
+import type { TaskSegment } from './task-types';
+import type { JsonObject, JsonValue } from './json-types';
+
 // ============================================================================
 // БАЗОВЫЕ ТИПЫ ДАННЫХ
 // ============================================================================
+
+export type { TaskSegment };
 
 export interface ID {
   value: number;
@@ -13,11 +18,6 @@ export interface ID {
 export interface DateRange {
   start: Date;
   end: Date;
-}
-
-export interface TaskSegment {
-  start: Date;
-  finish: Date;
 }
 
 export interface Duration {
@@ -513,7 +513,7 @@ export interface Filter {
   name: string;
   field: string;
   operator: FilterOperator;
-  value: any;
+  value: string | number | boolean | Date | null;
   enabled: boolean;
 }
 
@@ -665,7 +665,7 @@ export interface FormField {
   name: string;
   type: FieldType;
   label: string;
-  value: any;
+  value: string | number | boolean | Date | null;
   required: boolean;
   editable: boolean;
   visible: boolean;
@@ -675,7 +675,7 @@ export interface FormField {
 }
 
 export interface OptionItem {
-  value: any;
+  value: string | number | boolean | null;
   label: string;
   disabled?: boolean;
 }
@@ -683,7 +683,7 @@ export interface OptionItem {
 export interface ValidationRule {
   field: string;
   type: ValidationType;
-  parameters?: any;
+  parameters?: JsonObject | number | string;
   message: string;
 }
 
@@ -701,7 +701,7 @@ export enum ValidationType {
 
 export interface FieldValidation {
   type: ValidationType;
-  parameters?: any;
+  parameters?: JsonObject | number | string;
   message: string;
 }
 
@@ -713,7 +713,7 @@ export interface UIEvent {
   type: EventType;
   source: string;
   timestamp: Date;
-  data?: any;
+  data?: JsonObject | string | number | boolean | null;
   preventDefault?: boolean;
   stopPropagation?: boolean;
 }
@@ -1111,7 +1111,7 @@ export interface CustomField {
   id: ID;
   name: string;
   type: FieldType;
-  value: any;
+  value: string | number | boolean | Date | null;
   formula?: string;
   lookupTable?: LookupTable;
 }
@@ -1121,7 +1121,7 @@ export interface LookupTable {
 }
 
 export interface LookupValue {
-  value: any;
+  value: string | number | boolean | null;
   label: string;
   description?: string;
 }
@@ -1150,7 +1150,7 @@ export interface ReportParameter {
   name: string;
   type: FieldType;
   required: boolean;
-  defaultValue?: any;
+  defaultValue?: string | number | boolean | Date | null;
   options?: OptionItem[];
 }
 
@@ -1166,7 +1166,7 @@ export interface Template {
   name: string;
   description: string;
   category: TemplateCategory;
-  content: any; // Зависит от типа шаблона
+  content: JsonObject | string; // Зависит от типа шаблона
   preview?: string;
 }
 
@@ -1185,8 +1185,8 @@ export interface AuditLog {
   action: string;
   entityType: string;
   entityId: ID;
-  oldValue?: any;
-  newValue?: any;
+  oldValue?: string | number | boolean | null;
+  newValue?: string | number | boolean | null;
   ipAddress?: string;
 }
 
@@ -1236,9 +1236,9 @@ export interface ViewAPI {
 }
 
 export interface FileAPI {
-  saveProject(request: any): Promise<any>;
-  loadProject(request: any): Promise<any>;
-  listFiles(directory?: string): Promise<any>;
+  saveProject(request: JsonObject): Promise<JsonObject>;
+  loadProject(request: JsonObject): Promise<JsonObject>;
+  listFiles(directory?: string): Promise<string[]>;
   fileExists(filePath: string): Promise<boolean>;
   getVersion(): Promise<string>;
 }
@@ -1283,8 +1283,8 @@ export interface DialogState {
   id: string;
   type: DialogType;
   open: boolean;
-  data?: any;
-  result?: any;
+  data?: JsonObject | null;
+  result?: JsonObject | null;
 }
 
 export interface AppNotification {
@@ -1373,7 +1373,7 @@ export interface ResourceChartProps {
   onResourceUpdate: (resource: Resource) => void;
 }
 
-export interface DialogProps<T = any> {
+export interface DialogProps<T = JsonObject> {
   open: boolean;
   config: DialogConfig;
   data?: T;
@@ -1481,7 +1481,7 @@ export enum StepType {
 export interface ValidationScript {
   type: 'sql' | 'javascript' | 'custom';
   script: string;
-  expectedResults: any[];
+  expectedResults: (string | number | boolean | null)[];
 }
 
 export interface RollbackScript {
@@ -1551,6 +1551,21 @@ export interface ValidationError {
 
 export type ValidationErrors = Record<string, string[]>;
 
+/**
+ * Строго типизированные данные для JSON-совместимых структур (без any/unknown)
+ * Добавлена поддержка Date для совместимости с бизнес-моделями
+ */
+export type StrictData = 
+  | Error 
+  | string 
+  | number 
+  | boolean 
+  | Date
+  | null 
+  | undefined 
+  | { [key: string]: StrictData }
+  | StrictData[];
+
 export interface ResourceAllocation {
   resourceId: string;
   taskId: string;
@@ -1566,25 +1581,5 @@ export type TaskResourceAssignments = Record<string, string[]>;
 // ЭКСПОРТ ТИПОВ ДЛЯ ЛЕГКОГО ИМПОРТА
 // ============================================================================
 
-export type {// Основные сущности
-  Project, Task, Resource, Assignment, Dependency, Calendar,
-  
-  // View и UI
-  View, GanttConfiguration, TableConfiguration, ColumnDefinition,
-  
-  // Диалоги и формы
-  DialogConfig, FormField, ValidationRule,
-  
-  // События и действия
-  UIEvent, Action, Hotkey,
-  
-  // Конфигурация
-  AppConfig, UserPreferences, ProjectAPI, TaskAPI, ResourceAPI, FileAPI,
-  
-  // React компоненты
-  
-  // Утилиты
-  
-  // Миграция
-};
-
+// Экспорт типов удален во избежание конфликтов с другими модулями
+// Все типы доступны через прямой импорт из этого файла

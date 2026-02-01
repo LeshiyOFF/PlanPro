@@ -4,10 +4,10 @@ import { useAsyncOperation } from '@/hooks/useAsyncOperation';
 import { logger } from '@/utils/logger';
 import { ProjectForm } from './ProjectForm';
 import { ProjectCard } from './ProjectCard';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
-import { ErrorAlert } from '@/components/ui/ErrorAlert';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { ProjectCardSkeleton } from '@/components/ui/SkeletonLoader';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { ErrorAlert } from '@/components/ui/error-alert';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { ProjectCardSkeleton } from '@/components/ui/skeleton-loader';
 
 /**
  * Компонент управления проектами с реальной Java API интеграцией
@@ -36,11 +36,12 @@ export const ProjectManager: React.FC = () => {
       loadProjectsOperation.execute(
         () => javaApi.loadProjects(),
         {
-          onSuccess: (data) => {
-            logger.info('Projects loaded successfully:', data);
+          onSuccess: (data: unknown) => {
+            const list = data as Project[] | null | undefined;
+            logger.info('Projects loaded successfully:', { count: list?.length ?? 0 });
           },
           onError: (error) => {
-            logger.error('Failed to load projects:', error);
+            logger.error('Failed to load projects:', { message: error instanceof Error ? error.message : String(error) });
           }
         }
       );
@@ -78,16 +79,16 @@ export const ProjectManager: React.FC = () => {
     }
     
     projectOperation.execute(
-      () => javaApi.createProject(formData),
+      () => javaApi.createProject(formData).then((p) => { if (!p) throw new Error('Create failed'); return p; }),
       {
-        onSuccess: (project) => {
-          logger.info('Project created successfully:', project);
+        onSuccess: (data: unknown) => {
+          const project = data as Project | null | undefined;
+          logger.info('Project created successfully:', { projectId: project?.id });
           resetForm();
-          // Reload projects list
           loadProjectsOperation.execute(() => javaApi.loadProjects());
         },
         onError: (error) => {
-          logger.error('Failed to create project:', error);
+          logger.error('Failed to create project:', { message: error instanceof Error ? error.message : String(error) });
         }
       }
     );
@@ -104,16 +105,16 @@ export const ProjectManager: React.FC = () => {
     }
     
     projectOperation.execute(
-      () => javaApi.updateProject(editingProject.id, formData),
+      () => javaApi.updateProject(editingProject.id, formData).then((p) => { if (!p) throw new Error('Update failed'); return p; }),
       {
-        onSuccess: (updated) => {
-          logger.info('Project updated successfully:', updated);
+        onSuccess: (data: unknown) => {
+          const updated = data as Project | null | undefined;
+          logger.info('Project updated successfully:', { projectId: updated?.id });
           resetForm();
-          // Reload projects list
           loadProjectsOperation.execute(() => javaApi.loadProjects());
         },
         onError: (error) => {
-          logger.error('Failed to update project:', error);
+          logger.error('Failed to update project:', { message: error instanceof Error ? error.message : String(error) });
         }
       }
     );
@@ -133,15 +134,14 @@ export const ProjectManager: React.FC = () => {
     
     if (result.response === 0) {
       projectOperation.execute(
-        () => javaApi.deleteProject(project.id),
+        () => javaApi.deleteProject(project.id).then(() => project),
         {
           onSuccess: () => {
-            logger.info('Project deleted successfully:', project);
-            // Reload projects list
+            logger.info('Project deleted successfully:', { projectId: project.id });
             loadProjectsOperation.execute(() => javaApi.loadProjects());
           },
           onError: (error) => {
-            logger.error('Failed to delete project:', error);
+            logger.error('Failed to delete project:', { message: error instanceof Error ? error.message : String(error) });
           }
         }
       );
@@ -177,7 +177,7 @@ export const ProjectManager: React.FC = () => {
         });
       }
     } catch (error) {
-      logger.error('Failed to export project:', error);
+      logger.error('Failed to export project:', { message: error instanceof Error ? error.message : String(error) });
     }
   };
   

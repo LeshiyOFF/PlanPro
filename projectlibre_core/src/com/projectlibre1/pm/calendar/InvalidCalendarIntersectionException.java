@@ -56,41 +56,24 @@
 package com.projectlibre1.pm.calendar;
 
 /**
- * 
+ * Exception thrown when calendar intersection calculation fails.
  */
 public class InvalidCalendarIntersectionException extends Exception {
+	private static final long serialVersionUID = 1L;
 
-	/**
-	 * 
-	 */
 	public InvalidCalendarIntersectionException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidCalendarIntersectionException(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarIntersectionException(String message) {
+		super(message);
 	}
 
-	/**
-	 * @param arg0
-	 */
-	public InvalidCalendarIntersectionException(Throwable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarIntersectionException(Throwable cause) {
+		super(cause);
 	}
 
-	/**
-	 * @param arg0
-	 * @param arg1
-	 */
-	public InvalidCalendarIntersectionException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
+	public InvalidCalendarIntersectionException(String message, Throwable cause) {
+		super(message, cause);
 	}
-
 }

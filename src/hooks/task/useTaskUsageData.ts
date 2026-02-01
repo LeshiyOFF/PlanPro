@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Task, ResourceAssignment } from '@/store/project/interfaces';
+import { Task, ResourceAssignment, getTaskResourceIds } from '@/store/project/interfaces';
 import { Resource } from '@/types/resource-types';
 import { ITaskUsage } from '@/domain/sheets/entities/ITaskUsage';
 import { CalendarMathService } from '@/domain/services/CalendarMathService';
@@ -41,10 +41,11 @@ const formatAssignedResources = (
     if (formatted.length > 0) return formatted.join(', ');
   }
   
-  // Fallback: старый формат resourceIds (100% по умолчанию)
-  if (task.resourceIds && task.resourceIds.length > 0) {
-    const names = task.resourceIds
-      .map(id => resources.find(r => r.id === id)?.name)
+  // Fallback: из resourceAssignments через getTaskResourceIds
+  const resourceIds = getTaskResourceIds(task);
+  if (resourceIds.length > 0) {
+    const names = resourceIds
+      .map(id => resources.find(r => String(r.id) === id)?.name)
       .filter((name): name is string => Boolean(name));
     
     if (names.length > 0) return names.map(n => `${n} (100%)`).join(', ');
@@ -84,7 +85,7 @@ export const useTaskUsageData = (tasks: Task[], resources: Resource[]): ITaskUsa
   const { preferences } = useAppStore();
   
   // Извлекаем примитивные значения для стабильных зависимостей
-  const extPrefs = preferences as unknown as ExtendedPreferences;
+  const extPrefs = preferences as ExtendedPreferences;
   const hoursPerDay = extPrefs.calendar?.hoursPerDay ?? DEFAULT_CALENDAR_PREFS.hoursPerDay;
   const hoursPerWeek = extPrefs.calendar?.hoursPerWeek ?? DEFAULT_CALENDAR_PREFS.hoursPerWeek;
   const daysPerMonth = extPrefs.calendar?.daysPerMonth ?? DEFAULT_CALENDAR_PREFS.daysPerMonth;
@@ -116,8 +117,8 @@ export const useTaskUsageData = (tasks: Task[], resources: Resource[]): ITaskUsa
         resources: formatAssignedResources(task, resources, t('sheets.not_assigned') || 'Не назначено'),
         resourceAssignments: getResourceAssignments(task),
         level: task.level || 1,
-        milestone: task.milestone || false,
-        summary: task.summary || false
+        milestone: task.isMilestone || false,
+        summary: task.isSummary || false
       };
     });
   }, [tasks, resources, t, hoursPerDay, hoursPerWeek, daysPerMonth, durationUnit]);

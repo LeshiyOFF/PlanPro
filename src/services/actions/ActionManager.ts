@@ -20,5 +20,6 @@ export const resetActionManager = (): void => {
   actionManagerInstance = null;
 };
 
+export { ActionManagerFactory as ActionManager } from './ActionManagerFactory';
 export { ActionCategory, type IActionManager };
 

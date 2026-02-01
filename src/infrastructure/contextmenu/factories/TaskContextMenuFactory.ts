@@ -3,6 +3,7 @@ import { ContextMenuType, ContextMenuStatus } from '../../../domain/contextmenu/
 import { IMenuFactory } from '../../../domain/contextmenu/services/IContextMenuService';
 import { DeleteAction } from '../../../domain/contextmenu/actions/DeleteAction';
 import { logger } from '@/utils/logger';
+import type { JsonObject } from '@/types/json-types';
 
 /**
  * Фабрика контекстных меню для задач.
@@ -10,10 +11,13 @@ import { logger } from '@/utils/logger';
  */
 export class TaskContextMenuFactory implements IMenuFactory {
   canHandle(context: IContextMenuContext): boolean {
-    return context.target && (
-      context.target.type === 'task' ||
-      context.target.taskId ||
-      context.target.id?.startsWith('TASK-')
+    if (!context.target) return false;
+    const t = context.target as Record<string, JsonObject>;
+    const id = t.id;
+    return (
+      t.type === 'task' ||
+      t.taskId !== undefined ||
+      (typeof id === 'string' && id.startsWith('TASK-'))
     );
   }
 
@@ -37,7 +41,7 @@ export class TaskContextMenuFactory implements IMenuFactory {
           action: {
             execute: async () => {
               logger.info('[TaskContextMenuFactory] Properties action for:', target?.id);
-              if (target.onShowProperties) {
+              if (target && typeof target === 'object' && 'onShowProperties' in target && typeof target.onShowProperties === 'function') {
                 await target.onShowProperties(target);
               } else {
                 logger.warning('[TaskContextMenuFactory] No onShowProperties handler');
@@ -51,6 +55,7 @@ export class TaskContextMenuFactory implements IMenuFactory {
         },
         {
           id: 'separator1',
+          label: '',
           separator: true
         },
         {
@@ -58,8 +63,9 @@ export class TaskContextMenuFactory implements IMenuFactory {
           label: 'Удалить задачу',
           icon: '🗑️',
           action: new DeleteAction(target, async (t) => {
-            logger.info('[TaskContextMenuFactory] Delete action triggered for:', t?.id);
-            if (target.onDelete) {
+            const taskId = typeof t === 'object' && t !== null && 'id' in t ? (t as { id: string }).id : undefined;
+            logger.info('[TaskContextMenuFactory] Delete action triggered for:', taskId);
+            if (target && typeof target === 'object' && 'onDelete' in target && typeof target.onDelete === 'function') {
               await target.onDelete(t);
               logger.info('[TaskContextMenuFactory] Task deleted successfully');
             } else {
@@ -71,4 +77,3 @@ export class TaskContextMenuFactory implements IMenuFactory {
     };
   }
 }
-

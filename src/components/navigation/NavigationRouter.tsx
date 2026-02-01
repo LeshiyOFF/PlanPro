@@ -2,10 +2,9 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ViewRouteManager } from '@/services/ViewRouteManager';
 import { AppBootstrapper } from '@/application/bootstrapping/AppBootstrapper';
-import { ViewType } from '@/types/ViewTypes';
+import { ViewType, type ViewComponentProps } from '@/types/ViewTypes';
 import { ViewLayout } from '@/components/layout/ViewLayout';
 import { MainWindowInitializer } from '@/components/layout/MainWindowInitializer';
-import { MenuProvider } from '@/providers/MenuProvider';
 import { 
   GanttView, 
   NetworkViewComponent, 
@@ -19,7 +18,6 @@ import {
   CalendarView,
   ReportsView
 } from '@/components/views';
-import { ProjectDashboard } from '@/components/dashboard/ProjectDashboard'
 import { DialogTestPage } from '@/pages/DialogTestPage'
 import { ContextMenuDemoPage } from '@/pages/ContextMenuDemoPage'
 import HotkeyDemoPage from '@/pages/HotkeyDemoPage';
@@ -59,7 +57,7 @@ export const NavigationRouter: React.FC<NavigationRouterProps> = ({ onViewChange
       views.forEach(v => {
         const config = routeManager.getViewConfig(v.type);
         if (config) {
-          config.component = v.comp;
+          config.component = v.comp as React.ComponentType<ViewComponentProps>;
           routeManager.registerView(config);
         }
       });
@@ -94,7 +92,7 @@ export const NavigationRouter: React.FC<NavigationRouterProps> = ({ onViewChange
           {/* Динамический редирект на основе настроек пользователя */}
           <Route path="/" element={<Navigate to={initialRoute} replace />} />
 
-          {allRoutes.map((route, index) => (
+          {allRoutes.map((route, _index) => (
             <Route
               key={route.path}
               path={route.path}

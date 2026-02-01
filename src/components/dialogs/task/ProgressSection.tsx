@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Lock, Diamond, FolderTree, CheckCircle2 } from 'lucide-react';
 import { toPercent, toFraction } from '@/utils/ProgressFormatter';
@@ -146,7 +146,7 @@ const RegularProgress: React.FC<RegularProgressProps> = ({
       </div>
     </div>
     <div className="py-2">
-      <Slider value={[toPercent(progress)]} max={100} step={1} onValueChange={onSliderChange} className="py-3" />
+      <Slider value={[toPercent(progress)]} min={0} max={100} step={1} onValueChange={onSliderChange} className="py-3" />
     </div>
     <div className="flex justify-between text-xs text-slate-400 uppercase tracking-wider font-semibold pt-1">
       <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>

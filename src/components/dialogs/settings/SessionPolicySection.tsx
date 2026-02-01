@@ -10,10 +10,12 @@ interface SessionPolicyData {
   reauthInterval: number;
 }
 
+type SessionPolicyValue = boolean | number;
+
 interface SessionPolicySectionProps {
   data: SessionPolicyData;
-  onChange: (field: keyof SessionPolicyData, value: any) => void;
-  errors?: Record<string, string>;
+  onChange: (field: keyof SessionPolicyData, value: SessionPolicyValue) => void;
+  errors?: Record<string, string | null>;
 }
 
 export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
@@ -30,7 +32,7 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
           label="Таймаут неактивности (минут)"
           type="number"
           value={data.timeoutMinutes}
-          onChange={(value) => onChange('timeoutMinutes', value)}
+          onChange={(value) => onChange('timeoutMinutes', value as number)}
           error={errors.timeoutMinutes}
           min="5"
           max="480"
@@ -40,7 +42,10 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
           label="Макс. одновременных сессий"
           type="number"
           value={data.maxConcurrentSessions}
-          onChange={(value) => onChange('maxConcurrentSessions', value)}
+          onChange={(value) => {
+            const num = typeof value === 'number' && !isNaN(value) ? value : data.maxConcurrentSessions;
+            onChange('maxConcurrentSessions', num);
+          }}
           error={errors.maxConcurrentSessions}
           min="1"
           max="10"
@@ -51,7 +56,7 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
             label="Интервал повторной аутентификации (минут)"
             type="number"
             value={data.reauthInterval}
-            onChange={(value) => onChange('reauthInterval', value)}
+            onChange={(value) => onChange('reauthInterval', value as number)}
             error={errors.reauthInterval}
             min="15"
             max="240"
@@ -64,7 +69,7 @@ export const SessionPolicySection: React.FC<SessionPolicySectionProps> = ({
           <Checkbox
             id="requireReauth"
             checked={data.requireReauth}
-            onCheckedChange={(checked) => onChange('requireReauth', checked)}
+            onCheckedChange={(checked) => onChange('requireReauth', checked === true)}
           />
           <Label htmlFor="requireReauth" className="text-sm">
             Требовать повторную аутентификацию для чувствительных операций

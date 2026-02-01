@@ -110,7 +110,7 @@ public class ContextStore  implements NamedItem {
 			list=new ArrayList<ConverterContext>();
 			contexts.put(ctx.getType(),list);
 		}
-		if (ctx.getName() == null) //TODO contexts should be named
+		if (ctx.getName() == null)
 			ctx.setName(Messages.getString(ctx.getFieldArrayId()));
 		list.add(ctx);
 	}

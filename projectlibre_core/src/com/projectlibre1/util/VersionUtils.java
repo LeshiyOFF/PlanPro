@@ -126,7 +126,7 @@ public class VersionUtils {
 			try {
 				pref.flush();
 			} catch (BackingStoreException e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to flush preferences in versionCheck (else)", e);
 			}
 
 			if (warnIfBad && Environment.isApplet()) {
@@ -142,7 +142,7 @@ public class VersionUtils {
 			try {
 				pref.flush();
 			} catch (BackingStoreException e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to flush preferences in versionCheck (else)", e);
 			}
 		}
 		return updated;

@@ -3,6 +3,17 @@ import { logger } from '@/utils/logger';
 import { useProject } from '@/providers/ProjectProvider';
 import { useAppStore } from '@/store/appStore';
 import { useNavigation } from '@/providers/NavigationProvider';
+import {
+  MainWindowActionRegistryFactory,
+  MainWindowActionRegistry
+} from '@/services/actions/MainWindowActionRegistry';
+import type {
+  ProjectProviderPort,
+  NavigationProviderPort,
+  AppStorePort,
+  MainWindowDependencies
+} from '@/services/actions/registry/BaseActionRegistry';
+import type { Project } from '@/types/project-types';
 
 /**
  * Props для MainWindowInitializer
@@ -17,15 +28,42 @@ interface MainWindowInitializerProps {
  * - Single Responsibility: Только инициализация действий
  * - Dependency Inversion: Использует существующие провайдеры
  */
-export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({ 
-  children 
+export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({
+  children
 }) => {
-  // Временно отключаем инициализацию старых действий
-  // Новая система меню (IntegratedMenu) работает независимо
-  // logger.info('Using new IntegratedMenu system - old action system temporarily disabled');
-  
-  // TODO: Интегрировать старые действия в новую систему меню
-  // когда потребуется полная функциональность
+  const { project, projectActions } = useProject();
+  const appStore = useAppStore();
+  const { navigateToView, availableViews } = useNavigation();
+
+  const projectProvider = React.useMemo<ProjectProviderPort>(
+    () => ({
+      currentProject: project,
+      createProject: projectActions.createProject,
+      saveProject: (projectOrPath?: Project | string) =>
+        projectActions.saveProject(typeof projectOrPath === 'string' ? projectOrPath : undefined)
+    }),
+    [project, projectActions]
+  );
+
+  const navigationProvider = React.useMemo<NavigationProviderPort>(
+    () => ({ navigateToView, availableViews }),
+    [navigateToView, availableViews]
+  );
+
+  React.useEffect(() => {
+    const dependencies: MainWindowDependencies = MainWindowActionRegistryFactory.extractDependencies(
+      projectProvider,
+      appStore as AppStorePort,
+      navigationProvider
+    );
+
+    const registry = MainWindowActionRegistryFactory.createAndInitialize(dependencies);
+    logger.info('MainWindow actions initialized and integrated with new system');
+
+    return () => {
+      registry.unregisterAllActions();
+    };
+  }, [projectProvider, appStore, navigationProvider]);
 
   return <>{children}</>;
 };
@@ -34,19 +72,25 @@ export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({
  * Hook для получения регистра MainWindow действий
  */
 export const useMainWindowRegistry = () => {
-  const { projectProvider } = useProject();
-  const { appStore } = useAppStore();
-  const { navigationProvider } = useNavigation();
+  const { project, projectActions } = useProject();
+  const appStore = useAppStore();
+  const { navigateToView, availableViews } = useNavigation();
 
-  const dependencies = MainWindowActionRegistryFactory.extractDependencies(
+  const projectProvider: ProjectProviderPort = {
+    currentProject: project,
+    createProject: projectActions.createProject,
+    saveProject: (projectOrPath?: Project | string) =>
+      projectActions.saveProject(typeof projectOrPath === 'string' ? projectOrPath : undefined)
+  };
+
+  const navigationProvider: NavigationProviderPort = { navigateToView, availableViews };
+
+  const dependencies: MainWindowDependencies = MainWindowActionRegistryFactory.extractDependencies(
     projectProvider,
-    appStore,
+    appStore as AppStorePort,
     navigationProvider
   );
 
-  const { MainWindowActionRegistry } = require('@/services/actions/MainWindowActionRegistry');
-  const registry = new MainWindowActionRegistry(dependencies);
-
-  return registry;
+  return new MainWindowActionRegistry(dependencies);
 };
 

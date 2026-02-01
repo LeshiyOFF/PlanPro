@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { ViewType } from './Master_Functionality_Catalog';
 
 /**
@@ -96,6 +97,12 @@ export enum TaskPriority {
   URGENT = 'urgent'
 }
 
+/** Пропсы компонента представления (view). viewType передаётся при рендере из роутера. */
+export interface ViewComponentProps {
+  viewType?: ViewType;
+  settings?: Partial<ViewSettings>;
+}
+
 /**
  * Интерфейс конфигурации представления
  */
@@ -106,7 +113,7 @@ export interface ViewConfig {
   description: string;
   icon: string;
   path: string;
-  component: React.ComponentType<any>;
+  component: ComponentType<ViewComponentProps> | null;
   permissions?: string[];
   defaultSettings?: Partial<ViewSettings>;
 }
@@ -116,7 +123,7 @@ export interface ViewConfig {
  */
 export interface ViewRoute {
   path: string;
-  component: React.ComponentType<any>;
+  component: ComponentType<ViewComponentProps> | null;
   settings: Partial<ViewSettings>;
   permissions?: string[];
 }

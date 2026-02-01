@@ -72,7 +72,7 @@ public class SchedulingType {
 			case FIXED_WORK:
 				return FixedWork.getInstance();
 		}
-		return null; //TODO log error -  shouldn't be possible 
+		return null; // shouldn't be possible
 	}
 
 }

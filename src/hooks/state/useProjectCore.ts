@@ -1,5 +1,4 @@
-import { useProjectCore as useCore } from './useProjectLifecycle'
-import { useProjectMetadata } from './useProjectLifecycle'
+import { useProjectCore as useCore, useProjectMetadata } from './useProjectLifecycle'
 
 /**
  * Агрегированный хук для управления ядром проекта

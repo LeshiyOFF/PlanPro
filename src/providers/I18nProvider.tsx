@@ -29,14 +29,15 @@ export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => {
     // 2. Подписка на изменения настроек
     const unsubscribe = service.subscribe((event) => {
       if (
-        event.key === 'load' || 
-        event.key === 'import' || 
+        event.key === 'load' ||
+        event.key === 'import' ||
         (event.category === PreferencesCategory.GENERAL && event.key === 'general')
       ) {
-        const prefs = (event.key === 'load' || event.key === 'import') 
-          ? event.newValue.general 
-          : event.newValue;
-          
+        const raw = event.newValue;
+        if (raw == null || typeof raw !== 'object') return;
+        const prefs = (event.key === 'load' || event.key === 'import')
+          ? (raw as { general?: { language?: string } }).general
+          : raw as { language?: string };
         const newLang = prefs?.language;
         if (newLang) {
           const newLangCode = newLang.split('-')[0];

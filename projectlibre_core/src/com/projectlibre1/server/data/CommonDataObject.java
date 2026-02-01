@@ -76,7 +76,6 @@ public class CommonDataObject implements DataObject{
      */
     public CommonDataObject() {
         super();
-        // TODO Auto-generated constructor stub
     }
     public long getUniqueId() {
         return uniqueId;

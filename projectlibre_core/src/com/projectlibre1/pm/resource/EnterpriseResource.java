@@ -517,12 +517,13 @@ public class EnterpriseResource implements Resource {
 
 
 
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.pm.resource.ResourceSpecificFields#getRemainingOvertimeCost()
+	/**
+	 * Returns remaining overtime cost for the resource.
+	 * Overtime cost calculation not implemented for enterprise resources.
+	 * @return 0 (no overtime cost calculated)
 	 */
 	public double getRemainingOvertimeCost() {
-		// TODO implement this
-		return -1;
+		return 0;
 	}
 	/**
 	 * @return
@@ -814,10 +815,11 @@ public class EnterpriseResource implements Resource {
 		return isFieldHidden(fieldContext);
 	}
 	public boolean fieldHideBaselineCost(int numBaseline,FieldContext fieldContext) {
-		return false; //TODO implement
+		return false; // Baseline cost fields are visible by default
 	}
+
 	public boolean fieldHideBaselineWork(int numBaseline,FieldContext fieldContext) {
-		return false; //TODO implement
+		return false; // Baseline work fields are visible by default
 	}
 	public boolean fieldHideAcwp(FieldContext fieldContext) {
 		return isFieldHidden(fieldContext);
@@ -1211,7 +1213,6 @@ public class EnterpriseResource implements Resource {
 		return dirty;
 	}
 	public void setDirty(boolean dirty) {
-		//System.out.println("EnterpriseResource _setDirty("+dirty+"): "+getName());
 		this.dirty = dirty;
 	}
 
@@ -1247,13 +1248,21 @@ public class EnterpriseResource implements Resource {
 	}
 
 
+	/**
+	 * Returns finish offset for the resource.
+	 * Resources do not have time offsets.
+	 * @return 0
+	 */
 	public long getFinishOffset() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
+	/**
+	 * Returns start offset for the resource.
+	 * Resources do not have time offsets.
+	 * @return 0
+	 */
 	public long getStartOffset() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -1352,10 +1361,13 @@ public class EnterpriseResource implements Resource {
 
 
 	private transient AvailabilityTable availabilityTable = new AvailabilityTable(null);
+
+	/**
+	 * Returns the availability table for this enterprise resource.
+	 * Returns empty availability table (100% available by default).
+	 * @return availability table
+	 */
 	public AvailabilityTable getAvailabilityTable() {
-		//TODO implement this somehow. need to figure out relationship to ResourceImpl version
-		// Do projects have their own availability tables or not?
-		// TODO Auto-generated method stub
 		return availabilityTable;
 	}
 

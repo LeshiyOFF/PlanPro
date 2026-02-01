@@ -95,7 +95,6 @@ public class DefaultWorkCalendar implements WorkCalendar{
 
 	@Override
 	public boolean addException(WorkCalendarException exception) {
-		// TODO Auto-generated method stub
 		return exceptions.add(exception);
 	}
 

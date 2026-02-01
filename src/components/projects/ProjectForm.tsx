@@ -10,7 +10,7 @@ interface ProjectFormProps {
     endDate: string;
     status: string;
   };
-  onFormChange: (data: any) => void;
+  onFormChange: (data: Partial<ProjectFormProps['formData']>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isLoading: boolean;

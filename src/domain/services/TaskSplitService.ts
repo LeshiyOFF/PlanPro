@@ -1,5 +1,4 @@
 import { Task, TaskSegment } from '@/store/projectStore';
-import { CalendarPreferences } from '@/types/Master_Functionality_Catalog';
 
 /**
  * TaskSplitService - Сервис для управления логикой прерывания задач.

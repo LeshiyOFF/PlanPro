@@ -1,4 +1,4 @@
-import { Task } from '@/store/project/interfaces';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 import { Resource } from '@/types/resource-types';
 
 /**
@@ -29,10 +29,10 @@ export class CostDiagnosticService {
   }
 
   private getSummary(tasks: Task[], resources: Resource[]): DiagnosticSummary {
-    const nonSummaryTasks = tasks.filter(t => !t.summary);
+    const nonSummaryTasks = tasks.filter(t => !t.isSummary);
     const tasksWithAssignments = nonSummaryTasks.filter(t => 
       (t.resourceAssignments && t.resourceAssignments.length > 0) ||
-      (t.resourceIds && t.resourceIds.length > 0)
+      getTaskResourceIds(t).length > 0
     );
     const workResources = resources.filter(r => r.type === 'Work');
     const workWithRate = workResources.filter(r => r.standardRate > 0);
@@ -107,11 +107,11 @@ export class CostDiagnosticService {
     const resourceMap = new Map(resources.map(r => [r.id, r]));
     
     for (const task of tasks) {
-      if (task.summary) continue;
-      
+      if (task.isSummary) continue;
+
       const allAssignmentIds = new Set<string>();
-      task.resourceAssignments?.forEach(a => allAssignmentIds.add(a.resourceId));
-      task.resourceIds?.forEach(id => allAssignmentIds.add(id));
+      task.resourceAssignments?.forEach((a: { resourceId: string }) => allAssignmentIds.add(a.resourceId));
+      getTaskResourceIds(task).forEach((id: string) => allAssignmentIds.add(id));
       
       for (const resourceId of allAssignmentIds) {
         const resource = resourceMap.get(resourceId);
@@ -133,7 +133,7 @@ export class CostDiagnosticService {
   private getAssignedTasks(resourceId: string, tasks: Task[]): Task[] {
     return tasks.filter(t => {
       if (t.resourceAssignments?.some(a => a.resourceId === resourceId)) return true;
-      if (t.resourceIds?.includes(resourceId)) return true;
+      if (getTaskResourceIds(t).includes(resourceId)) return true;
       return false;
     });
   }

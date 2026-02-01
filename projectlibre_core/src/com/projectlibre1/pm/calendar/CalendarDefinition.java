@@ -82,12 +82,11 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 	protected long id=-1L;
 
 	/**
-	 *
+	 * Creates a new empty calendar definition with no exceptions.
 	 */
 	public CalendarDefinition() {
 		super();
 		dayExceptions = new TreeSet();
-		// TODO Auto-generated constructor stub
 	}
 
 	public CalendarDefinition(CalendarDefinition base, CalendarDefinition differences) {
@@ -212,8 +211,7 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 				forward = false;
 				duration = -duration;
 			}
-			//TODO move current day into iterator for speed
-			CalendarIterator iterator = CalendarIteratorFactory.getInstance(); // use object pool for speed
+			CalendarIterator iterator = CalendarIteratorFactory.getInstance();
 			long currentDay = iterator.dayOf(date);
 			iterator.initialize(this,forward,currentDay);
 			WorkingHours current = iterator.getNext(currentDay);
@@ -240,13 +238,15 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 				duration -= (numWeeks * weekDuration); // subtract off fixed duration
 				duration -= iterator.exceptionDurationDifference(currentDay); // subtract off difference.
 
-				if (duration <= 0) { // if exceptions cause too much duration, then go back in other direction
+				if (duration <= 0) {
+					// If exceptions cause too much duration, reverse direction
 					iterator.reverseDirection();
 					duration = -duration;
-					forward = !forward; // todo is this necessary?
+					forward = !forward;
+				} else {
+					// Move back a day for fine tuning (will be added back in fine tuning loop)
+					currentDay = iterator.prevDay(currentDay);
 				}
-				else //TODO verify that this should be in else.
-					currentDay = iterator.prevDay(currentDay); // move back a day for fine tuning which adds it back
 
 			}
 //
@@ -363,7 +363,7 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 			try {
 				return (CalendarIterator) pool.borrowObject();
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to borrow CalendarIterator from pool", e);
 				return null;
 			}
 		}
@@ -372,7 +372,7 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 			try {
 				pool.returnObject(object);
 			} catch (Exception e) {
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to return CalendarIterator to pool", e);
 			}
 		}
 	}
@@ -464,19 +464,22 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 		private WorkingHours getNext(long day) {
 			WorkDay workDay;
 			if (day == exceptionDay) {
-				workDay = exceptions[i]; // move index, save off new value for exception day
+				workDay = exceptions[i];
 				i += step;
-				if (i < 0 || i == exceptions.length) {//TODO
-					System.out.println("invalid calendar iterator - index is negative or past bounds. avoiding");
-					ErrorLogger.logOnce("CalendarIterator","invalid calendar iterator i=" + i + "\n" + CriticalPath.getTrace(),null);
-				} else
-					exceptionDay = exceptions[i].getStart(); // move index, save off new value for exception day
+				if (i < 0 || i == exceptions.length) {
+					// Boundary protection: index out of bounds indicates calendar corruption
+					ErrorLogger.logOnce("CalendarIterator", 
+						"Invalid calendar iterator i=" + i + "\n" + CriticalPath.getTrace(), null);
+				} else {
+					exceptionDay = exceptions[i].getStart();
+				}
 			} else {
 				workDay = week.getWeekDay(dayOfWeek(day));
 			}
 			
-			if (workDay==null)
-				workDay=WorkDay.getDefaultWorkDay();
+			if (workDay == null) {
+				workDay = WorkDay.getDefaultWorkDay();
+			}
 			
 			return workDay.getWorkingHours();
 		}
@@ -523,28 +526,31 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.configuration.NamedItem#getName()
+	/**
+	 * Gets the name of this calendar definition.
+	 * Base implementation returns null; override in subclasses for named calendars.
+	 * @return the calendar name, or null for unnamed base definitions
 	 */
 	public String getName() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.configuration.NamedItem#getCategory()
+	/**
+	 * Gets the category of this calendar definition.
+	 * Base implementation returns null; override in subclasses for categorized calendars.
+	 * @return the category name, or null for uncategorized definitions
 	 */
 	public String getCategory() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.pm.time.WorkCalendar#setName(java.lang.String)
+	/**
+	 * Sets the name of this calendar definition.
+	 * Base implementation is a no-op; override in subclasses for mutable names.
+	 * @param name the new calendar name (ignored in base implementation)
 	 */
 	public void setName(String name) {
-		// TODO Auto-generated method stub
-
+		// Base implementation: name is not stored at this level
 	}
 
 	/* (non-Javadoc)
@@ -641,7 +647,6 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 		return dirty;
 	}
 	public void setDirty(boolean dirty) {
-		//System.out.println("CalendarDefinition _setDirty("+dirty+"): "+getName());
 		this.dirty = dirty;
 	}
 

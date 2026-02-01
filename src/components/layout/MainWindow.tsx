@@ -1,17 +1,23 @@
-import React, { ReactNode, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigation } from '@/providers/NavigationProvider';
 import { useProject } from '@/providers/ProjectProvider';
-import { StatusBar } from '@/components/statusbar';
+import { useAppStore } from '@/store/appStore';
 import { IntegratedMenu } from '@/components/menu/IntegratedMenu';
 import { IntegratedToolbar } from '@/components/toolbar';
-import { useStatusBar } from '@/components/statusbar';
 import { useFileOperations } from '@/hooks/useFileOperations';
-import { useProjectStore } from '@/store/projectStore';
 import { MainWindowActionRegistryFactory } from '@/services/actions/MainWindowActionRegistry';
 import { useActionManager } from '@/providers/ActionContext';
 import { logger } from '@/utils/logger';
+import type {
+  ProjectProviderPort,
+  NavigationProviderPort,
+  FileOperationsPort,
+  AppStorePort,
+  MainWindowDependencies
+} from '@/services/actions/registry/BaseActionRegistry';
 
 import type { ViewType } from '@/types/ViewTypes';
+import type { Project } from '@/types/project-types';
 
 /**
  * Интерфейс MainWindow компонента
@@ -27,28 +33,41 @@ interface MainWindowProps {
  * Реализует паттерны из UI_Reverse_Engineering.md
  * Следует SOLID принципам и Clean Architecture
  */
-export const MainWindow: React.FC<MainWindowProps> = ({ 
-  className = '',
-  onViewChange,
+export const MainWindow: React.FC<MainWindowProps> = ({
+  className: _className = '',
+  onViewChange: _onViewChange,
   children
 }) => {
-  const { navigateToView } = useNavigation();
-  const { currentProject } = useProject();
-  
-  // Наши живые операции с файлами
+  const { navigateToView, availableViews } = useNavigation();
+  const { project, projectActions } = useProject();
+  const appStore = useAppStore();
   const fileOperations = useFileOperations();
-  const projectStore = useProjectStore();
   const { executeAction } = useActionManager();
 
-  // Инициализация реестра действий при монтировании
-  useEffect(() => {
+  useEffect((): (() => void) | undefined => {
     logger.info('[MainWindow] Initializing action registry with live dependencies');
-    
-    const dependencies = {
-      projectProvider: { currentProject },
-      appStore: projectStore,
-      navigationProvider: { navigateToView },
-      fileOperations // Внедряем живые функции!
+
+    const projectProvider: ProjectProviderPort = {
+      currentProject: project,
+      createProject: projectActions.createProject,
+      saveProject: (projectOrPath?: Project | string) =>
+        projectActions.saveProject(typeof projectOrPath === 'string' ? projectOrPath : undefined)
+    };
+
+    const navigationProvider: NavigationProviderPort = { navigateToView, availableViews };
+
+    const fileOperationsPort: FileOperationsPort = {
+      createNewProject: () => fileOperations.createNewProject().then(() => {}),
+      openProject: fileOperations.openProject,
+      saveProject: fileOperations.saveProject,
+      saveProjectAs: fileOperations.saveProjectAs
+    };
+
+    const dependencies: MainWindowDependencies = {
+      projectProvider,
+      appStore: appStore as AppStorePort,
+      navigationProvider,
+      fileOperations: fileOperationsPort
     };
 
     try {
@@ -57,17 +76,11 @@ export const MainWindow: React.FC<MainWindowProps> = ({
         registry.unregisterAllActions();
       };
     } catch (error) {
-      logger.error('[MainWindow] Failed to initialize action registry:', error);
+      const errMessage = error instanceof Error ? error.message : String(error);
+      logger.error('[MainWindow] Failed to initialize action registry:', { message: errMessage });
+      return undefined;
     }
-  }, [fileOperations, projectStore, navigateToView, currentProject]);
-
-  // Обработчик изменения представления
-  const handleViewChange = (viewType: ViewType) => {
-    navigateToView(viewType);
-    if (onViewChange) {
-      onViewChange(viewType);
-    }
-  };
+  }, [fileOperations, appStore, navigateToView, availableViews, project, projectActions]);
 
   // Обработчик действий тулбара
   const handleToolbarAction = async (actionId: string, actionLabel: string) => {

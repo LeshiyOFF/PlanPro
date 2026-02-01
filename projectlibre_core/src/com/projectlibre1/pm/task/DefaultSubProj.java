@@ -57,58 +57,62 @@ package com.projectlibre1.pm.task;
 
 import java.util.Map;
 
+/**
+ * Default no-op implementation of SubProj interface.
+ * This implementation is used when subproject functionality is not enabled.
+ * All methods return safe default values or perform no operation.
+ */
 public class DefaultSubProj implements SubProj {
-	public DefaultSubProj(Project dummy, Long id) {
-		
+	public DefaultSubProj(Project project, Long id) {
 	}
+
+	@Override
 	public Project getSubproject() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // No subproject reference in default implementation
 	}
 
+	@Override
 	public long getSubprojectUniqueId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return 0; // No subproject ID in default implementation
 	}
 
+	@Override
 	public boolean isSubprojectOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return false; // Not a subproject in default implementation
 	}
 
+	@Override
 	public boolean isValid() {
-		// TODO Auto-generated method stub
-		return false;
+		return false; // Not valid as no real subproject exists
 	}
 
+	@Override
 	public boolean isValidAndOpen() {
-		// TODO Auto-generated method stub
-		return false;
+		return false; // Not valid and not open
 	}
 
+	@Override
 	public boolean isWritable() {
-		// TODO Auto-generated method stub
-		return false;
+		return false; // Not writable in default implementation
 	}
 
+	@Override
 	public void setFetching(boolean b) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void setSchedulesFromSubprojectFieldValues() {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void setSubprojectFieldValues(Map subprojectFieldValues) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
 
+	@Override
 	public void setSubprojectUniqueId(long subprojectId) {
-		// TODO Auto-generated method stub
-
+		// No-op in default implementation
 	}
-
 }

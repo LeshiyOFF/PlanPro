@@ -112,8 +112,7 @@ public class NodeImplChangeAndValueSetEdit extends AbstractUndoableEdit{
 		try {
 			model.replaceImplAndSetFieldValue(node,previous,newImpl,field,source,value,context,NodeModel.EVENT);
 		} catch (FieldParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to redo NodeImplChangeAndValueSetEdit", e);
 		}
 	}
 	public void undo() throws CannotUndoException {
@@ -127,11 +126,7 @@ public class NodeImplChangeAndValueSetEdit extends AbstractUndoableEdit{
 		}
 		Object impl=node.getImpl();
 		model.replaceImpl(node,oldImpl,source,NodeModel.EVENT);
-//		try {
-			model.getDataFactory().remove(impl,model,false,false,true);
-//		} catch (NodeException e) {
-//			// TODO Auto-generated catch block
-//		}
+		model.getDataFactory().remove(impl,model,false,false,true);
 	}
 	
 	public static class Position{

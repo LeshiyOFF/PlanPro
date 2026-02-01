@@ -1,5 +1,5 @@
 import React, { Profiler } from 'react';
-import { ReactProfilerService, type ProfilerMetrics, type ProfilerConfig } from '@/services/ReactProfilerService';
+import { ReactProfilerService, type ProfilerConfig } from '@/services/ReactProfilerService';
 
 interface ReactProfilerProviderProps {
   children: React.ReactNode;

@@ -18,8 +18,8 @@ export class TaskStatsCalculator {
       return p > 0 && p < 100;
     }).length;
     const notStarted = tasks.filter(t => this.normalizeProgress(t.progress) === 0).length;
-    const critical = tasks.filter(t => t.critical).length;
-    const milestones = tasks.filter(t => t.milestone).length;
+    const critical = tasks.filter(t => t.isCritical).length;
+    const milestones = tasks.filter(t => t.isMilestone).length;
     
     return {
       total,

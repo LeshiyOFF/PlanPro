@@ -1,6 +1,6 @@
 import { Task } from '@/store/project/interfaces';
 import { CalendarMathService } from './CalendarMathService';
-import { CalendarPreferences } from '@/types/Master_Functionality_Catalog';
+import { CalendarPreferences, SchedulePreferences } from '@/types/Master_Functionality_Catalog';
 import { CalendarDateService } from '@/services/CalendarDateService';
 import { normalizeFraction } from '@/utils/ProgressFormatter';
 
@@ -11,7 +11,7 @@ export class TaskSchedulingService {
   public static recalculateAll(tasks: Task[], calendarPrefs: CalendarPreferences): Task[] {
     // 1. Сначала пересчитываем длительности обычных задач
     const updatedTasks = tasks.map(task => {
-      if (task.milestone || task.summary) return task;
+      if (task.isMilestone || task.isSummary) return task;
 
       const currentDuration = CalendarMathService.calculateDuration(
         task.startDate, task.endDate, 'hours', calendarPrefs
@@ -38,7 +38,7 @@ export class TaskSchedulingService {
     // Идем с конца в начало, чтобы сначала обработать глубокие уровни вложенности
     for (let i = result.length - 1; i >= 0; i--) {
       const task = result[i];
-      if (!task.summary) continue;
+      if (!task.isSummary) continue;
 
       // Находим все прямые и косвенные подзадачи
       const subtasks: Task[] = [];
@@ -60,7 +60,7 @@ export class TaskSchedulingService {
         
         // Средний прогресс: игнорируем вехи (как в MS Project)
         // Вехи - это контрольные точки, а не работа, поэтому не учитываем их в прогрессе
-        const nonMilestones = subtasks.filter(t => !t.milestone);
+        const nonMilestones = subtasks.filter(t => !t.isMilestone);
         let avgProgress = 0;
         
         if (nonMilestones.length > 0) {
@@ -88,9 +88,9 @@ export class TaskSchedulingService {
    * Это защищает от UTC-сдвигов при создании задач из любых View-компонентов.
    */
   public static prepareNewTask(
-    task: Task, 
+    task: Task,
     lastTask: Task | undefined,
-    schedulePrefs: any, 
+    schedulePrefs: Partial<SchedulePreferences> | null | undefined,
     calendarPrefs: CalendarPreferences
   ): Task {
     const newTask = { ...task };

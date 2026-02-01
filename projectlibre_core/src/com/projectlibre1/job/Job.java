@@ -600,10 +600,9 @@ public class Job extends Thread {
 		protected InternalRunnable previous=null;
 
 
-		public InternalRunnable(JobRunnable runnable, boolean sync, boolean createThread,  boolean swing, boolean exceptionHandler) {
+		public InternalRunnable(JobRunnable runnable, boolean sync, boolean createThread, boolean swing, boolean exceptionHandler) {
 			super();
-			// TODO Auto-generated constructor stub
-			this.sync=sync;
+			this.sync = sync;
 			this.createThread = createThread;
 			this.swing = swing;
 			this.exceptionHandler=exceptionHandler;
@@ -661,8 +660,7 @@ public class Job extends Thread {
 				//System.out.println("Exception: "+getName());
 				exception=e;
 				if (!(e instanceof JobCanceledException)){
-					e.printStackTrace();
-					ErrorLogger.log("Job Exception: " + getName(),e);
+					com.projectlibre1.server.access.ErrorLogger.log("Job Exception: " + getName(),e);
 				}
 			}
 		}

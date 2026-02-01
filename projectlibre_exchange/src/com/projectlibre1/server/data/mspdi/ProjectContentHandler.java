@@ -55,6 +55,8 @@
  *******************************************************************************/
 package com.projectlibre1.server.data.mspdi;
 
+import com.projectlibre1.server.access.ErrorLogger;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
@@ -75,14 +77,12 @@ public class ProjectContentHandler extends DefaultHandler {
 			context = JAXBContext.newInstance ("net.sf.mpxj.mspdi.schema");
 			unmarshaller = context.createUnmarshaller ();
 		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log(e);
 		}
 	}
 	public void endElement(String uri, String localName, String qName) throws SAXException {
 		if (qName.equals("Task"))
 			System.out.println("task found -- end");
-		// TODO Auto-generated method stub
 		super.endElement(uri, localName, qName);
 	}
 
@@ -95,8 +95,7 @@ public class ProjectContentHandler extends DefaultHandler {
 				Object o = unmarshaller.unmarshal(inputSource);
 				System.out.println("unmarshalled" + o.getClass());
 			} catch (JAXBException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ErrorLogger.log(e);
 			}
 		} else {
 			super.startElement(uri, localName, qName, attributes);

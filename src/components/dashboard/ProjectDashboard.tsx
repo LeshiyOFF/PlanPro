@@ -5,10 +5,10 @@ import { ResourceManager } from '@/components/resources/ResourceManager';
 import { StatusMonitor } from '@/components/status/StatusMonitor';
 import { StatusHistory } from '@/components/status/StatusHistory';
 import { useJavaApi } from '@/hooks/useJavaApi';
+import { useIpcService } from '@/hooks/useIpcService';
 import { useStatusMonitor } from '@/hooks/useStatusMonitor';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { ErrorAlert } from '@/components/ui/ErrorAlert';
-import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { ErrorAlert } from '@/components/ui/error-alert';
 
 type DashboardTab = 'projects' | 'tasks' | 'resources' | 'status' | 'history';
 
@@ -17,11 +17,12 @@ type DashboardTab = 'projects' | 'tasks' | 'resources' | 'status' | 'history';
  */
 export const ProjectDashboard: React.FC = () => {
   const javaApi = useJavaApi();
+  const { ipcService } = useIpcService();
   const [activeTab, setActiveTab] = useState<DashboardTab>('projects');
   const [globalError, setGlobalError] = useState<string | null>(null);
   
   // Мониторинг статуса с обновлением каждые 3 секунды
-  const { isHealthy, isMonitoring, detailedStatus, monitoringErrors } = useStatusMonitor(3000);
+  const { isHealthy, isMonitoring, monitoringErrors } = useStatusMonitor(3000);
   
   const getTabStyle = (tab: DashboardTab) => ({
     padding: '12px 24px',
@@ -66,11 +67,11 @@ export const ProjectDashboard: React.FC = () => {
     
     try {
       if (!javaApi.javaStatus?.running) {
-        await javaApi.ipcService.startJava();
+        await ipcService.startJava();
       } else if (!javaApi.isApiAvailable) {
         await javaApi.checkApiAvailability();
       } else {
-        await javaApi.ipcService.showMessageBox({
+        await ipcService.showMessageBox({
           type: 'info',
           title: 'Статус Java API',
           message: `Java API запущен и доступен.\n\nПроектов: ${javaApi.projects.length}\nЗадач: ${javaApi.tasks.length}\nРесурсов: ${javaApi.resources.length}`
@@ -261,7 +262,7 @@ export const ProjectDashboard: React.FC = () => {
             API: {javaApi.isApiAvailable ? 'Доступно' : 'Недоступно'}
           </span>
           <span>
-            Среда: {import.meta.env.MODE === 'development' ? 'Разработка' : 'Продакшн'}
+            Среда: {process.env.NODE_ENV === 'development' ? 'Разработка' : 'Продакшн'}
           </span>
         </div>
       </div>

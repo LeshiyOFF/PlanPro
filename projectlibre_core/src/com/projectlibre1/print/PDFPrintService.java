@@ -67,31 +67,34 @@ import javax.print.event.PrintServiceAttributeListener;
 
 import com.projectlibre1.strings.Messages;
 
-public class PDFPrintService implements PrintService{
+/**
+ * Placeholder for PDF printing service.
+ * Used for instanceof checks in ExtendedPageFormat to detect PDF output mode.
+ * Actual PDF printing functionality is not implemented.
+ */
+public class PDFPrintService implements PrintService {
 
-	public void addPrintServiceAttributeListener(
-			PrintServiceAttributeListener listener) {
-		// TODO Auto-generated method stub
-
+	/** Listeners not supported - no-op. */
+	public void addPrintServiceAttributeListener(PrintServiceAttributeListener listener) {
 	}
 
+	/** PDF print jobs not supported. */
 	public DocPrintJob createPrintJob() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("PDF printing not implemented");
 	}
 
+	/** Attributes not available for PDF service. */
 	public <T extends PrintServiceAttribute> T getAttribute(Class<T> category) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Attributes not available for PDF service. */
 	public PrintServiceAttributeSet getAttributes() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Default attributes not available for PDF service. */
 	public Object getDefaultAttributeValue(Class<? extends Attribute> category) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -99,55 +102,49 @@ public class PDFPrintService implements PrintService{
 		return Messages.getString("PageSetupDialog.PrinterPDFService");
 	}
 
+	/** UI factory not available for PDF service. */
 	public ServiceUIFactory getServiceUIFactory() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** No attribute categories supported. */
 	public Class<?>[] getSupportedAttributeCategories() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public Object getSupportedAttributeValues(
-			Class<? extends Attribute> category, DocFlavor flavor,
-			AttributeSet attributes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public DocFlavor[] getSupportedDocFlavors() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public AttributeSet getUnsupportedAttributes(DocFlavor flavor,
-			AttributeSet attributes) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public boolean isAttributeCategorySupported(
-			Class<? extends Attribute> category) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean isAttributeValueSupported(Attribute attrval,
+	/** No attribute values supported. */
+	public Object getSupportedAttributeValues(Class<? extends Attribute> category, 
 			DocFlavor flavor, AttributeSet attributes) {
-		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/** No doc flavors supported. */
+	public DocFlavor[] getSupportedDocFlavors() {
+		return null;
+	}
+
+	/** All attributes unsupported. */
+	public AttributeSet getUnsupportedAttributes(DocFlavor flavor, AttributeSet attributes) {
+		return null;
+	}
+
+	/** No attribute categories supported. */
+	public boolean isAttributeCategorySupported(Class<? extends Attribute> category) {
 		return false;
 	}
 
+	/** No attribute values supported. */
+	public boolean isAttributeValueSupported(Attribute attrval, DocFlavor flavor, 
+			AttributeSet attributes) {
+		return false;
+	}
+
+	/** No doc flavors supported. */
 	public boolean isDocFlavorSupported(DocFlavor flavor) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public void removePrintServiceAttributeListener(
-			PrintServiceAttributeListener listener) {
-		// TODO Auto-generated method stub
-
+	/** Listeners not supported - no-op. */
+	public void removePrintServiceAttributeListener(PrintServiceAttributeListener listener) {
 	}
-
 }

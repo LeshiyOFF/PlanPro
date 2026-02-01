@@ -820,8 +820,9 @@ abstract class MPD9AbstractReader
          task.setBaselineFinish(row.getDate("TASK_BASE_FINISH"));
          task.setBaselineStart(row.getDate("TASK_BASE_START"));
          task.setBaselineWork(row.getDuration("TASK_BASE_WORK"));
-         //task.setBCWP(row.getCurrency("TASK_BCWP")); //@todo FIXME
-         //task.setBCWS(row.getCurrency("TASK_BCWS")); //@todo FIXME
+         // NOTE: BCWP/BCWS not mapped from MPD9 schema in this reader.
+         // task.setBCWP(row.getCurrency("TASK_BCWP"));
+         // task.setBCWS(row.getCurrency("TASK_BCWS"));
          task.setCalendar(m_project.getCalendarByUniqueID(row.getInteger("TASK_CAL_UID")));
          //task.setConfirmed();
          task.setConstraintDate(row.getDate("TASK_CONSTRAINT_DATE"));
@@ -924,7 +925,8 @@ abstract class MPD9AbstractReader
          task.setLevelingCanSplit(row.getBoolean("TASK_LEVELING_CAN_SPLIT"));
          task.setLevelingDelayFormat(MPDUtility.getDurationTimeUnits(row.getInt("TASK_LEVELING_DELAY_FMT")));
          task.setLevelingDelay(MPDUtility.getAdjustedDuration(m_project, row.getInt("TASK_LEVELING_DELAY"), task.getLevelingDelayFormat()));
-         //task.setLinkedFields(row.getBoolean("TASK_HAS_LINKED_FIELDS")); @todo FIXME
+         // NOTE: linked-fields flag not mapped from MPD9 schema in this reader.
+         // task.setLinkedFields(row.getBoolean("TASK_HAS_LINKED_FIELDS"));
          task.setMarked(row.getBoolean("TASK_IS_MARKED"));
          task.setMilestone(row.getBoolean("TASK_IS_MILESTONE"));
          task.setName(row.getString("TASK_NAME"));

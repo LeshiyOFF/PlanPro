@@ -3,7 +3,7 @@
 import { ConfigService } from './ConfigService';
 import { SystemJreDetector } from './SystemJreDetector';
 import { EmbeddedJreService } from './EmbeddedJreService';
-import { IJreManager, JreType, JreSearchResult } from './interfaces/CommonTypes';
+import { IJreManager, JreType, JreSearchResult, JreInfo } from './interfaces/CommonTypes';
 
 /**
  * Основной сервис управления JRE (Java Runtime Environment)

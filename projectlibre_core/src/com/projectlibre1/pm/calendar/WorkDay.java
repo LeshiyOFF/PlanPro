@@ -79,8 +79,7 @@ public class WorkDay extends CalendarEvent implements Comparable, Cloneable,Seri
 			newOne = (WorkDay) super.clone();
 			newOne.workingHours = (WorkingHours) workingHours.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone WorkDay", e);
 		}
 		return newOne;
 	}

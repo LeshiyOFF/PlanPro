@@ -160,12 +160,7 @@ public class TimeIntervals implements Serializable,Cloneable{
 		for (TimeWindow w:win) w.setId(i++);
 	}
 
-	public TimeIntervals translate(int winCount) { //TODO case winCount<0
-
-//		for (TimeWindow w : history) System.out.println("history0: "+w);
-//		for (TimeWindow w : win) System.out.println("win0: "+w);
-
-		//for (TimeWindow w : history) System.out.println("id="+w.getId());
+	public TimeIntervals translate(int winCount) {
 		TimeIntervals t=new TimeIntervals();
 		t.setScale(scale);
 		LinkedList<TimeWindow> twin=t.getWin();

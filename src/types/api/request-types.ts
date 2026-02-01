@@ -3,6 +3,8 @@
  * Заменяют использование `any` для строгой типизации
  */
 
+import type { JsonObject, JsonValue } from '../json-types';
+
 // Базовые типы запросов
 export interface BaseRequest {
   id?: string
@@ -205,14 +207,14 @@ export interface ReportGenerateRequest extends BaseRequest {
   projectId: string
   reportType: 'gantt' | 'resource-usage' | 'cost-summary' | 'timeline' | 'custom'
   format?: 'pdf' | 'html' | 'excel' | 'xml'
-  filters?: Record<string, unknown>
-  parameters?: Record<string, unknown>
+  filters?: JsonObject
+  parameters?: JsonObject
 }
 
 // Запросы RPC команд (для Electron bridge)
 export interface RpcCommandRequest extends BaseRequest {
   command: string
-  args?: unknown[]
+  args?: JsonValue[]
 }
 
 // Запросы файловых операций
@@ -328,5 +330,3 @@ export interface ProjectSyncRequest extends BaseRequest {
   tasks: FrontendTaskData[]
   resources: FrontendResourceData[]
 }
-
-

@@ -1,4 +1,5 @@
 import React, { KeyboardEvent } from 'react';
+import { CellValue } from '@/types/sheet/CellValueTypes';
 import { ICellEditorProps } from './ICellEditorProps';
 
 /**
@@ -23,22 +24,20 @@ export const SelectCellEditor: React.FC<ICellEditorProps> = ({
     }
   };
 
+  const selectValue = typeof value === 'string' || typeof value === 'number' ? value : '';
   return (
     <div className="relative w-full h-full">
       <select
         className={`h-full w-full px-1 py-0 min-h-0 border-none rounded-none focus:outline-none focus:ring-1 text-[11px] bg-white ${
           isValid ? 'focus:ring-primary' : 'focus:ring-destructive bg-destructive/10'
         }`}
-        value={typeof value === 'object' ? '' : (value || '')}
+        value={selectValue}
         onChange={(e) => {
-          const newValue = e.target.value;
+          const newValue: CellValue = e.target.value;
           onChange(newValue);
-          // Stage 8.16: Коммитим СРАЗУ с передачей нового значения, 
-          // чтобы избежать проблем с асинхронным обновлением стейта
           onCommit(newValue);
         }}
         onBlur={() => {
-          // Только если значение примитивное
           if (typeof value !== 'object') {
             onCommit();
           }
@@ -48,7 +47,7 @@ export const SelectCellEditor: React.FC<ICellEditorProps> = ({
       >
         <option value="" disabled>Выберите...</option>
         {options.map((opt) => (
-          <option key={String(opt.value)} value={opt.value}>
+          <option key={String(opt.value)} value={String(opt.value)}>
             {opt.label}
           </option>
         ))}

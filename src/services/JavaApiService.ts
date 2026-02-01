@@ -17,6 +17,7 @@ import type {
   DataResponse,
   ProjectResponse,
   ProjectsListResponse,
+  ProjectDataResponse,
   TaskResponse,
   TasksListResponse,
   ResourceResponse,
@@ -28,8 +29,7 @@ import type {
   ExportResponse,
   ImportResponse,
   ConfigurationResponse,
-  ApiStatusResponse,
-  OperationResponse
+  ApiStatusResponse
 } from '@/types/api/response-types';
 
 /**
@@ -64,7 +64,7 @@ export class JavaApiService implements IJavaApiService {
     return this.projectService.getAllProjects();
   }
   
-  public recalculateProject(id: string): Promise<DataResponse<OperationResponse>> {
+  public recalculateProject(id: string): Promise<DataResponse<ProjectDataResponse>> {
     return this.projectService.recalculateProject(id);
   }
   

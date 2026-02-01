@@ -112,7 +112,7 @@ public class ModelFieldEdit extends AbstractUndoableEdit{
 		try {
 			model.setFieldValue(field,node,source,value,context,NodeModel.EVENT);
 		} catch (FieldParseException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to redo ModelFieldEdit", e);
 		}
 	}
 	public void undo() throws CannotUndoException {
@@ -120,7 +120,7 @@ public class ModelFieldEdit extends AbstractUndoableEdit{
 		try {
 			model.setFieldValue(field,node,source,oldValue,context,NodeModel.EVENT);
 		} catch (FieldParseException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to undo ModelFieldEdit", e);
 		}
 	}
 }

@@ -1,17 +1,26 @@
 import { useCallback, useMemo } from 'react'
 
-// API клиенты и типы
 import { ProjectAPIClient } from '@/services'
-import type { 
-  Project, 
-  ID,
-  ProjectAPI,
-  APIClientConfig 
-} from '@/types'
+import { stringToCatalogId, uiProjectPartialToCatalog } from '@/services/CatalogProjectMapper'
+import type { APIClientConfig } from '@/services/BaseAPIClient'
+import type { Project } from '@/types/project-types'
+import { ExportFormat, type ID } from '@/types/Master_Functionality_Catalog'
+import type { CaughtError } from '@/errors/CaughtError'
+import { toCaughtError } from '@/errors/CaughtError'
+
+/** Преобразует строковый формат экспорта в ExportFormat. */
+function toExportFormat(format: 'xml' | 'xlsx' | 'pdf'): ExportFormat {
+  const map: Record<'xml' | 'xlsx' | 'pdf', ExportFormat> = {
+    xml: ExportFormat.XML,
+    xlsx: ExportFormat.EXCEL,
+    pdf: ExportFormat.PDF,
+  };
+  return map[format];
+}
 
 /**
- * React хук для работы с Project API
- * Следует SOLID принципам
+ * React хук для работы с Project API.
+ * Использует типы store (project-types); маппинг в Catalog выполняется на границе.
  */
 export const useProjectAPI = (config?: APIClientConfig) => {
   const apiClient = useMemo(() => {
@@ -26,88 +35,61 @@ export const useProjectAPI = (config?: APIClientConfig) => {
     });
   }, [config]);
 
-  const handleError = useCallback((error: unknown, context: string) => {
+  const handleError = useCallback((error: CaughtError, context: string) => {
     console.error(`${context}:`, error);
-    
-    if (error instanceof Error) {
-      return {
-        message: error.message,
-        code: 'API_ERROR',
-        context
-      };
-    }
-
-    return {
-      message: 'Unknown error occurred',
-      code: 'UNKNOWN_ERROR',
-      context
-    };
+    return { message: error.message, code: 'API_ERROR', context };
   }, []);
 
   return useMemo(() => ({
-    /**
-     * Получение всех проектов
-     */
     getAllProjects: async () => {
       try {
         return await apiClient.getProjects();
       } catch (error) {
-        throw handleError(error, 'Failed to fetch projects');
+        throw handleError(toCaughtError(error), 'Failed to fetch projects');
       }
     },
 
-    /**
-     * Получение проекта по ID
-     */
-    getProject: async (id: ID) => {
+    getProject: async (id: string | ID) => {
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
       try {
-        return await apiClient.getProject(id);
+        return await apiClient.getProject(catalogId);
       } catch (error) {
-        throw handleError(error, `Failed to fetch project ${id.value}`);
+        throw handleError(toCaughtError(error), `Failed to fetch project ${typeof id === 'string' ? id : (id as ID).value}`);
       }
     },
 
-    /**
-     * Создание проекта
-     */
     createProject: async (project: Partial<Project>) => {
       try {
-        return await apiClient.createProject(project);
+        return await apiClient.createProject(uiProjectPartialToCatalog(project));
       } catch (error) {
-        throw handleError(error, 'Failed to create project');
+        throw handleError(toCaughtError(error), 'Failed to create project');
       }
     },
 
-    /**
-     * Обновление проекта
-     */
-    updateProject: async (id: ID, project: Partial<Project>) => {
+    updateProject: async (id: string | ID, project: Partial<Project>) => {
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
       try {
-        return await apiClient.updateProject(id, project);
+        return await apiClient.updateProject(catalogId, uiProjectPartialToCatalog(project));
       } catch (error) {
-        throw handleError(error, `Failed to update project ${id.value}`);
+        throw handleError(toCaughtError(error), `Failed to update project ${typeof id === 'string' ? id : (id as ID).value}`);
       }
     },
 
-    /**
-     * Удаление проекта
-     */
-    deleteProject: async (id: ID) => {
+    deleteProject: async (id: string | ID) => {
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
       try {
-        await apiClient.deleteProject(id);
+        await apiClient.deleteProject(catalogId);
       } catch (error) {
-        throw handleError(error, `Failed to delete project ${id.value}`);
+        throw handleError(toCaughtError(error), `Failed to delete project ${typeof id === 'string' ? id : (id as ID).value}`);
       }
     },
 
-    /**
-     * Экспорт проекта
-     */
-    exportProject: async (id: ID, format: 'xml' | 'xlsx' | 'pdf') => {
+    exportProject: async (id: string | ID, format: 'xml' | 'xlsx' | 'pdf') => {
+      const catalogId = typeof id === 'string' ? stringToCatalogId(id) : id;
       try {
-        return await apiClient.exportProject(id, format);
+        return await apiClient.exportProject(catalogId, toExportFormat(format));
       } catch (error) {
-        throw handleError(error, `Failed to export project ${id.value}`);
+        throw handleError(toCaughtError(error), `Failed to export project ${typeof id === 'string' ? id : (id as ID).value}`);
       }
     }
   }), [apiClient, handleError]);

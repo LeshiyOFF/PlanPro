@@ -73,7 +73,7 @@ export const StoreErrorFallback: React.FC<StoreErrorFallbackProps> = ({
             
             <Button
               onClick={handleReload}
-              variant="primary"
+              variant="default"
               size="sm"
             >
               {t('errors.reload')}

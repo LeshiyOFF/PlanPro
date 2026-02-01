@@ -16,7 +16,7 @@ interface TaskFormProps {
     resourceId: string;
   };
   resources: Resource[];
-  onFormChange: (data: any) => void;
+  onFormChange: (data: Partial<TaskFormProps['formData']>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
   isLoading: boolean;
@@ -29,22 +29,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   task,
   selectedProject,
   formData,
-  resources,
+  resources: _resources,
   onFormChange,
   onSubmit,
   onCancel,
   isLoading
 }) => {
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'not_started': return 'Not Started';
-      case 'in_progress': return 'In Progress';
-      case 'completed': return 'Completed';
-      case 'blocked': return 'Blocked';
-      default: return status;
-    }
-  };
-
   return (
     <div style={{
       position: 'fixed',

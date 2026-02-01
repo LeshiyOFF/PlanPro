@@ -1,16 +1,18 @@
 import React from 'react';
 import { GanttCanvasController } from '@/components/gantt';
 import { Task } from '@/store/project/interfaces';
+import { IGanttTaskUpdate } from '@/types/gantt/IGanttTypes';
+import { GanttDisplayMode } from '@/types/gantt/GanttTaskTypes';
 
 interface GanttRightPanelProps {
-  tasks: Task[];
-  startDate: Date;
-  linkingTaskId: string | null;
-  mode: 'standard' | 'tracking';
-  onCurrentDateChange: (date: Date) => void;
-  onTaskUpdate: (id: string, updates: any) => void;
-  onTaskSelect: (task: Task) => void;
-  onModeChange: (mode: 'standard' | 'tracking') => void;
+  readonly tasks: ReadonlyArray<Task>;
+  readonly startDate: Date;
+  readonly linkingTaskId: string | null;
+  readonly mode: GanttDisplayMode;
+  readonly onCurrentDateChange: (date: Date) => void;
+  readonly onTaskUpdate: (id: string, updates: IGanttTaskUpdate) => void;
+  readonly onTaskSelect: (task: Task) => void;
+  readonly onModeChange: (mode: GanttDisplayMode) => void;
 }
 
 export const GanttRightPanel: React.FC<GanttRightPanelProps> = ({
@@ -21,12 +23,11 @@ export const GanttRightPanel: React.FC<GanttRightPanelProps> = ({
     <div className={`flex flex-col h-full bg-white ${linkingTaskId ? 'cursor-alias' : ''}`}>
       <GanttCanvasController
         tasks={tasks}
-        startDate={startDate}
-        endDate={new Date(startDate.getTime() + 120 * 24 * 60 * 60 * 1000)}
         currentDate={startDate}
         onCurrentDateChange={onCurrentDateChange}
         onTaskUpdate={onTaskUpdate}
         onTaskSelect={onTaskSelect}
+        onTaskDoubleClick={undefined}
         mode={mode}
         onModeChange={onModeChange}
       />

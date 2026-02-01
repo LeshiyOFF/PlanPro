@@ -52,7 +52,7 @@ export const GeneralErrorFallback: React.FC<GeneralErrorFallbackProps> = ({
           
           <Button
             onClick={() => window.location.reload()}
-            variant="primary"
+            variant="default"
             size="sm"
           >
             {t('errors.reload')}

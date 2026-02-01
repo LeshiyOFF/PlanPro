@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -57,11 +57,19 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
 }) => {
   const [mode, setMode] = React.useState<'view' | 'add' | 'edit'>('view');
   const [selectedNoteId, setSelectedNoteId] = React.useState('');
-  const [noteData, setNoteData] = React.useState({
+  const [noteData, setNoteData] = React.useState<{
+    date: string;
+    author: string;
+    category: 'general' | 'progress' | 'issue' | 'resolution';
+    priority: 'low' | 'normal' | 'high' | 'critical';
+    subject: string;
+    content: string;
+    isPublic: boolean;
+  }>({
     date: new Date().toISOString().split('T')[0],
     author: authors[0] || '',
-    category: 'general' as const,
-    priority: 'normal' as const,
+    category: 'general',
+    priority: 'normal',
     subject: '',
     content: '',
     isPublic: true
@@ -72,16 +80,22 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
       required: true,
       minLength: 1,
       maxLength: 255,
-      validate: (value) => value.trim() ? null : 'Subject is required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Subject is required';
+        return value.trim() ? null : 'Subject is required';
+      }
     },
     content: {
       required: true,
       minLength: 1,
-      validate: (value) => value.trim() ? null : 'Content is required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Content is required';
+        return value.trim() ? null : 'Content is required';
+      }
     },
     author: {
       required: true,
-      validate: (value) => value ? null : 'Author is required'
+      custom: (value) => value ? null : 'Author is required'
     }
   });
 
@@ -91,7 +105,7 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
     });
   }, [noteData]);
 
-  const handleFieldChange = (field: keyof typeof noteData, value: any) => {
+  const handleFieldChange = (field: keyof typeof noteData, value: (typeof noteData)[keyof typeof noteData]) => {
     setNoteData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -150,19 +164,19 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
   };
 
   const canSave = isValid();
-  const selectedNote = notes.find(n => n.id === selectedNoteId);
-  const getCategoryDescription = (category: string) => {
-    return NOTE_CATEGORIES.find(c => c.value === category)?.description || '';
-  };
   const getPriorityColor = (priority: string) => {
     return PRIORITY_LEVELS.find(p => p.value === priority)?.color || 'text-gray-600';
   };
+
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
 
   return (
     <BaseDialog
       title={`Task Notes - ${taskName}`}
       size="fullscreen"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -250,7 +264,7 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={noteData.category}
-                  onValueChange={(value) => handleFieldChange('category', value as any)}
+                  onValueChange={(value) => handleFieldChange('category', value as (typeof noteData)['category'])}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -274,7 +288,7 @@ export const TaskNotesDialog: React.FC<TaskNotesDialogProps> = ({
                 <Label htmlFor="priority">Priority</Label>
                 <Select
                   value={noteData.priority}
-                  onValueChange={(value) => handleFieldChange('priority', value as any)}
+                  onValueChange={(value) => handleFieldChange('priority', value as 'low' | 'normal' | 'high' | 'critical')}
                 >
                   <SelectTrigger>
                     <SelectValue />

@@ -1,12 +1,12 @@
 import { ToolbarAction } from './ToolbarAction';
 import { IToolbarButton } from '../interfaces/ToolbarInterfaces';
+import { textFormattingService } from '@/services/TextFormattingService';
 
 /**
  * Действие для изменения семейства шрифта
  * Кнопка форматирования TF005
  */
 export class FontFamilyAction extends ToolbarAction {
-  private currentFont: string = 'Arial';
   private readonly fonts: string[] = [
     'Arial',
     'Calibri',
@@ -25,21 +25,26 @@ export class FontFamilyAction extends ToolbarAction {
   }
 
   /**
+   * Выполняет действие (IAction). Выбор шрифта — в createButton.
+   */
+  override async execute(): Promise<void> {
+    // Базовый вызов без аргумента; выбор шрифта через UI кнопки
+  }
+
+  /**
    * Устанавливает семейство шрифта
    */
-  execute(fontFamily?: string): void {
+  setFontFamily(fontFamily: string): void {
     if (fontFamily && this.fonts.includes(fontFamily)) {
-      this.currentFont = fontFamily;
+      textFormattingService.setFontFamily(fontFamily);
     }
-    console.log(`Семейство шрифта: ${this.currentFont}`);
-    // TODO: Интеграция с TextFormatter или FontManager
   }
 
   /**
    * Возвращает текущее семейство шрифта
    */
   getCurrentFont(): string {
-    return this.currentFont;
+    return textFormattingService.getFontFamily();
   }
 
   /**
@@ -53,22 +58,22 @@ export class FontFamilyAction extends ToolbarAction {
    * Создаёт экземпляр кнопки для тулбара с dropdown
    */
   createButton(): IToolbarButton {
+    const currentFont = this.getCurrentFont();
     const dropdownItems = this.fonts.map(font => ({
       id: `${this.id}-${font.replace(/\s+/g, '')}`,
       label: font,
-      icon: font === this.currentFont ? '✓' : '',
-      onClick: () => this.execute(font)
+      icon: font === currentFont ? '✓' : '',
+      onClick: () => this.setFontFamily(font)
     }));
 
     return {
       id: this.id,
-      label: this.currentFont,
+      label: currentFont,
       icon: this.icon,
       tooltip: this.tooltip,
       disabled: this.disabled,
       dropdownItems,
       onClick: () => {
-        // Показать dropdown меню
         console.log('Показать меню выбора шрифта');
       }
     };

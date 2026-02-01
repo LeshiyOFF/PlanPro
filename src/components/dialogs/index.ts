@@ -54,12 +54,14 @@ export { OptionsDialog } from './settings/OptionsDialog';
 export { FindAndReplaceDialog } from './editing/FindAndReplaceDialog';
 export { GoToDialog } from './editing/GoToDialog';
 
-// Dialog Management
-export { DialogManager } from './DialogManager';
+// Dialog Management - New Typed System
+export { TypedDialogProvider, useTypedDialog, useDialog } from './context/TypedDialogContext';
 export { StartupDialogLauncher } from './StartupDialogLauncher';
-export { DialogProvider, useDialogContext } from './DialogContext';
-export { useDialogManager } from './DialogManager';
 export { DialogDemo } from './DialogDemo';
+
+// Legacy exports for backward compatibility (deprecated)
+export { TypedDialogProvider as DialogProvider, useTypedDialogContext as useDialogContext } from './DialogContext';
+export { DialogManager, useDialogManager } from './DialogManager';
 
 // Base Components and Hooks
 export { BaseDialog, SimpleBaseDialog } from './base/SimpleBaseDialog';

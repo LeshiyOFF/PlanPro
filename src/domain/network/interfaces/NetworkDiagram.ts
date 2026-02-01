@@ -3,7 +3,7 @@
  * Following Clean Architecture and SOLID principles
  */
 
-import { CanvasPoint, CanvasRect } from '../../canvas/interfaces/GanttCanvas';
+import { CanvasRect } from '../../canvas/interfaces/GanttCanvas';
 
 /**
  * Type of node in network diagram

@@ -667,7 +667,7 @@ export interface FormField {
 }
 
 export interface OptionItem {
-  value: any;
+  value: CatalogValue;
   label: string;
   disabled?: boolean;
 }
@@ -1058,7 +1058,7 @@ export interface LookupTable {
 }
 
 export interface LookupValue {
-  value: any;
+  value: CatalogValue;
   label: string;
   description?: string;
 }
@@ -1087,7 +1087,7 @@ export interface ReportParameter {
   name: string;
   type: FieldType;
   required: boolean;
-  defaultValue?: any;
+  defaultValue?: CatalogValue;
   options?: OptionItem[];
 }
 
@@ -1103,7 +1103,7 @@ export interface Template {
   name: string;
   description: string;
   category: TemplateCategory;
-  content: any; // Зависит от типа шаблона
+  content: CatalogValue; // Зависит от типа шаблона
   preview?: string;
 }
 
@@ -1210,7 +1210,7 @@ export interface DialogState {
   id: string;
   type: DialogType;
   open: boolean;
-  data?: any;
+  data?: CatalogValue;
   result?: any;
 }
 
@@ -1300,7 +1300,7 @@ export interface ResourceChartProps {
   onResourceUpdate: (resource: Resource) => void;
 }
 
-export interface DialogProps<T = any> {
+export interface DialogProps<T = CatalogValue> {
   open: boolean;
   config: DialogConfig;
   data?: T;
@@ -1408,7 +1408,7 @@ export enum StepType {
 export interface ValidationScript {
   type: 'sql' | 'javascript' | 'custom';
   script: string;
-  expectedResults: any[];
+  expectedResults: CatalogValue[];
 }
 
 export interface RollbackScript {

@@ -102,17 +102,11 @@ public class FieldValues {
 				f.setValue(object,null,map.get(fieldId),context);
 				f.setReadOnly(readOnly);
 			} catch (FieldParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Failed to set field value from ID: " + fieldId, e);
 			}
 		}
 	}
 	public static void dump(Map map) {
-		Iterator i = map.keySet().iterator();
-		while (i.hasNext()) {
-			String fieldId = (String)i.next();
-			System.out.println("Field " + Configuration.getFieldFromId(fieldId) + " value " + map.get(fieldId));
-		}
 	}
 	
 }

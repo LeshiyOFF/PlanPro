@@ -91,11 +91,11 @@ public class FormulaClass {
 					GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader());
 //					GroovyClassLoader loader = new GroovyClassLoader(ClassLoaderUtils.getLocalClassLoader());
 					try {
-						groovyClass = loader.parseClass(classText); //TODO this his horribly slow (~500ms)  Can we parse all at once or can we do this lazily or initialize in another thread?
-						groovyObject = (GroovyObject) groovyClass.newInstance(); // this would be ideally done by a factory
+						groovyClass = loader.parseClass(classText);
+						groovyObject = (GroovyObject) groovyClass.getDeclaredConstructor().newInstance();
 					} catch (Exception e) {
 						compileException = e;
-						System.out.println(e);
+						com.projectlibre1.server.access.ErrorLogger.log("Failed to compile scripted formula class: " + className, e);
 					}
 //					System.out.println("compiled class " + className + " in " + (System.currentTimeMillis()-x) + "ms");
 				}
@@ -127,9 +127,9 @@ public class FormulaClass {
 			if (groovyClass == null)
 				compile();
 			args[0] = object;
-			return groovyObject.invokeMethod(method, args);		 //TODO eventually cache the Method 
+			return groovyObject.invokeMethod(method, args);
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to evaluate scripted formula: " + method, e);
 			throw new InvalidFormulaException(e);
 		}
 	}	

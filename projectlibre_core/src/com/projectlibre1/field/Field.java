@@ -401,10 +401,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 
 	// added for groups
 	public SummaryVisitor getSummaryVisitor(int summary, boolean forceDeep) {
-		return SummaryVisitorFactory.getInstance(summary, getDisplayType(),forceDeep); // TODO
-																				// use
-																				// internalType
-																				// instead?
+		return SummaryVisitorFactory.getInstance(summary, getDisplayType(),forceDeep);
 	}
 
 	public SummaryVisitor getSummaryVisitor(boolean forceDeep) {
@@ -429,9 +426,8 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 	/**
 	 * For use in populating a list box
 	 *
-	 * @param object
-	 *            TODO
-	 * @return
+	 * @param object the object
+	 * @return array of options
 	 */
 	public Object[] getOptions(Object object) {
 		if (select == null)
@@ -522,7 +518,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 				return convertValueToStringUsingOptions(value);
 			}
 		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get text for field", e1);
 		}
 		return toText(value, object);
 	}
@@ -543,7 +539,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 				return convertValueToStringUsingOptions(value);
 			}
 		} catch (IllegalArgumentException e1) {
-			e1.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get text for node", e1);
 		}
 		return toText(value, object);
 	}
@@ -629,10 +625,9 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 			Date start = (Date) getSummarizedValueForField(startField, node, nodeModel, context);
 			Date end = (Date) getSummarizedValueForField(endField, node, nodeModel, context);
 
-			double t = wc.compare(end.getTime(), start.getTime(), false);
-			result = new Duration(Duration.getInstance(t / CalendarOption.getInstance().getMillisPerDay(), TimeUnit.DAYS));
-			// TODO 8 IS A HACK REPLACE ALL THIS SECTION
-		} else {
+		double t = wc.compare(end.getTime(), start.getTime(), false);
+		result = new Duration(Duration.getInstance(t / CalendarOption.getInstance().getMillisPerDay(), TimeUnit.DAYS));
+	} else {
 			if (nodeHasNonSummarizedValue(node, nodeModel)) {// if no summary
 																// or leaf
 				result = getValue(object, context);
@@ -675,16 +670,11 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 		walkingVisitor.setNodeModel(nodeModel);
 		walkingVisitor.setContext(context);
 		walkingVisitor.setField(field);
-		Object result = walkingVisitor.getSummary();
-		if (result instanceof Double) { // convert to proper display type
-			result = ClassUtils.doubleToObject((Double) result, field.getDisplayType());
-		}
-		if ((object instanceof GroupNodeImpl) && field.hasOptions()) { // TODO
-																		// should
-																		// apply
-																		// to
-																		// summaries
-																		// other
+	Object result = walkingVisitor.getSummary();
+	if (result instanceof Double) { // convert to proper display type
+		result = ClassUtils.doubleToObject((Double) result, field.getDisplayType());
+	}
+	if ((object instanceof GroupNodeImpl) && field.hasOptions()) { // Options apply to groups
 																		// than
 																		// group
 			result = field.convertValueToStringUsingOptions(result);
@@ -712,14 +702,11 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 				}
 
 			} catch (IllegalArgumentException e) {
-				System.out.println("Bad field " + this);
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Bad field " + this, e);
 			} catch (IllegalAccessException e) {
-				System.out.println("Bad field " + this);
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Bad field " + this, e);
 			} catch (InvocationTargetException e) {
-				System.out.println("Bad field " + this);
-				e.printStackTrace();
+				com.projectlibre1.server.access.ErrorLogger.log("Bad field " + this, e);
 			}
 		}
 		return result;
@@ -757,7 +744,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 				try {// convert to external type
 					result = FieldConverter.convert(result, externalType, context); // convert a long to date for example
 				} catch (FieldParseException e1) {
-					e1.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Failed to convert field value", e1);
 					result = null;
 				}
 			}
@@ -985,11 +972,10 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 
 		if (value != null && value.equals(getValue(object, context))) // if
 																		// not
-																		// change,
-																		// do
-																		// nothing
-			return false; // TODO certain time-distibued fields need to be
-							// changed
+																	// change,
+																	// do
+																	// nothing
+		return false;
 
 		if (hasExternalType()) { // does the second pass, converting from
 									// say, Date to long
@@ -997,11 +983,11 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 																			// from
 																			// date
 																			// to
-																			// long
-																			// for
-																			// example
-			if (value == null && !isMap()) // TODO is this how to treat null values?
-				return false;
+																		// long
+																		// for
+																		// example
+		if (value == null && !isMap())
+			return false;
 
 		}
 
@@ -1032,10 +1018,10 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 		} catch (IllegalArgumentException e) {
 			throw new FieldParseException(e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Illegal access during field set", e);
 		} catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Invocation target exception during field set", e);
 			if (cause != null && cause instanceof FieldParseException)
 				throw (FieldParseException) cause;
 			else {
@@ -1145,11 +1131,10 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 			context = specialFieldContext;
 		if (methodHide == null)
 			return false;
-		Boolean value = (Boolean) invokeContextMethod(methodHide, object, context, hideHasNoContext);
-		if (value != null)
-			return value.booleanValue();
-		// TODO maybe test if objet itself is hidden
-		return false;
+	Boolean value = (Boolean) invokeContextMethod(methodHide, object, context, hideHasNoContext);
+	if (value != null)
+		return value.booleanValue();
+	return false;
 	}
 
 	public Object mapStringToValue(String textValue) {
@@ -1277,11 +1262,11 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 					return method.invoke(object, new Object[] { context });
 			}
 		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Illegal argument in context method", e);
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Illegal access in context method", e);
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Invocation target exception in context method", e);
 		}
 		return null;
 	}
@@ -1384,8 +1369,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 		try {
 			setExternalType(Class.forName(type));
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Class not found: " + type, e);
 		}
 	}
 	/**
@@ -1506,8 +1490,7 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 	 *            The formula to set.
 	 */
 	public void setFormula(String formulaName, String variableName, String formulaText) {
-//		formula = FormulaFactory.addScripted("Field", formulaName, variableName, formulaText);
-		throw new RuntimeException("setFormula"); //TODO if used, need to handle addNormal too
+		throw new UnsupportedOperationException("setFormula not implemented");
 	}
 
 	public void clearFormula() {
@@ -1652,12 +1635,10 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 
 
 	public Object clone()  {
-		// TODO Auto-generated method stub
 		try {
 			return super.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to clone Field", e);
 			return null;
 		}
 	}
@@ -1750,12 +1731,11 @@ public class Field implements SummaryNames, Cloneable, Comparable, Finder, Compa
 		Object current;
 		while (i.hasNext()) {
 			current = i.next();
-			try {
-				setValue(current, eventSource, value, context);
-			} catch (FieldParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			setValue(current, eventSource, value, context);
+		} catch (FieldParseException e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to set field value for multiple objects", e);
+		}
 		}
 
 	}

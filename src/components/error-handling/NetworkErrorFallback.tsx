@@ -53,7 +53,7 @@ export const NetworkErrorFallback: React.FC<NetworkErrorFallbackProps> = ({
             {retry && (
               <Button
                 onClick={retry}
-                variant="primary"
+                variant="default"
                 size="sm"
               >
                 {t('errors.retry')}

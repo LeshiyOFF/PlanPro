@@ -91,8 +91,6 @@ public class PersonalContourBucket extends AbstractContourBucket implements Seri
 	}
 	
 	public static PersonalContourBucket getInstance(long duration, double units) {
-		if (duration < 0)
-			System.out.println("bug negative bucket"); //TODO get rid of in production
 		return new PersonalContourBucket(duration,units);
 	}
 	private PersonalContourBucket(AbstractContourBucket standard, long assignmentDuration) {

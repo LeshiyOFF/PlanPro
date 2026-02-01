@@ -103,14 +103,13 @@ public class DependencyFormat extends AssociationFormat {
 		if (container != null)
 			found = parameters.getIdField().find(number,container);
 
-		if (found == null) { //TODO this should probably be moved to finder
-
+		if (found == null) {
 			if (GeneralOption.getInstance().isAutomaticallyAddNewResourcesAndTasks()) {
 				found = createNewObject(parameters.isLeftAssociation());
 				try {
 					parameters.getIdField().setText(found,number.toString(),null);
 				} catch (FieldParseException e) {
-					throw new ParseException(e.getMessage(), 0); //TODO don't know about this - can it happen?
+					throw new ParseException(e.getMessage(), 0);
 				}
 			} else {
 				throw new ParseException(getErrorMessage(string), pos.getIndex());
@@ -186,7 +185,7 @@ public class DependencyFormat extends AssociationFormat {
 		return ((Task) parameters.getThisObject()).getProject().getTasks();
 	}
 	protected Object createNewObject(boolean left) {
-		return ((Task) parameters.getThisObject()).getProject().newNormalTaskInstance(); //TODO this should not search only in current
+		return ((Task) parameters.getThisObject()).getProject().newNormalTaskInstance();
 	}
 
 

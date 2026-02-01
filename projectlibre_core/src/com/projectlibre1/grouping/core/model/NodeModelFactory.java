@@ -95,7 +95,7 @@ public class NodeModelFactory {
 	
 
 	public NodeModel createAssignmentNodeModel(DefaultNodeModel model,Document document,boolean containsLeftObjects){
-		return new AssignmentNodeModel(/*(ArrayList)model.getList().clone(),*/(MutableNodeHierarchy)model.getHierarchy().clone(), model.getDataFactory(),document,containsLeftObjects);
+		return new AssignmentNodeModel((MutableNodeHierarchy)model.getHierarchy().clone(), model.getDataFactory(),document,containsLeftObjects);
 	}
 
 	public NodeModel createNodeModelFromCollection(Collection collection,NodeModelDataFactory dataFactory) {
@@ -153,9 +153,7 @@ public class NodeModelFactory {
 	public static NodeModel createResourceModel(Project project) {
 		NodeModel resourceModel = project.getResourcePool().getResourceOutline();
 		if (resourceModel instanceof AssignmentNodeModel) {
-			//the bug is fixed elsewhere
-//			if (!resourceModel.hasChildren(null)) // if it is currently empty - fixes bug about adding a second assignment when the view is first shown
-				((AssignmentNodeModel) resourceModel).addAssignments();
+			((AssignmentNodeModel) resourceModel).addAssignments();
 		}
 		return resourceModel;
 	}

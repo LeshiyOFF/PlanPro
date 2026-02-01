@@ -55,26 +55,25 @@
  *******************************************************************************/
 package com.projectlibre1.job;
 
+/**
+ * Exception thrown when a background job is canceled by the user.
+ */
 public class JobCanceledException extends Exception {
+	private static final long serialVersionUID = 1L;
 
 	public JobCanceledException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public JobCanceledException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	public JobCanceledException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	public JobCanceledException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
-
 }

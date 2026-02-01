@@ -124,21 +124,8 @@ public class SelectOption {
 		
 		try {
 			return ClassUtils.forName(object).getField(objectField).get(null);
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception e) {
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to get static object for SelectOption: " + object + "." + objectField, e);
 		}
 		return null;
 	}

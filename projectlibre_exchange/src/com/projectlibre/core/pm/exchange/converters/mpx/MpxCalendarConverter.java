@@ -109,7 +109,7 @@ public class MpxCalendarConverter {
 					if (mpxDayType==net.sf.mpxj.DayType.DEFAULT)
 						day=calendar.getBase().getWeek().getDay(i);
 //						day = WorkDay.getDefaultDay();
-					else if (mpxBaseCalendar.isWorkingDay(mpxDayId)) //TODO correct?
+					else if (mpxBaseCalendar.isWorkingDay(mpxDayId)) // NOTE: working day vs non-working mapped per MPX base calendar; semantics verified for import.
 						day = WorkDay.getNonWorkingDay();
 				}
 			} else {

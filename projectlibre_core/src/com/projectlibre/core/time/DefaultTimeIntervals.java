@@ -119,12 +119,6 @@ public class DefaultTimeIntervals implements TimeIntervals {
 		return intervals;
 	}
 
-//	@Override
-//	public void setIntervals(List<TimeInterval> intervals) {
-//		// TODO Auto-generated method stub
-//
-//	}
-	
 	@Override
 	public void addInterval(TimeInterval interval) {
 		intervals.add(interval);
@@ -170,8 +164,6 @@ public class DefaultTimeIntervals implements TimeIntervals {
 
 	@Override
 	public void inter(TimeInterval interval) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override

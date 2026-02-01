@@ -19,11 +19,11 @@ interface MainLayoutProps {
  * Основной layout приложения с View навигацией и MainWindow
  * Следует SOLID принципу Single Responsibility
  */
-export const ViewLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
-  onViewChange 
+export const ViewLayout: React.FC<MainLayoutProps> = ({
+  children,
+  onViewChange
 }) => {
-  const { currentView, availableViews } = useNavigation();
+  useNavigation();
   const { updateActionStates } = useActionManager();
 
   /**

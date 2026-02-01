@@ -12,7 +12,6 @@ export class CalendarService {
   public generateMonthDays(year: number, month: number, tasks: Task[]): ICalendarCell[] {
     const days: ICalendarCell[] = [];
     const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
     
     // Определяем начало сетки (может захватывать конец предыдущего месяца)
     // 0 - Воскресенье, 1 - Понедельник. Сделаем неделю с Понедельника.
@@ -70,8 +69,8 @@ export class CalendarService {
         endDate: new Date(task.endDate),
         color: task.color || '#3b82f6',
         progress: task.progress,
-        isMilestone: task.milestone || false,
-        isCritical: task.critical || false,
+        isMilestone: task.isMilestone || false,
+        isCritical: task.isCritical || false,
         originalTask: task
       }));
   }

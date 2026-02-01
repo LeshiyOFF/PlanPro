@@ -2,8 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui';
 import { ZoomIn, ZoomOut, RotateCcw, ChevronLeft, ChevronRight, Settings, Activity, BarChart, Pin, Loader2 } from 'lucide-react';
-import { DatePicker } from '@/components/ui/DatePicker';
-import { SafeTooltip } from '@/components/ui/Tooltip';
+import { DatePicker } from '@/components/ui/date-picker';
+import { SafeTooltip } from '@/components/ui/tooltip';
 
 interface GanttToolbarProps {
   tasksCount: number;

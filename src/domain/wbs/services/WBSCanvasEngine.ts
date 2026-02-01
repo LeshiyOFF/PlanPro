@@ -1,5 +1,4 @@
 import { WBSDiagramData, WBSNode } from '../interfaces/WBS';
-import { CanvasPoint } from '../../canvas/interfaces/GanttCanvas';
 
 /**
  * Engine for rendering WBS (Work Breakdown Structure) on Canvas
@@ -175,7 +174,7 @@ export class WBSCanvasEngine {
     // 3. Header: WBS Code & Duration
     ctx.fillStyle = critical ? '#fee2e2' : (isSummary ? '#f1f5f9' : '#ffffff');
     ctx.beginPath();
-    ctx.roundRect(x, y, width, this.HEADER_HEIGHT, { tl: 6, tr: 6, bl: 0, br: 0 });
+    ctx.roundRect(x, y, width, this.HEADER_HEIGHT, [6, 6, 0, 0]);
     ctx.fill();
     
     ctx.fillStyle = '#475569';

@@ -1,5 +1,7 @@
 import { useCallback } from 'react'
-import { Project, Task, Resource, Assignment } from '@/types'
+import type { Project } from '@/types/project-types'
+import type { Task } from '@/store/project/interfaces'
+import type { Resource, Assignment } from '@/types/resource-types'
 import { useTaskState } from './state/useTaskState'
 import { useResourceState } from './state/useResourceState'
 import { useAssignmentState } from './state/useAssignmentState'

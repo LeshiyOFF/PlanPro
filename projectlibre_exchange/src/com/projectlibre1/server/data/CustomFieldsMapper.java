@@ -56,6 +56,7 @@
 package com.projectlibre1.server.data;
 
 import com.projectlibre1.field.CustomFieldsImpl;
+import com.projectlibre1.server.access.ErrorLogger;
 
 import net.sf.mpxj.FieldType;
 import net.sf.mpxj.ResourceField;
@@ -88,7 +89,7 @@ public class CustomFieldsMapper {
 				try {
 					result[i] = (FieldType) clazz.getDeclaredField(text+(i+1)).get(null); // look for something like TEXT12
 				} catch (Exception e) {
-					e.printStackTrace();
+					ErrorLogger.log(e);
 				}
 			}
 			return result;

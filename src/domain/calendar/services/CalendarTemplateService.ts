@@ -2,8 +2,7 @@ import {
   ICalendarTemplate, 
   CalendarTemplateType, 
   IWorkingDay,
-  IWorkCalendar,
-  ICalendarException
+  IWorkCalendar
 } from '../interfaces/IWorkCalendar';
 
 /**
@@ -343,9 +342,9 @@ export class CalendarTemplateService {
    * V2.0: Формат custom_<UUID>_<sanitized_name> для совместимости с Java backend.
    */
   private generateCalendarIdWithName(name: string): string {
-    const uuid = this.generateUUID().substring(0, 8);
+    const base = this._generateCalendarId();
     const sanitizedName = this.sanitizeName(name);
-    return `custom_${uuid}_${sanitizedName}`;
+    return base.replace(/_temp$/, `_${sanitizedName}`);
   }
   
   /**
@@ -420,7 +419,7 @@ export class CalendarTemplateService {
    * Формат: custom_<UUID>_<sanitized_name>
    * Где UUID - это первые 8 символов UUID v4
    */
-  private generateCalendarId(): string {
+  private _generateCalendarId(): string {
     // Генерация UUID v4 (упрощенная версия)
     const uuid = this.generateUUID().substring(0, 8);
     return `custom_${uuid}_temp`; // Временное имя, будет заменено при сохранении
@@ -441,15 +440,16 @@ export class CalendarTemplateService {
    * Проверка, является ли дата рабочей для данного календаря
    */
   public isWorkingDay(calendar: IWorkCalendar, date: Date): boolean {
-    // Сначала проверяем исключения
-    const exception = calendar.exceptions.find(ex => 
-      ex.date.getDate() === date.getDate() &&
-      ex.date.getMonth() === date.getMonth() &&
-      ex.date.getFullYear() === date.getFullYear()
-    );
+    // Сначала проверяем исключения (ex.date в CalendarException — строка ISO)
+    const exception = calendar.exceptions.find(ex => {
+      const exDate = new Date(ex.date);
+      return exDate.getDate() === date.getDate() &&
+        exDate.getMonth() === date.getMonth() &&
+        exDate.getFullYear() === date.getFullYear();
+    });
 
     if (exception) {
-      return exception.isWorking;
+      return exception.type === 'working';
     }
 
     // Если нет исключения, смотрим базовый график
@@ -466,14 +466,15 @@ export class CalendarTemplateService {
     if (!this.isWorkingDay(calendar, date)) return 0;
 
     // Проверяем исключения
-    const exception = calendar.exceptions.find(ex => 
-      ex.date.getDate() === date.getDate() &&
-      ex.date.getMonth() === date.getMonth() &&
-      ex.date.getFullYear() === date.getFullYear()
-    );
+    const exception = calendar.exceptions.find(ex => {
+      const exDate = new Date(ex.date);
+      return exDate.getDate() === date.getDate() &&
+        exDate.getMonth() === date.getMonth() &&
+        exDate.getFullYear() === date.getFullYear();
+    });
 
-    if (exception?.workingHours) {
-      return this.calculateHoursBetween(exception.workingHours.start, exception.workingHours.end);
+    if (exception?.startTime != null && exception?.endTime != null) {
+      return this.calculateHoursBetween(exception.startTime, exception.endTime);
     }
 
     // Базовый график

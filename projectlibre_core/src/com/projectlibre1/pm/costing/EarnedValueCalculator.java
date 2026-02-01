@@ -212,7 +212,7 @@ public class EarnedValueCalculator {
 		return bcwr(ev,defaultStart,defaultEnd); 
 	}
 	public long getStartOffset(EarnedValueValues ev) {
-		int numBaseline = Snapshottable.BASELINE.intValue(); // TODO use EV baseline?
+		int numBaseline = Snapshottable.BASELINE.intValue();
 		if (!(ev instanceof HasStartAndEnd))
 			return 0L;
 		if (!(ev instanceof BaselineScheduleFields))
@@ -226,7 +226,7 @@ public class EarnedValueCalculator {
 		return ((HasCalendar)ev).getEffectiveWorkCalendar().compare(start,baselineStart, false);
 	}
 	public long getFinishOffset(EarnedValueValues ev) {
-		int numBaseline = Snapshottable.BASELINE.intValue(); // TODO use EV baseline?
+		int numBaseline = Snapshottable.BASELINE.intValue();
 		if (!(ev instanceof HasStartAndEnd))
 			return 0L;
 		if (!(ev instanceof BaselineScheduleFields))

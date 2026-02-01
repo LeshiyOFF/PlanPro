@@ -1,42 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { BaseDialog } from '@/components/dialogs/base/BaseDialog';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { formatDate as centralizedFormatDate } from '@/utils/formatUtils';
 import { 
   IDialogActions,
-  DialogResult 
+  DialogResult,
+  IDialogData
 } from '@/types/dialog/DialogTypes';
 
 /**
  * Интерфейс для данных проекта
  */
-interface ProjectInformationData {
-  id: string;
-  title: string;
-  description: string;
-  timestamp: Date;
-  name: string;
-  manager: string;
-  startDate: Date;
-  endDate?: Date;
-  status: string;
-  progress: number;
-  budget?: number;
-  actualCost?: number;
-  tasks: {
+interface ProjectInformationData extends IDialogData {
+  projectName: string;
+  projectManager: string;
+  projectStartDate: Date;
+  projectEndDate?: Date;
+  projectStatus: string;
+  projectProgress: number;
+  projectBudget?: number;
+  projectActualCost?: number;
+  projectTasks: {
     total: number;
     completed: number;
     inProgress: number;
     delayed: number;
   };
-  resources: {
+  projectResources: {
     total: number;
     assigned: number;
     available: number;
   };
-  notes?: string;
+  projectNotes?: string;
 }
 
 /**
@@ -58,28 +54,31 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
   isOpen,
   onClose
 }) => {
-  const [projectData, setProjectData] = useState<ProjectInformationData>({
-    id: `project_info_${Date.now()}`,
-    title: 'Информация о проекте',
-    description: 'Общая информация и статистика проекта',
-    timestamp: new Date(),
-    name: '',
-    manager: '',
-    startDate: new Date(),
-    status: 'Планирование',
-    progress: 0,
-    tasks: {
-      total: 0,
-      completed: 0,
-      inProgress: 0,
-      delayed: 0
-    },
-    resources: {
-      total: 0,
-      assigned: 0,
-      available: 0
-    },
-    ...data
+  const [projectData, setProjectData] = useState<ProjectInformationData>(() => {
+    const initial: ProjectInformationData = {
+      id: `project_info_${Date.now()}`,
+      title: 'Информация о проекте',
+      description: 'Общая информация и статистика проекта',
+      timestamp: new Date(),
+      projectName: '',
+      projectManager: '',
+      projectStartDate: new Date(),
+      projectStatus: 'Планирование',
+      projectProgress: 0,
+      projectTasks: {
+        total: 0,
+        completed: 0,
+        inProgress: 0,
+        delayed: 0
+      },
+      projectResources: {
+        total: 0,
+        assigned: 0,
+        available: 0
+      },
+      ...data
+    };
+    return initial;
   });
 
   /**
@@ -105,11 +104,11 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
    * Расчет эффективности бюджета
    */
   const getBudgetEfficiency = (): { percentage: number; status: string } => {
-    if (!projectData.budget || !projectData.actualCost) {
+    if (!projectData.projectBudget || !projectData.projectActualCost) {
       return { percentage: 0, status: 'Нет данных' };
     }
 
-    const percentage = ((projectData.budget - projectData.actualCost) / projectData.budget) * 100;
+    const percentage = ((projectData.projectBudget - projectData.projectActualCost) / projectData.projectBudget) * 100;
     
     if (percentage >= 10) {
       return { percentage, status: 'Под бюджетом' };
@@ -135,18 +134,21 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
    * Действия диалога
    */
   const actions: IDialogActions = {
-    onOk: async (data: ProjectInformationData) => {
-      console.log('Project information confirmed:', data);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      return data;
+    onOk: async (_data?: IDialogData) => {
+      onClose({ success: true, data: projectData, action: 'ok' });
     },
     
     onCancel: () => {
       console.log('Project information dialog cancelled');
+      onClose({ success: false, action: 'cancel' });
     },
     
     onHelp: () => {
       console.log('Opening project information help...');
+    },
+
+    onValidate: (_data: IDialogData) => {
+      return true;
     }
   };
 
@@ -155,7 +157,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
    */
   useEffect(() => {
     if (data && Object.keys(data).length > 0) {
-      setProjectData(prev => ({
+      setProjectData((prev: ProjectInformationData) => ({
         ...prev,
         ...data,
         id: prev.id,
@@ -169,19 +171,19 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
   /**
    * Компонент содержимого диалога
    */
-  const DialogContent = () => (
+  const DialogContent: React.FC = () => (
     <div className="space-y-6 p-6">
       {/* Основная информация */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <h3 className="text-xl font-semibold text-foreground">{projectData.name}</h3>
-          <Badge variant={getStatusVariant(projectData.status)}>
-            {projectData.status}
+          <h3 className="text-xl font-semibold text-foreground">{projectData.projectName}</h3>
+          <Badge variant={getStatusVariant(projectData.projectStatus)}>
+            {projectData.projectStatus}
           </Badge>
         </div>
         
         <div className="text-sm text-muted-foreground">
-          <div>Менеджер: {projectData.manager}</div>
+          <div>Менеджер: {projectData.projectManager}</div>
           <div>Создан: {formatDate(projectData.timestamp)}</div>
         </div>
       </div>
@@ -191,20 +193,20 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Прогресс выполнения</span>
-            <span className="font-medium">{projectData.progress}%</span>
+            <span className="font-medium">{projectData.projectProgress}%</span>
           </div>
-          <Progress value={projectData.progress} className="h-2" />
+          <Progress value={projectData.projectProgress} className="h-2" />
         </div>
         
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
             <span className="text-muted-foreground">Дата начала:</span>
-            <div className="font-medium">{formatDate(projectData.startDate)}</div>
+            <div className="font-medium">{formatDate(projectData.projectStartDate)}</div>
           </div>
-          {projectData.endDate && (
+          {projectData.projectEndDate && (
             <div>
               <span className="text-muted-foreground">Дата окончания:</span>
-              <div className="font-medium">{formatDate(projectData.endDate)}</div>
+              <div className="font-medium">{formatDate(projectData.projectEndDate)}</div>
             </div>
           )}
         </div>
@@ -220,30 +222,30 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Всего задач:</span>
-              <span className="font-medium">{projectData.tasks.total}</span>
+              <span className="font-medium">{projectData.projectTasks.total}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Завершено:</span>
-              <span className="font-medium text-green-600">{projectData.tasks.completed}</span>
+              <span className="font-medium text-green-600">{projectData.projectTasks.completed}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">В работе:</span>
-              <span className="font-medium text-primary">{projectData.tasks.inProgress}</span>
+              <span className="font-medium text-primary">{projectData.projectTasks.inProgress}</span>
             </div>
           </div>
           
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Отстают:</span>
-              <span className="font-medium text-red-600">{projectData.tasks.delayed}</span>
+              <span className="font-medium text-red-600">{projectData.projectTasks.delayed}</span>
             </div>
             
             {/* Прогресс задач */}
-            {projectData.tasks.total > 0 && (
+            {projectData.projectTasks.total > 0 && (
               <div className="space-y-2">
                 <div className="text-sm text-muted-foreground">Выполнение задач:</div>
                 <Progress 
-                  value={(projectData.tasks.completed / projectData.tasks.total) * 100} 
+                  value={(projectData.projectTasks.completed / projectData.projectTasks.total) * 100} 
                   className="h-2" 
                 />
               </div>
@@ -260,30 +262,30 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         
         <div className="grid grid-cols-3 gap-4 text-center">
           <div className="p-3 bg-muted rounded">
-            <div className="text-2xl font-bold text-foreground">{projectData.resources.total}</div>
+            <div className="text-2xl font-bold text-foreground">{projectData.projectResources.total}</div>
             <div className="text-sm text-muted-foreground">Всего</div>
           </div>
           <div className="p-3 bg-primary/10 dark:bg-blue-900 rounded">
-            <div className="text-2xl font-bold text-primary dark:text-blue-300">{projectData.resources.assigned}</div>
+            <div className="text-2xl font-bold text-primary dark:text-blue-300">{projectData.projectResources.assigned}</div>
             <div className="text-sm text-muted-foreground">Назначено</div>
           </div>
           <div className="p-3 bg-green-50 dark:bg-green-900 rounded">
-            <div className="text-2xl font-bold text-green-600 dark:text-green-300">{projectData.resources.available}</div>
+            <div className="text-2xl font-bold text-green-600 dark:text-green-300">{projectData.projectResources.available}</div>
             <div className="text-sm text-muted-foreground">Доступно</div>
           </div>
         </div>
         
         {/* Прогресс использования ресурсов */}
-        {projectData.resources.total > 0 && (
+        {projectData.projectResources.total > 0 && (
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Загрузка ресурсов:</span>
               <span className="font-medium">
-                {Math.round((projectData.resources.assigned / projectData.resources.total) * 100)}%
+                {Math.round((projectData.projectResources.assigned / projectData.projectResources.total) * 100)}%
               </span>
             </div>
             <Progress 
-              value={(projectData.resources.assigned / projectData.resources.total) * 100} 
+              value={(projectData.projectResources.assigned / projectData.projectResources.total) * 100} 
               className="h-2" 
             />
           </div>
@@ -291,7 +293,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
       </div>
 
       {/* Бюджет */}
-      {projectData.budget && (
+      {projectData.projectBudget && (
         <>
           <Separator />
           <div className="space-y-4">
@@ -301,12 +303,12 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Плановый бюджет:</span>
-                  <span className="font-medium">{projectData.budget}</span>
+                  <span className="font-medium">{projectData.projectBudget}</span>
                 </div>
-                {projectData.actualCost && (
+                {projectData.projectActualCost && (
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Фактические затраты:</span>
-                    <span className="font-medium">{projectData.actualCost}</span>
+                    <span className="font-medium">{projectData.projectActualCost}</span>
                   </div>
                 )}
               </div>
@@ -334,13 +336,13 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
       )}
 
       {/* Заметки */}
-      {projectData.notes && (
+      {projectData.projectNotes && (
         <>
           <Separator />
           <div className="space-y-2">
             <h3 className="text-lg font-semibold text-foreground">Заметки</h3>
             <div className="text-sm p-3 bg-muted rounded">
-              {projectData.notes}
+              {projectData.projectNotes}
             </div>
           </div>
         </>
@@ -361,7 +363,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
         showHelp: true
       }}
     >
-      {DialogContent}
+      <DialogContent />
     </BaseDialog>
   );
 };

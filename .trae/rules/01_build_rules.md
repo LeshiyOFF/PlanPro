@@ -8,8 +8,7 @@
 
 ## 2. PROJECT STRUCTURE
 2.1 Source locations fixed:
-   - UI: `projectlibre_ui/src/`
-   - Core: `projectlibre/src/`
+   - Core: `projectlibre_core/src/`
    - Build: `projectlibre_build/build.xml`
 2.2 Git remotes configured:
    - Primary: `origin` (https://github.com/LeshiyOFF/projectlibre-modern.git)

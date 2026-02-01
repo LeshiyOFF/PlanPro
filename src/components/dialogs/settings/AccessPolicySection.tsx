@@ -2,7 +2,7 @@ import React from 'react';
 import { FormField } from '../components/FormField';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
@@ -14,10 +14,12 @@ interface AccessPolicyData {
   apiRateLimit: number;
 }
 
+type AccessPolicyValue = boolean | number | string | string[] | 'email' | 'sms' | 'app';
+
 interface AccessPolicySectionProps {
   data: AccessPolicyData;
-  onChange: (field: keyof AccessPolicyData, value: any) => void;
-  errors?: Record<string, string>;
+  onChange: (field: keyof AccessPolicyData, value: AccessPolicyValue) => void;
+  errors?: Record<string, string | null>;
 }
 
 export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
@@ -25,10 +27,6 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
   onChange,
   errors = {}
 }) => {
-  const addIpToWhitelist = () => {
-    // TODO: Implement IP add dialog
-  };
-
   const removeIpFromWhitelist = (index: number) => {
     const newWhitelist = data.ipWhitelist.filter((_, i) => i !== index);
     onChange('ipWhitelist', newWhitelist);
@@ -43,7 +41,7 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
           <Checkbox
             id="twoFactorEnabled"
             checked={data.twoFactorEnabled}
-            onCheckedChange={(checked) => onChange('twoFactorEnabled', checked)}
+            onCheckedChange={(checked) => onChange('twoFactorEnabled', checked === true)}
           />
           <Label htmlFor="twoFactorEnabled" className="text-sm">
             Включить двухфакторную аутентификацию
@@ -55,7 +53,11 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
             label="Метод 2FA"
             type="select"
             value={data.twoFactorMethod}
-            onChange={(value) => onChange('twoFactorMethod', value)}
+            onChange={(value) => {
+              if (value != null && typeof value === 'string' && (value === 'email' || value === 'sms' || value === 'app')) {
+                onChange('twoFactorMethod', value);
+              }
+            }}
             error={errors.twoFactorMethod}
             options={[
               { value: 'email', label: 'Email' },
@@ -71,7 +73,7 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
           label="Белый список IP-адресов"
           type="textarea"
           value={data.ipWhitelist.join('\n')}
-          onChange={(value) => onChange('ipWhitelist', value.split('\n').filter(ip => ip.trim()))}
+          onChange={(value) => onChange('ipWhitelist', (value as string).split('\n').filter((ip: string) => ip.trim()))}
           placeholder="192.168.1.0/24&#10;10.0.0.0/8"
           helper="Один IP или CIDR на строку"
         />
@@ -103,7 +105,7 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
           <Checkbox
             id="apiAccessEnabled"
             checked={data.apiAccessEnabled}
-            onCheckedChange={(checked) => onChange('apiAccessEnabled', checked)}
+            onCheckedChange={(checked) => onChange('apiAccessEnabled', checked === true)}
           />
           <Label htmlFor="apiAccessEnabled" className="text-sm">
             Разрешить доступ к API
@@ -115,7 +117,10 @@ export const AccessPolicySection: React.FC<AccessPolicySectionProps> = ({
             label="Лимит запросов API (в минуту)"
             type="number"
             value={data.apiRateLimit}
-            onChange={(value) => onChange('apiRateLimit', value)}
+            onChange={(value) => {
+              const num = typeof value === 'number' && !isNaN(value) ? value : data.apiRateLimit;
+              onChange('apiRateLimit', num);
+            }}
             error={errors.apiRateLimit}
             min="1"
             max="10000"

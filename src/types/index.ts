@@ -3,9 +3,6 @@
  * Интегрирован с Master Functionality Catalog для полного покрытия функциональности
  */
 
-// Master Functionality Catalog - полная спецификация типов
-export * from './master-catalog'
-
 // Экспорт типов задач
 export * from './task-types'
 
@@ -18,24 +15,53 @@ export * from './project-types'
 // Экспорт типов календарей
 export * from './calendar-types'
 
-// Экспорт типов API
-export * from './api-types'
-
 // Экспорт типов диаграммы Ганта
 export * from './gantt-types'
 
 // Экспорт кнопочных типов
 export * from './button-types'
 
-// Экспорт типов сообщений
-export * from './ui/message-box-types'
+// Экспорт типов контекста
+export * from './context-types'
 
-// Экспорт типов ответов API
-export * from './response-wrapper-types'
+// Экспорт типов IPC
+export * from './ipc'
+
+// Экспорт типов Sheet
+export * from './sheet'
+
+// Экспорт типов Gantt
+export * from './gantt'
+
+// Специфические экспорты для избежания дубликатов
+export type { ApiResponse as ApiResponseFromApi } from './api-types'
+export type { ApiResponse as ApiResponseFromWrapper } from './response-wrapper-types'
+export type { MessageBoxOptions as MessageBoxOptionsFromUi } from './ui/message-box-types'
 
 // Экспорт типов запросов API
 export * from './api/request-types'
 
-// Экспорт типов контекста
-export * from './context-types'
+// Типизированный контракт FileAPI (из api)
+export type { FileAPI } from './api/file-api.types';
 
+// Экспорт типов из Master Catalog (для обратной совместимости)
+export type {
+  ID,
+  Duration,
+  Percentage,
+  Currency,
+  ProjectPriority,
+  ProjectStatus,
+  ExportFormat,
+  ImportFormat,
+  ValidationResult,
+  ValidationError,
+  ValidationWarning,
+  ProjectAPI,
+  TaskAPI,
+  ResourceAPI,
+  DependencyType
+} from './Master_Functionality_Catalog'
+
+// Конфигурация API-клиентов (используется хуками useProjectAPI, useTaskAPI и т.д.)
+export type { APIClientConfig } from '@/services/BaseAPIClient'

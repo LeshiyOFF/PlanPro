@@ -62,32 +62,35 @@ import com.projectlibre1.undo.DataFactoryUndoController;
  *
  */
 public interface NodeModelDataFactory {
-/**
- * Creates a new node given a parent and a child of the parent.
- * @param nodeModel TODO
- * @param parent TODO
- * @param previous TODO
- * @return new node
- */
+	/**
+	 * Creates a new unvalidated object for the node model.
+	 * @param nodeModel the node model
+	 * @param parent the parent object
+	 * @return the new unvalidated object
+	 */
 	Object createUnvalidatedObject(NodeModel nodeModel, Object parent);
-	
-	void addUnvalidatedObject(Object object,NodeModel nodeModel, Object parent);
- 
- /**
-  * Validate an object created by createObject.
- * @param newlyCreated
- * @param nodeModel TODO
- * @param eventSource TODO
- * @param voidNodeInfo TODO
-  */	
- 	void validateObject(Object newlyCreated, NodeModel nodeModel, Object eventSource, Object hierarchyInfo, boolean isNew);
- /**
-  * Remove an object (the impl of a node)
- * @param toRemove
- * @param nodeModel TODO
-  * @throws NodeException if the node can't be removed
-  */
-	void remove(Object toRemove, NodeModel nodeModel,boolean deep,boolean undo,boolean cleanDependencies);
+
+	void addUnvalidatedObject(Object object, NodeModel nodeModel, Object parent);
+
+	/**
+	 * Validates an object created by createUnvalidatedObject.
+	 * @param newlyCreated the object to validate
+	 * @param nodeModel the node model
+	 * @param eventSource the source of the event
+	 * @param hierarchyInfo information about the hierarchy
+	 * @param isNew true if the object is new
+	 */
+	void validateObject(Object newlyCreated, NodeModel nodeModel, Object eventSource, Object hierarchyInfo, boolean isNew);
+
+	/**
+	 * Removes an object from the data factory.
+	 * @param toRemove the object to remove
+	 * @param nodeModel the node model
+	 * @param deep true if the removal should be deep
+	 * @param undo true if the removal is part of an undo operation
+	 * @param cleanDependencies true if dependencies should be cleaned
+	 */
+	void remove(Object toRemove, NodeModel nodeModel, boolean deep, boolean undo, boolean cleanDependencies);
 	
 	
 	
@@ -99,8 +102,7 @@ public interface NodeModelDataFactory {
 	
 
 	public void rollbackUnvalidated(NodeModel nodeModel, Object object);
-//	public void fireCreated(Object newlyCreated);
-	
+
 	public void initOutline(NodeModel nodeModel);
 	NodeModelDataFactory getFactoryToUseForChildOfParent(Object impl);
 	

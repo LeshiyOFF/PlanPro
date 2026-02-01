@@ -17,7 +17,7 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         icon: '❌',
         handler: () => onAction('close')
       },
-      this.createSeparator(),
+      BaseContextMenuFactory.createSeparator(),
       {
         id: 'save',
         label: 'Сохранить проект',
@@ -32,7 +32,7 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         shortcut: 'Ctrl+Shift+S',
         handler: () => onAction('saveAs')
       },
-      this.createSeparator(),
+      BaseContextMenuFactory.createSeparator(),
       {
         id: 'print',
         label: 'Печать',
@@ -75,7 +75,7 @@ export class ProjectGanttContextMenuFactory extends BaseContextMenuFactory {
         shortcut: 'Ctrl+0',
         handler: () => onAction('fitWidth')
       },
-      this.createSeparator(),
+      BaseContextMenuFactory.createSeparator(),
       {
         id: 'filter',
         label: 'Фильтр задач',

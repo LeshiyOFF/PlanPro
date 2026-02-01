@@ -649,11 +649,12 @@ public class ResourceImpl implements Resource, HasAvailability, HasResourceIndic
 	public boolean fieldHideActualFixedCost(FieldContext fieldContext) {
 		return true;
 	}
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.pm.assignment.HasTimeDistributedData#actualFixedCost(long, long)
+	/**
+	 * Returns fixed cost for the resource in the given time period.
+	 * Resources do not have fixed costs (this is a Task property).
+	 * @return always 0
 	 */
 	public double fixedCost(long start, long end) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
@@ -710,12 +711,6 @@ public class ResourceImpl implements Resource, HasAvailability, HasResourceIndic
 	public boolean isLabor() {
 		return globalResource.isLabor();
 	}
-//	public boolean isNew() { //TODO does this have its own ID and not the global resource id?
-//		return globalResource.isNew();
-//	}
-//	public void setNew(boolean isNew) {
-//		globalResource.setNew(isNew);
-//	}
 	/* (non-Javadoc)
 	 * @see com.projectlibre1.pm.assignment.HasAssignments#hasLaborAssignment()
 	 */
@@ -837,12 +832,22 @@ public class ResourceImpl implements Resource, HasAvailability, HasResourceIndic
 		//System.out.println("ResourceImpl _setDirty("+dirty+"): "+getName());
 		this.dirty = dirty;
 	}
+
+	/**
+	 * Returns finish offset for the resource.
+	 * Resources do not have time offsets (this is a Task property).
+	 * @return always 0
+	 */
 	public long getFinishOffset() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
+
+	/**
+	 * Returns start offset for the resource.
+	 * Resources do not have time offsets (this is a Task property).
+	 * @return always 0
+	 */
 	public long getStartOffset() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	public RateFormat getRateFormat(){

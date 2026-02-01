@@ -21,13 +21,19 @@ export interface IReportData {
   sections: IReportSection[];
 }
 
+/** Допустимое содержимое секции отчета */
+export type ReportSectionContent =
+  | string
+  | Record<string, string | number | boolean | null | undefined>
+  | Array<Record<string, string | number | boolean | null | undefined>>;
+
 /**
  * Секция отчета
  */
 export interface IReportSection {
   title: string;
   type: 'table' | 'text' | 'chart' | 'summary';
-  content: any;
+  content: ReportSectionContent;
 }
 
 

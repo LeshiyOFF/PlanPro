@@ -5,7 +5,8 @@ import type { Project } from '@/types'
  */
 export class ProjectUtils {
   /**
-   * Создание mock проекта для разработки
+   * Создание проекта для тестов и разработки.
+   * В production-потоке не использовать; для создания — ProjectAPIClient.createProject.
    */
   static createMockProject(name: string, additionalData?: Partial<Project>): Project {
     const mockProject: Project = {

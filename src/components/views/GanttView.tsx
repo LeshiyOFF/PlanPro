@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { GanttLayout } from '@/components/gantt';
-import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore, createTaskFromView } from '@/store/projectStore';
 import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider';
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
 import { SplitTaskDialog } from '@/components/dialogs/task/SplitTaskDialog';
@@ -71,7 +71,7 @@ export const GanttView: React.FC = () => {
       // если её уровень равен текущему.
       const potentialParent = store.tasks[taskIndex - 1];
       
-      if (potentialParent && potentialParent.level === currentTask.level && !potentialParent.summary) {
+      if (potentialParent && potentialParent.level === currentTask.level && !potentialParent.isSummary) {
         setDialogState({ ...dialogState, summaryConfirmId: id });
       } else {
         store.indentTask(id);
@@ -85,16 +85,15 @@ export const GanttView: React.FC = () => {
   const onContextMenu = useGanttContextMenu(showMenu, t, contextMenuActions, isDeletionAllowed);
 
   const handleAddTask = useCallback(() => {
-    store.addTask({ 
+    store.addTask(createTaskFromView({ 
       id: `TASK-${store.tasks.length + 1}`, 
       name: `${t('sheets.new_task')} ${store.tasks.length + 1}`, 
       startDate: new Date(), 
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), 
       progress: 0, 
-      color: 'hsl(var(--primary))', 
       level: 1, 
       predecessors: [] 
-    });
+    }));
   }, [store, t]);
 
   // Контролы режима связывания для ActionBar
@@ -183,7 +182,9 @@ export const GanttView: React.FC = () => {
           isOpen={!!dialogState.splitId} 
           onClose={(res) => { 
             setDialogState({ ...dialogState, splitId: null }); 
-            if (res.success && res.data) store.splitTask(dialogState.splitId!, res.data.splitDate, res.data.gapDays); 
+            if (res.success && res.data && res.data.splitDate != null) {
+              store.splitTask(dialogState.splitId!, res.data.splitDate, res.data.gapDays ?? 0);
+            }
           }} 
           data={{ 
             taskId: dialogState.splitId!, 

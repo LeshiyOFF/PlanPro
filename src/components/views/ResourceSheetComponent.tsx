@@ -11,8 +11,10 @@ import { useTranslation } from 'react-i18next';
 import { Plus, Users, Download, Loader2, Calendar, HelpCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarManager } from '@/components/calendar/CalendarManager';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/Dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useCalendarValidation } from '@/hooks/useCalendarValidation';
+import { getElectronAPI } from '@/utils/electronAPI';
+import type { JsonObject, JsonValue } from '@/types/json-types';
 
 /**
  * Resource Sheet компонент - Лист ресурсов
@@ -22,16 +24,16 @@ import { useCalendarValidation } from '@/hooks/useCalendarValidation';
  * 
  * @version 8.13
  */
-export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({ 
-  viewType, 
-  settings 
+export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+  viewType: _viewType,
+  settings: _settings
 }) => {
   const { t } = useTranslation();
   const { resources, addResource, updateResource, calendars } = useProjectStore();
   const { preferences } = useUserPreferences();
   const helpContent = useHelpContent();
   const { toast } = useToast();
-  const { sanitizeCalendarId, isCalendarValid } = useCalendarValidation(calendars);
+  const { sanitizeCalendarId } = useCalendarValidation(calendars);
   
   const sheetRef = useRef<ProfessionalSheetHandle>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -49,26 +51,21 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
 
   const handleExport = async () => {
     if (!sheetRef.current) return;
-    
+    const api = getElectronAPI();
+    if (!api?.showSaveDialog || !api?.saveBinaryFile) return;
     try {
       setIsExporting(true);
-      
       const fileName = `Resources_${new Date().toISOString().split('T')[0]}.csv`;
-      const resultDialog = await window.electronAPI.showSaveDialog({
+      const resultDialog = await api.showSaveDialog({
         title: t('sheets.export_data'),
         defaultPath: fileName,
         filters: [{ name: 'CSV', extensions: ['csv'] }]
-      });
-
-      // Electron возвращает { filePath, canceled }
-      const savePath = typeof resultDialog === 'object' ? resultDialog.filePath : resultDialog;
-
+      } as Record<string, JsonObject>);
+      const savePath = typeof resultDialog === 'object' ? resultDialog.filePath : undefined;
       if (!savePath) return;
-
       const blob = await sheetRef.current.exportToCSV();
       const arrayBuffer = await blob.arrayBuffer();
-      const result = await window.electronAPI.saveBinaryFile(savePath, new Uint8Array(arrayBuffer));
-
+      const result = await api.saveBinaryFile(savePath, new Uint8Array(arrayBuffer));
       if (result.success) {
         toast({
           title: t('common.success'),
@@ -199,7 +196,7 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
                 <p className="font-bold text-green-900 mb-1">📦 {t('sheets.material')}</p>
                 <p className="text-green-800">{t('sheets.calc_help_material')}</p>
               </div>
-
+              
               <div className="p-3 bg-amber-50 border-l-4 border-amber-400 rounded">
                 <p className="font-bold text-amber-900 mb-1">💰 {t('sheets.cost')}</p>
                 <p className="text-amber-800">{t('sheets.calc_help_cost')}</p>
@@ -211,4 +208,3 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
     </div>
   );
 };
-

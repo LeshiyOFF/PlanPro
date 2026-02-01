@@ -13,4 +13,6 @@ export interface IConfigService {
   getDefaultJvmArgs(): string[];
   validateJavaFiles(): { valid: boolean; error?: string };
   resolveAvailablePorts(): Promise<void>;
+  isExecutableJarMode(): boolean;
+  getExecutableJarPath(): string | null;
 }

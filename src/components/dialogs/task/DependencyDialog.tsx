@@ -1,10 +1,9 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/Table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
@@ -50,10 +49,16 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
   onClose,
   ...props
 }) => {
-  const [dependency, setDependency] = React.useState({
+  type DependencyType = 'FS' | 'SS' | 'FF' | 'SF';
+  const [dependency, setDependency] = React.useState<{
+    predecessorId: string;
+    successorId: string;
+    type: DependencyType;
+    lag: number;
+  }>({
     predecessorId: predecessorId || '',
     successorId: successorId || '',
-    type: 'FS' as const,
+    type: 'FS',
     lag: 0
   });
 
@@ -68,7 +73,7 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
     },
     lag: {
       required: true,
-      validate: (value) => !isNaN(value) ? null : 'Lag must be a valid number'
+      validate: (value) => (typeof value === 'number' && !isNaN(value)) ? null : 'Lag must be a valid number'
     }
   });
 
@@ -89,7 +94,7 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
     });
   }, [dependency]);
 
-  const handleFieldChange = (field: keyof typeof dependency, value: any) => {
+  const handleFieldChange = (field: keyof typeof dependency, value: (typeof dependency)[keyof typeof dependency]) => {
     setDependency(prev => ({ ...prev, [field]: value }));
   };
 
@@ -119,11 +124,12 @@ export const DependencyDialog: React.FC<DependencyDialogProps> = ({
     return DEPENDENCY_TYPES.find(t => t.value === type)?.description || '';
   };
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
       title={isEditing ? "Edit Dependency" : "Create Dependency"}
       size="medium"
-      {...props}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

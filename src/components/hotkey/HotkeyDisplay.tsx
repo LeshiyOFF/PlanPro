@@ -1,8 +1,7 @@
 import React from 'react';
-import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
-import { SafeTooltip } from '@/components/ui/Tooltip';
-import { hotkeyToString } from '@/types/HotkeyTypes';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { SafeTooltip } from '@/components/ui/tooltip';
 import type { Hotkey, HotkeyConfig } from '@/types/HotkeyTypes';
 
 interface HotkeyDisplayProps {

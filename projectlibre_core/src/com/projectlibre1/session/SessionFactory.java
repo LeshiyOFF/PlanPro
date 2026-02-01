@@ -62,6 +62,7 @@ import java.util.StringTokenizer;
 
 import com.projectlibre1.job.Job;
 import com.projectlibre1.job.JobQueue;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.strings.Messages;
 import com.projectlibre1.util.ClassUtils;
 
@@ -92,17 +93,14 @@ public class SessionFactory {
 			            	Session session = (Session) ClassUtils.forName(implClass).newInstance();
 			            	//session.init(credentials);
 			            	if (session.getJobQueue()==null) session.setJobQueue(getJobQueue()); //because this method is called before jobQueue is set
-			            	sessionImpls.put(key.substring(key.lastIndexOf('.')+1), session);
-			            } catch (InstantiationException e) {
-			                // TODO Auto-generated catch block
-			                e.printStackTrace();
-			            } catch (IllegalAccessException e) {
-			                // TODO Auto-generated catch block
-			                e.printStackTrace();
-			            } catch (ClassNotFoundException e) {
-			                // TODO Auto-generated catch block
-			                e.printStackTrace();
-			            }
+		            	sessionImpls.put(key.substring(key.lastIndexOf('.')+1), session);
+		            } catch (InstantiationException e) {
+		                ErrorLogger.log("Failed to instantiate session: " + implClass, e);
+		            } catch (IllegalAccessException e) {
+		                ErrorLogger.log("Illegal access to session class: " + implClass, e);
+		            } catch (ClassNotFoundException e) {
+		                ErrorLogger.log("Session class not found: " + implClass, e);
+		            }
 					}
 				}
     		}
@@ -118,47 +116,35 @@ public class SessionFactory {
     	return local?getSession("local"):getSession("server");
     }
     
-    public static Object call(Object object,String method,Class[] argsDesc, Object[] args) throws Exception{
+    public static Object call(Object object, String method, Class[] argsDesc, Object[] args) throws Exception {
     	try {
-    		//System.out.println("call, "+method+"..."+object.getClass());
 			return object.getClass().getMethod(method, argsDesc).invoke(object, args);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in call to " + method, e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception in call to " + method, e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in call to " + method, e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in call to " + method, e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method not found: " + method, e);
 		}
 		return null;
     }
-    public static Object callNoEx(Object object,String method,Class[] argsDesc, Object[] args){
+    public static Object callNoEx(Object object, String method, Class[] argsDesc, Object[] args) {
     	try {
-    		//System.out.println("callNoEx, "+method+"...");
 			return object.getClass().getMethod(method, argsDesc).invoke(object, args);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal argument in callNoEx to " + method, e);
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Security exception in callNoEx to " + method, e);
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Illegal access in callNoEx to " + method, e);
 		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Invocation target exception in callNoEx to " + method, e);
 		} catch (NoSuchMethodException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorLogger.log("Method not found in callNoEx: " + method, e);
 		}
 		return null;
     }

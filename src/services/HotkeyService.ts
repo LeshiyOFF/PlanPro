@@ -1,18 +1,12 @@
 import { logger } from '@/utils/logger';
 import type { 
   Hotkey, 
-  HotkeyConfig, 
   HotkeyAction, 
   HotkeyBinding, 
   HotkeyProfile, 
-  HotkeyConflict,
-  HotkeyState,
-  HotkeyCategory,
-  DEFAULT_HOTKEYS,
-  hotkeyToString,
-  hotkeyFromString,
-  hotkeyEquals 
+  HotkeyState
 } from '@/types/HotkeyTypes';
+import { DEFAULT_HOTKEYS, hotkeyToString, hotkeyEquals, HotkeyCategory } from '@/types/HotkeyTypes';
 
 /**
  * Сервис для управления горячими клавишами
@@ -33,8 +27,10 @@ class HotkeyService {
       conflicts: [],
       isEnabled: true
     };
-    // this.initializeDefaultActions();
+    this.initializeDefaultActions();
   }
+
+  private static readonly STORAGE_KEY = 'projectlibre-hotkey-bindings';
 
   static getInstance(): HotkeyService {
     if (!HotkeyService.instance) {
@@ -173,7 +169,7 @@ class HotkeyService {
    */
   registerBinding(actionId: string, keys: Hotkey): boolean {
     if (this.hasConflict(actionId, keys)) {
-      logger.dialogError('Hotkey conflict detected', { actionId, keys }, 'Hotkey');
+      logger.dialogError('Hotkey conflict detected', { actionId, keysLabel: hotkeyToString(keys) }, 'Hotkey');
       return false;
     }
 
@@ -257,7 +253,7 @@ class HotkeyService {
           return binding;
         }
       } catch (error) {
-        logger.dialogError('hotkeyEquals error', { binding, eventHotkey, error }, 'Hotkey');
+        logger.dialogError('hotkeyEquals error', { actionId: binding.actionId, error: String(error) }, 'Hotkey');
       }
     }
 
@@ -296,7 +292,7 @@ class HotkeyService {
 
       logger.dialog('Action executed', { actionId }, 'Hotkey');
     } catch (error) {
-      logger.dialogError('Action execution error', { actionId, error }, 'Hotkey');
+      logger.dialogError('Action execution error', { actionId, error: String(error) }, 'Hotkey');
     }
   }
 
@@ -365,7 +361,7 @@ class HotkeyService {
         try {
           handler(actionId, event || new KeyboardEvent('keydown'));
         } catch (error) {
-          logger.dialogError('Event handler error', { actionId, error }, 'Hotkey');
+          logger.dialogError('Event handler error', { actionId, error: String(error) }, 'Hotkey');
         }
       });
     }
@@ -434,6 +430,50 @@ class HotkeyService {
    */
   getActionsByCategory(category: HotkeyCategory): HotkeyAction[] {
     return Array.from(this.actions.values()).filter(action => action.category === category);
+  }
+
+  /**
+   * Возвращает привязку по умолчанию для действия (из DEFAULT_HOTKEYS).
+   */
+  getDefaultBinding(actionId: string): HotkeyBinding | null {
+    const defaultKeys = DEFAULT_HOTKEYS[actionId];
+    if (!defaultKeys) return null;
+    return {
+      actionId,
+      keys: defaultKeys,
+      enabled: true
+    };
+  }
+
+  /**
+   * Сохраняет текущие привязки в localStorage.
+   */
+  saveToStorage(): void {
+    try {
+      const payload: Record<string, { keys: Hotkey; enabled: boolean }> = {};
+      this.bindings.forEach((binding, actionId) => {
+        payload[actionId] = { keys: binding.keys, enabled: binding.enabled };
+      });
+      localStorage.setItem(HotkeyService.STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      logger.dialogError('Failed to save hotkeys to storage', { error: e instanceof Error ? e.message : String(e) }, 'Hotkey');
+    }
+  }
+
+  /**
+   * Загружает привязки из localStorage (вызывать при старте приложения при необходимости).
+   */
+  loadFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(HotkeyService.STORAGE_KEY);
+      if (!raw) return;
+      const payload = JSON.parse(raw) as Record<string, { keys: Hotkey; enabled: boolean }>;
+      Object.entries(payload).forEach(([actionId, { keys, enabled }]) => {
+        this.bindings.set(actionId, { actionId, keys, enabled });
+      });
+    } catch (e) {
+      logger.dialogError('Failed to load hotkeys from storage', { error: e instanceof Error ? e.message : String(e) }, 'Hotkey');
+    }
   }
 }
 

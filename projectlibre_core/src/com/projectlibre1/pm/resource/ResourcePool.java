@@ -89,7 +89,8 @@ public class ResourcePool implements Document, NodeModelDataFactory {
 	private ObjectEventManager objectEventManager = new ObjectEventManager();
 	private int resourceIdCounter = 0;
 	private WorkingCalendar defaultCalendar;
-    private static ResourcePool globalPool = null; // TODO is it ok to be global?
+	private static ResourcePool globalPool = null;
+
 	protected ResourcePool(String name,DataFactoryUndoController undo) {
 		this.name = name;
 		globalPool = this;
@@ -119,8 +120,7 @@ public class ResourcePool implements Document, NodeModelDataFactory {
 	}
 	public void initializeId(Resource resource) {
 		long id = ++resourceIdCounter;
-		resource.setId(id); //starts at 1TODO check for duplicates -
-		//resource.setUniqueId(id); //TODO use a GUID generator
+		resource.setId(id);
 	}
 	
 	public void initializeOutlines(){
@@ -298,11 +298,12 @@ public class ResourcePool implements Document, NodeModelDataFactory {
 		this.name = name;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.projectlibre1.document.Document#fireMultipleTransaction(int, boolean)
+	/**
+	 * Fires multiple transaction event.
+	 * This implementation does not support transactions.
+	 * @return 0 (no transaction)
 	 */
 	public int fireMultipleTransaction(int id, boolean begin) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 	
@@ -441,8 +442,12 @@ public class ResourcePool implements Document, NodeModelDataFactory {
 		temp.add(childNode);
 		getResourceOutline().move(parentNode, temp, -1,NodeModel.NORMAL);
 	}
+	/**
+	 * Returns object selection event manager.
+	 * This implementation does not support object selection.
+	 * @return null
+	 */
 	public ObjectSelectionEventManager getObjectSelectionEventManager() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

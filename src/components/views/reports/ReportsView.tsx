@@ -13,7 +13,7 @@ import { ReportViewer } from './ReportViewer';
 import { BarChart3, ListTodo, Users, Milestone, DollarSign, FileText, ArrowLeft, Printer, Download, UserCog } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import '@/styles/reports.css';
 
 /**

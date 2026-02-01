@@ -1,13 +1,5 @@
 import { ReactNode } from 'react';
-import { ContextMenuType } from '../ContextMenuType';
-
-/**
- * Статус меню
- */
-export enum ContextMenuStatus {
-  HIDDEN = 'hidden',
-  VISIBLE = 'visible'
-}
+import { ContextMenuType, ContextMenuStatus } from '../ContextMenuType';
 
 /**
  * Действие пункта меню
@@ -35,6 +27,9 @@ export interface IContextMenuItem {
   readonly submenu?: IContextMenuItem[];
 }
 
+/** Цель контекстного меню (задача, ресурс или объект с id) */
+export type ContextMenuTarget = Record<string, string | number | boolean | object | null | undefined>;
+
 /**
  * Контекстное меню
  */
@@ -47,26 +42,26 @@ export interface IContextMenu {
     y: number;
   };
   readonly status: ContextMenuStatus;
-  readonly target?: any;
+  readonly target?: ContextMenuTarget;
 }
 
 /**
  * Контекст для отображения меню
  */
 export interface IContextMenuContext {
-  readonly target: any;
+  readonly target: ContextMenuTarget;
   readonly position: {
     x: number;
     y: number;
   };
-  readonly actions?: Array<{ 
-    label?: string; 
-    onClick?: () => void; 
+  readonly actions?: Array<{
+    label?: string;
+    onClick?: () => void;
     icon?: ReactNode;
     divider?: boolean;
     disabled?: boolean;
     tooltip?: string;
   }>;
-  readonly metadata?: Record<string, any>;
+  readonly metadata?: Record<string, string | number | boolean | null | undefined>;
 }
 

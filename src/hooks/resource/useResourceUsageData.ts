@@ -1,7 +1,7 @@
 import { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Resource } from '@/types/resource-types';
-import { Task } from '@/store/project/interfaces';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 import { IResourceUsage } from '@/domain/sheets/entities/IResourceUsage';
 
 /** Базовая загрузка: 100% = полная занятость ресурса */
@@ -25,7 +25,7 @@ const calculateAssignedPercent = (resource: Resource, tasks: Task[]): number => 
     const assignment = task.resourceAssignments?.find(a => a.resourceId === resource.id);
     if (assignment) {
       totalUnits += assignment.units;
-    } else if (task.resourceIds?.includes(resource.id)) {
+    } else if (getTaskResourceIds(task).includes(String(resource.id))) {
       // Fallback: старый формат resourceIds (100% по умолчанию)
       totalUnits += BASE_CAPACITY;
     }

@@ -4,12 +4,12 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader';
 import { useHelpContent } from '@/hooks/useHelpContent';
 import { NetworkDiagramCore } from '@/components/gantt/NetworkDiagramCore';
 import { NetworkNode, NetworkNodeType, NetworkConnection } from '@/domain/network/interfaces/NetworkDiagram';
-import { Plus, Maximize, ZoomIn, ZoomOut, Layout, GitBranch } from 'lucide-react';
+import { Plus, ZoomIn, ZoomOut, Layout, GitBranch, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useProjectStore } from '@/store/projectStore';
+import { useProjectStore, createTaskFromView } from '@/store/projectStore';
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog';
-import { SafeTooltip } from '@/components/ui/Tooltip';
-import { cn } from '@/lib/utils';
+import { SafeTooltip } from '@/components/ui/tooltip';
+import { ITaskWithPosition } from '@/types/views/IViewTypes';
 
 /**
  * NetworkView - Сетевой график (PERT диаграмма)
@@ -30,22 +30,26 @@ export const NetworkView: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Конвертация задач из стора в узлы для диаграммы
-  const nodes: NetworkNode[] = useMemo(() => tasks.map(task => ({
-    id: task.id,
-    name: task.name,
-    duration: `${Math.ceil((new Date(task.endDate).getTime() - new Date(task.startDate).getTime()) / (24 * 60 * 60 * 1000))}${t('sheets.days')}`,
-    startDate: new Date(task.startDate),
-    endDate: new Date(task.endDate),
-    type: task.type === 'milestone' ? NetworkNodeType.MILESTONE : 
-          task.type === 'summary' ? NetworkNodeType.SUMMARY : NetworkNodeType.TASK,
-    critical: !!(task.criticalPath || task.critical),
-    progress: task.progress,
-    x: (task as any).x || 0,
-    y: (task as any).y || 0,
-    width: 180,
-    height: 80,
-    isPinned: (task as any).isPinned || false
-  })), [tasks, t]);
+  const nodes: NetworkNode[] = useMemo(() => tasks.map((task): NetworkNode => {
+    const taskWithPosition = task as ITaskWithPosition;
+    const isMilestone = (task as { isMilestone?: boolean }).isMilestone === true;
+    const isSummary = (task as { isSummary?: boolean }).isSummary === true;
+    return {
+      id: task.id,
+      name: task.name,
+      duration: `${Math.ceil((new Date(task.endDate).getTime() - new Date(task.startDate).getTime()) / (24 * 60 * 60 * 1000))}${t('sheets.days')}`,
+      startDate: new Date(task.startDate),
+      endDate: new Date(task.endDate),
+      type: isMilestone ? NetworkNodeType.MILESTONE : isSummary ? NetworkNodeType.SUMMARY : NetworkNodeType.TASK,
+      critical: !!(task.criticalPath ?? task.isCritical),
+      progress: task.progress,
+      x: taskWithPosition.x ?? 0,
+      y: taskWithPosition.y ?? 0,
+      width: 180,
+      height: 80,
+      isPinned: taskWithPosition.isPinned ?? false
+    };
+  }), [tasks, t]);
 
   // Формирование связей
   const connections: NetworkConnection[] = useMemo(() => {
@@ -54,12 +58,14 @@ export const NetworkView: React.FC = () => {
       if (task.predecessors) {
         task.predecessors.forEach((predId) => {
           const fromTask = tasks.find(t => t.id === predId);
+          const taskCritical = task.isCritical ?? task.criticalPath ?? false;
+          const fromCritical = fromTask ? (fromTask.isCritical ?? fromTask.criticalPath ?? false) : false;
           conns.push({
             id: `conn-${task.id}-${predId}`,
             fromId: predId,
             toId: task.id,
             type: 'fs',
-            critical: !!((task.criticalPath || task.critical) && (fromTask?.criticalPath || fromTask?.critical))
+            critical: taskCritical && fromCritical
           });
         });
       }
@@ -69,33 +75,34 @@ export const NetworkView: React.FC = () => {
 
   const handleNodesChange = useCallback((updatedNodes: NetworkNode[]) => {
     updatedNodes.forEach(node => {
-      updateTask(node.id, { 
+      const positionUpdate: Partial<ITaskWithPosition> = { 
         x: node.x, 
         y: node.y, 
         isPinned: node.isPinned 
-      } as any);
+      };
+      updateTask(node.id, positionUpdate);
     });
   }, [updateTask]);
 
   const handleAddTask = useCallback(() => {
     const newId = `TASK-${String(tasks.length + 1).padStart(3, '0')}`;
-    const newTask = {
+    const newTask = createTaskFromView({
       id: newId,
       name: `${t('sheets.new_task')} ${tasks.length + 1}`,
       startDate: new Date(),
       endDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
       progress: 0,
       color: 'hsl(var(--primary))',
-      level: 1,
-      x: 50, 
-      y: 50,
-      isPinned: true
-    };
-    addTask(newTask as any);
+      level: 1
+    });
+    addTask(newTask);
   }, [tasks.length, addTask, t]);
 
   const handleAutoLayout = useCallback(() => {
-    tasks.forEach(t => updateTask(t.id, { isPinned: false } as any));
+    tasks.forEach(t => {
+      const resetPosition: Partial<ITaskWithPosition> = { isPinned: false };
+      updateTask(t.id, resetPosition);
+    });
   }, [tasks, updateTask]);
 
   const handleNodeDoubleClick = useCallback((nodeId: string) => {
@@ -143,7 +150,7 @@ export const NetworkView: React.FC = () => {
         onClick={() => setZoom(1)} 
         className="h-9 w-9 p-0 border-border/40 hover:bg-[hsl(var(--primary-soft))] text-primary transition-all"
       >
-        <Maximize className="h-4 w-4" />
+        <Maximize2 className="h-4 w-4" />
       </Button>
     </div>
   );

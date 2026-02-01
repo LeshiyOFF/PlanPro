@@ -61,9 +61,16 @@ export abstract class BaseContextMenuFactory {
   }
 
   /**
-   * Создать разделитель
+   * Создать разделитель (экземплярный метод для наследников)
    */
   protected createSeparator(): ContextMenuItem {
+    return BaseContextMenuFactory.createSeparator();
+  }
+
+  /**
+   * Создать разделитель (статический метод для использования в static-методах фабрик)
+   */
+  static createSeparator(): ContextMenuItem {
     return {
       id: `separator-${Date.now()}`,
       label: '',

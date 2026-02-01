@@ -113,7 +113,7 @@ public class ObjectEvent extends EventObject {
 		try {
 			objectEvent = (ObjectEvent) pool.borrowObject();
 		} catch (Exception e) {
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to borrow ObjectEvent from pool", e);
 			return null;
 		}
 		objectEvent.source = source;
@@ -132,8 +132,7 @@ public class ObjectEvent extends EventObject {
 		try {
 			pool.returnObject(this);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			com.projectlibre1.server.access.ErrorLogger.log("Failed to return ObjectEvent to pool", e);
 		}
 	}
 	

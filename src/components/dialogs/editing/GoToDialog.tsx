@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { BaseDialog } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/Badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'; // temporarily removed
 // import { ScrollArea } from '@/components/ui/scroll-area'; // temporarily removed
 import { Search, FileText, Calendar, MapPin, Hash, ArrowRight } from 'lucide-react';
@@ -44,8 +43,6 @@ interface GoToDialogProps {
 export const GoToDialog: React.FC<GoToDialogProps> = ({
   open,
   onOpenChange,
-  projectId,
-  currentView = 'gantt',
   onGoTo,
   onSearch
 }) => {

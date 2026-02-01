@@ -6,7 +6,7 @@
 import React from 'react';
 import { cn } from '@/utils/cn';
 import { AtomInput, AtomInputProps } from '../atoms';
-import { BaseAtomicProps, ColorVariant } from '../atoms/types';
+import { BaseAtomicProps } from '../atoms/types';
 
 /**
  * Props для FormField Molecule
@@ -48,11 +48,6 @@ export const FormField: React.FC<FormFieldProps> = ({
     labelPosition === 'left' && 'text-xs uppercase tracking-wider mb-1',
     error ? 'text-red-600' : 'text-gray-700',
     required && 'after:content-["*"] after:ml-1 after:text-red-500'
-  );
-
-  const errorTextClasses = cn(
-    'text-xs mt-1',
-    error ? 'text-red-600' : 'text-gray-500'
   );
 
   const inputSize = {

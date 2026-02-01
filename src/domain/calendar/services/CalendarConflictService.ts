@@ -1,4 +1,4 @@
-import { Task } from '@/store/project/interfaces';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 import { Resource } from '@/types/resource-types';
 import { IWorkCalendar } from '../interfaces/IWorkCalendar';
 import { CalendarTemplateService } from './CalendarTemplateService';
@@ -44,7 +44,8 @@ export class CalendarConflictService {
     calendars: IWorkCalendar[]
   ): CalendarConflictResult {
     // Если задача не имеет назначенных ресурсов или это summary/milestone - конфликта нет
-    if (!task.resourceIds || task.resourceIds.length === 0 || task.summary || task.milestone) {
+    const resourceIds = getTaskResourceIds(task);
+    if (resourceIds.length === 0 || task.isSummary || task.isMilestone) {
       return { hasConflict: false, conflictingResources: [] };
     }
 
@@ -52,8 +53,8 @@ export class CalendarConflictService {
     const templateService = CalendarTemplateService.getInstance();
 
     // Проверяем каждого назначенного работника
-    for (const resourceId of task.resourceIds) {
-      const resource = resources.find(r => r.id === resourceId);
+    for (const resourceId of resourceIds) {
+      const resource = resources.find(r => String(r.id) === resourceId);
       
       // Проверяем только ресурсы типа "Труд" (у них есть рабочие календари)
       if (!resource || resource.type !== 'Work') continue;
@@ -110,8 +111,8 @@ export class CalendarConflictService {
    * Генерирует человекочитаемое описание конфликта
    */
   private getConflictReason(
-    startDate: Date,
-    endDate: Date,
+    _startDate: Date,
+    _endDate: Date,
     calendar: IWorkCalendar,
     templateService: CalendarTemplateService
   ): string {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useDialogValidation } from '../hooks/useDialogValidation';
 
 export interface ResourceData {
+  [key: string]: string | number | boolean | undefined;
   name: string;
   type: 'work' | 'material' | 'cost';
   initials: string;
@@ -72,36 +73,41 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
       required: true,
       minLength: 1,
       maxLength: 255,
-      validate: (value) => value.trim() ? null : 'Resource name is required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Resource name is required';
+        return value.trim() ? null : 'Resource name is required';
+      }
     },
     initials: {
       required: true,
       minLength: 1,
       maxLength: 10,
-      validate: (value) => value.trim() ? null : 'Initials are required'
+      custom: (value) => {
+        if (!value || typeof value !== 'string') return 'Initials are required';
+        return value.trim() ? null : 'Initials are required';
+      }
     },
     maxUnits: {
       required: true,
-      min: 0.1,
-      max: 1000,
-      validate: (value) => (value > 0 && value <= 1000) ? null : 'Max units must be between 0.1 and 1000'
+      custom: (value) => {
+        const numValue = Number(value);
+        return (numValue > 0 && numValue <= 1000) ? null : 'Max units must be between 0.1 and 1000';
+      }
     },
     standardRate: {
       required: true,
-      min: 0,
-      validate: (value) => value >= 0 ? null : 'Standard rate must be non-negative'
+      custom: (value) => {
+        const numValue = Number(value);
+        return numValue >= 0 ? null : 'Standard rate must be non-negative';
+      }
     }
   });
 
   React.useEffect(() => {
-    Object.keys(resourceData).forEach(key => {
-      if (resourceData[key as keyof ResourceData] !== undefined) {
-        validate(key, resourceData[key as keyof ResourceData]);
-      }
-    });
+    validate(resourceData);
   }, [resourceData]);
 
-  const handleFieldChange = (field: keyof ResourceData, value: any) => {
+  const handleFieldChange = (field: keyof ResourceData, value: ResourceData[keyof ResourceData]) => {
     setResourceData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -118,11 +124,15 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
     return RESOURCE_TYPES.find(t => t.value === type)?.description || '';
   };
 
+  const { open: _open, onOpenChange: _onOpenChange, title: _title, ...dialogProps } = props;
+
   return (
     <BaseDialog
       title="Add New Resource"
       size="large"
-      {...props}
+      open={props.open}
+      onOpenChange={props.onOpenChange}
+      {...dialogProps}
       onClose={onClose}
       footer={
         <div className="flex justify-end space-x-2">
@@ -329,7 +339,7 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
               <Label htmlFor="accrueAt">Accrue At</Label>
               <Select
                 value={resourceData.accrueAt}
-                onValueChange={(value) => handleFieldChange('accrueAt', value as any)}
+                onValueChange={(value) => handleFieldChange('accrueAt', value as ResourceData['accrueAt'])}
               >
                 <SelectTrigger>
                   <SelectValue />

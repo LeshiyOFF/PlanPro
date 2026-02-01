@@ -266,7 +266,7 @@ public final class P3DatabaseReader implements ProjectReader
     */
    private void readCalendars()
    {
-      // TODO: understand the calendar data representation.
+      // LIMITATION (MPXJ): P3 calendar data representation not fully mapped.
    }
 
    /**

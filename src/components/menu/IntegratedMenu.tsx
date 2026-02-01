@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ContextMenu } from './ContextMenu';
-import { useMenuContext } from '@/providers/MenuProvider';
+import { ContextMenuType, ContextMenuItem, useMenuContext } from '@/providers/MenuProvider';
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from '@/hooks/useKeyboardShortcuts';
 import { ContextMenuFactory } from './factories/ContextMenuFactory';
 import { useFileOperations } from '@/hooks/useFileOperations';
-
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
+import { contextActionService, ContextActionType } from '@/services/ContextActionService';
+import { getElectronAPI } from '@/utils/electronAPI';
 
 /**
  * Интегрированный Menu компонент
@@ -13,9 +14,8 @@ import { useTaskDeletion } from '@/hooks/task/useTaskDeletion';
  */
 export const IntegratedMenu: React.FC = () => {
   const { contextMenu, showContextMenu, hideContextMenu } = useMenuContext();
-  const { deleteTask, isDeletionAllowed } = useTaskDeletion();
+  const { isDeletionAllowed } = useTaskDeletion();
   const { createNewProject, openProject, saveProject, saveProjectAs, loadProjectFromPath } = useFileOperations();
-  const [activeTab, setActiveTab] = useState('file');
 
   // Обработчики горячих клавиш
   const handleShortcutAction = useCallback((action: string) => {
@@ -42,10 +42,10 @@ export const IntegratedMenu: React.FC = () => {
         saveProjectAs();
         break;
       case 'INSERT_TASK':
-        // TODO: Implement insert task action
+        window.dispatchEvent(new CustomEvent('task:insert'));
         break;
       case 'FIND_TASK':
-        // TODO: Implement find task action
+        window.dispatchEvent(new CustomEvent('search:open'));
         break;
       default:
         console.log(`Unhandled hotkey action: ${action}`);
@@ -66,9 +66,9 @@ export const IntegratedMenu: React.FC = () => {
       const files = e.dataTransfer?.files;
       if (files && files.length > 0) {
         const file = files[0];
-        
-        // Electron автоматически добавляет свойство 'path' к File объектам в drag-and-drop
-        const filePath = (file as any).path;
+        // Electron добавляет path к File в drag-and-drop; в браузере его нет
+        const fileWithPath = file as File & { path?: string };
+        const filePath = fileWithPath.path;
         
         console.log('[IntegratedMenu] File dropped:', {
           name: file.name,
@@ -80,8 +80,9 @@ export const IntegratedMenu: React.FC = () => {
         if (filePath) {
           // Проверяем расширение файла
           if (!filePath.endsWith('.pod')) {
-            if (window.electronAPI) {
-              await window.electronAPI.showMessageBox({
+            const api = getElectronAPI();
+            if (api?.showMessageBox) {
+              await api.showMessageBox({
                 type: 'warning',
                 title: 'Неверный формат файла',
                 message: 'Можно открывать только файлы с расширением .pod'
@@ -95,9 +96,9 @@ export const IntegratedMenu: React.FC = () => {
         } else {
           // Fallback: если path недоступен, предлагаем использовать диалог
           console.error('[IntegratedMenu] File path not available from drop event. This might be a security restriction.');
-          
-          if (window.electronAPI) {
-            await window.electronAPI.showMessageBox({
+          const api = getElectronAPI();
+          if (api?.showMessageBox) {
+            await api.showMessageBox({
               type: 'info',
               title: 'Используйте кнопку "Открыть"',
               message: 'Drag-and-drop временно недоступен из-за настроек безопасности.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.'
@@ -147,55 +148,35 @@ export const IntegratedMenu: React.FC = () => {
   useKeyboardShortcuts(shortcuts, true);
 
   // Обработчики контекстных меню
-  const handleContextMenuAction = useCallback((type: string, action: string) => {
-    console.log(`Context menu action: ${type} - ${action}`);
-    
-    switch (type) {
-      case 'task':
-        // TODO: Implement task context actions
-        break;
-      case 'resource':
-        // TODO: Implement resource context actions
-        break;
-      case 'project':
-        // TODO: Implement project context actions
-        break;
-      case 'gantt':
-        // TODO: Implement gantt context actions
-        break;
-      default:
-        console.log(`Unhandled context menu action: ${type} - ${action}`);
-    }
+  const handleContextMenuAction = useCallback(async (type: string, action: string) => {
+    const fullAction: ContextActionType = `${type}-${action}` as ContextActionType;
+    await contextActionService.executeAction(fullAction);
   }, []);
 
-  // Обработчик правого клика мыши
-  const handleContextMenu = useCallback((event: React.MouseEvent) => {
+  const VALID_CONTEXT_TYPES: ContextMenuType[] = ['task', 'resource', 'project', 'gantt'];
+
+  const handleContextMenu = useCallback((event: MouseEvent) => {
     event.preventDefault();
-    
     const target = event.target as HTMLElement;
-    const contextType = target.getAttribute('data-context-type') as string;
-    
-    let menuItems: any[] = [];
-    
-    switch (contextType) {
-      case 'task':
-        menuItems = ContextMenuFactory.createTaskContextMenu((action) => handleContextMenuAction('task', action));
-        break;
-      case 'resource':
-        menuItems = ContextMenuFactory.createResourceContextMenu((action) => handleContextMenuAction('resource', action));
-        break;
-      case 'project':
-        menuItems = ContextMenuFactory.createProjectContextMenu((action) => handleContextMenuAction('project', action));
-        break;
-      case 'gantt':
-        menuItems = ContextMenuFactory.createGanttContextMenu((action) => handleContextMenuAction('gantt', action));
-        break;
-    }
-    
+    const rawType = target.getAttribute('data-context-type');
+    const contextType = rawType && VALID_CONTEXT_TYPES.includes(rawType as ContextMenuType)
+      ? (rawType as ContextMenuType)
+      : null;
+    if (!contextType) return;
+
+    const menuItems: ContextMenuItem[] = ContextMenuFactory.getMenuByType(
+      contextType,
+      (action) => handleContextMenuAction(contextType, action)
+    );
     if (menuItems.length > 0) {
-      showContextMenu(contextType as any, menuItems, event.clientX, event.clientY);
+      showContextMenu(contextType, menuItems, event.clientX, event.clientY);
     }
   }, [showContextMenu, handleContextMenuAction]);
+
+  useEffect(() => {
+    document.addEventListener('contextmenu', handleContextMenu);
+    return () => document.removeEventListener('contextmenu', handleContextMenu);
+  }, [handleContextMenu]);
 
   return (
     <>

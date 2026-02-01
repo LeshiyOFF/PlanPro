@@ -196,7 +196,6 @@ public class FilteredNodeHierarchy extends AbstractMutableNodeHierarchy implemen
 //		return hierarchy.getVoidNodes(location);
 //	}
 	public void valueForPathChanged(TreePath path, Object newValue) {
- 		//TODO works ?
 		hierarchy.valueForPathChanged(path, newValue);
 	}
 	public void addTreeModelListener(TreeModelListener l) {

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { NetworkDiagramEngine } from '@/domain/network/services/NetworkDiagramEngine';
 import { SugiyamaLayoutStrategy } from '@/domain/network/layout/SugiyamaLayoutStrategy';
-import { NetworkNode, NetworkConnection, NetworkDiagramData } from '@/domain/network/interfaces/NetworkDiagram';
+import { NetworkNode, NetworkConnection } from '@/domain/network/interfaces/NetworkDiagram';
 import { CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas';
 
 interface NetworkDiagramCoreProps {
@@ -88,7 +88,6 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
     
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     
     // Коэффициент пересчета экранных пикселей в логические пиксели холста (width/height)
     const cssScaleX = width / rect.width;
@@ -162,7 +161,7 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
       }));
       setPanStart(currentPoint);
     } else if (isLinking && linkingFromId) {
-      engineRef.current.updateData({ hoveredNodeId: engineRef.current.hitTestNode(currentPoint) });
+      engineRef.current.updateData({ hoveredNodeId: engineRef.current.hitTestNode(currentPoint) ?? undefined });
       engineRef.current.render(); 
       const ctx = canvas.getContext('2d')!;
       const fromNode = nodes.find(n => n.id === linkingFromId);
@@ -185,7 +184,7 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
     } else {
       // Normal hover
       const hoveredId = engineRef.current.hitTestNode(currentPoint);
-      engineRef.current.updateData({ hoveredNodeId: hoveredId });
+      engineRef.current.updateData({ hoveredNodeId: hoveredId ?? undefined });
       engineRef.current.render();
     }
   }, [isDragging, isPanning, isLinking, draggedNodeId, linkingFromId, dragStart, panStart, nodes, viewport, width, height]);
@@ -207,7 +206,7 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
       }
       setIsLinking(false);
       setLinkingFromId(null);
-      engineRef.current.updateData({ hoveredNodeId: null });
+      engineRef.current.updateData({ hoveredNodeId: undefined });
     }
 
     setIsDragging(false);
@@ -225,7 +224,6 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
     
     // Mouse position relative to canvas
     const mouseX = (e.clientX - rect.left);

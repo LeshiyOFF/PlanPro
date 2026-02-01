@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 
 // API клиенты и типы
 import { useProjectAPI } from './useProjectAPI'

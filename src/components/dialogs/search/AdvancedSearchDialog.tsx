@@ -1,29 +1,20 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { SearchResult } from '@/types/search-types';
+import { SearchService } from '@/services/SearchService';
 
 export interface SearchScope {
   id: string;
   name: string;
   fields: string[];
-}
-
-export interface SearchResult {
-  id: string;
-  type: 'task' | 'resource' | 'project' | 'document' | 'note';
-  title: string;
-  description: string;
-  relevance: number;
-  modified: string;
-  path: string;
-  highlights?: string[];
 }
 
 export interface AdvancedSearchDialogProps extends Omit<BaseDialogProps, 'children'> {
@@ -34,10 +25,10 @@ export interface AdvancedSearchDialogProps extends Omit<BaseDialogProps, 'childr
     name: string;
     query: string;
     scope: string[];
-    filters: any;
+    filters: Record<string, string | number | boolean | string[]>;
   }>;
-  onSearch?: (query: string, scope: string[], filters: any) => void;
-  onSaveSearch?: (name: string, query: string, scope: string[], filters: any) => void;
+  onSearch?: (query: string, scope: string[], filters: Record<string, string | number | boolean | string[]>) => void;
+  onSaveSearch?: (name: string, query: string, scope: string[], filters: Record<string, string | number | boolean | string[]>) => void;
   onOpenResult?: (result: SearchResult) => void;
 }
 
@@ -97,41 +88,34 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
     if (!query.trim() || selectedScopes.length === 0) return;
 
     setIsSearching(true);
-    
-    // Simulate search delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock search results (in real implementation, this would call actual search)
-    const mockResults: SearchResult[] = [
-      {
-        id: '1',
-        type: 'task',
-        title: 'Design UI components',
-        description: 'Create responsive user interface components using React and Tailwind CSS',
-        relevance: 95,
-        modified: '2024-01-15',
-        path: 'Project/Phase 1/UI Design',
-        highlights: ['Design', 'UI', 'components']
-      },
-      {
-        id: '2',
-        type: 'resource',
-        title: 'Frontend Developer',
-        description: 'Senior frontend developer with React and TypeScript expertise',
-        relevance: 88,
-        modified: '2024-01-10',
-        path: 'Resources/Development Team',
-        highlights: ['Frontend', 'Developer']
-      }
-    ].filter(result => 
-      query.toLowerCase().split(' ').some(word => 
-        result.title.toLowerCase().includes(word) ||
-        result.description.toLowerCase().includes(word)
-      )
-    );
-
-    setSearchResults(mockResults);
-    setIsSearching(false);
+    try {
+      const searchService = SearchService.getInstance();
+      const searchType =
+        selectedScopes.includes('task') && selectedScopes.includes('resource')
+          ? 'all'
+          : selectedScopes.includes('task')
+            ? 'task'
+            : selectedScopes.includes('resource')
+              ? 'resource'
+              : 'all';
+      const response = await searchService.search({
+        query: query.trim(),
+        type: searchType,
+        limit: 50,
+        offset: 0
+      });
+      const results: SearchResult[] = response.results.map(r => ({
+        ...r,
+        modified: r.modifiedDate instanceof Date ? r.modifiedDate.toISOString().slice(0, 10) : r.modified,
+        relevance: r.relevanceScore ?? r.relevance
+      }));
+      setSearchResults(results);
+      searchService.saveRecentSearch(query.trim());
+    } catch {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
     onSearch?.(query, selectedScopes, {
       searchOperator,
       caseSensitive,
@@ -156,7 +140,7 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
     }
   };
 
-  const handleLoadSavedSearch = (savedSearch: any) => {
+  const handleLoadSavedSearch = (savedSearch: { query: string; scope: string[] }) => {
     setQuery(savedSearch.query);
     setSelectedScopes(savedSearch.scope);
     setActiveTab('search');
@@ -183,11 +167,12 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
     return 'text-red-600';
   };
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Advanced Search"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -230,7 +215,7 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                 <Checkbox
                   id="caseSensitive"
                   checked={caseSensitive}
-                  onCheckedChange={setCaseSensitive}
+                  onCheckedChange={(checked) => setCaseSensitive(checked === true)}
                 />
                 <Label htmlFor="caseSensitive">Case sensitive</Label>
               </div>
@@ -238,7 +223,7 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                 <Checkbox
                   id="includeContent"
                   checked={includeContent}
-                  onCheckedChange={setIncludeContent}
+                  onCheckedChange={(checked) => setIncludeContent(checked === true)}
                 />
                 <Label htmlFor="includeContent">Search content</Label>
               </div>
@@ -481,8 +466,8 @@ export const AdvancedSearchDialog: React.FC<AdvancedSearchDialogProps> = ({
                     </div>
                     <div className="text-sm text-muted-foreground">
                       Relevance: 
-                      <span className={`ml-1 font-medium ${getRelevanceColor(result.relevance)}`}>
-                        {result.relevance}%
+                      <span className={`ml-1 font-medium ${getRelevanceColor(result.relevance ?? result.relevanceScore ?? 0)}`}>
+                        {(result.relevance ?? result.relevanceScore ?? 0)}%
                       </span>
                     </div>
                   </div>

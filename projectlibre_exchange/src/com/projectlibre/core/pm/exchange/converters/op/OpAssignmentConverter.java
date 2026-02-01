@@ -68,6 +68,7 @@ import com.projectlibre1.pm.assignment.AssignmentService;
 import com.projectlibre1.pm.assignment.contour.ContourTypes;
 import com.projectlibre1.pm.resource.ResourceImpl;
 import com.projectlibre1.pm.task.NormalTask;
+import com.projectlibre1.server.access.ErrorLogger;
 import com.projectlibre1.server.data.mspdi.TimeDistributedTypeMapper;
 
 /**
@@ -88,8 +89,10 @@ public class OpAssignmentConverter {
 		if (assignment.getResource().isUnassigned()) 
 			resource=ResourceImpl.getUnassignedInstance();
 		else resource = state.getOpResource(assignment.getResource());
-		if (resource==null)
-			return null; //TODO handle error or log
+		if (resource==null) {
+			ErrorLogger.log("OpAssignmentConverter: resource is null");
+			return null;
+		}
 		
 		NormalTask task=state.getOpTask(assignment.getTask());
 		

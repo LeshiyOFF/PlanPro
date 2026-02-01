@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -149,13 +149,13 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
       required: true,
       min: 1,
       max: 65535,
-      validate: (value) => (value > 0 && value <= 65535) ? null : 'Port must be between 1 and 65535'
+      custom: (value) => (Number(value) > 0 && Number(value) <= 65535) ? null : 'Port must be between 1 and 65535'
     },
     'global.digestSettings.maxItems': {
       required: true,
       min: 1,
       max: 1000,
-      validate: (value) => (value > 0 && value <= 1000) ? null : 'Max items must be between 1 and 1000'
+      custom: (value) => (Number(value) > 0 && Number(value) <= 1000) ? null : 'Max items must be between 1 and 1000'
     }
   });
 
@@ -170,27 +170,27 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
     validate('global.digestSettings.maxItems', settings.global.digestSettings.maxItems);
   }, [settings.emailSettings.smtpPort, settings.global.digestSettings.maxItems]);
 
-  const handleGlobalChange = (field: string, value: any) => {
+  const handleGlobalChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       global: {
         ...prev.global,
         [field]: value
       }
-    }));
+    } as NotificationSettings));
   };
 
-  const handleEmailChange = (field: string, value: any) => {
+  const handleEmailChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       emailSettings: {
         ...prev.emailSettings,
         [field]: value
       }
-    }));
+    } as NotificationSettings));
   };
 
-  const handleQuietHoursChange = (field: string, value: any) => {
+  const handleQuietHoursChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       global: {
@@ -200,10 +200,10 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
           [field]: value
         }
       }
-    }));
+    } as NotificationSettings));
   };
 
-  const handleDigestChange = (field: string, value: any) => {
+  const handleDigestChange = (field: string, value: string | number | boolean) => {
     setSettings(prev => ({
       ...prev,
       global: {
@@ -213,7 +213,7 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
           [field]: value
         }
       }
-    }));
+    } as NotificationSettings));
   };
 
   const addNotificationRule = () => {
@@ -261,11 +261,12 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
 
   const canSave = isValid();
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Notification Settings"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">
@@ -514,7 +515,7 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
                         <div className="flex items-center space-x-2">
                           <Checkbox
                             checked={rule.enabled}
-                            onCheckedChange={(checked) => updateRule(rule.id, { enabled: checked })}
+                            onCheckedChange={(checked) => updateRule(rule.id, { enabled: checked === true })}
                           />
                           <Label className="text-sm">Enabled</Label>
                         </div>

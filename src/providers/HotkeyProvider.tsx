@@ -29,7 +29,6 @@ export const HotkeyProvider: React.FC<HotkeyProviderProps> = ({
   const [state, setState] = useState<HotkeyState>(hotkeyService.getState());
   const [isEnabled, setIsEnabled] = useState(initialEnabled);
   const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isInitializedRef = useRef(false);
 
   // Инициализация системы
   useEffect(() => {
@@ -40,8 +39,9 @@ export const HotkeyProvider: React.FC<HotkeyProviderProps> = ({
     const handleKeyDown = (event: KeyboardEvent) => {
       try {
         hotkeyService.handleKeyDown(event);
-      } catch (error) {
-        logger.dialogError('Hotkey handling error', error, 'HotkeyProvider');
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        logger.dialogError('Hotkey handling error', { errorMessage }, 'HotkeyProvider');
       }
     };
 

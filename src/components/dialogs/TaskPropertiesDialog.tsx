@@ -43,8 +43,8 @@ export const TaskPropertiesDialog: React.FC<TaskPropertiesDialogProps> = ({
 
   const taskType: TaskType = useMemo(() => {
     if (!task) return 'regular';
-    if (task.milestone) return 'milestone';
-    if (task.summary) return 'summary';
+    if (task.isMilestone) return 'milestone';
+    if (task.isSummary) return 'summary';
     return 'regular';
   }, [task]);
 
@@ -99,10 +99,9 @@ export const TaskPropertiesDialog: React.FC<TaskPropertiesDialogProps> = ({
   );
 };
 
-/** Миграция legacy resourceIds -> resourceAssignments */
+/** Преобразование назначений задачи в массив ResourceAssignment */
 const migrateToAssignments = (task: Task): ResourceAssignment[] => {
   if (task.resourceAssignments?.length) return task.resourceAssignments;
-  if (task.resourceIds?.length) return task.resourceIds.map(resourceId => ({ resourceId, units: 1.0 }));
   return [];
 };
 
@@ -126,7 +125,7 @@ interface DialogBodyProps {
   formData: Partial<Task>; setFormData: React.Dispatch<React.SetStateAction<Partial<Task>>>;
   taskType: TaskType; assignments: ResourceAssignment[]; setAssignments: React.Dispatch<React.SetStateAction<ResourceAssignment[]>>;
   predecessorsInput: string; setPredecessorsInput: React.Dispatch<React.SetStateAction<string>>;
-  successors: string[]; resources: ReturnType<typeof useProjectStore>['resources'];
+  successors: string[]; resources: import('@/types/resource-types').Resource[];
   t: (k: string, o?: Record<string,string>) => string; onProgressChange: (v: number) => void;
 }
 

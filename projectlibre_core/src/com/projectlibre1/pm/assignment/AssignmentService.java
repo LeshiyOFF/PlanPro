@@ -120,13 +120,6 @@ public class AssignmentService {
 			while (r.hasNext()) {
 				Resource resource = (Resource) r.next();
 				if (null == task.findAssignment(resource)) {
-//					double units = 1.0D;
-//TODO Bug 330: this is slow and uses tons of memory when assigning many at once. optimizing by doing just one update
-//The result is that AssignmentNodeModel.objectChanged(ObjectEvent objectEvent) is called for each assignment
-//This needs to be batched as its current memory usage is unacceptable and it takes very long
-//Perhaps one solution would be to replace hierarchy search() with a hash table for mapping impls to nodes
-
-//TODO It throws an event for assignment. A service for updating all the assignments at once should be added.
 					Assignment assignment = newAssignment(task,resource,units,0,eventSource,true);
 					if (!resource.isLabor()) // for assigning non temporal resources, use the value of 1
 						assignment.setRateUnit(TimeUnit.NON_TEMPORAL);
@@ -146,13 +139,14 @@ public class AssignmentService {
 
 
 /**
- * When importing, we don't update or recalculate duration
- * @param task
- * @param resource
- * @param units
- * @param delay
- * @param eventSource
- * @return
+ * Creates a new assignment.
+ * @param task the task
+ * @param resource the resource
+ * @param units the units
+ * @param delay the delay
+ * @param eventSource the event source
+ * @param undo true if undo is enabled
+ * @return the new assignment
  */	
 	public Assignment newAssignment(NormalTask task, Resource resource, double units, long delay, Object eventSource,boolean undo) {
 		Assignment assignment = Assignment.getInstance(task, resource, units, delay);

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { IResourceHistogramData } from '@/domain/resources/interfaces/IResourceHistogram';
 import { BarChart3 } from 'lucide-react';
-import { SafeTooltip, TooltipProvider } from '@/components/ui/Tooltip';
+import { SafeTooltip, TooltipProvider } from '@/components/ui/tooltip';
 
 interface ResourceHistogramChartProps {
   data: IResourceHistogramData;

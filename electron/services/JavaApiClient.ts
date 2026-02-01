@@ -1,3 +1,6 @@
+import type { JavaCommandArgs } from '../types/JavaCommandArgs';
+import type { JsonValue } from '../types/JsonValue';
+
 /**
  * API клиент для взаимодействия с Java backend
  * Отвечает только за выполнение HTTP запросов к Java API
@@ -14,14 +17,14 @@ export class JavaApiClient {
   /**
    * Выполнение HTTP запроса к Java API с поддержкой повторных попыток (Retry).
    */
-  public async makeRequest(command: string, args: any[] = []): Promise<any> {
+  public async makeRequest<T = JsonValue>(command: string, args: JavaCommandArgs = []): Promise<T> {
     const MAX_RETRIES = 3;
     const RETRY_DELAY_MS = 300;
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        return await this.executeRequest(command, args);
+        return (await this.executeRequest(command, args)) as T;
       } catch (error) {
         lastError = error as Error;
         const isNetworkError = lastError.message.includes('fetch failed') || 
@@ -39,7 +42,7 @@ export class JavaApiClient {
   /**
    * Внутренний метод для выполнения "сырого" запроса.
    */
-  private async executeRequest(command: string, args: any[] = []): Promise<any> {
+  private async executeRequest<T = JsonValue>(command: string, args: JavaCommandArgs = []): Promise<T> {
     const url = `${this.baseUrl}/api/${command}`
     
     try {
@@ -69,7 +72,7 @@ export class JavaApiClient {
 
       const rawText = await response.text()
       try {
-        return JSON.parse(rawText)
+        return JSON.parse(rawText) as T
       } catch (e) {
         console.error('JSON Parse Error. Raw body:', rawText)
         throw new Error(`Invalid JSON response from Java API for command ${command}: ${(e as Error).message}`)

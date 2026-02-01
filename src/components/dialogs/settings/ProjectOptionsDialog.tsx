@@ -1,7 +1,7 @@
 import React from 'react';
 import { BaseDialog, BaseDialogProps } from '../base/SimpleBaseDialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/Input';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -115,36 +115,36 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
     }
   );
 
-  const { validate, errors, isValid } = useDialogValidation({
+  const { errors, isValid } = useDialogValidation({
     'general.defaultDuration': {
       required: true,
       min: 0.1,
       max: 1000,
-      validate: (value) => value > 0 ? null : 'Duration must be greater than 0'
+      validate: (value) => (value != null && typeof value === 'number' && value > 0) ? null : 'Duration must be greater than 0'
     },
     'general.autoSaveInterval': {
       required: true,
       min: 1,
       max: 60,
-      validate: (value) => value >= 1 ? null : 'Auto-save interval must be at least 1 minute'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Auto-save interval must be at least 1 minute'
     },
     'general.criticalSlack': {
       required: true,
       min: 0,
       max: 100,
-      validate: (value) => value >= 0 ? null : 'Critical slack must be non-negative'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0) ? null : 'Critical slack must be non-negative'
     },
     'display.decimalPlaces': {
       required: true,
       min: 0,
       max: 4,
-      validate: (value) => value >= 0 && value <= 4 ? null : 'Decimal places must be between 0 and 4'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 0 && value <= 4) ? null : 'Decimal places must be between 0 and 4'
     },
     'collaboration.maxVersions': {
       required: true,
       min: 1,
       max: 50,
-      validate: (value) => value >= 1 ? null : 'Maximum versions must be at least 1'
+      validate: (value) => (value != null && typeof value === 'number' && value >= 1) ? null : 'Maximum versions must be at least 1'
     }
   });
 
@@ -154,7 +154,7 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
     }
   }, [currentOptions]);
 
-  const handleOptionChange = (category: keyof ProjectOptions, field: string, value: any) => {
+  const handleOptionChange = (category: keyof ProjectOptions, field: string, value: string | number | boolean) => {
     setOptions(prev => ({
       ...prev,
       [category]: {
@@ -178,11 +178,12 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
 
   const canSave = isValid();
 
+  const { title: _omitTitle, ...dialogProps } = props;
   return (
     <BaseDialog
+      {...dialogProps}
       title="Project Options"
       size="fullscreen"
-      {...props}
       onClose={onClose}
       footer={
         <div className="flex justify-between">

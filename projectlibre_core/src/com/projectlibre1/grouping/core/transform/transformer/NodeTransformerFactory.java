@@ -91,13 +91,11 @@ public class NodeTransformerFactory extends CommonTransformFactory{
 //	    GroovyClassLoader loader = new GroovyClassLoader(ClassLoaderUtils.getLocalClassLoader());
 	    GroovyClassLoader loader = new GroovyClassLoader(getClass().getClassLoader());
 		try {
-			Class groovyClass = loader.parseClass(classText.toString()); //TODO this his horribly slow (~500ms)  Can we parse all at once or can we do this lazily or initialize in another thread?
-			t=(CommonTransform)groovyClass.newInstance();
+			Class groovyClass = loader.parseClass(classText.toString());
+			t=(CommonTransform)groovyClass.getDeclaredConstructor().newInstance();
 			setProperties(t);
 			return t;
 		} catch (Exception e) {
-//			e.printStackTrace();
-//		    System.out.println("classText="+classText);
 			throw new InvalidFormulaException(e);
 		}
 	}

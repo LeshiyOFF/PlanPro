@@ -1,4 +1,4 @@
-import { ReactProfilerService, type ProfilerMetrics, type ComponentProfile } from '@/services/ReactProfilerService';
+import { ReactProfilerService, type ComponentProfile } from '@/services/ReactProfilerService';
 import { SentryService } from '@/services/SentryService';
 
 /**
@@ -150,21 +150,20 @@ export class PerformanceMetricsCollector {
         `Low performance score: ${metrics.performanceScore}`,
         'warning',
         {
-          performanceMetrics: metrics,
+          performanceScore: metrics.performanceScore,
           threshold: this.config.performanceThresholds.score,
-        }
+        } as Record<string, string | number | boolean>
       );
     }
   }
 
   /**
-   * Получить использование памяти
+   * Получить использование памяти (Chrome/Node: performance.memory)
    */
   private getMemoryUsage(): number | undefined {
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize / 1024 / 1024; // MB
-    }
+    const p = performance as Performance & { memory?: { usedJSHeapSize: number } };
+    const memory = p.memory;
+    if (memory) return memory.usedJSHeapSize / 1024 / 1024; // MB
     return undefined;
   }
 
@@ -172,7 +171,11 @@ export class PerformanceMetricsCollector {
    * Рассчитать оценку производительности (0-100)
    */
   private calculatePerformanceScore(
-    profilerStats: any,
+    profilerStats: {
+      totalRenders: number;
+      slowRenderCount: number;
+      averageRenderTime: number;
+    },
     memoryUsage?: number
   ): number {
     let score = 100;

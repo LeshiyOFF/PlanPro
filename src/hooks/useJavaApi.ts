@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { javaApiService, IJavaApiService } from '@/services/JavaApiService';
+import { javaApiService } from '@/services/JavaApiService';
 import { useIpcService } from './useIpcService';
+import type { DataResponse, ProjectResponse, ProjectsListResponse, ResourceResponse, ResourcesListResponse, TaskResponse, TasksListResponse } from '@/types/api/response-types';
+import type { ProjectCreateRequest, ProjectUpdateRequest, ResourceCreateRequest, TaskCreateRequest } from '@/types/api/request-types';
 
 /**
  * Структура данных проекта
@@ -49,12 +51,58 @@ export interface Resource {
   updated?: string;
 }
 
+/** Маппинг ProjectResponse → Project (useJavaApi) */
+function mapProjectResponse(r: ProjectResponse): Project {
+  return {
+    id: r.id,
+    name: r.name,
+    description: r.description,
+    startDate: r.startDate instanceof Date ? r.startDate.toISOString() : String(r.startDate ?? ''),
+    endDate: r.endDate instanceof Date ? r.endDate.toISOString() : String(r.endDate ?? ''),
+    status: r.status,
+    created: r.createdAt instanceof Date ? r.createdAt.toISOString() : undefined,
+    updated: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : undefined
+  };
+}
+
+/** Маппинг ResourceResponse → Resource (useJavaApi) */
+function mapResourceResponse(r: ResourceResponse): Resource {
+  return {
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    role: r.department ?? r.type,
+    availability: r.available === true ? 100 : r.available === false ? 0 : undefined,
+    costPerHour: r.costPerHour,
+    created: r.createdAt instanceof Date ? r.createdAt.toISOString() : undefined,
+    updated: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : undefined
+  };
+}
+
+/** Маппинг TaskResponse → Task (useJavaApi) */
+function mapTaskResponse(r: TaskResponse): Task {
+  return {
+    id: r.id,
+    projectId: r.projectId ?? '',
+    name: r.name,
+    description: r.description,
+    startDate: r.startDate instanceof Date ? r.startDate.toISOString() : undefined,
+    endDate: r.endDate instanceof Date ? r.endDate.toISOString() : undefined,
+    duration: r.estimatedHours,
+    progress: r.progress,
+    status: r.status,
+    resourceId: r.assigneeId ?? r.resourceId,
+    created: r.createdAt instanceof Date ? r.createdAt.toISOString() : undefined,
+    updated: r.updatedAt instanceof Date ? r.updatedAt.toISOString() : undefined
+  };
+}
+
 /**
  * React Hook для работы с Java API
  * Предоставляет состояние и методы для взаимодействия с Java бэкендом
  */
 export const useJavaApi = () => {
-  const { javaStatus } = useIpcService();
+  const { javaStatus, ipcService } = useIpcService();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isApiAvailable, setIsApiAvailable] = useState(false);
@@ -109,112 +157,162 @@ export const useJavaApi = () => {
   // Project operations
   
   /**
-   * Загрузка всех проектов
+   * Загрузка всех проектов. Возвращает Project[] для UI.
    */
-  const loadProjects = useCallback(async () => {
-    const result = await executeApiCall(() => javaApiService.getAllProjects());
-    if (result && Array.isArray(result)) {
-      setProjects(result);
+  const loadProjects = useCallback(async (): Promise<Project[]> => {
+    const result = await executeApiCall(() => javaApiService.getAllProjects()) as DataResponse<ProjectsListResponse> | null;
+    if (result?.data?.projects) {
+      const list = result.data.projects.map(mapProjectResponse);
+      setProjects(list);
+      return list;
     }
-    return result;
+    setProjects([]);
+    return [];
   }, [executeApiCall]);
   
   /**
-   * Создание проекта
+   * Создание проекта. Возвращает Project | null.
    */
-  const createProject = useCallback(async (projectData: Omit<Project, 'id' | 'created' | 'updated'>) => {
-    const result = await executeApiCall(() => javaApiService.createProject(projectData));
-    if (result) {
-      await loadProjects(); // Обновляем список проектов
+  const createProject = useCallback(async (projectData: Omit<Project, 'id' | 'created' | 'updated'>): Promise<Project | null> => {
+    const request: ProjectCreateRequest = {
+      name: projectData.name,
+      description: projectData.description,
+      status: projectData.status,
+      startDate: projectData.startDate ? new Date(projectData.startDate) : undefined,
+      endDate: projectData.endDate ? new Date(projectData.endDate) : undefined
+    };
+    const result = await executeApiCall(() => javaApiService.createProject(request)) as DataResponse<ProjectResponse> | null;
+    if (result?.data) {
+      const project = mapProjectResponse(result.data);
+      await loadProjects();
+      return project;
     }
-    return result;
+    return null;
   }, [executeApiCall, loadProjects]);
   
   /**
-   * Загрузка конкретного проекта
+   * Загрузка конкретного проекта.
    */
-  const loadProject = useCallback(async (projectId: string) => {
-    const result = await executeApiCall(() => javaApiService.getProject(projectId));
-    if (result) {
-      setCurrentProject(result);
+  const loadProject = useCallback(async (projectId: string): Promise<Project | null> => {
+    const result = await executeApiCall(() => javaApiService.getProject(projectId)) as DataResponse<ProjectResponse> | null;
+    if (result?.data) {
+      const project = mapProjectResponse(result.data);
+      setCurrentProject(project);
+      return project;
     }
-    return result;
+    return null;
   }, [executeApiCall]);
   
   /**
-   * Обновление проекта
+   * Обновление проекта.
    */
-  const updateProject = useCallback(async (projectId: string, updates: Partial<Project>) => {
-    const result = await executeApiCall(() => javaApiService.updateProject(projectId, updates));
-    if (result) {
-      await loadProjects(); // Обновляем список
+  const updateProject = useCallback(async (projectId: string, updates: Partial<Project>): Promise<Project | null> => {
+    const request: ProjectUpdateRequest = {
+      name: updates.name,
+      description: updates.description,
+      status: updates.status,
+      startDate: updates.startDate ? new Date(updates.startDate) : undefined,
+      endDate: updates.endDate ? new Date(updates.endDate) : undefined
+    };
+    const result = await executeApiCall(() => javaApiService.updateProject(projectId, request)) as DataResponse<ProjectResponse> | null;
+    if (result?.data) {
+      const project = mapProjectResponse(result.data);
+      await loadProjects();
       if (currentProject?.id === projectId) {
-        setCurrentProject({ ...currentProject, ...updates });
+        setCurrentProject(project);
       }
+      return project;
     }
-    return result;
+    return null;
   }, [executeApiCall, loadProjects, currentProject]);
   
   /**
-   * Удаление проекта
+   * Удаление проекта.
    */
-  const deleteProject = useCallback(async (projectId: string) => {
-    const result = await executeApiCall(() => javaApiService.deleteProject(projectId));
-    if (result) {
+  const deleteProject = useCallback(async (projectId: string): Promise<void> => {
+    const result = await executeApiCall(() => javaApiService.deleteProject(projectId)) as DataResponse<void> | null;
+    if (result?.success !== false) {
       setProjects(prev => prev.filter(p => p.id !== projectId));
       if (currentProject?.id === projectId) {
         setCurrentProject(null);
       }
     }
-    return result;
   }, [executeApiCall, currentProject]);
   
   // Task operations
   
   /**
-   * Загрузка задач проекта
+   * Загрузка задач проекта.
    */
-  const loadProjectTasks = useCallback(async (projectId: string) => {
-    const result = await executeApiCall(() => javaApiService.getTasksByProject(projectId));
-    if (result && Array.isArray(result)) {
-      setTasks(result);
+  const loadProjectTasks = useCallback(async (projectId: string): Promise<Task[]> => {
+    const result = await executeApiCall(() => javaApiService.getTasksByProject(projectId)) as DataResponse<TasksListResponse> | null;
+    if (result?.data?.tasks) {
+      const list = result.data.tasks.map(mapTaskResponse);
+      setTasks(list);
+      return list;
     }
-    return result;
+    setTasks([]);
+    return [];
   }, [executeApiCall]);
   
   /**
-   * Создание задачи
+   * Создание задачи.
    */
-  const createTask = useCallback(async (projectId: string, taskData: Omit<Task, 'id' | 'created' | 'updated'>) => {
-    const result = await executeApiCall(() => javaApiService.createTask(projectId, taskData));
-    if (result) {
-      await loadProjectTasks(projectId); // Обновляем список задач
+  const createTask = useCallback(async (projectId: string, taskData: Omit<Task, 'id' | 'created' | 'updated'>): Promise<Task | null> => {
+    const request: TaskCreateRequest = {
+      projectId,
+      name: taskData.name,
+      description: taskData.description,
+      status: taskData.status,
+      startDate: taskData.startDate ? new Date(taskData.startDate) : undefined,
+      endDate: taskData.endDate ? new Date(taskData.endDate) : undefined,
+      duration: taskData.duration,
+      percentComplete: taskData.progress,
+      assigneeId: taskData.resourceId
+    };
+    const result = await executeApiCall(() => javaApiService.createTask(projectId, request)) as DataResponse<TaskResponse> | null;
+    if (result?.data) {
+      const task = mapTaskResponse(result.data);
+      await loadProjectTasks(projectId);
+      return task;
     }
-    return result;
+    return null;
   }, [executeApiCall, loadProjectTasks]);
   
   // Resource operations
   
   /**
-   * Загрузка всех ресурсов
+   * Загрузка всех ресурсов. Возвращает Resource[].
    */
-  const loadResources = useCallback(async () => {
-    const result = await executeApiCall(() => javaApiService.getAllResources());
-    if (result && Array.isArray(result)) {
-      setResources(result);
+  const loadResources = useCallback(async (): Promise<Resource[]> => {
+    const result = await executeApiCall(() => javaApiService.getAllResources()) as DataResponse<ResourcesListResponse> | null;
+    if (result?.data?.resources) {
+      const list = result.data.resources.map(mapResourceResponse);
+      setResources(list);
+      return list;
     }
-    return result;
+    setResources([]);
+    return [];
   }, [executeApiCall]);
   
   /**
-   * Создание ресурса
+   * Создание ресурса.
    */
-  const createResource = useCallback(async (resourceData: Omit<Resource, 'id' | 'created' | 'updated'>) => {
-    const result = await executeApiCall(() => javaApiService.createResource(resourceData));
-    if (result) {
-      await loadResources(); // Обновляем список ресурсов
+  const createResource = useCallback(async (resourceData: Omit<Resource, 'id' | 'created' | 'updated'>): Promise<Resource | null> => {
+    const request: ResourceCreateRequest = {
+      name: resourceData.name,
+      type: 'human',
+      email: resourceData.email,
+      costPerHour: resourceData.costPerHour,
+      available: (resourceData.availability ?? 0) >= 50
+    };
+    const result = await executeApiCall(() => javaApiService.createResource(request)) as DataResponse<ResourceResponse> | null;
+    if (result?.data) {
+      const resource = mapResourceResponse(result.data);
+      await loadResources();
+      return resource;
     }
-    return result;
+    return null;
   }, [executeApiCall, loadResources]);
   
   // Utility operations
@@ -288,7 +386,9 @@ export const useJavaApi = () => {
     importProject,
     
     // API сервис для прямого доступа
-    javaApiService
+    javaApiService,
+    // IPC для диалогов (showMessageBox и т.д.)
+    ipcService
   };
 };
 

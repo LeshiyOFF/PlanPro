@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IContextMenu } from '../../../domain/contextmenu/entities/ContextMenu';
+import { IContextMenu, IContextMenuItem } from '../../../domain/contextmenu/entities/ContextMenu';
 import { ContextMenuItemComponent } from './ContextMenuItem';
 import { logger } from '@/utils/logger';
 
@@ -68,22 +68,21 @@ export const ContextMenuComponent: React.FC<ContextMenuComponentProps> = ({
     }
   }, [menu.position]);
 
-  const handleItemSelect = async (item: any) => {
+  const handleItemSelect = async (item: IContextMenuItem) => {
     try {
       if (item.submenu && item.submenu.length > 0) {
-        // Переключение подменю
         setOpenSubmenu(openSubmenu === item.id ? null : item.id);
       } else if (item.action) {
-        // Выполнение действия
         await onActionExecute(item.id);
         onHide();
       }
-    } catch (error) {
-      logger.error(`Failed to execute menu action ${item.id}: ${error.message}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      logger.error(`Failed to execute menu action ${item.id}:`, { errorMessage });
     }
   };
 
-  const renderMenuItem = (item: any, depth: number = 0): React.ReactNode => {
+  const renderMenuItem = (item: IContextMenuItem, depth: number = 0): React.ReactNode => {
     const isOpen = openSubmenu === item.id;
     const hasSubmenu = item.submenu && item.submenu.length > 0;
 
@@ -110,7 +109,7 @@ export const ContextMenuComponent: React.FC<ContextMenuComponentProps> = ({
               marginLeft: '4px'
             }}
           >
-            {item.submenu.map((subItem: any) => renderMenuItem(subItem, depth + 1))}
+            {item.submenu.map((subItem: IContextMenuItem) => renderMenuItem(subItem, depth + 1))}
           </div>
         )}
       </div>

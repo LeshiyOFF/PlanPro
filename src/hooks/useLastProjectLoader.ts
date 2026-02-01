@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { LastProjectService } from '@/services/LastProjectService';
 import { useFileOperations } from './useFileOperations';
+import { getElectronAPI } from '@/utils/electronAPI';
 
 export type LoadErrorType = 'FILE_NOT_FOUND' | 'FILE_MOVED' | 'LOAD_FAILED' | 'API_ERROR' | 'CREATE_FAILED' | null;
 
@@ -32,31 +33,34 @@ export const useLastProjectLoader = () => {
   const hasAttemptedRef = useRef(false);
   
   const showErrorNotification = useCallback(async (errorType: LoadErrorType, filePath: string) => {
-    if (!window.electronAPI) return;
-    
+    const api = getElectronAPI();
+    if (!api?.showMessageBox) return;
+
     const messages: Record<Exclude<LoadErrorType, null>, string> = {
       'FILE_NOT_FOUND': `Файл последнего проекта не найден:\n${filePath}\n\nФайл мог быть удален или перемещен.`,
       'FILE_MOVED': `Файл проекта был перемещен или переименован:\n${filePath}`,
       'LOAD_FAILED': `Не удалось загрузить проект:\n${filePath}\n\nФайл может быть поврежден.`,
-      'API_ERROR': `Ошибка при загрузке проекта.\nПроверьте, что Java-бэкенд запущен.`
+      'API_ERROR': `Ошибка при загрузке проекта.\nПроверьте, что Java-бэкенд запущен.`,
+      'CREATE_FAILED': `Не удалось создать новый проект.\nПроверьте, что Java-бэкенд запущен.`
     };
-    
+
     if (errorType) {
-      await window.electronAPI.showMessageBox({
+      await api.showMessageBox({
         type: 'warning',
         title: 'Автозагрузка проекта',
         message: messages[errorType]
       });
     }
   }, []);
-  
+
   const checkFileExists = useCallback(async (filePath: string): Promise<boolean> => {
-    if (!window.electronAPI?.fileExists) {
+    const api = getElectronAPI();
+    if (!api?.fileExists) {
       return true; // Если метод недоступен, пропускаем проверку
     }
-    
+
     try {
-      return await window.electronAPI.fileExists(filePath);
+      return await api.fileExists(filePath);
     } catch (error) {
       console.warn('[useLastProjectLoader] fileExists check failed:', error);
       return true; // При ошибке проверки, пробуем загрузить

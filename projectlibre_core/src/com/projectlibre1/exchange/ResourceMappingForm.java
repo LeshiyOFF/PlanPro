@@ -181,7 +181,7 @@ public abstract class ResourceMappingForm {
 						notMergedValues.add(value);
 					}else mergeFieldMap.put(value,resource);
 				} catch (Exception e) {
-					e.printStackTrace();
+					com.projectlibre1.server.access.ErrorLogger.log("Failed to get property for merge field", e);
 				}
 			}
 			
@@ -218,7 +218,6 @@ public abstract class ResourceMappingForm {
 
 			public MergeField(String importName, String projectlibreName, String displayName) {
 				super();
-				// TODO Auto-generated constructor stub
 				this.importName = importName;
 				this.projectlibreName = projectlibreName;
 				this.displayName = displayName;

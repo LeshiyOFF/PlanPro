@@ -128,11 +128,11 @@ public class AssignmentFormat extends AssociationFormat {
 				
 				if (found == null) // if couldn't create, such as trying to create a task on resource pool
 					throw new ParseException(getErrorMessage(string), pos.getIndex());	
-				try {
-					parameters.getIdField().setText(found,matcher.group(1),null);
-				} catch (FieldParseException e) {
-					throw new ParseException(e.getMessage(), 0); //TODO don't know about this - can it happen?
-				}
+			try {
+				parameters.getIdField().setText(found,matcher.group(1),null);
+			} catch (FieldParseException e) {
+				throw new ParseException(e.getMessage(), 0);
+			}
 			} else {
 				throw new ParseException(getErrorMessage(string), pos.getIndex());
 			}
@@ -144,17 +144,9 @@ public class AssignmentFormat extends AssociationFormat {
 		if (matcher.group(2) != null) { // if text was empty use default
 			if (!getParameters().isAllowDetailsEntry())
 				throw new ParseException(Messages.getString("Message.cannotEnterUnits"),0);
-			RateFormat format = resource.getRateFormat();
-			rate = (Rate) format.parseObject(matcher.group(2));
-			percent = rate.getValue();
-//			Number percentNumber;
-//			if (resource.isLabor())
-//				percentNumber = percentFormat.parse(matcher.group(2)+ Settings.PERCENT); // force a percent sign at the end for labor.  If there are two, it is ignored
-//			else //TODO allow parsing values like 3/d for material resources
-//				percentNumber = NumberFormat.getInstance().parse(matcher.group(2));
-//			
-//			if (percentNumber == null)
-//				throw new ParseException(getErrorMessage(string), pos.getIndex());
+		RateFormat format = resource.getRateFormat();
+		rate = (Rate) format.parseObject(matcher.group(2));
+		percent = rate.getValue();
 //			percent = percentNumber.doubleValue();
 		} else if (resource.isMaterial()) {
 			rate = new Rate(1,TimeUnit.NON_TEMPORAL);
@@ -207,14 +199,14 @@ public class AssignmentFormat extends AssociationFormat {
 		if (left)
 			return ((Task) parameters.getThisObject()).getProject().getResourcePool().getResourceList();
 		else
-			return null; // TODO if we implement projet-specific resource pools, we can handle this
+			return null; // Project-specific resource pools not implemented
 	}
 
 	protected Object createNewObject(boolean left) {
 		if (left)
 			return ((Task) parameters.getThisObject()).getProject().getResourcePool().newResourceInstance();
 		else
-			return null; // TODO if we implement projet-specific resource pools, we can handle this
+			return null; // Project-specific resource pools not implemented
 	}
 	
 }

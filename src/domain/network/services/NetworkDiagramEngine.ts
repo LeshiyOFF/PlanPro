@@ -1,5 +1,5 @@
-import { NetworkDiagramData, NetworkNode, NetworkConnection, NetworkNodeType } from '../interfaces/NetworkDiagram';
-import { CanvasPoint } from '../../canvas/interfaces/GanttCanvas';
+import { NetworkDiagramData, NetworkNode } from '../interfaces/NetworkDiagram';
+import { CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas';
 import { logger } from '@/utils/logger';
 import { ThemeApplier } from '@/components/userpreferences/services/ThemeApplier';
 
@@ -178,7 +178,9 @@ export class NetworkDiagramEngine {
    * Professional PERT node rendering (multi-cell block)
    */
   private drawPERTNode(node: NetworkNode): void {
-    const { x, y, width, height, name, duration, critical, displayId, selectedNodeId } = node;
+    const width = node.width || this.NODE_WIDTH;
+    const height = node.height || this.NODE_HEIGHT;
+    const { x, y, name, duration, critical, displayId } = node;
     const isSelected = this.data.selectedNodeId === node.id;
     const isHovered = this.data.hoveredNodeId === node.id;
 
@@ -204,7 +206,7 @@ export class NetworkDiagramEngine {
     // 1. Header Row (ID and Duration)
     this.ctx.fillStyle = critical ? '#fee2e2' : '#f8fafc';
     this.ctx.beginPath();
-    this.ctx.roundRect(x, y, width, this.HEADER_HEIGHT, { tl: 4, tr: 4, bl: 0, br: 0 });
+    this.ctx.roundRect(x, y, width, this.HEADER_HEIGHT, [4, 4, 0, 0]);
     this.ctx.fill();
     
     // Header text

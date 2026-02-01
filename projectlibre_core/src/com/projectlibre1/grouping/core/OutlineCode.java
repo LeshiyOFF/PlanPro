@@ -99,10 +99,8 @@ public class OutlineCode extends Format {
 			return null;
 	}
 
-	public StringBuffer format(Object arg0, StringBuffer arg1, FieldPosition arg2) {
-		
-		// TODO Auto-generated method stub
-		return null;
+	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
+		return toAppendTo.append(obj.toString());
 	}
 	
 	public boolean isValid(String code) {
@@ -140,29 +138,9 @@ public class OutlineCode extends Format {
 		return pattern.toString();
 		
 	}
-	
-	
-	public static void main(String[] args) {
-		OutlineCode code = new OutlineCode();
-		code.addMask(new Mask(NUMBERS,ANY_LENGTH,"."));
-		code.addMask(new Mask(UPPERCASE_LETTERS,2,"."));
-		code.addMask(new Mask(LOWERCASE_LETTERS,ANY_LENGTH,"."));
-		
-		boolean res;
-		res = code.isValid("12.AA.a");
-		res = code.isValid("22212.AA.absdf");
-		res = code.isValid("1");
-		res = code.isValid("12.AA");
-		res = code.isValid("12.");
-		res = code.isValid(".AA");
-		res = code.isValid("A2");
-		res = code.isValid("132");
-		res = code.isValid("12.11");
-		res = code.isValid("12.AA.");
-	}
-	
 
-	public static class Mask  {
+	/** Inner class for outline code mask (type, length, separator). */
+	public static class Mask {
 		static final int NUMBERS = 0;
 		static final int UPPERCASE_LETTERS = 1;
 		static final int LOWERCASE_LETTERS = 2;
@@ -205,14 +183,14 @@ public class OutlineCode extends Format {
 		}
 		
 		String nextValue(String current) {
-			String result = current; //TODO is this needed?
+			String result = current;
 			switch (type) {
 				case NUMBERS:
 					int value = Integer.parseInt(current) + 1;
 					if (length == ANY_LENGTH)
 						result = "" + value;
 					else
-						result = new DecimalFormat(StringUtils.repeat("0",length)).format( Integer.getInteger(current));
+						result = new DecimalFormat(StringUtils.repeat("0",length)).format(value);
 					break;
 			}
 			return result;		

@@ -107,7 +107,6 @@ public class TimeIteratorGenerator implements IntervalGenerator, HasStartAndEnd 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Object arg0) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

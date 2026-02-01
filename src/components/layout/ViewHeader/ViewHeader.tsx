@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewHeaderProps } from './ViewHeaderTypes';
-import { ContextHelp } from '@/components/ui/ContextHelp';
+import { ContextHelp } from '@/components/ui/context-help';
 import { cn } from '@/lib/utils';
 
 /**

@@ -61,12 +61,12 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
   
   const ganttTasks = useMemo(() => {
     return GanttTaskMapper.mapToGanttTasks(
-      tasks, 
-      dimensions.height, 
-      projectRange, 
-      getVisualProgress, 
-      getFormattedName, 
-      showBaseline, 
+      tasks,
+      dimensions.height,
+      projectRange,
+      getVisualProgress,
+      getFormattedName,
+      showBaseline,
       mode,
       preferences.gantt,
       isPulseActive,
@@ -177,7 +177,7 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
       )}
       {ganttTasks.length > 0 && dimensions.width > 0 && (
         <div className="absolute inset-0 top-[50px] gantt-hide-list">
-          <Gantt tasks={ganttTasks} viewMode={viewMode} columnWidth={columnWidth} headerHeight={0} rowHeight={preferences.gantt.rowHeight} locale="ru-RU" listCellWidth={1}
+          <Gantt tasks={ganttTasks} viewMode={viewMode} columnWidth={columnWidth} headerHeight={0} rowHeight={typeof preferences.gantt.rowHeight === 'number' ? preferences.gantt.rowHeight : 40} locale="ru-RU" listCellWidth="1"
             TaskListHeader={() => null} TaskListTable={() => null}
             onDateChange={(t: GanttTask) => { const s = CalendarDateService.toLocalMidnight(t.start), e = CalendarDateService.toLocalMidnight(t.end); e.setHours(23, 59, 59, 999); onTaskUpdate?.(t.id, { startDate: s, endDate: e, progress: Math.round(t.progress) / 100 }); }}
             onProgressChange={(t: GanttTask) => onTaskUpdate?.(t.id, { startDate: t.start, endDate: t.end, progress: Math.round(t.progress) / 100 })}
@@ -194,7 +194,7 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
                 <div 
                   className="bg-white p-3 border border-slate-200 rounded-lg shadow-xl text-xs border-l-4 whitespace-normal break-words" 
                   style={{ 
-                    borderLeftColor: gTask.styles.backgroundColor,
+                    borderLeftColor: gTask.styles?.backgroundColor,
                     width: 'max-content',
                     minWidth: '280px',
                     maxWidth: '450px',
@@ -231,10 +231,10 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
                       <>
                         <div className="col-span-2 my-1 border-t border-slate-100" />
                         <span className="font-semibold">{t('gantt.tooltip_critical', { defaultValue: 'Критический путь' })}:</span>
-                        <span className={et.originalTask?.critical ? 'text-red-500 font-bold' : 'text-slate-500'}>
-                          {et.originalTask?.critical ? t('common.yes', { defaultValue: 'Да' }) : t('common.no', { defaultValue: 'Нет' })}
+                        <span className={et.originalTask?.isCritical ? 'text-red-500 font-bold' : 'text-slate-500'}>
+                          {et.originalTask?.isCritical ? t('common.yes', { defaultValue: 'Да' }) : t('common.no', { defaultValue: 'Нет' })}
                         </span>
-                        {!et.originalTask?.critical && et.originalTask?.slack !== undefined && (
+                        {!et.originalTask?.isCritical && et.originalTask?.slack !== undefined && (
                           <>
                             <span className="font-semibold">{t('gantt.tooltip_slack', { defaultValue: 'Запас времени' })}:</span>
                             <span className="text-blue-500 font-bold">{Math.round(et.originalTask.slack / (1000 * 60 * 60 * 24))} {t('gantt.days', { defaultValue: 'дн.' })}</span>
@@ -267,7 +267,6 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
               columnWidth={columnWidth} 
               viewMode={viewMode} 
               rowHeight={preferences.gantt.rowHeight} 
-              headerHeight={0}
             />,
             svgElement
           )}

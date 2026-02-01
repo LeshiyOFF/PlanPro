@@ -1,8 +1,9 @@
+import type { JsonValue } from './JsonValue'
 
 /**
  * Базовый интерфейс ответа от Java API.
  */
-export interface IJavaResponse<T = any> {
+export interface IJavaResponse<T = JsonValue> {
   success: boolean;
   data?: T;
   error?: string;

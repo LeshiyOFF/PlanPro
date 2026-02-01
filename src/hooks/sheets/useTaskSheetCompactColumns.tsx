@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn';
-import { Task } from '@/types/task-types';
+import { Task } from '@/store/project/interfaces';
 import { Lock } from 'lucide-react';
 import { formatDate } from '@/utils/formatUtils';
 import { useTaskEstimation } from '@/hooks/task/useTaskEstimation';
@@ -18,7 +18,7 @@ export const useTaskSheetCompactColumns = (disabledTaskIds: string[]): ISheetCol
     {
       id: 'id', field: 'id', title: t('sheets.id'), width: 45,
       type: SheetColumnType.TEXT, editable: false, visible: true, sortable: true, resizable: true,
-      formatter: (val, row) => {
+      formatter: (_val, row) => {
         const isDisabled = disabledTaskIds.includes(row.id);
         return (
           <div className="flex items-center gap-1">
@@ -27,7 +27,7 @@ export const useTaskSheetCompactColumns = (disabledTaskIds: string[]): ISheetCol
                 <Lock size={10} className="text-slate-400" />
               </div>
             ) : (
-              <span className="text-[10px] font-mono text-slate-400">{val}</span>
+              <span className="text-[10px] font-mono text-slate-400">{row.id}</span>
             )}
           </div>
         );
@@ -36,7 +36,7 @@ export const useTaskSheetCompactColumns = (disabledTaskIds: string[]): ISheetCol
     {
       id: 'name', field: 'name', title: t('sheets.task_info'), width: 215,
       type: SheetColumnType.TEXT, editable: true, visible: true, sortable: true, resizable: true,
-      formatter: (val, row) => (
+      formatter: (_val, row) => (
         <div className="flex flex-col py-0.5 leading-none overflow-hidden select-none" 
              style={{ paddingLeft: `${(row.level - 1) * 12}px` }}>
           <div className="font-bold text-[11px] truncate text-slate-700 mb-1">

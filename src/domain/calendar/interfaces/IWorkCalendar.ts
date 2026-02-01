@@ -23,20 +23,14 @@ export interface IWorkingDay {
   };
 }
 
+import { CalendarException } from '@/types/calendar-types';
+
 /**
  * Исключение (Exception) в календаре
  * Используется для праздников, отпусков, особых дат
+ * Реэкспорт унифицированного типа для domain-слоя
  */
-export interface ICalendarException {
-  id: string;
-  date: Date;
-  isWorking: boolean;
-  name?: string; // Название (например, "Новый год")
-  workingHours?: {
-    start: string;
-    end: string;
-  };
-}
+export type ICalendarException = CalendarException;
 
 /**
  * Рабочий календарь

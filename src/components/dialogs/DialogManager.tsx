@@ -1,367 +1,235 @@
-import React, { useCallback } from 'react';
+import React, { useContext, useCallback, useState, createContext } from 'react';
 import { logger } from '@/utils/logger';
-import { useDialogContext } from './DialogContext';
+import { getErrorMessage } from '@/utils/errorUtils';
+import { StrictData } from '@/types/Master_Functionality_Catalog';
+import type { DialogType as DialogTypeFromTypes } from '@/types/dialog/DialogType';
+import type { DefaultDialogData, DefaultDialogResult, DialogResult } from '@/types/dialog/DialogStateTypes';
 
-// Import all dialogs
-import {
-  WelcomeDialog,
-  ProjectsDialog,
-  UpdateProjectDialog,
-  RenameProjectDialog,
-  OpenProjectDialog,
-  BaselineDialog,
-  DependencyDialog,
-  XbsDependencyDialog,
-  DelegateTaskDialog,
-  UpdateTaskDialog,
-  AssignmentDialog,
-  ResourceMappingDialog,
-  ResourceAdditionDialog,
-  ReplaceAssignmentDialog,
-  NewBaseCalendarDialog,
-  HolidayDialog,
-  TaskDetailsDialog,
-  EarnedValueDialog,
-  ProjectStatisticsDialog,
-  TaskLinksDialog,
-  TaskNotesDialog,
-  AdvancedSearchDialog,
-  FilterDialog,
-  ProjectOptionsDialog,
-  GanttChartOptionsDialog,
-  CalculationOptionsDialog,
-  NotificationSettingsDialog,
-  SecuritySettingsDialog,
-  FindAndReplaceDialog,
-  GoToDialog
-} from './index';
+/** Реэкспорт для обратной совместимости */
+export type DialogType = DialogTypeFromTypes;
 
-export type DialogType = 
-  | 'welcome'
-  | 'projects'
-  | 'update-project'
-  | 'rename-project'
-  | 'open-project'
-  | 'baseline'
-  | 'dependency'
-  | 'xbs-dependency'
-  | 'delegate-task'
-  | 'update-task'
-  | 'assignment'
-  | 'resource-mapping'
-  | 'resource-addition'
-  | 'replace-assignment'
-  | 'new-base-calendar'
-  | 'holiday'
-  | 'task-details'
-  | 'earned-value'
-  | 'project-statistics'
-  | 'task-links'
-  | 'task-notes'
-  | 'advanced-search'
-  | 'filter'
-  | 'project-options'
-  | 'gantt-chart-options'
-  | 'calculation-options'
-  | 'notification-settings'
-  | 'security-settings'
-  | 'find-and-replace'
-  | 'go-to';
-
-interface DialogData {
-  type: DialogType;
-  data?: any;
+/**
+ * Базовые типы для диалогов (без any)
+ */
+export interface BaseDialogData {
+  title: string;
   projectId?: string;
-  taskId?: string;
-  resourceId?: string;
+  onClose?: () => void;
 }
 
-interface DialogManagerProps {
-  children?: React.ReactNode;
+export interface BaseDialogActions {
+  onOk?: () => void;
+  onCancel?: () => void;
+  onHelp?: () => void;
 }
 
-export const DialogManager: React.FC<DialogManagerProps> = ({ children }) => {
-  const { currentDialog, closeDialog } = useDialogContext();
+/**
+ * Состояние диалога
+ */
+export interface DialogState<TData, TResult> {
+  type: DialogType;
+  data: TData | undefined;
+  isOpen: boolean;
+  isSubmitting: boolean;
+  error: string | null;
+  result?: TResult;
+}
 
-  const openDialog = useCallback((type: DialogType, data?: any) => {
-    // This is handled by the context now
-    logger.dialog(`Opening dialog: ${type}`, data, type);
+/**
+ * Типизированный контекст для диалоговых окон
+ */
+export interface DialogContextType {
+  currentDialog: {
+    type: DialogType;
+    data: DefaultDialogData;
+  } | null;
+  openDialog: <TData = DefaultDialogData>(
+    type: DialogType,
+    data?: TData
+  ) => DialogState<TData, DefaultDialogResult>;
+  closeDialog: () => void;
+  submitDialog: <TData = DefaultDialogData>(
+    data: TData
+  ) => Promise<DialogResult<DefaultDialogResult>>;
+  isDialogOpen: (type: DialogType) => boolean;
+}
+
+/**
+ * Создание контекста
+ */
+const DialogContext = createContext<DialogContextType | null>(null);
+
+/**
+ * Provider для типизированного контекста
+ */
+export const TypedDialogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentDialog, setCurrentDialog] = useState<DialogState<DefaultDialogData, DefaultDialogResult> | null>(null);
+
+  const openDialog = useCallback(<TData = DefaultDialogData>(
+    type: DialogType,
+    data?: TData
+  ): DialogState<TData, DefaultDialogResult> => {
+    const newState: DialogState<TData, DefaultDialogResult> = {
+      type,
+      data,
+      isOpen: true,
+      isSubmitting: false,
+      error: null
+    };
+    setCurrentDialog(newState);
+    return newState;
   }, []);
 
-  const renderDialog = () => {
-    if (!currentDialog) return null;
+  const closeDialog = useCallback((): void => {
+    setCurrentDialog(null);
+  }, []);
 
-    const { type, data } = currentDialog;
-    const commonProps = {
-      open: true,
-      onOpenChange: (open: boolean) => {
-        if (!open) closeDialog();
-      }
-    };
+  const submitDialog = useCallback(async <TData = DefaultDialogData>(
+    data: TData
+  ): Promise<DialogResult<DefaultDialogResult>> => {
+    if (!currentDialog) return { success: false, error: 'No dialog open' };
 
-    switch (type) {
-      case 'welcome':
-        return (
-          <WelcomeDialog
-            {...commonProps}
-            {...data}
-          />
-        );
+    setCurrentDialog(prev => prev ? ({
+      ...prev,
+      isSubmitting: true,
+      error: null
+    }) : null);
 
-      // Project Dialogs
-      case 'projects':
-        return (
-          <ProjectsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'update-project':
-        return (
-          <UpdateProjectDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'rename-project':
-        return (
-          <RenameProjectDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'open-project':
-        return (
-          <OpenProjectDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'baseline':
-        return (
-          <BaselineDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Task Dialogs
-      case 'dependency':
-        return (
-          <DependencyDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'xbs-dependency':
-        return (
-          <XbsDependencyDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'delegate-task':
-        return (
-          <DelegateTaskDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'update-task':
-        return (
-          <UpdateTaskDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Resource Dialogs
-      case 'assignment':
-        return (
-          <AssignmentDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'resource-mapping':
-        return (
-          <ResourceMappingDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'resource-addition':
-        return (
-          <ResourceAdditionDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'replace-assignment':
-        return (
-          <ReplaceAssignmentDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Calendar Dialogs
-      case 'new-base-calendar':
-        return (
-          <NewBaseCalendarDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'holiday':
-        return (
-          <HolidayDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Information Dialogs
-      case 'task-details':
-        return (
-          <TaskDetailsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'earned-value':
-        return (
-          <EarnedValueDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'project-statistics':
-        return (
-          <ProjectStatisticsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'task-links':
-        return (
-          <TaskLinksDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'task-notes':
-        return (
-          <TaskNotesDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Search Dialogs
-      case 'advanced-search':
-        return (
-          <AdvancedSearchDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'filter':
-        return (
-          <FilterDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Settings Dialogs
-      case 'project-options':
-        return (
-          <ProjectOptionsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'gantt-chart-options':
-        return (
-          <GanttChartOptionsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'calculation-options':
-        return (
-          <CalculationOptionsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'notification-settings':
-        return (
-          <NotificationSettingsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'security-settings':
-        return (
-          <SecuritySettingsDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      // Editing Dialogs
-      case 'find-and-replace':
-        return (
-          <FindAndReplaceDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      case 'go-to':
-        return (
-          <GoToDialog
-            {...commonProps}
-            {...data}
-          />
-        );
-
-      default:
-        return null;
+    try {
+      logger.info(`Submitting dialog: ${currentDialog.type}`, { data: data as StrictData });
+      return { success: true, data: undefined };
+    } catch (err) {
+      const errorMessage = getErrorMessage(err);
+      logger.error('Failed to submit dialog:', errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setCurrentDialog(prev => prev ? ({
+        ...prev,
+        isSubmitting: false,
+        error: null
+      }) : null);
     }
+  }, [currentDialog]);
+
+  const isDialogOpen = useCallback((type: DialogType): boolean => {
+    return currentDialog?.type === type;
+  }, [currentDialog]);
+
+  const value: DialogContextType = {
+    currentDialog,
+    openDialog,
+    closeDialog,
+    submitDialog,
+    isDialogOpen
   };
 
-  // Provide dialog API to children via context or render prop
   return (
-    <>
+    <DialogContext.Provider value={value}>
       {children}
-      {renderDialog()}
-    </>
+    </DialogContext.Provider>
   );
 };
 
-// Hook for using dialog manager - now just exports the context hook
-export const useDialogManager = useDialogContext;
+export const useTypedDialogContext = (): DialogContextType => {
+  const context = useContext(DialogContext);
+  if (!context) {
+    throw new Error('useTypedDialogContext must be used within a TypedDialogProvider');
+  }
+  return context;
+};
 
+/**
+ * Type-safe dialog opening function
+ */
+export const openTypedDialog = <TData = DefaultDialogData>(
+  context: DialogContextType,
+  type: DialogType,
+  data?: TData
+): void => {
+  context.openDialog(type, data);
+};
+
+/**
+ * Type-safe dialog closing function
+ */
+export const closeTypedDialog = (context: DialogContextType): void => {
+  context.closeDialog();
+};
+
+/**
+ * Type-safe dialog submission function
+ */
+export const submitTypedDialog = async <TData = DefaultDialogData, TResult = DefaultDialogResult>(
+  context: DialogContextType,
+  data: TData
+): Promise<TResult> => {
+  return context.submitDialog(data) as Promise<TResult>;
+};
+
+/**
+ * Dialog component factory
+ * @deprecated Используйте TypedDialogService вместо этого
+ */
+export const createTypedDialog = <TData = DefaultDialogData, TResult = DefaultDialogResult>(
+  _dialogType: DialogType,
+  title: string,
+  Component: React.ComponentType<{ open: boolean; onClose: () => void; onSubmit: () => Promise<DefaultDialogResult> }>
+): React.FC<{ open: (data?: TData) => void; onClose: () => void }> => {
+  const DialogWrapper: React.FC<{ open: (data?: TData) => void; onClose: () => void }> = (_props) => {
+    const context = useTypedDialogContext();
+    const [state, setState] = useState<DialogState<TData, TResult> | null>(null);
+
+    const closeDialog = () => {
+      context.closeDialog();
+      setState(null);
+    };
+
+    const submitDialog = async () => {
+      if (!state) return;
+      setState(prev => prev ? { ...prev, isSubmitting: true, error: null } : null);
+      
+      try {
+        const result = await context.submitDialog(state.data);
+        setState(prev => prev ? { ...prev, isSubmitting: false, result: result as TResult, error: null } : null);
+        closeDialog();
+        return result;
+      } catch (err) {
+        const errorMessage = getErrorMessage(err);
+        setState(prev => prev ? { ...prev, isSubmitting: false, error: errorMessage } : null);
+      }
+    };
+
+    if (!state) {
+      return null;
+    }
+
+    return React.createElement(Component, {
+      open: state.isOpen,
+      onClose: closeDialog,
+      onSubmit: submitDialog
+    });
+  };
+
+  DialogWrapper.displayName = title;
+  return DialogWrapper;
+};
+
+/**
+ * Хук для использования менеджера диалогов
+ * @deprecated Используйте useTypedDialog вместо этого
+ */
+export const useDialogManager = () => {
+  const context = useContext(DialogContext);
+  if (!context) {
+    throw new Error('useDialogManager must be used within TypedDialogProvider');
+  }
+  return context;
+};
+
+/**
+ * Компонент-менеджер диалогов для рендеринга
+ * @deprecated Legacy компонент, будет удален в будущем
+ */
+export const DialogManager: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
+  return <>{children}</>;
+};

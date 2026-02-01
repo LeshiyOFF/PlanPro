@@ -1,12 +1,12 @@
 import { useEffect, useCallback } from 'react';
-import { ActionManager } from '@/services/actions/ActionManager';
+import type { IActionManager } from '@/services/actions/ActionManager';
 import { logger } from '@/utils/logger';
 
 /**
  * Хук для обработки горячих клавиш
  */
 export const useKeyboardShortcuts = (
-  actionManager: ActionManager,
+  actionManager: IActionManager,
   executeAction: (actionId: string) => Promise<void>
 ) => {
   const handleKeyDown = useCallback(async (event: KeyboardEvent): Promise<void> => {
@@ -45,7 +45,7 @@ export const useKeyboardShortcuts = (
               await executeAction(action.id);
               break; // Выполняем только первое доступное действие
             } catch (error) {
-              logger.error(`Failed to execute shortcut action ${action.id}:`, error);
+              logger.error(`Failed to execute shortcut action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) });
             }
           }
         }
@@ -65,7 +65,7 @@ export const useKeyboardShortcuts = (
               await executeAction(action.id);
               break;
             } catch (error) {
-              logger.error(`Failed to execute Insert action ${action.id}:`, error);
+              logger.error(`Failed to execute Insert action ${action.id}:`, error instanceof Error ? { message: error.message } : { message: String(error) });
             }
           }
         }

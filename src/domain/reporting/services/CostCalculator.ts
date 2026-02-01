@@ -1,4 +1,4 @@
-import { Task } from '@/store/project/interfaces';
+import { Task, getTaskResourceIds } from '@/store/project/interfaces';
 import { Resource } from '@/types/resource-types';
 
 /**
@@ -55,7 +55,7 @@ export class CostCalculator {
       
       for (const task of assignedTasks) {
         // Пропускаем summary задачи (они агрегируют дочерние)
-        if (task.summary) continue;
+        if (task.isSummary) continue;
         
         const durationHours = this.calculateTaskDurationHours(task);
         const units = this.getAssignmentUnits(resource.id, task);
@@ -81,7 +81,7 @@ export class CostCalculator {
       if (assignedTasks.length > 0) {
         for (const task of assignedTasks) {
           // Пропускаем summary задачи
-          if (task.summary) continue;
+          if (task.isSummary) continue;
           
           const units = this.getAssignmentUnits(resource.id, task);
           
@@ -142,8 +142,8 @@ export class CostCalculator {
     if (assignment) {
       return assignment.units;
     }
-    // Legacy: resourceIds подразумевает 100% загрузку
-    if (task.resourceIds?.includes(resourceId)) {
+    // Legacy: getTaskResourceIds подразумевает 100% загрузку
+    if (getTaskResourceIds(task).includes(resourceId)) {
       return 1.0;
     }
     return 1.0;

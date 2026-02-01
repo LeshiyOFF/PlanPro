@@ -1,5 +1,8 @@
 import { useAppStore } from '../store/appStore';
+import { useProjectStore } from '../store/projectStore';
 import { javaApiService } from './JavaApiService';
+import { TaskDataConverter } from './TaskDataConverter';
+import { ResourceDataConverter } from './ResourceDataConverter';
 import { logger } from '../utils/logger';
 
 /**
@@ -87,17 +90,22 @@ export class ProjectAutoSaveService {
     }
 
     try {
-      logger.info('Performing auto-save...', { projectId: project.id.value });
-      
-      // Вызываем Java API для сохранения текущего состояния проекта
-      await javaApiService.updateProject(project.id.value.toString(), project);
+      const projectId = project.id;
+      logger.info('Performing auto-save...', { projectId });
+
+      const calendars = useProjectStore.getState().calendars ?? [];
+      const updates = {
+        tasks: TaskDataConverter.frontendTasksToSync(project.tasks),
+        resources: ResourceDataConverter.frontendResourcesToSync(project.resources, calendars)
+      };
+      await javaApiService.updateProject(projectId, updates);
       
       // Сбрасываем флаг изменений в сторе
       useAppStore.getState().setProjectState({ unsavedChanges: false });
       
       logger.info('Auto-save completed successfully');
     } catch (error) {
-      logger.error('Auto-save failed', error);
+      logger.error('Auto-save failed', error instanceof Error ? error : String(error));
       // Мы не показываем ошибку пользователю при автосохранении, 
       // чтобы не прерывать рабочий процесс, но фиксируем в логах.
     }

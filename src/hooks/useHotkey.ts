@@ -1,12 +1,9 @@
 import { useEffect, useCallback, useRef } from 'react';
+import * as React from 'react';
 import { hotkeyService } from '@/services/HotkeyService';
-import type { Hotkey, HotkeyAction, HotkeyCategory } from '@/types/HotkeyTypes';
+import { type Hotkey, type HotkeyAction, HotkeyCategory } from '@/types/HotkeyTypes';
 import { logger } from '@/utils/logger';
-
-/**
- * Хук для работы с горячими клавишами
- * Интегрирует HotkeyService с React компонентами
- */
+import { getElectronAPI } from '@/utils/electronAPI';
 
 interface UseHotkeyOptions {
   enabled?: boolean;
@@ -16,7 +13,7 @@ interface UseHotkeyOptions {
 }
 
 interface UseHotkeyReturn {
-  bindHotkey: (keys: Hotkey, action: () => void, options?: UseHotkeyOptions) => void;
+  bindHotkey: (keys: Hotkey, action: () => void, options?: UseHotkeyOptions) => (() => void) | void;
   unbindHotkey: (keys: Hotkey) => void;
   isEnabled: boolean;
   setEnabled: (enabled: boolean) => void;
@@ -34,20 +31,12 @@ export const useHotkey = (): UseHotkeyReturn => {
     action: () => void, 
     options: UseHotkeyOptions = {}
   ) => {
-    const {
-      enabled = true,
-      preventDefault = true,
-      allowInInput = false,
-      deps = []
-    } = options;
-
+    const { enabled = true } = options;
     if (!enabled) return;
 
-    // Генерация уникального ID для действия
     const actionId = `hotkey_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     actionIdRef.current = actionId;
 
-    // Создание действия
     const hotkeyAction: HotkeyAction = {
       id: actionId,
       name: `Hotkey ${JSON.stringify(keys)}`,
@@ -57,25 +46,22 @@ export const useHotkey = (): UseHotkeyReturn => {
       canExecute: () => isEnabledRef.current
     };
 
-    // Регистрация действия и привязки
     hotkeyService.registerAction(hotkeyAction);
     hotkeyService.registerBinding(actionId, keys);
+    logger.dialog('Hotkey bound', { keys: String(keys), actionId }, 'useHotkey');
 
-    logger.dialog('Hotkey bound', { keys, actionId }, 'useHotkey');
-
-    // Функция очистки
-    return () => {
+    const cleanup = () => {
       if (actionIdRef.current) {
         hotkeyService.unregisterBinding(actionIdRef.current);
-        logger.dialog('Hotkey unbound', { keys, actionId: actionIdRef.current }, 'useHotkey');
       }
     };
+    return cleanup;
   }, []);
 
   const unbindHotkey = useCallback((keys: Hotkey) => {
     if (actionIdRef.current) {
       hotkeyService.unregisterBinding(actionIdRef.current);
-      logger.dialog('Hotkey unbound', { keys }, 'useHotkey');
+      logger.dialog('Hotkey unbound', { keys: String(keys) }, 'useHotkey');
     }
   }, []);
 
@@ -83,12 +69,7 @@ export const useHotkey = (): UseHotkeyReturn => {
     isEnabledRef.current = enabled;
   }, []);
 
-  return {
-    bindHotkey,
-    unbindHotkey,
-    isEnabled: isEnabledRef.current,
-    setEnabled
-  };
+  return { bindHotkey, unbindHotkey, isEnabled: isEnabledRef.current, setEnabled };
 };
 
 /**
@@ -99,20 +80,16 @@ export const useHotkeyBind = (
   action: () => void,
   options: UseHotkeyOptions = {}
 ) => {
-  const { bindHotkey, unbindHotkey } = useHotkey();
+  const { bindHotkey } = useHotkey();
   const cleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (options.enabled !== false) {
-      cleanupRef.current = bindHotkey(keys, action, options);
+      const cleanup = bindHotkey(keys, action, options);
+      cleanupRef.current = typeof cleanup === 'function' ? cleanup : null;
     }
-
-    return () => {
-      if (cleanupRef.current) {
-        cleanupRef.current();
-      }
-    };
-  }, [keys, action, options.enabled, ...options.deps]);
+    return () => { cleanupRef.current?.(); };
+  }, [keys, action, options.enabled, ...(options.deps || [])]);
 };
 
 /**
@@ -130,16 +107,11 @@ export const useHotkeyAction = (
     if (!enabled) return;
 
     const eventHandler = (action: string, event: KeyboardEvent) => {
-      if (handlerRef.current) {
-        handlerRef.current(action, event);
-      }
+      handlerRef.current?.(action, event);
     };
 
     hotkeyService.addEventListener(actionId, eventHandler);
-
-    return () => {
-      hotkeyService.removeEventListener(actionId, eventHandler);
-    };
+    return () => { hotkeyService.removeEventListener(actionId, eventHandler); };
   }, [actionId, enabled]);
 };
 
@@ -151,17 +123,12 @@ export const useHotkeyState = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const currentState = hotkeyService.getState();
-      setState(currentState);
+      setState(hotkeyService.getState());
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
-  return {
-    ...state,
-    setEnabled: hotkeyService.setEnabled.bind(hotkeyService)
-  };
+  return { ...state, setEnabled: hotkeyService.setEnabled.bind(hotkeyService) };
 };
 
 /**
@@ -171,8 +138,7 @@ export const useHotkeyCategory = (category: HotkeyCategory) => {
   const [actions, setActions] = React.useState<HotkeyAction[]>([]);
 
   useEffect(() => {
-    const categoryActions = hotkeyService.getActionsByCategory(category);
-    setActions(categoryActions);
+    setActions(hotkeyService.getActionsByCategory(category));
   }, [category]);
 
   return actions;
@@ -188,39 +154,34 @@ export const useHotkeyToggle = () => {
     hotkeyService.setEnabled(enabled);
   }, [enabled]);
 
-  const toggle = useCallback(() => {
-    setEnabled(prev => !prev);
-  }, []);
-
-  return {
-    enabled,
-    setEnabled,
-    toggle
-  };
+  return { enabled, setEnabled, toggle: useCallback(() => setEnabled(prev => !prev), []) };
 };
 
 /**
  * Хук для навигационных горячих клавиш
  */
 export const useNavigationHotkeys = () => {
-  useHotkeyAction('GOTO_TASK', (action) => {
-    // TODO: Implement navigation to task
-    logger.dialog('Navigate to task', {}, 'Navigation');
+  useHotkeyAction('GOTO_TASK', () => {
+    const taskId = prompt('Введите ID задачи для перехода:');
+    if (taskId) {
+      window.dispatchEvent(new CustomEvent('gantt:navigate-to-task', { detail: { taskId } }));
+      logger.dialog('Navigate to task', { taskId }, 'Navigation');
+    }
   });
 
-  useHotkeyAction('ZOOM_IN', (action) => {
-    // TODO: Implement zoom in
-    logger.dialog('Zoom in', {}, 'Navigation');
+  useHotkeyAction('ZOOM_IN', () => {
+    window.dispatchEvent(new CustomEvent('gantt:zoom-delta', { detail: { delta: 0.25 } }));
+    logger.dialog('Zoom in executed', {}, 'Navigation');
   });
 
-  useHotkeyAction('ZOOM_OUT', (action) => {
-    // TODO: Implement zoom out
-    logger.dialog('Zoom out', {}, 'Navigation');
+  useHotkeyAction('ZOOM_OUT', () => {
+    window.dispatchEvent(new CustomEvent('gantt:zoom-delta', { detail: { delta: -0.25 } }));
+    logger.dialog('Zoom out executed', {}, 'Navigation');
   });
 
-  useHotkeyAction('FIT_TO_WIDTH', (action) => {
-    // TODO: Implement fit to width
-    logger.dialog('Fit to width', {}, 'Navigation');
+  useHotkeyAction('FIT_TO_WIDTH', () => {
+    window.dispatchEvent(new CustomEvent('gantt:fit-to-width'));
+    logger.dialog('Fit to width executed', {}, 'Navigation');
   });
 };
 
@@ -228,34 +189,38 @@ export const useNavigationHotkeys = () => {
  * Хук для файловых горячих клавиш
  */
 export const useFileHotkeys = () => {
-  useHotkeyAction('NEW_PROJECT', (action) => {
-    // TODO: Implement new project
-    logger.dialog('New project', {}, 'File');
+  useHotkeyAction('NEW_PROJECT', () => {
+    window.dispatchEvent(new CustomEvent('file:new-project'));
+    logger.dialog('New project hotkey triggered', {}, 'File');
   });
 
-  useHotkeyAction('OPEN_PROJECT', (action) => {
-    // TODO: Implement open project
-    logger.dialog('Open project', {}, 'File');
+  useHotkeyAction('OPEN_PROJECT', () => {
+    window.dispatchEvent(new CustomEvent('file:open-project'));
+    logger.dialog('Open project hotkey triggered', {}, 'File');
   });
 
-  useHotkeyAction('SAVE_PROJECT', (action) => {
-    // TODO: Implement save project
-    logger.dialog('Save project', {}, 'File');
+  useHotkeyAction('SAVE_PROJECT', () => {
+    window.dispatchEvent(new CustomEvent('file:save-project'));
+    logger.dialog('Save project hotkey triggered', {}, 'File');
   });
 
-  useHotkeyAction('SAVE_AS', (action) => {
-    // TODO: Implement save as
-    logger.dialog('Save as', {}, 'File');
+  useHotkeyAction('SAVE_AS', () => {
+    window.dispatchEvent(new CustomEvent('file:save-project-as'));
+    logger.dialog('Save as hotkey triggered', {}, 'File');
   });
 
-  useHotkeyAction('PRINT', (action) => {
-    // TODO: Implement print
-    logger.dialog('Print', {}, 'File');
+  useHotkeyAction('PRINT', () => {
+    window.print();
+    logger.dialog('Print executed', {}, 'File');
   });
 
-  useHotkeyAction('EXIT', (action) => {
-    // TODO: Implement exit
-    logger.dialog('Exit', {}, 'File');
+  useHotkeyAction('EXIT', () => {
+    const api = getElectronAPI();
+    if (api?.closeWindow) {
+      api.closeWindow();
+    } else {
+      window.close();
+    }
+    logger.dialog('Exit executed', {}, 'File');
   });
 };
-

@@ -5,6 +5,7 @@ import { JavaBridgeService } from './services/JavaBridgeService';
 import { ConfigService } from './services/ConfigService';
 import { AppBootstrapper } from './services/AppBootstrapper';
 import { IpcChannels } from './types/IpcChannels';
+import type { JavaBridgeEventPayload } from './types/JavaBridgeEventPayload';
 import { SecurityPolicyManager } from './services/SecurityPolicyManager';
 import { PreferencesIpcHandler } from './handlers/PreferencesIpcHandler';
 import { JavaIpcHandler } from './handlers/JavaIpcHandler';
@@ -79,7 +80,7 @@ export class PlanProApp {
     ];
 
     events.forEach(({ ev, ch }) => {
-      this.javaBridge.on(ev as any, (data: any) => {
+      this.javaBridge.on(ev, (data?: JavaBridgeEventPayload) => {
         const win = this.windowManager.getMainWindow();
         if (win && !win.isDestroyed()) win.webContents.send(ch, data);
       });

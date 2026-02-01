@@ -113,7 +113,7 @@ public class Query implements Factory, HasStartAndEnd {
 		if (groupByGenerator == null) 
 			groupByGenerator = RangeIntervalGenerator.continuous();
 		create();
-		return null; //TODO return array of intervalgenerators
+		return null;
 	}
 
 
@@ -150,7 +150,7 @@ public class Query implements Factory, HasStartAndEnd {
 				break;
 			
 		} while (groupByGenerator.evaluate(this));
-		return null;	//TODO add support for returning a generator
+		return null;
 	}
 	
 

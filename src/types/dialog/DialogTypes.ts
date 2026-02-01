@@ -1,230 +1,140 @@
-/**
- * Базовые типы для всех диалоговых окон ProjectLibre
- * Следует SOLID принципам и Clean Architecture
- */
+import { 
+  CalendarDialogData, 
+  TaskInformationData, 
+  ProjectDialogData, 
+  WorkingTimeDialogData, 
+  HolidayDialogData,
+  ResourceInformationData,
+  FindDialogData,
+  SettingsDialogData,
+  LoginDialogData,
+  SplitTaskData,
+  NewBaseCalendarDialogData
+} from '../calendar-types';
 
-// ============================================================================
-// БАЗОВЫЕ ИНТЕРФЕЙСЫ
-// ============================================================================
+import type { JsonValue } from '@/types/json-types';
+import type { 
+  DialogResult as TypedDialogResult,
+  TypedDialogActions,
+  TypedDialogProps,
+  DialogState as TypedDialogState,
+  DialogContextType as TypedDialogContextType
+} from './DialogStateTypes';
+
+export { DialogStatus as TypedDialogStatus } from './LegacyDialogTypes';
+export type { 
+  TypedDialogResult, 
+  TypedDialogActions, 
+  TypedDialogProps, 
+  TypedDialogState, 
+  TypedDialogContextType 
+};
 
 /**
- * Базовый интерфейс для данных любого диалога
+ * Legacy типы для обратной совместимости
  */
-export interface IDialogData {
+export { DialogStatus } from './LegacyDialogTypes';
+export type {
+  IDialogData,
+  IDialogActions,
+  IDialogConfig,
+  DialogResult,
+  DialogEvent,
+  ValidationRule,
+  DialogDataValue
+} from './LegacyDialogTypes';
+export type {
+  FindDialogData,
+  SettingsDialogData,
+  CalendarDialogData,
+  LoginDialogData,
+  SplitTaskData
+} from '../calendar-types';
+
+export type { LoginDialogData as ILoginDialogData } from '../calendar-types';
+
+/**
+ * Конкретные типы для каждого диалога
+ */
+export type CalendarDialogState = TypedDialogState<CalendarDialogData, TypedDialogResult<CalendarDialogData>>;
+export type TaskInfoDialogState = TypedDialogState<TaskInformationData, TypedDialogResult<TaskInformationData>>;
+export type ProjectDialogState = TypedDialogState<ProjectDialogData, TypedDialogResult<ProjectDialogData>>;
+export type ResourceDialogState = TypedDialogState<ResourceInformationData, TypedDialogResult<ResourceInformationData>>;
+export type WorkingTimeDialogState = TypedDialogState<WorkingTimeDialogData, TypedDialogResult<WorkingTimeDialogData>>;
+export type HolidayDialogState = TypedDialogState<HolidayDialogData, TypedDialogResult<HolidayDialogData>>;
+export type FindDialogState = TypedDialogState<FindDialogData, TypedDialogResult<FindDialogData>>;
+export type SettingsDialogState = TypedDialogState<SettingsDialogData, TypedDialogResult<SettingsDialogData>>;
+export type LoginDialogState = TypedDialogState<LoginDialogData, TypedDialogResult<LoginDialogData>>;
+export type SplitTaskDialogState = TypedDialogState<SplitTaskData, TypedDialogResult<SplitTaskData>>;
+export type NewBaseCalendarDialogState = TypedDialogState<NewBaseCalendarDialogData, TypedDialogResult<NewBaseCalendarDialogData>>;
+
+/**
+ * Конкретные действия для каждого диалога
+ */
+export interface CalendarDialogActions extends TypedDialogActions<CalendarDialogData, TypedDialogResult<CalendarDialogData>> {}
+export interface TaskInfoDialogActions extends TypedDialogActions<TaskInformationData, TypedDialogResult<TaskInformationData>> {}
+export interface ProjectDialogActions extends TypedDialogActions<ProjectDialogData, TypedDialogResult<ProjectDialogData>> {}
+export interface ResourceDialogActions extends TypedDialogActions<ResourceInformationData, TypedDialogResult<ResourceInformationData>> {}
+export interface WorkingTimeActions extends TypedDialogActions<WorkingTimeDialogData, TypedDialogResult<WorkingTimeDialogData>> {}
+export interface HolidayActions extends TypedDialogActions<HolidayDialogData, TypedDialogResult<HolidayDialogData>> {}
+export interface FindDialogActions extends TypedDialogActions<FindDialogData, TypedDialogResult<FindDialogData>> {}
+export interface SettingsActions extends TypedDialogActions<SettingsDialogData, TypedDialogResult<SettingsDialogData>> {}
+export interface LoginActions extends TypedDialogActions<LoginDialogData, TypedDialogResult<LoginDialogData>> {}
+export interface SplitTaskActions extends TypedDialogActions<SplitTaskData, TypedDialogResult<SplitTaskData>> {}
+
+/**
+ * Типизированные props для каждого диалога
+ */
+export interface CalendarDialogProps extends TypedDialogProps<CalendarDialogData, CalendarDialogActions> {}
+export interface TaskInfoDialogProps extends TypedDialogProps<TaskInformationData, TaskInfoDialogActions> {}
+export interface ProjectDialogProps extends TypedDialogProps<ProjectDialogData, ProjectDialogActions> {}
+export interface ResourceDialogProps extends TypedDialogProps<ResourceInformationData, ResourceDialogActions> {}
+export interface WorkingTimeDialogProps extends TypedDialogProps<WorkingTimeDialogData, WorkingTimeActions> {}
+export interface HolidayDialogProps extends TypedDialogProps<HolidayDialogData, HolidayActions> {}
+export interface FindDialogProps extends TypedDialogProps<FindDialogData, FindDialogActions> {}
+export interface SettingsDialogProps extends TypedDialogProps<SettingsDialogData, SettingsActions> {}
+export interface LoginDialogProps extends TypedDialogProps<LoginDialogData, LoginActions> {}
+
+/**
+ * Результаты диалогов
+ */
+export type CalendarDialogResult = TypedDialogResult<CalendarDialogData>;
+export type TaskInfoDialogResult = TypedDialogResult<TaskInformationData>;
+export type ProjectDialogResult = TypedDialogResult<ProjectDialogData>;
+export type ResourceDialogResult = TypedDialogResult<ResourceInformationData>;
+export type WorkingTimeResult = TypedDialogResult<WorkingTimeDialogData>;
+export type HolidayDialogResult = TypedDialogResult<HolidayDialogData>;
+export type FindDialogResult = TypedDialogResult<FindDialogData>;
+export type SettingsDialogResult = TypedDialogResult<SettingsDialogData>;
+export type LoginDialogResult = TypedDialogResult<LoginDialogData>;
+
+/**
+ * Интерфейсы для специфичных данных
+ */
+export interface Holiday {
   id: string;
-  title: string;
-  description?: string;
-  timestamp: Date;
-}
-
-/**
- * Интерфейс для действий диалога
- */
-export interface IDialogActions {
-  onOk: (data: any) => Promise<void>;
-  onCancel: () => void;
-  onHelp?: () => void;
-  onValidate?: (data: any) => boolean;
-}
-
-/**
- * Интерфейс для конфигурации диалога
- */
-export interface IDialogConfig {
-  width?: number;
-  height?: number;
-  resizable?: boolean;
-  modal?: boolean;
-  showHelp?: boolean;
-  closeOnEscape?: boolean;
-  closeOnEnter?: boolean;
-}
-
-// ============================================================================
-// ОБЩИЕ ТИПЫ ДИАЛОГОВ
-// ============================================================================
-
-/**
- * Типы диалогов по категориям
- */
-export enum DialogCategory {
-  PROJECT = 'project',
-  TASK = 'task',
-  RESOURCE = 'resource',
-  CALENDAR = 'calendar',
-  INFORMATION = 'information',
-  SEARCH = 'search',
-  SETTINGS = 'settings',
-  AUTHENTICATION = 'authentication',
-  EDITING = 'editing'
-}
-
-/**
- * Статусы диалогов
- */
-export enum DialogStatus {
-  INITIAL = 'initial',
-  LOADING = 'loading',
-  VALIDATING = 'validating',
-  READY = 'ready',
-  ERROR = 'error',
-  SUCCESS = 'success'
-}
-
-/**
- * Результат работы диалога
- */
-export interface DialogResult<T = any> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  action: 'ok' | 'cancel' | 'help';
-}
-
-// ============================================================================
-// СПЕЦИАЛИЗИРОВАННЫЕ ТИПЫ ДАННЫХ
-// ============================================================================
-
-/**
- * Базовые данные проекта
- */
-export interface ProjectDialogData extends IDialogData {
   name: string;
-  manager: string;
-  notes: string;
-  startDate: Date;
-  resourcePool?: any;
-  forward: boolean;
-  projectType: number;
-  projectStatus: number;
+  date: string;
+  type: 'holiday' | 'working';
+  startTime?: string;
+  endTime?: string;
 }
 
 /**
- * Данные для диалога информации о задаче
+ * Исключения календаря
  */
-export interface TaskInformationData extends IDialogData {
-  taskId: string;
-  name: string;
-  duration: number;
-  progress: number;
-  startDate: Date;
-  endDate: Date;
-  predecessors: string[];
-  successors: string[];
-  resources: any[];
-  notes: string;
-  priority: number;
-  estimated?: boolean;
+export type WorkingTimeExceptions = Holiday[];
+
+/**
+ * Полные данные календаря
+ */
+export interface FullCalendarData {
+  workingTime: Record<'day0' | 'day1' | 'day2' | 'day3' | 'day4' | 'day5' | 'day6', { startTime: string; endTime: string; isWorkingDay: boolean }>;
+  exceptions: WorkingTimeExceptions;
 }
 
 /**
- * Данные для диалога информации о ресурсе
+ * Конкретные типы для диалогов замены
+ * Устаревается совместимость с существующим кодом
  */
-export interface ResourceInformationData extends IDialogData {
-  resourceId: string;
-  name: string;
-  type: string;
-  rate: number;
-  cost: number;
-  availability: any;
-  assignedTasks: any[];
-  notes: string;
-}
-
-/**
- * Данные для диалога поиска
- */
-export interface FindDialogData extends IDialogData {
-  searchText: string;
-  searchType: string;
-  searchContext?: any;
-  results: any[];
-  currentIndex: number;
-}
-
-/**
- * Данные для диалога настроек
- */
-export interface SettingsDialogData extends IDialogData {
-  category: string;
-  settings: Record<string, any>;
-  modified: boolean;
-}
-
-/**
- * Данные для диалога аутентификации
- */
-export interface LoginDialogData extends IDialogData {
-  username: string;
-  password: string;
-  rememberCredentials: boolean;
-  useMenus: boolean;
-}
-
-/**
- * Данные для диалога календаря
- */
-export interface CalendarDialogData extends IDialogData {
-  calendarId: string;
-  name: string;
-  workingDays: number[];
-  holidays: Date[];
-  workingHours: {
-    start: string;
-    end: string;
-  };
-}
-
-/**
- * Данные для диалога прерывания задачи
- */
-export interface SplitTaskData extends IDialogData {
-  taskId: string;
-  taskName: string;
-  splitDate: Date;
-  gapDays: number;
-}
-
-// ============================================================================
-// ТИПЫ ВАЛИДАЦИИ
-// ============================================================================
-
-/**
- * Правила валидации
- */
-export interface ValidationRule {
-  field: string;
-  required?: boolean;
-  minLength?: number;
-  maxLength?: number;
-  pattern?: RegExp;
-  custom?: (value: any) => boolean | string;
-}
-
-/**
- * Результат валидации
- */
-export interface ValidationResult {
-  isValid: boolean;
-  errors: Record<string, string[]>;
-}
-
-// ============================================================================
-// ТИПЫ СОБЫТИЙ
-// ============================================================================
-
-/**
- * События диалога
- */
-export interface DialogEvent {
-  type: 'open' | 'close' | 'validate' | 'submit' | 'error';
-  dialogId: string;
-  timestamp: Date;
-  data?: any;
-}
-
-/**
- * Обработчик событий диалога
- */
-export type DialogEventHandler = (event: DialogEvent) => void;
-
+export type LegacyDialogData = Record<string, JsonValue>;

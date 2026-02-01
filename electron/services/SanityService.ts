@@ -1,3 +1,4 @@
+import type { JsonValue } from '../types/JsonValue';
 
 /**
  * Сервис санитизации (очистки) данных.
@@ -15,17 +16,17 @@ export class SanityService {
    */
   public static sanitize<T>(data: T): T {
     if (typeof data === 'string') {
-      return this.sanitizeString(data) as unknown as T;
+      return this.sanitizeString(data) as T;
     }
     
     if (Array.isArray(data)) {
-      return data.map(item => this.sanitize(item)) as unknown as T;
+      return data.map(item => this.sanitize(item)) as T;
     }
     
     if (data !== null && typeof data === 'object') {
-      const sanitizedObj: any = {};
+      const sanitizedObj: Record<string, JsonValue> = {};
       for (const [key, value] of Object.entries(data)) {
-        sanitizedObj[key] = this.sanitize(value);
+        sanitizedObj[key] = this.sanitize(value) as JsonValue;
       }
       return sanitizedObj as T;
     }

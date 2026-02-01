@@ -320,8 +320,9 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	}
 
 	/**
+	 * Debug method to set work contour directly.
 	 * @param contour The contour to set.
-	 * TODO get rid of this
+	 * @deprecated Use setWorkContourType instead
 	 */
 	public void debugSetWorkContour(AbstractContour contour) {
 		newDetail().setWorkContour(contour);
@@ -371,19 +372,6 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 		if (getUnits() == 0) // take care of degenerate case
 			newRemainingDuration = 0;
 		newDetail().adjustRemainingDuration(newRemainingDuration);
-
-
-//TODO commented out may 8 2007
-//		if (getTaskSchedulingType() == SchedulingType.FIXED_WORK && newRemainingDuration != 0) {
-//			double multiplier = ((double)old) / newRemainingDuration;
-//			if (multiplier > 0) {
-//				detail.setWorkContour(detail.getWorkContour().adjustUnits(multiplier, getActualDuration()));
-//				detail.setUnits(getUnits() * multiplier);
-//			}
-//		}
-
-
-
 	}
 
 	public void adjustRemainingDurationIfWorkingAtTaskEnd(long newRemainingDuration) {
@@ -427,7 +415,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 		if (!FieldContext.hasInterval(context)) {
 			long currentRemainingWork = Duration.millis(getWork(context)) - Duration.millis(getActualWork(context));
 			if (currentRemainingWork == 0 && remainingWork == 0)
-				adjustRemainingUnits(0, 0, true, false); //TODO is this ok?
+				adjustRemainingUnits(0, 0, true, false);
 			else {
 				if (getTaskSchedulingType() == SchedulingType.FIXED_UNITS)
 					adjustRemainingDuration(remainingWork, false);
@@ -512,7 +500,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 			//if the task isn't yet started and setting work, move to start date
 			if (getTask().getActualStart() == 0 && actualWork != 0) {
 				long s = getEffectiveWorkCalendar().adjustInsideCalendar(fieldContext.getStart(), false);
-				getTask().setActualStart(s); //TODO handle if setting non calendar time
+				getTask().setActualStart(s);
 			}
 
 
@@ -636,7 +624,6 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 		}
 		if (delay > 0)
 			s = getEffectiveWorkCalendar().add(s,delay,true);
-		//TODO check if above should use task calendar or assignment calendar
 		return s;
 	}
 
@@ -652,9 +639,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 			start=getEffectiveWorkCalendar().add(start,getActualDuration(),useSooner);
 
 
-		long duration = remainingOnly ? detail.getRemainingDuration() : detail.getDuration();// + this.detail.getSplitDuration();
-//TODO integrate split - still needed?
-
+		long duration = remainingOnly ? detail.getRemainingDuration() : detail.getDuration();
 		long amount = (ahead ? duration : -duration);
 		return  getEffectiveWorkCalendar().add(start,amount, useSooner);
 	}
@@ -728,8 +713,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	 * @return instance of generator
 	 */
 	public ContourBucketIntervalGenerator contourGeneratorInstance(Object type, long start)   {
-		return ContourBucketIntervalGenerator.getInstance(this,type);//getEffectiveWorkCalendar(), detail.getContour(type), detail.getDurationMillis(), getStart());
-		//TODO actual cost treatment if entered manually
+		return ContourBucketIntervalGenerator.getInstance(this,type);
 	}
 
 	/**
@@ -768,11 +752,10 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	}
 
 	private AssignmentFieldFunctor availability(SelectFrom clause) {
-		//TODO this is untested, as histogram is currently broken 8/12/04 hk
 		ResourceAvailabilityFunctor functor = ResourceAvailabilityFunctor.getInstance(this);
 		CollectionIntervalGenerator availability = CollectionIntervalGenerator.getInstance(((ResourceImpl)detail.getResource()).getAvailabilityTable().getList());
 		clause.select(functor)
-				.from(availability); //use range?
+				.from(availability);
 		return functor;
 	}
 
@@ -783,7 +766,6 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	 * @return
 	 */
 	private static AssignmentFieldFunctor resourceAvailability(SelectFrom clause, Resource resource) {
-		//TODO this is untested, as histogram is currently broken 8/12/04 hk
 		ResourceAvailabilityFunctor functor = ResourceAvailabilityFunctor.getInstance(resource);
 		CollectionIntervalGenerator availability = CollectionIntervalGenerator.getInstance(resource.getAvailabilityTable().getList());
 		clause.select(functor)
@@ -1103,14 +1085,14 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	}
 
 	/**
-	 * This treats just a single interval to merge in
+	 * This treats just a single interval to merge in.
+	 * Note: Cost values are calculated from work and rates, not set directly.
 	 * @param type - WORK or COST. can also be a time distributed field
 	 * @param start - start of interval
 	 * @param end - end of interval
 	 * @param value - value of interval
 	 */
 	public void setInterval(Object type, long start, long end, double value) {
-		//TODO treat cost values - they are currently ignored
 		if (type == ACTUAL_WORK || type == WORK || type == REMAINING_WORK) {
 			if (value != 0 && !verifyBounds(start,end))
 				return;
@@ -1360,8 +1342,6 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	 */
 	public void setWorkContourType(int workContourType) {
 		newDetail().setWorkContour(ContourFactory.getInstance(workContourType));
-		// TODO need to actually transform contour correctly when changing
-
 	}
 	public final double getRemainingUnits() {
 		if (!isLabor())
@@ -1542,8 +1522,6 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	public long work(long start, long end) {
 		if (!isInRange(start,end))
 			return NO_VALUE_LONG;
-//		if (!isLabor()) // TODO this right?
-//			return 0;
 		Query query = Query.getInstance();
 		SelectFrom clause = SelectFrom.getInstance().whereInRange(start,end);
 		query.selectFrom(clause)
@@ -1567,7 +1545,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	public long actualWork(long start, long end) {
 		if (!isInRange(start,end))
 			return NO_VALUE_LONG;
-		if (!isLabor()) // TODO this right?
+		if (!isLabor())
 			return 0;
 		Query query = Query.getInstance();
 		SelectFrom clause = SelectFrom.getInstance().whereInRange(Math.max(start,detail.getStart()),Math.min(end,getStop()));
@@ -1580,7 +1558,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	public long remainingWork(long start, long end) {
 		if (!isInRange(start,end))
 			return NO_VALUE_LONG;
-		if (!isLabor()) // TODO this right?
+		if (!isLabor())
 			return 0;
 		Query query = Query.getInstance();
 		SelectFrom clause = SelectFrom.getInstance().whereInRange(Math.max(start,detail.getStop()),Math.min(end,getEnd()));
@@ -1604,9 +1582,7 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 
 
 	public long baselineWork(long start, long end) {
-//		if (!isInRange(start,end))
-//			return NO_VALUE_LONG;
-		if (!isLabor()) // TODO this right?
+		if (!isLabor())
 			return 0;
 		Query query = Query.getInstance();
 		SelectFrom clause = SelectFrom.getInstance().whereInRange(start,end);
@@ -1932,16 +1908,14 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 
 
 /**
- * Clone the detail and set it
+ * Clone the detail and set it.
  * @return cloned assignment detail
- */	private AssignmentDetail newDetail() {
- 		//TODO store off detail for undo
-//System.out.println("before clone " + new Date(detail.getStop()));
+ */
+	private AssignmentDetail newDetail() {
 		detail = (AssignmentDetail) detail.clone();
 		if (getTask() != null)
 			getTask().setDirty(true);
 		setDirty(true);
-//System.out.println("after clone " + new Date(detail.getStop()));
 		return detail;
 	}
 
@@ -2023,8 +1997,13 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 	public long getDependencyStart() {
 		return detail.getDependencyStart();
 	}
+	
+	/**
+	 * Sets the dependency start time.
+	 * This modifies the schedule directly as dependencyStart is transient.
+	 */
 	public void setDependencyStart(long dependencyStart) {
-		detail.setDependencyStart(dependencyStart); //TODO is it ok to modify schedule directly?  Should be if it is transient
+		detail.setDependencyStart(dependencyStart);
 	}
 
 	//for gantt bar formula

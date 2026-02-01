@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import { PreferencesStore } from '../services/PreferencesStore';
 import * as fs from 'fs';
+import type { PreferencesData } from '../types/PreferencesData';
 
 /**
  * Обработчик IPC для управления пользовательскими настройками.
@@ -36,7 +37,7 @@ export class PreferencesIpcHandler {
       }
     });
 
-    ipcMain.handle('preferences:save', (_, data: any) => {
+    ipcMain.handle('preferences:save', (_, data: PreferencesData) => {
       try {
         this.store.save(data);
         return { success: true };
@@ -51,7 +52,7 @@ export class PreferencesIpcHandler {
    */
   private static registerExternalHandlers(): void {
     // Экспорт настроек в файл
-    ipcMain.handle('preferences:export-to-file', (_, { path, data }: { path: string, data: any }) => {
+    ipcMain.handle('preferences:export-to-file', (_, { path, data }: { path: string; data: PreferencesData }) => {
       try {
         fs.writeFileSync(path, JSON.stringify(data, null, 2), 'utf8');
         return { success: true };

@@ -68,6 +68,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JOptionPane;
+
+import com.projectlibre1.server.access.ErrorLogger;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.collections.Closure;
@@ -166,12 +168,11 @@ public class ProjectFactory {
 					job.addSync();
 					session.schedule(job);
 					//job.waitResult();
-				}
-				DataUtil.setEnterpriseResources(resources,resourcePool);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
+			DataUtil.setEnterpriseResources(resources,resourcePool);
+		} catch (Exception e) {
+			ErrorLogger.log("Failed to set enterprise resources", e);
+		}
 		}
 
 		project.setInitialized(true);
@@ -197,7 +198,7 @@ public class ProjectFactory {
 				System.out.println("Project returned end lock");
 				return project;
 			} catch (Exception e) {//Forward exception + Alert
-				e.printStackTrace();
+				ErrorLogger.log("Failed to wait for project creation result", e);
 				return null;
 			}
 
@@ -205,7 +206,7 @@ public class ProjectFactory {
 			try {
 				return (Project)runnable.run();
 			} catch (Exception e) {
-				e.printStackTrace();
+				ErrorLogger.log("Failed to run project creation runnable", e);
 				return null;
 			}
 		}
@@ -315,12 +316,10 @@ public class ProjectFactory {
 			return (opt.isSync())?(Project)job.waitResult():null;
 		} catch (Exception e) {
 			// Log exception with details before returning null
-			System.err.println("❌ ERROR in ProjectFactory.openProject:");
-			System.err.println("   File: " + (opt.getFileName() != null ? opt.getFileName() : "null"));
-			System.err.println("   Sync: " + opt.isSync());
-			System.err.println("   Importer: " + (opt.getImporter() != null ? opt.getImporter() : "null"));
-			System.err.println("   Exception: " + e.getMessage());
-			e.printStackTrace();
+			ErrorLogger.log("ERROR in ProjectFactory.openProject: " + 
+				"File: " + (opt.getFileName() != null ? opt.getFileName() : "null") + ", " +
+				"Sync: " + opt.isSync() + ", " +
+				"Importer: " + (opt.getImporter() != null ? opt.getImporter() : "null"), e);
 			return null;
 		}
 	}
@@ -364,17 +363,13 @@ public class ProjectFactory {
 
 					if (subproject != null) {// is it possible it can be null?
 						parent.getSubprojectHandler().addSubproject(subproject, subprojectNode,creating, false);
-						if (subproject.isReadOnly()){
-							Alert.warn(MessageFormat.format(Messages.getString("Message.readOnlySubproject"),new Object[]{subproject.getName()}));
-						}
-//
-//						subproject.setGroupDirty(true);
-//						//TODO something more precise here
+					if (subproject.isReadOnly()){
+						Alert.warn(MessageFormat.format(Messages.getString("Message.readOnlySubproject"),new Object[]{subproject.getName()}));
 					}
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					throw e;
+				}
+			} catch (Exception e) {
+				ErrorLogger.log("Failed to load subproject", e);
+				throw e;
 				} finally {
 					subprojectTask.setFetching(false);
 					removeLoadingProject(id);
