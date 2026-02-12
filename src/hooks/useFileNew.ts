@@ -44,12 +44,14 @@ export const useFileNew = () => {
 
       const timestamp = new Date().toLocaleString('ru-RU')
       const name = `Новый проект ${timestamp}`
-      const startDate = new Date()
+      const start = new Date()
+      const finish = new Date(start.getTime() + 24 * 60 * 60 * 1000)
 
       const projectData = {
         name,
         description: 'Создано через React интерфейс',
-        startDate,
+        start,
+        finish,
       }
 
       console.log(`${LOG_TAG} Creating new project:`, projectData)

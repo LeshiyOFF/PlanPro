@@ -24,10 +24,13 @@ public class ProjectSyncRequestDto {
     
     private List<FrontendTaskDto> tasks;
     private List<FrontendResourceDto> resources;
-    
+    /** Полный актуальный список календарей проекта (в т.ч. без назначений); системные календари не входят. */
+    private List<CalendarSyncDto> projectCalendars;
+
     public ProjectSyncRequestDto() {
         this.tasks = new ArrayList<>();
         this.resources = new ArrayList<>();
+        this.projectCalendars = new ArrayList<>();
     }
     
     public Long getProjectId() { return projectId; }
@@ -39,10 +42,15 @@ public class ProjectSyncRequestDto {
     }
     
     public List<FrontendResourceDto> getResources() { return resources; }
-    public void setResources(List<FrontendResourceDto> resources) { 
-        this.resources = resources != null ? resources : new ArrayList<>(); 
+    public void setResources(List<FrontendResourceDto> resources) {
+        this.resources = resources != null ? resources : new ArrayList<>();
     }
-    
+
+    public List<CalendarSyncDto> getProjectCalendars() { return projectCalendars; }
+    public void setProjectCalendars(List<CalendarSyncDto> projectCalendars) {
+        this.projectCalendars = projectCalendars != null ? projectCalendars : new ArrayList<>();
+    }
+
     public int getTaskCount() { return tasks != null ? tasks.size() : 0; }
     public int getResourceCount() { return resources != null ? resources.size() : 0; }
 }

@@ -7,7 +7,7 @@ import { ContextMenuService } from '@/application/contextmenu/services/ContextMe
 import { ResourceContextMenuFactory } from '@/infrastructure/contextmenu/factories/ResourceContextMenuFactory'
 import { TaskContextMenuFactory } from '@/infrastructure/contextmenu/factories/TaskContextMenuFactory'
 import { logger } from '@/utils/logger'
-import type { CaughtError } from '@/errors/CaughtError'
+import type { Throwable } from '@/utils/errorUtils'
 import { toCaughtError, getCaughtErrorMessage } from '@/errors/CaughtError'
 
 /**
@@ -105,7 +105,7 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
           if (menu) {
             logger.info(`[ContextMenuProvider] Factory menu created with ${menu.items.length} items`)
           }
-        } catch (factoryError: unknown) {
+        } catch (factoryError) {
           const errMsg = factoryError instanceof Error ? factoryError.message : String(factoryError)
           logger.warning(`[ContextMenuProvider] Factory failed: ${errMsg}`)
           // Не показываем меню если фабрика не сработала и нет actions
@@ -118,8 +118,8 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setIsMenuVisible(true)
       }
 
-    } catch (criticalError: unknown) {
-      const caughtError = toCaughtError(criticalError)
+    } catch (criticalError) {
+      const caughtError = toCaughtError(criticalError as Throwable)
       const errMsg = getCaughtErrorMessage(caughtError)
       logger.error(`[ContextMenuProvider] CRITICAL ERROR: ${errMsg}`)
     }
@@ -142,8 +142,8 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
       if (menuItem?.action) {
         await menuItem.action.execute()
       }
-    } catch (error: unknown) {
-      const caughtError = toCaughtError(error)
+    } catch (error) {
+      const caughtError = toCaughtError(error as Throwable)
       const errorMessage = getCaughtErrorMessage(caughtError)
       logger.error(`Failed to execute menu action: ${errorMessage}`)
     }

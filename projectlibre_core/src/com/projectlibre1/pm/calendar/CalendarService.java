@@ -483,12 +483,15 @@ public class CalendarService {
 	/**
 	 * Добавление в derivedCalendars с проверкой дубликатов.
 	 * V5.0: Учитывает как валидные (uniqueId > 0), так и сломанные календари.
+	 * Дубликат также по паре (нормализованное имя, базовый календарь), чтобы один
+	 * и тот же логический календарь не добавлялся дважды с разными uniqueId.
 	 */
 	private void addToDerived(WorkingCalendar cal) {
 		if (derivedCalendars.contains(cal)) return;
 		
 		long newUniqueId = cal.getUniqueId();
 		String newNormalizedName = normalizeForComparison(cal.getName());
+		WorkCalendar newBase = cal.getBaseCalendar();
 		
 		for (Object obj : derivedCalendars) {
 			if (!(obj instanceof WorkingCalendar)) continue;
@@ -502,6 +505,14 @@ public class CalendarService {
 			// Дубликат по имени (оба сломанные с uniqueId <= 0)
 			if (newUniqueId <= 0 && existing.getUniqueId() <= 0) {
 				if (newNormalizedName.equals(normalizeForComparison(existing.getName()))) {
+					return;
+				}
+			}
+			
+			// Дубликат по (имя, база) — один логический календарь на пару
+			if (newNormalizedName.equals(normalizeForComparison(existing.getName()))) {
+				WorkCalendar existingBase = existing.getBaseCalendar();
+				if (newBase == existingBase || (newBase != null && newBase.equals(existingBase))) {
 					return;
 				}
 			}

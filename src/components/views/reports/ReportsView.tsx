@@ -55,10 +55,12 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
     return reportService.generateReportData(selectedReportType, tasks, resources, {
       projectName,
       projectManager,
+      userName: preferences.general?.userName,
+      companyName: preferences.general?.companyName,
       t: (key, defaultValue) => t(key, { defaultValue }) as string,
       currencySymbol,
     })
-  }, [selectedReportType, tasks, resources, reportService, projectName, projectManager, t, currencySymbol])
+  }, [selectedReportType, tasks, resources, reportService, projectName, projectManager, preferences.general, t, currencySymbol])
 
   const handleSaveManager = useCallback(() => {
     setProjectManager(managerInput.trim())

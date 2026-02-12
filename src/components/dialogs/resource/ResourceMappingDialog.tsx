@@ -41,8 +41,8 @@ const ACCESS_LEVELS = [
 export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
   mappings = [],
   availableFields = [],
-  editorTypes = EDITOR_TYPES.map(t => t.value),
-  accessLevels = ACCESS_LEVELS.map(l => l.value),
+  editorTypes: _editorTypes = EDITOR_TYPES.map(t => t.value),
+  accessLevels: _accessLevels = ACCESS_LEVELS.map(l => l.value),
   localProject = false,
   masterProject = false,
   onSave,

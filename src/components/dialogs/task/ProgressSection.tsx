@@ -132,23 +132,23 @@ interface RegularProgressProps {
 const RegularProgress: React.FC<RegularProgressProps> = ({
   inputValue, progress, onInputChange, onSliderChange, t,
 }) => (
-  <div className="space-y-4 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
-    <div className="flex justify-between items-center mb-2">
-      <Label className="text-sm font-semibold text-slate-700 tracking-wide">
+  <div className="space-y-3 p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+    <div className="flex justify-between items-center mb-1">
+      <Label className="text-xs font-semibold text-slate-700 tracking-wide">
         {t('task_props.progress', { defaultValue: 'Прогресс выполнения' })}
       </Label>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <Input
-          className="w-20 h-10 text-center font-bold text-base border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-white"
+          className="w-16 h-8 text-center font-bold text-sm border border-slate-200 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-white"
           type="text" value={inputValue} onChange={(e) => onInputChange(e.target.value)}
         />
-        <span className="text-base font-semibold text-slate-500">%</span>
+        <span className="text-sm font-semibold text-slate-500">%</span>
       </div>
     </div>
-    <div className="py-2">
-      <Slider value={[toPercent(progress)]} min={0} max={100} step={1} onValueChange={onSliderChange} className="py-3" />
+    <div className="py-1">
+      <Slider value={[toPercent(progress)]} min={0} max={100} step={1} onValueChange={onSliderChange} className="py-2" />
     </div>
-    <div className="flex justify-between text-xs text-slate-400 uppercase tracking-wider font-semibold pt-1">
+    <div className="flex justify-between text-[10px] text-slate-400 uppercase tracking-wider font-bold pt-0.5">
       <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
     </div>
   </div>

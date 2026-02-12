@@ -28,6 +28,10 @@ export interface NetworkNode extends CanvasRect {
   progress: number;
   isPinned?: boolean; // If true, node won't be moved by auto-layout
   displayId?: string; // Short ID like "1", "2"
+  // Hierarchy fields for summary task grouping
+  parentId?: string; // ID родительской суммарной задачи
+  childIds?: string[]; // ID дочерних задач (только для SUMMARY)
+  isCollapsed?: boolean; // Свёрнута ли группа (только для SUMMARY)
 }
 
 /**

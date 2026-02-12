@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, useCallback } from 'react'
 import { ProfessionalSheet, type ProfessionalSheetHandle } from './ProfessionalSheet'
 import { Task } from '@/store/project/interfaces'
 import { CellValue } from '@/types/sheet/CellValueTypes'
@@ -17,8 +17,14 @@ interface TaskSheetProps {
   onRowSelect?: (task: Task) => void;
   onDeleteTasks?: (taskIds: string[]) => void;
   disabledTaskIds?: string[];
+  /** Ключи i18n причин блокировки (для тултипа при связывании): taskId → ключ перевода */
+  disabledReasons?: Record<string, string>;
   className?: string;
   variant?: 'compact' | 'full';
+  /** Ref для синхронизации вертикального скролла с диаграммой Ганта */
+  scrollRef?: React.RefObject<HTMLDivElement>;
+  /** Callback при прокрутке для синхронизации */
+  onScroll?: () => void;
 }
 
 /**
@@ -32,17 +38,17 @@ export const TaskSheet = forwardRef<ProfessionalSheetHandle, TaskSheetProps>(({
   onRowSelect,
   onDeleteTasks,
   disabledTaskIds = [],
+  disabledReasons,
   className = '',
   variant = 'full',
+  scrollRef,
+  onScroll,
 }, ref) => {
-  const compactColumns = useTaskSheetCompactColumns(disabledTaskIds)
-  const fullColumns = useTaskSheetFullColumns()
-  const columns = variant === 'compact' ? compactColumns : fullColumns
-
   const handleDataChange = (rowId: string, field: string, value: CellValue) => {
     let finalValue: CellValue | string[] = value
-    if (field === 'progress' && typeof value === 'string') {
-      finalValue = toFraction(parseFloat(value) || 0)
+    if (field === 'progress') {
+      const raw = typeof value === 'string' ? parseFloat(value) : typeof value === 'number' ? value : NaN
+      if (!Number.isNaN(raw)) finalValue = toFraction(raw)
     } else if (field === 'predecessors' && typeof value === 'string') {
       finalValue = value.split(',').map(s => s.trim()).filter(s => s !== '')
     } else if ((field === 'startDate' || field === 'endDate') && value) {
@@ -59,6 +65,14 @@ export const TaskSheet = forwardRef<ProfessionalSheetHandle, TaskSheetProps>(({
     onTaskUpdate(rowId, { [field]: finalValue } as Partial<Task>)
   }
 
+  const handleProgressUpdate = useCallback((taskId: string, progress: number) => {
+    onTaskUpdate(taskId, { progress })
+  }, [onTaskUpdate])
+
+  const compactColumns = useTaskSheetCompactColumns(disabledTaskIds, disabledReasons)
+  const fullColumns = useTaskSheetFullColumns(handleProgressUpdate)
+  const columns = variant === 'compact' ? compactColumns : fullColumns
+
   const data = tasks as TaskRow[]
 
   return (
@@ -74,6 +88,8 @@ export const TaskSheet = forwardRef<ProfessionalSheetHandle, TaskSheetProps>(({
         onDeleteRows={onDeleteTasks}
         disabledRowIds={disabledTaskIds}
         className="border-none rounded-none"
+        scrollRef={scrollRef}
+        onScroll={onScroll}
       />
     </div>
   )

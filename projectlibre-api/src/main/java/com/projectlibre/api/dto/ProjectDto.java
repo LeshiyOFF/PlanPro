@@ -29,6 +29,8 @@ public class ProjectDto extends BaseDto {
     
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private LocalDateTime imposedFinishDate; // VB.1: Жёсткий дедлайн (imposed), null = автоматический режим
+    private Boolean isForward; // VB.12: Режим планирования (true = Schedule from Start, false = Schedule from End)
     private List<String> taskIds;
     private List<String> resourceIds;
     private String manager;
@@ -72,6 +74,30 @@ public class ProjectDto extends BaseDto {
     
     public LocalDateTime getEndDate() { return endDate; }
     public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    
+    /**
+     * VB.1: Получить imposed finish date (жёсткий дедлайн, заданный пользователем).
+     */
+    public LocalDateTime getImposedFinishDate() { return imposedFinishDate; }
+    
+    /**
+     * VB.1: Установить imposed finish date.
+     */
+    public void setImposedFinishDate(LocalDateTime imposedFinishDate) { 
+        this.imposedFinishDate = imposedFinishDate; 
+    }
+    
+    /**
+     * VB.12: Получить режим планирования проекта.
+     * @return true если Schedule from Start (forward), false если Schedule from End (backward)
+     */
+    public Boolean getIsForward() { return isForward; }
+    
+    /**
+     * VB.12: Установить режим планирования проекта.
+     * @param isForward true для Schedule from Start, false для Schedule from End
+     */
+    public void setIsForward(Boolean isForward) { this.isForward = isForward; }
     
     public List<String> getTaskIds() { return taskIds; }
     public void setTaskIds(List<String> taskIds) { this.taskIds = taskIds; }

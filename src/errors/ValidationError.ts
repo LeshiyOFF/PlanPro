@@ -4,6 +4,7 @@
  */
 
 import type { ValidationError as ValidationErrorType } from '@/types'
+import type { Throwable } from '@/utils/errorUtils'
 
 /**
  * Класс ошибки валидации с типизированным полем validationErrors
@@ -23,7 +24,7 @@ export class ValidationException extends Error {
   /**
    * Type Guard для проверки, является ли ошибка ValidationException
    */
-  static isValidationException(error: unknown): error is ValidationException {
+  static isValidationException(error: Throwable): error is ValidationException {
     return error instanceof ValidationException
   }
 

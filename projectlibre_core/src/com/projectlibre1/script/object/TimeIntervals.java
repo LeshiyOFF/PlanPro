@@ -60,8 +60,9 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.TimeZone;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.projectlibre1.timescale.CalendarUtil;
 
@@ -308,7 +309,7 @@ public class TimeIntervals implements Serializable,Cloneable{
 			return null;
 		}
 
-		Calendar c=Calendar.getInstance(DateUtils.UTC_TIME_ZONE, Locale.US);//DateTime.calendarInstance();
+		Calendar c=Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.US);//DateTime.calendarInstance();
 		c.setTimeInMillis(start);
 
 		//adapt start

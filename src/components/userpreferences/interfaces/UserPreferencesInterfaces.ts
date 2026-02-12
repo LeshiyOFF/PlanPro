@@ -21,6 +21,8 @@ export interface IGanttPreferences {
   accentColor: string;
   summaryColor: string;
   showDeltasInLabels: boolean;
+  /** VB.11: Подсвечивать задачи с отрицательным slack (просроченные) */
+  showNegativeSlack: boolean;
 }
 
 /**
@@ -52,7 +54,6 @@ export interface IGeneralPreferences {
   currency: string;
   language: string;
   defaultStandardRate: number;
-  defaultOvertimeRate: number;
 }
 
 /**
@@ -68,12 +69,21 @@ export interface ISchedulePreferences {
 }
 
 /**
+ * Режим расчёта длительности
+ * - 'working': Рабочие часы (по умолчанию, использует hoursPerDay)
+ * - 'calendar': Календарные сутки (24 часа в сутки)
+ */
+export type DurationCalculationMode = 'working' | 'calendar';
+
+/**
  * Настройки календаря (CalendarOptions в Java)
  */
 export interface ICalendarPreferences {
   hoursPerDay: number;
   hoursPerWeek: number;
   daysPerMonth: number;
+  /** Режим расчёта длительности: рабочие часы или календарные сутки */
+  durationCalculationMode: DurationCalculationMode;
 }
 
 /**
@@ -91,16 +101,15 @@ export interface IDisplayPreferences {
 }
 
 /**
- * Настройки редактирования
+ * Настройки редактирования.
+ * Примечание: effortDriven удалён (09.02.2026) - единый источник: schedule.effortDriven
  */
 export interface IEditingPreferences {
   autoCalculate: boolean;
   showDependencies: boolean;
   allowTaskDeletion: boolean;
   confirmDeletions: boolean;
-  autoLinkTasks: boolean;
   splitTasksEnabled: boolean;
-  effortDriven: boolean;
 }
 
 /**

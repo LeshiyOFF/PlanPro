@@ -17,6 +17,8 @@ export default defineConfig({
   // Настройка путей для(alias) для чистых импортов
   resolve: {
     alias: {
+      // Форк библиотеки Gantt для кастомного хедера
+      '@wamra/gantt-task-react': resolve(__dirname, 'src/lib/gantt-task-react'),
       '@': resolve(__dirname, 'src'),
       '@components': resolve(__dirname, 'src/components'),
       '@services': resolve(__dirname, 'src/services'),

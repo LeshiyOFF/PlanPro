@@ -9,6 +9,11 @@
     "openExistingDesc": "Load project from file (.pod, .mpp, .xml)",
     "recentProjects": "Recent projects",
     "recentProjectsDesc": "Return to recent work",
+    "openProject": "Open project",
+    "openProjectDesc": "Load project from file (.pod, .mpp, .xml)",
+    "openLastProject": "Open last project",
+    "openLastProjectDesc": "Return to last opened file",
+    "dropZone": "Drop project file here",
     "showAtStartup": "Show this window at startup",
     "about": "About",
     "about_title": "About PlanPro",
@@ -54,7 +59,6 @@
     "currency": "Currency",
     "language": "Interface Language",
     "std_rate": "Default Standard Rate",
-    "ot_rate": "Default Overtime Rate",
     "default_calendar": "Default Calendar",
     "honor_required_dates": "Honor required dates",
     "trusted_locations": "Trusted Locations",
@@ -194,6 +198,7 @@
   },
   "sheets": {
     "id": "ID",
+    "header_sort_filter_hint": "Click to sort and filter",
     "task_info": "Task / Info",
     "name": "Name",
     "duration": "Duration",
@@ -218,6 +223,9 @@
     "available": "Available %",
     "status": "Status",
     "workload": "Workload",
+    "actual_hours": "Actual Hours",
+    "planned_hours": "Planned Hours",
+    "variance_hours": "Variance (hours)",
     "resources": "Resources",
     "work": "Work",
     "material": "Material",
@@ -305,7 +313,56 @@
     "calc_help_title": "How are resources calculated?",
     "calc_help_work": "Work (People): Cost = Rate * Time. (e.g.: $50/h * 2h = $100)",
     "calc_help_material": "Material: Cost = Rate * Quantity. Time does NOT affect price. (e.g.: $2/pcs * 500pcs = $1000)",
-    "calc_help_cost": "Cost: Fixed amount. Just added to the task once (tickets, fees)."
+    "calc_help_cost": "Cost: Fixed amount. Just added to the task once (tickets, fees).",
+    "tab_advanced": "Advanced",
+    "advanced_disabled_hint": "Enable \"Honor required dates\" to activate",
+    "constraints_section": "Date Constraints",
+    "constraint_type": "Constraint Type",
+    "constraint_date": "Constraint Date",
+    "constraint_disabled_hint": "Enable \"Honor required dates\" in project options to edit.",
+    "constraint_disabled_full_hint": "Enable \"Honor required dates\" in project options to use date constraints."
+  },
+  "constraints": {
+    "asap": {
+      "label": "As Soon As Possible (ASAP)",
+      "description": "Task starts at the earliest possible date considering dependencies.\n\nUsed by default for flexible scheduling.",
+      "hint": "Task will start as early as possible considering dependencies. Default mode for flexible scheduling."
+    },
+    "alap": {
+      "label": "As Late As Possible (ALAP)",
+      "description": "Task starts as late as possible without delaying project end date.\n\nUsed to optimize resource usage.",
+      "hint": "Task will start as late as possible without delaying project completion. Used for delayed start."
+    },
+    "mso": {
+      "label": "Must Start On (MSO)",
+      "description": "Task MUST start on the specified date, regardless of dependencies.\n\nSTRICT constraint! May create conflicts with other tasks.\n\nRequires date selection.",
+      "hint": "Task MUST start exactly on the specified date. Violation will cause a conflict (red highlight on chart)."
+    },
+    "mfo": {
+      "label": "Must Finish On (MFO)",
+      "description": "Task MUST finish on the specified date.\n\nSTRICT constraint! May create schedule conflicts.\n\nRequires date selection.",
+      "hint": "Task MUST finish exactly on the specified date. Violation will cause a conflict."
+    },
+    "snet": {
+      "label": "Start No Earlier Than (SNET)",
+      "description": "Task cannot start before the specified date, but can start later (if delayed).\n\nSofter than MSO, allows flexibility.\n\nRequires date selection.",
+      "hint": "Task cannot start before the specified date, but can start later. Semi-flexible constraint."
+    },
+    "snlt": {
+      "label": "Start No Later Than (SNLT)",
+      "description": "Task must start no later than the specified date.\n\nUsed to control work start deadlines.\n\nRequires date selection.",
+      "hint": "Task cannot start later than the specified date, but can start earlier. Semi-flexible constraint."
+    },
+    "fnet": {
+      "label": "Finish No Earlier Than (FNET)",
+      "description": "Task cannot finish before the specified date.\n\nUseful for synchronization with external events or deliveries.\n\nRequires date selection.",
+      "hint": "Task cannot finish before the specified date. Semi-flexible constraint."
+    },
+    "fnlt": {
+      "label": "Finish No Later Than (FNLT)",
+      "description": "Task must finish no later than the specified date.\n\nUsed for hard deadlines with some scheduling flexibility.\n\nRequires date selection.",
+      "hint": "Task cannot finish later than the specified date. Semi-flexible constraint."
+    }
   },
   "calendar": {
     "milestone": "Milestone"
@@ -340,7 +397,302 @@
     "critical_path": "Critical Path",
     "critical_path_tip": "Chain of tasks determining the project end date. Delaying any of these will delay the entire project.",
     "regular_task": "Regular Task",
-    "regular_task_tip": "Tasks with time slack. They can be slightly moved without risking the overall project deadline."
+    "regular_task_tip": "Tasks with time slack. They can be slightly moved without risking the overall project deadline.",
+    "understood": "Got it",
+    "gantt": {
+      "title": "Gantt Chart",
+      "subtitle": "Project Timeline Planning",
+      "taskTypes": {
+        "title": "Task Types",
+        "normal": "Regular Tasks",
+        "normalDesc": "(blue bars): Atomic work items with fixed duration",
+        "summary": "Summary Tasks",
+        "summaryDesc": "(black brackets): Groups of subtasks. Their dates are calculated automatically",
+        "milestone": "Milestones",
+        "milestoneDesc": "(diamonds): Control points with zero duration",
+        "note": "Summary tasks cannot be dragged — they depend on their children"
+      },
+      "criticalPath": {
+        "title": "Critical Path (Pulse Mode)",
+        "what": "What is it:",
+        "whatDesc": "Sequence of tasks that determine the minimum project duration",
+        "how": "How to activate:",
+        "howDesc": "Click the 'Pulse' button (Activity icon) on the toolbar",
+        "visual": "Visualization:",
+        "visualDesc": "Critical tasks are highlighted in red",
+        "slack": "Slack Time:",
+        "slackDesc": "Tooltip shows how many days a task can be delayed"
+      },
+      "dependencies": {
+        "title": "Task Links",
+        "desc": "Tasks can be linked together with arrows. Linked tasks execute sequentially: the next task won't start until the previous one is completed.",
+        "visual": "Arrows visually show the order of work execution and help control the sequence of project phases.",
+        "noSummary": "Cannot link regular task to summary task",
+        "noCycle": "Cannot create circular dependency"
+      },
+      "baseline": {
+        "title": "Baseline",
+        "why": "Purpose:",
+        "whyDesc": "Captures the original schedule for comparison with current state",
+        "how": "How to create:",
+        "howDesc": "'Set Baseline' button (Pin icon) → baseline manager",
+        "visual": "Visualization:",
+        "visualDesc": "Gray bars under current tasks show original dates",
+        "deviation": "Deviations:",
+        "deviationDesc": "Tooltip shows difference in days (e.g., '[+3d]')"
+      },
+      "colorModes": {
+        "title": "Color Modes",
+        "single": "Single Color:",
+        "singleDesc": "All tasks in your chosen color (settings → Task Color)",
+        "rainbow": "Rainbow:",
+        "rainbowDesc": "Each task gets a unique color based on ID",
+        "status": "By Status:",
+        "statusDesc": "Gray (not started) → Yellow (started) → Blue (in progress) → Green (completed)"
+      },
+      "calendar": {
+        "title": "Calendar Conflicts",
+        "conflict": "If a task is assigned on a non-working day per resource calendar, a warning appears.",
+        "example": "Example: Task on Saturday, but resource 'John' has 5-day work week",
+        "calculation": "System considers working calendars when calculating duration."
+      }
+    },
+    "network": {
+      "title": "Network Diagram",
+      "subtitle": "Project Logic Analysis",
+      "what": {
+        "title": "What is it",
+        "nodes": "Nodes:",
+        "nodesDesc": "Rectangles with task name, start and finish dates",
+        "arrows": "Arrows:",
+        "arrowsDesc": "Show the sequence of work execution",
+        "critical": "Critical Path:",
+        "criticalDesc": "Nodes with red border",
+        "goal": "Purpose: Analyze project logic, find bottlenecks"
+      },
+      "reading": {
+        "title": "How to Read the Diagram",
+        "sequential": "Arrow to the right — sequential dependency",
+        "parallel": "Parallel nodes without links — tasks can be done simultaneously",
+        "critical": "Long chain of red nodes — critical path (delay of any task shifts the entire project)"
+      },
+      "features": {
+        "title": "Features",
+        "doubleClick": "Double-click on node → open task properties",
+        "layout": "Auto-layout nodes (Layout button)",
+        "zoom": "Zoom for large projects"
+      }
+    },
+    "wbs": {
+      "title": "Work Breakdown Structure",
+      "subtitle": "Hierarchical Project Structure",
+      "hierarchy": {
+        "title": "Project Structure",
+        "desc": "WBS (Work Breakdown Structure) is a visual representation of task hierarchy as a tree.",
+        "purpose": "Allows viewing project structure, task grouping by phases, and nesting levels.",
+        "wbsCode": "WBS Numbering:",
+        "wbsCodeDesc": "Automatic numbering (1.2.3)",
+        "collapse": "Expand/collapse branches for convenient project navigation"
+      }
+    },
+    "resourceUsage": {
+      "title": "Resource Usage",
+      "subtitle": "Resource Utilization Analysis",
+      "columns": {
+        "title": "Table Columns",
+        "name": "Resource Name",
+        "nameDesc": "Employee or material name",
+        "assigned": "Assigned",
+        "assignedDesc": "Total resource utilization percentage",
+        "available": "Available",
+        "availableDesc": "Free resource capacity",
+        "status": "Status",
+        "statusDesc": "Free / Busy / Overloaded",
+        "workload": "Workload",
+        "workloadDesc": "Utilization details"
+      },
+      "overallocation": {
+        "title": "Resource Overload",
+        "desc": "Overload occurs when total resource utilization exceeds 100%.",
+        "indicator": "Red color",
+        "indicatorDesc": "highlights overloaded resources.",
+        "fix": "How to fix:",
+        "solution": "Redistribute resource utilization percentages across tasks or assign additional workers."
+      }
+    },
+    "taskUsage": {
+      "title": "Task Usage",
+      "subtitle": "Resource Assignment to Tasks",
+      "purpose": {
+        "title": "Purpose",
+        "desc": "Task table with resource assignment capabilities.",
+        "main": "Main function — distributing resources across tasks and specifying the utilization percentage for each resource on a specific task."
+      },
+      "resources": {
+        "title": "Working with Resources",
+        "assign": "Click on 'Resources' column opens assignment dialog",
+        "percent": "Specify utilization percentage for each assigned resource",
+        "progress": "Edit task completion progress",
+        "dates": "Change start and finish dates (for regular tasks)"
+      }
+    },
+    "tracking": {
+      "title": "Tracking",
+      "subtitle": "Read-only Mode",
+      "readonly": {
+        "title": "Monitoring Mode",
+        "purpose": "This view is designed exclusively for visual tracking of progress and analysis of deviations from the baseline.",
+        "blocked": "Blocked:",
+        "noDrag": "Changing dates via drag and drop",
+        "noProgress": "Modifying task progress",
+        "noEdit": "Editing via context menu",
+        "hint": "Use the main Gantt chart to make changes"
+      },
+      "planVsFact": {
+        "title": "Plan vs Actual",
+        "baseline": "Bottom gray bar:",
+        "baselineDesc": "Baseline",
+        "current": "Top colored bar:",
+        "currentDesc": "Current status",
+        "green": "Green fill:",
+        "greenDesc": "Completed work",
+        "shift": "Bar offset shows schedule deviation"
+      },
+      "metrics": {
+        "title": "Tracking Metrics",
+        "delay": "Delay:",
+        "delayDesc": "Days behind baseline (shown as '[+Nd]')",
+        "ahead": "Ahead:",
+        "aheadDesc": "Days ahead of schedule (shown as '[-Nd]')",
+        "progress": "% Complete:",
+        "progressDesc": "Execution progress (green fill on the bar)"
+      }
+    },
+    "calendar": {
+      "title": "Calendar View",
+      "subtitle": "Tasks on Calendar Grid",
+      "visualization": {
+        "title": "Visualization",
+        "monthly": "Classic monthly calendar",
+        "tasks": "Tasks displayed as bars on dates",
+        "colors": "Bar color matches task color"
+      },
+      "dragDrop": {
+        "title": "Drag & Drop",
+        "move": "Drag tasks to other dates with mouse",
+        "duration": "Task duration is preserved when moving",
+        "conflict": "Dependency conflict warning dialog appears when needed"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "subtitle": "Project Summary Information",
+      "types": {
+        "title": "Report Types",
+        "project": "By Project:",
+        "projectDesc": "General info, deadlines, budget",
+        "resources": "By Resources:",
+        "resourcesDesc": "Workload, cost, calendars",
+        "tasks": "By Tasks:",
+        "tasksDesc": "Critical path, delays, milestones",
+        "export": "Export:",
+        "exportDesc": "PDF (via Print/Export buttons)"
+      },
+      "management": {
+        "title": "Report Management",
+        "print": "Print:",
+        "printDesc": "Print button opens system print dialog",
+        "pdf": "PDF Export:",
+        "pdfDesc": "Save report as PDF file",
+        "manager": "Project Manager:",
+        "managerDesc": "Specify manager name for reports"
+      }
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Application Configuration",
+      "general": {
+        "title": "General",
+        "language": "Interface language",
+        "dateFormat": "Date and time format",
+        "currency": "Currency",
+        "theme": "Theme"
+      },
+      "scheduling": {
+        "title": "Scheduling",
+        "hoursPerDay": "Hours per work day",
+        "daysPerWeek": "Days per work week",
+        "rules": "Scheduling rules:",
+        "fixedDuration": "Fixed Duration",
+        "fixedUnits": "Fixed Units",
+        "fixedWork": "Fixed Work"
+      },
+      "gantt": {
+        "title": "Gantt Chart",
+        "colorModes": "Color modes (single, rainbow, by status)",
+        "rowHeight": "Row height",
+        "arrows": "Show dependency arrows",
+        "weekends": "Highlight weekends"
+      }
+    },
+    "taskSheet": {
+      "title": "Task Sheet",
+      "subtitle": "Tabular View of Project Tasks",
+      "columns": {
+        "title": "Table Columns",
+        "id": "ID",
+        "idDesc": "Unique task identifier",
+        "name": "Name",
+        "nameDesc": "Task name (double-click → properties)",
+        "duration": "Duration",
+        "durationDesc": "Execution duration",
+        "progress": "Progress",
+        "progressDesc": "Completion percentage (0-100%)",
+        "start": "Start",
+        "startDesc": "Task start date",
+        "finish": "Finish",
+        "finishDesc": "Task completion date",
+        "slack": "Slack",
+        "slackDesc": "Time buffer before critical path"
+      }
+    },
+    "resourceSheet": {
+      "title": "Resource Sheet",
+      "subtitle": "Project Resource Management",
+      "types": {
+        "title": "Resource Types",
+        "work": "Work",
+        "workDesc": "People, specialists, workers",
+        "material": "Material",
+        "materialDesc": "Consumables, components",
+        "cost": "Cost",
+        "costDesc": "Fixed expenses (rent, licenses)"
+      },
+      "columns": {
+        "title": "Table Columns",
+        "name": "Name",
+        "nameDesc": "Resource name",
+        "type": "Type",
+        "typeDesc": "Work / Material / Cost",
+        "unit": "Unit",
+        "unitDesc": "For materials (pcs, kg, m³)",
+        "maxUnits": "Max Units",
+        "maxUnitsDesc": "Availability in % or quantity",
+        "rate": "Std Rate",
+        "rateDesc": "Cost per hour or unit",
+        "calendar": "Calendar",
+        "calendarDesc": "Work calendar (for work resources)",
+        "group": "Group",
+        "groupDesc": "Resource category"
+      },
+      "calendars": {
+        "title": "Work Calendars",
+        "personal": "Each work resource can have its own work calendar",
+        "default": "Default:",
+        "defaultDesc": "8 hours per day, 5 days per week",
+        "note": "Calendar affects task duration calculations"
+      }
+    }
   },
   "ribbon": {
     "tabs": {
@@ -467,6 +819,7 @@
     "pulse": "Pulse (Critical Path)",
     "calculating": "Calculating critical path...",
     "save_baseline": "Save Baseline",
+    "project_deadline": "Project Deadline",
     "more": "More",
     "view_label": "View",
     "zoom_label": "Zoom",
@@ -476,11 +829,49 @@
     "controls_hint": "Mouse wheel to zoom • Drag to pan",
     "task_list": "Task List",
     "select_predecessor": "Select predecessor",
+    "link_disabled_self": "Cannot link a task to itself",
+    "link_disabled_summary": "Cannot link to a summary task",
+    "link_disabled_cycle": "Link would create a dependency cycle",
     "new_task_name": "New Task #{{number}}",
     "view_day": "Day",
     "view_week": "Week",
     "view_month": "Month",
-    "root_level": "Root"
+    "root_level": "Root",
+    "dependency_conflict_title": "Dependency date conflict",
+    "dependency_conflict_subtitle": "Successor starts before predecessor ends",
+    "dependency_conflict_subtitle_same_day": "Successor starts on the same day the predecessor ends",
+    "dependency_conflict_predecessor": "Predecessor",
+    "dependency_conflict_successor": "Successor",
+    "dependency_conflict_min_date": "Minimum successor start date",
+    "dependency_conflict_leave_unchanged": "Leave unchanged",
+    "dependency_conflict_adjust_dates": "Adjust dates to match link",
+    "dependency_conflict_remove_link": "Remove link",
+    "dependency_conflict_i_know": "I know what I'm doing",
+    "dependency_conflict_diagram_caption": "Date conflict",
+    "dependency_conflict_consequences_title": "What's wrong",
+    "dependency_conflict_consequences_body": "The successor starts before the predecessor ends. This breaks dependency logic: critical path and reports may be calculated incorrectly, and project duration and dates will become invalid.",
+    "dependency_conflict_consequences_body_same_day": "In day-based scheduling, the successor should start on the next working day after the predecessor ends. Starting on the same calendar day is considered overlap and may lead to incorrect critical path and report calculations.",
+    "dependency_conflict_consequences_leave_title": "If you leave it as is",
+    "dependency_conflict_consequences_leave_body": "The link will contradict the dates. The schedule will be incorrect, with possible errors on recalc, export, and in reports.",
+    "dependency_conflict_consequences_leave_body_same_day": "The link will be marked as having a date conflict. It is recommended to start the successor on the day after the predecessor ends.",
+    "dependency_conflict_i_know_same_day": "I know what I'm doing",
+    "dependency_conflict_subtitle_before_predecessor": "Successor starts before predecessor",
+    "dependency_conflict_subtitle_during_or_end": "Successor starts during predecessor or when it ends",
+    "dependency_conflict_consequences_body_before_predecessor": "The successor starts before the predecessor has started. This breaks dependency logic: critical path and reports may be calculated incorrectly, and project duration and dates will become invalid.",
+    "dependency_conflict_consequences_body_during_or_end": "The successor starts during the predecessor or on its end date. By the link it should start the day after the predecessor ends. Otherwise critical path and reports may be calculated incorrectly.",
+    "dependency_conflict_consequences_leave_body_before_predecessor": "The link will contradict the dates. The schedule will be incorrect, with possible errors on recalc, export, and in reports.",
+    "dependency_conflict_consequences_leave_body_during_or_end": "The link will contradict the dates. It is recommended to start the successor on the day after the predecessor ends.",
+    "confirm_conflict_title": "Confirm action",
+    "confirm_conflict_subtitle": "Creating link with date conflict",
+    "confirm_conflict_subtitle_same_day": "Successor starts on the same day the predecessor ends",
+    "confirm_conflict_message": "Dates will not be auto-corrected. The link will be created as is. This may lead to incorrect schedule display and critical path calculation. Continue?",
+    "confirm_conflict_message_same_day": "Dates will remain unchanged. Per scheduling rules, the successor is recommended to start the next day. Do you confirm keeping the current dates?",
+    "confirm_conflict_subtitle_before_predecessor": "Successor starts before predecessor",
+    "confirm_conflict_subtitle_during_or_end": "Successor starts during predecessor or when it ends",
+    "confirm_conflict_message_before_predecessor": "Dates will not be auto-corrected. The link will be kept as is. This may lead to incorrect schedule display and critical path calculation. Continue?",
+    "confirm_conflict_message_during_or_end": "Dates will remain unchanged. Per scheduling rules, the successor is recommended to start the day after the predecessor ends. Do you confirm keeping the current dates?",
+    "confirm_conflict_confirm": "Confirm",
+    "confirm_conflict_diagram_caption": "Without date auto-correction"
   },
   "tracking_gantt": {
     "title": "Tracking Gantt",
@@ -564,6 +955,14 @@
     "cost_material": "Materials",
     "cost_fixed": "Fixed Costs",
     "cost_total": "TOTAL"
+  },
+  "toolbar": {
+    "recalculate_project": "Recalculate",
+    "recalculate_tooltip": "Recalculate project schedule (F9)",
+    "no_project_title": "No project open",
+    "no_project_desc": "Open a project to recalculate.",
+    "recalculate_success": "Recalculation complete",
+    "recalculate_success_desc": "Project schedule has been updated."
   },
   "view_controls": {
     "zoom_in": "Zoom In",

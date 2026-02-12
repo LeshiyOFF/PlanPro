@@ -28,6 +28,8 @@ export interface IUseGanttStateResult {
  */
 interface IUseGanttStateParams {
   readonly initialDate?: Date;
+  /** GANTT-SYNC: Callback для получения актуальной даты при сбросе (minTaskDate) */
+  readonly getResetDate?: () => Date;
 }
 
 /**
@@ -35,6 +37,7 @@ interface IUseGanttStateParams {
  */
 export const useGanttState = ({
   initialDate,
+  getResetDate,
 }: IUseGanttStateParams = {}): IUseGanttStateResult => {
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
   const [showToday, setShowToday] = useState(true)
@@ -54,11 +57,13 @@ export const useGanttState = ({
     setZoomLevel(prev => Math.max(prev - 0.1, 0.5))
   }, [])
 
+  // GANTT-SYNC: При сбросе используем getResetDate() для получения minTaskDate вместо "сегодня"
   const handleFitToScreen = useCallback(() => {
     setZoomLevel(1)
-    setCurrentDate(new Date())
+    const resetDate = getResetDate ? getResetDate() : new Date()
+    setCurrentDate(resetDate)
     setShowToday(true)
-  }, [])
+  }, [getResetDate])
 
   return {
     viewMode,

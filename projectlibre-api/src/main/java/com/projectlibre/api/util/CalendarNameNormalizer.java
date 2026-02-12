@@ -58,9 +58,8 @@ public final class CalendarNameNormalizer {
     /**
      * Санитизация для использования в ID — СОХРАНЯЕТ ОРИГИНАЛЬНЫЙ РЕГИСТР.
      * Удаляет спецсимволы, заменяет пробелы на подчёркивания.
-     * 
-     * V2.0: Не делает lowercase — это критическое исправление бага!
-     * 
+     * V2.1: Разрешён символ '/' — предотвращает искажение имён типа "График 2/2" → "График 22".
+     *
      * @param name исходное имя
      * @return санитизированное имя для ID с сохранением регистра
      */
@@ -68,9 +67,8 @@ public final class CalendarNameNormalizer {
         if (name == null || name.trim().isEmpty()) {
             return "unnamed";
         }
-        
         return name.trim()
-            .replaceAll("[^a-zA-Zа-яА-ЯёЁ0-9\\s-]", "")
+            .replaceAll("[^a-zA-Zа-яА-ЯёЁ0-9\\s\\-/]", "")
             .replaceAll("\\s+", "_");
     }
     

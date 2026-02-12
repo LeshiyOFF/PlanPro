@@ -6,7 +6,10 @@ import { IConfigService } from './interfaces/IConfigService'
 import { ContentLoaderService } from './ContentLoaderService'
 import { UIErrorHandler } from './UIErrorHandler'
 import { SplashManager } from './SplashManager'
+import { PreferencesStore } from './PreferencesStore'
 import * as process from 'process'
+
+const DEFAULT_ACCENT_HEX = '#1F1F1F'
 
 /**
  * Менеджер окон Electron приложения.
@@ -25,6 +28,14 @@ export class WindowManager implements IWindowManager {
   }
 
   /**
+   * Показать splash сразу после app.whenReady (до запуска Java).
+   */
+  public showSplash(): void {
+    const accent = this.getAccentFromPreferences()
+    this.splashManager?.createSplash(accent, this.getPreloadPath())
+  }
+
+  /**
    * Создание главного окна приложения.
    */
   public createMainWindow(): void {
@@ -33,8 +44,9 @@ export class WindowManager implements IWindowManager {
       return
     }
 
-    // 1. Создаем заставку
-    this.splashManager?.createSplash()
+    // 1. Создаем заставку (если ещё не создана — создаём с акцентом из настроек)
+    const accent = this.getAccentFromPreferences()
+    this.splashManager?.createSplash(accent, this.getPreloadPath())
 
     // 2. Создаем основное окно (скрытым)
     this.mainWindow = new BrowserWindow({
@@ -53,8 +65,10 @@ export class WindowManager implements IWindowManager {
       this.splashManager?.destroySplash()
       this.mainWindow?.show()
       
-      // Всегда открываем консоль для диагностики
-      this.mainWindow?.webContents.openDevTools({ mode: 'detach' });
+      // DevTools: в разработке или при локальной сборке (не CI)
+      if (this.configService.isDevelopment() || !process.env.CI) {
+        this.mainWindow?.webContents.openDevTools({ mode: 'detach' });
+      }
     })
   }
 
@@ -66,16 +80,20 @@ export class WindowManager implements IWindowManager {
   }
 
   /**
+   * Путь к preload-скрипту (общий для главного окна и splash).
+   */
+  private getPreloadPath(): string {
+    return app.isPackaged
+      ? join(app.getAppPath(), 'dist-app/electron/preload.js')
+      : join(__dirname, 'preload.js');
+  }
+
+  /**
    * Формирование настроек окна.
    */
   private getWindowOptions(): Electron.BrowserWindowConstructorOptions {
-    // Определяем путь к preload.js более надежным способом
-    const preloadPath = app.isPackaged 
-      ? join(app.getAppPath(), 'dist-app/electron/preload.js')
-      : join(__dirname, '../preload.js');
-
+    const preloadPath = this.getPreloadPath();
     console.log(`[WindowManager] Using preload path: ${preloadPath}`);
-
     return {
       width: 1200,
       height: 800,
@@ -86,7 +104,7 @@ export class WindowManager implements IWindowManager {
         contextIsolation: true,
         preload: preloadPath
       }
-    }
+    };
   }
 
   /**
@@ -127,5 +145,25 @@ export class WindowManager implements IWindowManager {
     const iconPath = join(this.configService.getResourcesPath(), '../assets', iconFile)
 
     return fs.existsSync(iconPath) ? iconPath : undefined
+  }
+
+  /**
+   * Чтение акцентного цвета из user_preferences.json (display.accentColor).
+   */
+  private getAccentFromPreferences(): string {
+    try {
+      const store = new PreferencesStore()
+      const data = store.load()
+      if (!data || typeof data !== 'object' || !data.display || typeof data.display !== 'object') {
+        return DEFAULT_ACCENT_HEX
+      }
+      const display = data.display as Record<string, unknown>
+      const accent = display.accentColor
+      return typeof accent === 'string' && /^#[0-9A-Fa-f]{6}$/.test(accent)
+        ? accent
+        : DEFAULT_ACCENT_HEX
+    } catch {
+      return DEFAULT_ACCENT_HEX
+    }
   }
 }

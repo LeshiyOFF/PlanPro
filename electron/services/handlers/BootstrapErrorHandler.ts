@@ -19,7 +19,7 @@ export class BootstrapErrorHandler {
     
     const result = dialog.showMessageBoxSync({
       type: 'error',
-      title: 'ProjectLibre - Startup Failed',
+      title: 'ПланПро - Ошибка запуска',
       message: 'The application failed to start.',
       detail: message,
       buttons: ['Exit', 'Open Logs Folder'],
@@ -48,7 +48,7 @@ export class BootstrapErrorHandler {
       message = 'Java backend did not respond in time.\n\n' +
                 'Possible reasons:\n' +
                 '1. Port conflict: Check if port 8080-8083 are available.\n' +
-                '2. Another instance of ProjectLibre is already running.\n' +
+                '2. Another instance of ПланПро is already running.\n' +
                 '3. Firewall is blocking Java process.\n' +
                 '4. Java Runtime (JRE) is missing or corrupted.\n' +
                 '5. JAR file corruption or dependency issues.\n\n' +
@@ -71,7 +71,7 @@ export class BootstrapErrorHandler {
     } else if (message.includes('Executable JAR not found')) {
       message = 'Java application JAR file was not found.\n\n' +
                 'This indicates an incomplete installation or corrupted application files.\n\n' +
-                'Please reinstall ProjectLibre.\n\n' +
+                'Please reinstall ПланПро.\n\n' +
                 '📋 Logs location: ' + logsPath + '\n' +
                 'Technical details: ' + error.message;
     }

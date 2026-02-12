@@ -16,6 +16,8 @@ export interface IReportData {
   generatedAt: Date;
   projectName: string;
   projectManager: string;
+  /** Название компании из настроек пользователя */
+  companyName?: string;
   reportTitle: string;
   type: ReportType;
   sections: IReportSection[];

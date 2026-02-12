@@ -640,8 +640,14 @@ public final class Assignment implements Schedule, Association, Allocation, Dela
 
 
 		long duration = remainingOnly ? detail.getRemainingDuration() : detail.getDuration();
+		// ELAPSED-PROPAGATION: Если родительская задача использует календарную длительность,
+		// передаём флаг ELAPSED в calendar.add() для простого сложения start+duration
+		Task parentTask = getTask();
+		if (parentTask instanceof NormalTask && ((NormalTask) parentTask).isElapsed()) {
+			duration = Duration.setAsElapsed(duration);
+		}
 		long amount = (ahead ? duration : -duration);
-		return  getEffectiveWorkCalendar().add(start,amount, useSooner);
+		return getEffectiveWorkCalendar().add(start, amount, useSooner);
 	}
 
 

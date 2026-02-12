@@ -3,6 +3,7 @@
  */
 
 // Импортируем конкретные типы
+import type { JsonObject } from '../json-types'
 import type {
   MessageBoxOptions,
   FileDialogOptions,
@@ -20,7 +21,7 @@ export interface ProjectEvent {
   type: 'task-created' | 'task-updated' | 'task-deleted' |
          'resource-created' | 'resource-updated' | 'resource-deleted' |
          'assignment-created' | 'assignment-updated' | 'assignment-deleted'
-  payload: unknown
+  payload: JsonObject
   timestamp: Date
 }
 
@@ -43,11 +44,11 @@ export type JavaCommand =
 
 // Типы для Electron API с конкретными типами
 export interface ElectronAPI {
-  javaExecute: (command: JavaCommand, args?: string[]) => Promise<unknown>
+  javaExecute: (command: JavaCommand, args?: string[]) => Promise<JsonObject>
   getAppVersion: () => Promise<string>
-  showMessageBox: (options: MessageBoxOptions) => Promise<unknown>
-  showFileDialog: (options: FileDialogOptions) => Promise<unknown>
-  showProgressDialog: (options: ProgressDialogOptions) => Promise<unknown>
+  showMessageBox: (options: MessageBoxOptions) => Promise<JsonObject>
+  showFileDialog: (options: FileDialogOptions) => Promise<JsonObject>
+  showProgressDialog: (options: ProgressDialogOptions) => Promise<JsonObject>
   openExternal: (url: string) => Promise<void>
   onJavaStarted: (callback: () => void) => void
   onJavaStopped: (callback: () => void) => void

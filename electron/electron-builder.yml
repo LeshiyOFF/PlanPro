@@ -1,5 +1,5 @@
-appId: com.projectlibre.app
-productName: ProjectLibre
+appId: com.prosystems.planpro
+productName: ПланПро
 directories:
   output: release
 win:
@@ -40,3 +40,19 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
+linux:
+  target:
+    - deb
+  category: Office
+  maintainer: ООО Просистемы <info@prosystems.ru>
+  synopsis: Профессиональное ПО для управления проектами
+  description: ПланПро - система управления проектами для малого и среднего бизнеса
+  desktop:
+    Name: ПланПро
+    Comment: Управление проектами
+    Categories: Office;ProjectManagement;
+deb:
+  depends:
+    - libgtk-3-0
+    - libnotify4
+    - libnss3

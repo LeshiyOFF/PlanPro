@@ -28,9 +28,10 @@ export class UserPreferencesService {
   private initialized: boolean = false
 
   private constructor() {
-    this.initializationPromise = this.loadPreferences().then(() => {
+    this.initializationPromise = (async () => {
+      await this.loadPreferences()
       this.initialized = true
-    })
+    })()
   }
 
   public static getInstance(): UserPreferencesService {
@@ -172,7 +173,17 @@ export class UserPreferencesService {
   }
 
   private notifyListeners(event: IPreferencesChangeEvent): void {
-    this.listeners.forEach(l => { try { l(event) } catch (e) {} })
+    this.listeners.forEach((l) => {
+      try {
+        l(event)
+      } catch (e) {
+        // Игнорируем ошибки подписчика, чтобы не прерывать уведомление остальных
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.warn('Preferences listener error', e)
+        }
+      }
+    })
   }
 
   public async importPreferences(data: string): Promise<void> {

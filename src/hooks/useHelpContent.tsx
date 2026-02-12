@@ -1,14 +1,28 @@
 import { useTranslation } from 'react-i18next'
+import { HelpSectionId } from '@/types/help'
+
+interface HelpContentItem {
+  /** Заголовок для tooltip */
+  title: string
+  /** Контент для tooltip (обратная совместимость) */
+  content: React.ReactNode
+  /** ID секции для модального окна */
+  section: HelpSectionId
+}
+
+type HelpContentMap = Record<HelpSectionId, HelpContentItem>
 
 /**
  * Хук для получения локализованного контента справки.
+ * Возвращает объект с title, content (для tooltip) и section (для модального окна)
  */
-export const useHelpContent = () => {
+export const useHelpContent = (): HelpContentMap => {
   const { t } = useTranslation()
 
   return {
     GANTT: {
       title: t('help.gantt_title'),
+      section: 'GANTT',
       content: (
         <>
           <p>{t('help.gantt_desc_1', 'Основной инструмент планирования графиков задач.')}</p>
@@ -24,6 +38,7 @@ export const useHelpContent = () => {
     },
     NETWORK: {
       title: t('help.network_title'),
+      section: 'NETWORK',
       content: (
         <>
           <p>{t('help.network_desc_1', 'Визуализация логической структуры проекта и зависимостей.')}</p>
@@ -38,6 +53,7 @@ export const useHelpContent = () => {
     },
     WBS: {
       title: t('help.wbs_title'),
+      section: 'WBS',
       content: (
         <>
           <p>{t('help.wbs_desc_1', 'Иерархическая декомпозиция проекта.')}</p>
@@ -51,16 +67,18 @@ export const useHelpContent = () => {
     },
     RESOURCE_USAGE: {
       title: t('help.resource_usage_title'),
+      section: 'RESOURCE_USAGE',
       content: (
         <>
           <p>{t('help.resource_usage_desc_1', 'Анализ загрузки сотрудников и оборудования.')}</p>
-          <p>{t('help.resource_usage_desc_2', 'Красные индикаторы сигнализируют о <strong>перегрузке</strong> (overallocation).')}</p>
+          <p>{t('help.resource_usage_desc_2', 'Красные индикаторы сигнализируют о перегрузке (overallocation).')}</p>
           <p className="mt-1">{t('help.resource_usage_desc_3', 'Позволяет увидеть распределение трудозатрат по времени.')}</p>
         </>
       ),
     },
     TASK_USAGE: {
       title: t('help.task_usage_title'),
+      section: 'TASK_USAGE',
       content: (
         <>
           <p>{t('help.task_usage_desc_1', 'Детальный анализ выполнения работ по каждой задаче.')}</p>
@@ -74,9 +92,10 @@ export const useHelpContent = () => {
     },
     TRACKING: {
       title: t('help.tracking_title'),
+      section: 'TRACKING',
       content: (
         <>
-          <p>{t('help.tracking_desc_1', 'Сравнение текущего прогресса с <strong>базовым планом</strong>.')}</p>
+          <p>{t('help.tracking_desc_1', 'Сравнение текущего прогресса с базовым планом.')}</p>
           <ul className="list-disc pl-4 space-y-1">
             <li><strong>{t('help.tracking_item_1_bold', 'Нижняя серая полоса:')}</strong> {t('help.tracking_item_1_text', 'базовый план (состояние на момент начала).')}</li>
             <li><strong>{t('help.tracking_item_2_bold', 'Верхняя полоса:')}</strong> {t('help.tracking_item_2_text', 'текущий статус выполнения.')}</li>
@@ -88,6 +107,7 @@ export const useHelpContent = () => {
     },
     CALENDAR: {
       title: t('help.calendar_title', 'Календарь'),
+      section: 'CALENDAR',
       content: (
         <>
           <p>{t('help.calendar_desc_1', 'Отображение задач в виде календарной сетки по датам.')}</p>
@@ -97,6 +117,7 @@ export const useHelpContent = () => {
     },
     REPORTS: {
       title: t('help.reports_title', 'Отчёты'),
+      section: 'REPORTS',
       content: (
         <>
           <p>{t('help.reports_desc_1', 'Сводные отчёты по проекту: затраты, загрузка ресурсов, статус.')}</p>
@@ -106,6 +127,7 @@ export const useHelpContent = () => {
     },
     SETTINGS: {
       title: t('help.settings_title', 'Настройки'),
+      section: 'SETTINGS',
       content: (
         <>
           <p>{t('help.settings_desc_1', 'Общие настройки приложения, тема, единицы измерения.')}</p>
@@ -114,6 +136,7 @@ export const useHelpContent = () => {
     },
     TASK_SHEET: {
       title: t('help.task_sheet_title', 'Таблица задач'),
+      section: 'TASK_SHEET',
       content: (
         <>
           <p>{t('help.task_sheet_desc_1', 'Табличное представление списка задач проекта.')}</p>
@@ -123,6 +146,7 @@ export const useHelpContent = () => {
     },
     RESOURCE_SHEET: {
       title: t('help.resource_sheet_title', 'Таблица ресурсов'),
+      section: 'RESOURCE_SHEET',
       content: (
         <>
           <p>{t('help.resource_sheet_desc_1', 'Список ресурсов проекта: люди, оборудование, материалы.')}</p>
@@ -132,4 +156,3 @@ export const useHelpContent = () => {
     },
   }
 }
-

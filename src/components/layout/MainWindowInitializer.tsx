@@ -2,7 +2,9 @@ import React from 'react'
 import { logger } from '@/utils/logger'
 import { useProject } from '@/providers/ProjectProvider'
 import { useAppStore } from '@/store/appStore'
+import { useProjectStore } from '@/store/projectStore'
 import { useNavigation } from '@/providers/NavigationProvider'
+import { useFileOperations } from '@/hooks/useFileOperations'
 import {
   MainWindowActionRegistryFactory,
   MainWindowActionRegistry,
@@ -11,6 +13,7 @@ import type {
   ProjectProviderPort,
   NavigationProviderPort,
   AppStorePort,
+  FileOperationsPort,
   MainWindowDependencies,
 } from '@/services/actions/registry/BaseActionRegistry'
 import type { Project } from '@/types/project-types'
@@ -34,6 +37,9 @@ export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({
   const { project, projectActions } = useProject()
   const appStore = useAppStore()
   const { navigateToView, availableViews } = useNavigation()
+  const fileOperations = useFileOperations()
+  const currentProjectId = useProjectStore((s) => s.currentProjectId)
+  const hasProjectToSave = currentProjectId != null && currentProjectId >= 0
 
   const projectProvider = React.useMemo<ProjectProviderPort>(
     () => ({
@@ -50,11 +56,23 @@ export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({
     [navigateToView, availableViews],
   )
 
+  const fileOperationsPort = React.useMemo<FileOperationsPort>(
+    () => ({
+      createNewProject: async () => { await fileOperations.createNewProject() },
+      openProject: async () => { await fileOperations.openProject() },
+      saveProject: fileOperations.saveProject,
+      saveProjectAs: fileOperations.saveProjectAs,
+    }),
+    [fileOperations],
+  )
+
   React.useEffect(() => {
     const dependencies: MainWindowDependencies = MainWindowActionRegistryFactory.extractDependencies(
       projectProvider,
       appStore as AppStorePort,
       navigationProvider,
+      fileOperationsPort,
+      hasProjectToSave,
     )
 
     const registry = MainWindowActionRegistryFactory.createAndInitialize(dependencies)
@@ -63,7 +81,7 @@ export const MainWindowInitializer: React.FC<MainWindowInitializerProps> = ({
     return () => {
       registry.unregisterAllActions()
     }
-  }, [projectProvider, appStore, navigationProvider])
+  }, [projectProvider, appStore, navigationProvider, fileOperationsPort, hasProjectToSave])
 
   return <>{children}</>
 }
@@ -75,6 +93,9 @@ export const useMainWindowRegistry = () => {
   const { project, projectActions } = useProject()
   const appStore = useAppStore()
   const { navigateToView, availableViews } = useNavigation()
+  const fileOperations = useFileOperations()
+  const currentProjectId = useProjectStore((s) => s.currentProjectId)
+  const hasProjectToSave = currentProjectId != null && currentProjectId >= 0
 
   const projectProvider: ProjectProviderPort = {
     currentProject: project,
@@ -85,10 +106,19 @@ export const useMainWindowRegistry = () => {
 
   const navigationProvider: NavigationProviderPort = { navigateToView, availableViews }
 
+  const fileOperationsPort: FileOperationsPort = {
+    createNewProject: async () => { await fileOperations.createNewProject() },
+    openProject: async () => { await fileOperations.openProject() },
+    saveProject: fileOperations.saveProject,
+    saveProjectAs: fileOperations.saveProjectAs,
+  }
+
   const dependencies: MainWindowDependencies = MainWindowActionRegistryFactory.extractDependencies(
     projectProvider,
     appStore as AppStorePort,
     navigationProvider,
+    fileOperationsPort,
+    hasProjectToSave,
   )
 
   return new MainWindowActionRegistry(dependencies)

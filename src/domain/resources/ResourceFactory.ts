@@ -1,5 +1,6 @@
 import { Resource } from '@/types'
 import { UserPreferences } from '@/types/Master_Functionality_Catalog'
+import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
 
 /**
  * Фабрика для создания объектов ресурсов.
@@ -13,20 +14,22 @@ export class ResourceFactory {
    *
    * @param data Данные для создания ресурса (без ID)
    * @param preferences Настройки пользователя с дефолтными ставками
+   * @param existingResources Массив существующих ресурсов для генерации уникального ID
    * @returns Полный объект ресурса с ID
    */
   public static createResource(
     data: Omit<Resource, 'id'>,
     preferences: UserPreferences,
+    existingResources: ReadonlyArray<Resource> = [],
   ): Resource {
-    const { defaultStandardRate, defaultOvertimeRate } = preferences.general
+    const { defaultStandardRate } = preferences.general
 
     const resource: Resource = {
       ...data,
-      id: Date.now().toString(),
-      // Применяем дефолтные ставки, если они не заданы в data
+      id: ResourceIdGenerator.generate(existingResources),
+      // Применяем дефолтную ставку, если она не задана в data
       standardRate: this.getValueOrDefault(data.standardRate, defaultStandardRate),
-      overtimeRate: this.getValueOrDefault(data.overtimeRate, defaultOvertimeRate),
+      overtimeRate: this.getValueOrDefault(data.overtimeRate, 0),
     }
 
     return resource

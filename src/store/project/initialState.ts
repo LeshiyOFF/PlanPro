@@ -19,7 +19,7 @@ export const initialResources: Resource[] = [
 /**
  * Начальное состояние с демо-данными для первого запуска
  */
-export const initialProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
+export const initialProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'setImposedFinishDate' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
   tasks: INITIAL_TASKS as Task[],
   resources: initialResources,
   calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
@@ -29,13 +29,15 @@ export const initialProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInf
   currentProjectId: undefined,
   currentFilePath: undefined,
   projectManager: undefined,
+  imposedFinishDate: null,
+  isForward: true, // VB.12: По умолчанию Schedule from Start
   isDirty: false,
 }
 
 /**
  * Пустое состояние для нового/загруженного проекта
  */
-export const emptyProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
+export const emptyProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo' | 'setProjectManager' | 'setImposedFinishDate' | 'updateTask' | 'addTask' | 'deleteTask' | 'moveTask' | 'setResources' | 'updateResource' | 'addResource' | 'deleteResource' | 'setCalendars' | 'addCalendar' | 'updateCalendar' | 'deleteCalendar' | 'getCalendar' | 'indentTask' | 'outdentTask' | 'linkTasks' | 'unlinkTasks' | 'toggleMilestone' | 'isValidPredecessor' | 'recalculateAllTasks' | 'setInitialized' | 'reset' | 'getHoursPerDay' | 'splitTask' | 'mergeTask' | 'recalculateCriticalPath' | 'saveBaseline' | 'deleteBaseline' | 'setActiveBaseline' | 'setDirty' | 'markClean'> = {
   tasks: [],
   resources: [],
   calendars: CalendarTemplateService.getInstance().getBaseCalendars(),
@@ -45,6 +47,8 @@ export const emptyProjectState: Omit<ProjectStore, 'setTasks' | 'setProjectInfo'
   currentProjectId: undefined,
   currentFilePath: undefined,
   projectManager: undefined,
+  imposedFinishDate: null,
+  isForward: true, // VB.12: По умолчанию Schedule from Start
   isDirty: false,
 }
 

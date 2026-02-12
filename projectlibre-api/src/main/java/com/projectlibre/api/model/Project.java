@@ -18,6 +18,7 @@ public class Project extends BaseEntity {
     private String priority;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private LocalDateTime imposedFinishDate; // VB.1: Жёсткий дедлайн, null = автоматический режим
     private Double progress;
     private List<String> resources;
     private String owner;
@@ -126,6 +127,21 @@ public class Project extends BaseEntity {
      */
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    /**
+     * VB.1: Получить imposed finish date (жёсткий дедлайн, заданный пользователем).
+     */
+    public LocalDateTime getImposedFinishDate() {
+        return imposedFinishDate;
+    }
+
+    /**
+     * VB.1: Установить imposed finish date.
+     */
+    public void setImposedFinishDate(LocalDateTime imposedFinishDate) {
+        this.imposedFinishDate = imposedFinishDate;
         this.updatedAt = LocalDateTime.now();
     }
 

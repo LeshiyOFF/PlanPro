@@ -12,9 +12,10 @@
 | AssignmentCostTest | 15 | ✅ Все проходят |
 | ResourceAvailabilityTest | 17 | ✅ Все проходят |
 | CriticalPathTest | 18 | ✅ Все проходят |
+| CriticalPathMSTest | 17 | ✅ Все проходят |
 | ProjectIdTest | 7 | ✅ Все проходят |
 | JsonSerializationTest | 5 | ✅ Все проходят |
-| **ИТОГО** | **62** | ✅ **100% проходят** |
+| **ИТОГО** | **79** | ✅ **100% проходят** |
 
 ## Архитектура тестов
 
@@ -38,7 +39,10 @@ src/test/java/com/projectlibre1/
 │   │   └── ResourceAvailabilityTest.java # Доступность ресурсов
 │   └── task/
 │       ├── ProjectIdTest.java           # Генерация ID (UUID)
-│       └── CriticalPathTest.java        # Критический путь
+│       ├── CriticalPathTest.java        # Критический путь (базовый)
+│       ├── CriticalPathMSTest.java      # CPM с иерархией (MS Project Standard)
+│       ├── MockCpmTask.java             # Mock задача для CPM тестов
+│       └── CpmTestUtils.java            # Утилиты CPM (isCritical, etc.)
 └── serialization/
     └── JsonSerializationTest.java       # JSON сериализация
 ```
@@ -88,7 +92,7 @@ mvn test
 
 ### 3. CriticalPathTest (18 тестов)
 
-Тестирует логику критического пути:
+Тестирует логику критического пути (базовый):
 - ✅ Нулевой резерв = критическая задача
 - ✅ Малый резерв = критическая задача
 - ✅ Большой резерв = некритическая задача
@@ -96,7 +100,19 @@ mvn test
 - ✅ Параметризованные тесты с различными значениями
 - ✅ Граничные случаи (отрицательные значения, нули)
 
-### 4. ProjectIdTest (7 тестов)
+### 4. CriticalPathMSTest (17 тестов) — CPM-MS.11
+
+Тестирует CPM с иерархией задач (MS Project Standard):
+- ✅ **Сценарий 1**: Плоский проект (leaf tasks)
+- ✅ **Сценарий 2**: Иерархия 1 уровень (summary + children)
+- ✅ **Сценарий 3**: Параллельные дети (критическая/некритическая ветки)
+- ✅ **Сценарий 4**: Вложенная иерархия (2+ уровня, рекурсия)
+- ✅ **Сценарий 5**: Save/Load стабильность дат
+- ✅ Summary.isCritical() = false (MS Project Standard)
+- ✅ containsCriticalChildren() — рекурсивная проверка
+- ✅ getMinChildSlack() — рекурсивная агрегация
+
+### 5. ProjectIdTest (7 тестов)
 
 Тестирует генерацию идентификаторов:
 - ✅ Уникальность последовательных ID
@@ -105,7 +121,7 @@ mvn test
 - ✅ Thread-safety при генерации
 - ✅ Производительность генерации UUID
 
-### 5. JsonSerializationTest (5 тестов)
+### 6. JsonSerializationTest (5 тестов)
 
 Тестирует базовую JSON сериализацию:
 - ✅ Сериализация проекта
@@ -174,5 +190,6 @@ void testMethodName() {
 
 | Версия | Дата | Изменения |
 |--------|------|-----------|
+| 3.0.0 | 2026-02-06 | CPM-MS.11: Добавлены тесты CPM с иерархией (MS Project Standard) |
 | 2.0.0 | 2026-01-31 | Полная переработка на изолированные тесты |
 | 1.0.0 | 2026-01-30 | Первая версия (требовала инициализации) |

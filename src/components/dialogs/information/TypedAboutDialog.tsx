@@ -31,7 +31,7 @@ export const TypedAboutDialog: React.FC = () => {
       type="about"
       isOpen={isOpen}
       data={state.data}
-      title="О программе ProjectLibre"
+      title="О программе ПланПро"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       submitLabel="Закрыть"
@@ -44,7 +44,7 @@ export const TypedAboutDialog: React.FC = () => {
           </div>
 
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-slate-100 tracking-tight">ProjectLibre</h3>
+            <h3 className="text-2xl font-bold text-slate-100 tracking-tight">ПланПро</h3>
             <p className="text-sm text-slate-400 mt-1">
               Версия {state.data.version}
             </p>
@@ -53,7 +53,7 @@ export const TypedAboutDialog: React.FC = () => {
 
         <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
           <p className="text-sm text-slate-300 leading-relaxed">
-            ProjectLibre - это мощное приложение для управления проектами с открытым исходным кодом.
+            ПланПро — приложение для управления проектами с открытым исходным кодом.
             Альтернатива Microsoft Project с полной поддержкой импорта/экспорта MPP файлов.
           </p>
         </div>
@@ -66,7 +66,7 @@ export const TypedAboutDialog: React.FC = () => {
         </div>
 
         <div className="text-center text-xs text-slate-500">
-          © 2024 ProjectLibre Community
+          © 2024 ПланПро
         </div>
       </div>
     </TypedBaseDialog>

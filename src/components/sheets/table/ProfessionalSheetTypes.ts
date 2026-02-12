@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { ReactNode, RefObject } from 'react'
 import { ISheetColumn } from '@/domain/sheets/interfaces/ISheetColumn'
 import { CellValue } from '@/types/sheet/CellValueTypes'
 import type { JsonValue } from '@/types/json-types'
@@ -16,6 +16,8 @@ export interface ProfessionalSheetHandle {
 export interface ProfessionalSheetProps<T extends Record<string, JsonValue>> {
   data: T[];
   columns: ISheetColumn<T>[];
+  /** Колонки, которые не отображаются в таблице, но включаются в экспорт CSV */
+  exportOnlyColumns?: ISheetColumn<T>[];
   rowIdField: keyof T;
   onDataChange?: (rowId: string, field: string, value: CellValue) => void;
   onBatchChange?: (rowIds: string[], field: string, value: CellValue) => void;
@@ -24,6 +26,10 @@ export interface ProfessionalSheetProps<T extends Record<string, JsonValue>> {
   onDeleteRows?: (rowIds: string[]) => void;
   disabledRowIds?: string[];
   className?: string;
+  /** Ref для синхронизации вертикального скролла с диаграммой Ганта */
+  scrollRef?: RefObject<HTMLDivElement>;
+  /** Callback при прокрутке для синхронизации */
+  onScroll?: () => void;
 }
 
 /**

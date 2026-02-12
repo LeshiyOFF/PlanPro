@@ -1426,33 +1426,52 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 
 
 	/**
-	 * @return Returns the earlyFinish.
+	 * Ранняя дата окончания. Используется getEnd() для корректной логической даты
+	 * (в LATE-расписании getFinish() хранит отрицательное значение).
 	 */
 	public long getEarlyFinish() {
-		return earlySchedule.getFinish();
+		return earlySchedule.getEnd();
 	}
 
 	/**
-	 * @return Returns the earlyStart.
+	 * Ранняя дата начала. Используется getBegin() для единообразия с поздними датами.
 	 */
 	public long getEarlyStart() {
-		return earlySchedule.getStart();
+		return earlySchedule.getBegin();
 	}
 
-
 	/**
-	 * @return Returns the lateFinish.
+	 * Поздняя дата окончания (LF) в миллисекундах с эпохи.
+	 * 
+	 * ВАЖНО: В LATE-расписании используется "negation trick" — даты хранятся инвертированно:
+	 * - поле start хранит lateStart (положительное)
+	 * - поле finish хранит lateFinish (положительное)
+	 * - getBegin() возвращает -finish = -lateFinish
+	 * - getEnd() возвращает -start = -lateStart
+	 * 
+	 * Поэтому для получения lateFinish нужно вызывать getBegin() (не getEnd()!),
+	 * который вернёт -lateFinish, и затем взять абсолютное значение.
 	 */
 	public long getLateFinish() {
-		return lateSchedule.getFinish();
+		long begin = lateSchedule.getBegin();  // возвращает -lateFinish
+		return begin < 0 ? -begin : begin;
 	}
 
-
 	/**
-	 * @return Returns the lateStart.
+	 * Поздняя дата начала (LS) в миллисекундах с эпохи.
+	 * 
+	 * ВАЖНО: В LATE-расписании используется "negation trick" — даты хранятся инвертированно:
+	 * - поле start хранит lateStart (положительное)
+	 * - поле finish хранит lateFinish (положительное)
+	 * - getBegin() возвращает -finish = -lateFinish
+	 * - getEnd() возвращает -start = -lateStart
+	 * 
+	 * Поэтому для получения lateStart нужно вызывать getEnd() (не getBegin()!),
+	 * который вернёт -lateStart, и затем взять абсолютное значение.
 	 */
 	public long getLateStart() {
-		return lateSchedule.getStart();
+		long end = lateSchedule.getEnd();  // возвращает -lateStart
+		return end < 0 ? -end : end;
 	}
 
 	/**
@@ -1569,19 +1588,34 @@ public abstract class Task implements HasKey, HasNotes, HasCalendar, HasDependen
 
 /**************************************************************************
  * Critical path methods for slack
+ * 
+ * UNIFIED-SLACK-FIX: Для elapsed задач slack считается в календарном времени (24h/день),
+ * для обычных задач — в рабочем времени (по календарю проекта).
+ * Это обеспечивает согласованность с расчётом duration.
 ***************************************************************************/
+	
+	/**
+	 * Определяет, использует ли задача elapsed (календарную) длительность.
+	 * Базовая реализация возвращает false; NormalTask переопределяет.
+	 * @return true если задача elapsed
+	 */
+	protected boolean isElapsedTask() {
+		return false; // По умолчанию — рабочее время. NormalTask переопределяет.
+	}
+	
 	public final long getTotalSlack() {
-		return getEffectiveWorkCalendar().compare(getLateFinish(),getEarlyFinish(), false);
+		// UNIFIED-SLACK-FIX: Для elapsed задач — простая разница (calendar.compare с elapsed=true)
+		return getEffectiveWorkCalendar().compare(getLateFinish(), getEarlyFinish(), isElapsedTask());
 	}
 
 	/** The amount of excess time an activity has between its Early Start and Late Start dates. */
 	public final long getStartSlack() {
-		return getEffectiveWorkCalendar().compare(getLateStart(),getEarlyStart(), false);
+		return getEffectiveWorkCalendar().compare(getLateStart(), getEarlyStart(), isElapsedTask());
 	}
 
 	/** The amount of excess time an activity has between its Early Finish and Late Finish dates. */
 	public final long getFinishSlack() {
-		return getEffectiveWorkCalendar().compare(getLateFinish(),getEarlyFinish(), false);  // note that this is same as total float
+		return getEffectiveWorkCalendar().compare(getLateFinish(), getEarlyFinish(), isElapsedTask());  // same as total slack
 	}
 
 	/**

@@ -8,6 +8,7 @@ import type { Task as CatalogTask, StrictData } from '@/types/Master_Functionali
 import { useEventFlow } from '@/providers/hooks'
 import { useProjectStore, createTaskFromView } from '@/store/projectStore'
 import { Task } from '@/store/project/interfaces'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
 import { useHelpContent } from '@/hooks/useHelpContent'
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion'
@@ -20,7 +21,7 @@ import { CalendarPreferences } from '@/types/Master_Functionality_Catalog'
 import { useToast } from '@/hooks/use-toast'
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { getElectronAPI } from '@/utils/electronAPI'
-import type { JsonObject, JsonValue } from '@/types/json-types'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Task Sheet компонент - Лист задач
@@ -66,9 +67,10 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
       calendarPrefs,
     )
 
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     const payload = {
-      id: `TASK-${String(tasks.length + 1).padStart(3, '0')}`,
-      name: t('sheets.new_task') || 'Новая задача',
+      id: TaskIdGenerator.generate(tasks),
+      name: TaskIdGenerator.generateDefaultName(tasks, t('sheets.new_task') || 'Новая задача'),
       startDate,
       endDate,
       progress: 0,

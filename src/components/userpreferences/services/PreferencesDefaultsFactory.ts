@@ -37,13 +37,12 @@ export class PreferencesDefaultsFactory {
       defaultView: 'gantt' as ViewType,
       autoSave: true,
       autoSaveInterval: 5,
-      defaultCalendar: '',
+      defaultCalendar: 'standard',
       dateFormat: 'DD.MM.YYYY',
       timeFormat: 'HH:mm',
       currency: 'USD',
       language: 'ru-RU',
       defaultStandardRate: 0,
-      defaultOvertimeRate: 0,
     }
   }
 
@@ -69,6 +68,7 @@ export class PreferencesDefaultsFactory {
       hoursPerDay: 8,
       hoursPerWeek: 40,
       daysPerMonth: 20,
+      durationCalculationMode: 'working' as const,
     }
   }
 
@@ -97,9 +97,7 @@ export class PreferencesDefaultsFactory {
       showDependencies: true,
       allowTaskDeletion: true,
       confirmDeletions: true,
-      autoLinkTasks: false,
       splitTasksEnabled: true,
-      effortDriven: false,
     }
   }
 
@@ -151,6 +149,7 @@ export class PreferencesDefaultsFactory {
       accentColor: '#3b82f6',
       summaryColor: '#1e293b',
       showDeltasInLabels: false,
+      showNegativeSlack: false,
     }
   }
 }

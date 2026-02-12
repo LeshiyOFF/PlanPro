@@ -24,12 +24,15 @@ export interface GanttTask {
 }
 
 /**
- * Обновления задачи Gantt
+ * Обновления задачи Gantt.
+ * КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Добавлено поле duration для синхронизации с Java Core.
  */
 export interface GanttTaskUpdate {
   startDate: Date;
   endDate: Date;
   progress: number;
+  /** Длительность в днях - критически важно для корректного CPM расчёта */
+  duration: number;
 }
 
 /**

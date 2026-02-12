@@ -23,7 +23,13 @@ export type StoreProjectState = Omit<CatalogProjectState, 'current'> & { current
 
 export type StoreExtendedAppState = Omit<ExtendedAppState, 'projects'> & { projects: StoreProjectState };
 
-interface AppStore extends StoreExtendedAppState {
+/** Флаг прохождения полноэкранного стартового экрана (Фаза 2 ROADMAP). */
+export type StartupScreenState = { startupScreenCompleted: boolean };
+
+interface AppStore extends StoreExtendedAppState, StartupScreenState {
+  // Startup screen (Phase 2)
+  setStartupScreenCompleted: (completed: boolean) => void;
+
   // Project actions
   setProjectState: (state: Partial<StoreProjectState>) => void;
   setCurrentProject: (project: Project | null) => void;
@@ -61,7 +67,7 @@ interface AppStore extends StoreExtendedAppState {
   initializeStore: (initialState?: Partial<StoreExtendedAppState>) => void;
 }
 
-const initialState: StoreExtendedAppState = {
+const initialState: StoreExtendedAppState & StartupScreenState = {
   projects: {
     current: null,
     loading: false,
@@ -133,9 +139,7 @@ const initialState: StoreExtendedAppState = {
       showDependencies: true,
       allowTaskDeletion: true,
       confirmDeletions: true,
-      autoLinkTasks: true,
       splitTasksEnabled: true,
-      effortDriven: false,
     },
     calculations: {
       criticalSlack: { value: 0, unit: TimeUnit.DAYS },
@@ -171,12 +175,17 @@ const initialState: StoreExtendedAppState = {
       daysPerMonth: 20,
     },
   },
+  startupScreenCompleted: false,
 }
 
 export const useAppStore = create<AppStore>()(
   devtools(
     subscribeWithSelector((set) => ({
       ...initialState,
+      startupScreenCompleted: false,
+
+      setStartupScreenCompleted: (completed) =>
+        set({ startupScreenCompleted: completed }, false, 'setStartupScreenCompleted'),
 
       // Project actions
       setProjectState: (projectState) => set((state) => ({

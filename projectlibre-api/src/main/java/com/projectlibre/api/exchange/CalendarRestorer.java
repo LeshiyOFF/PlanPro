@@ -204,6 +204,10 @@ public class CalendarRestorer {
         if (baseFixedId == 0) {
             WorkCalendar correctBase = findStandardCalendar(CalendarService.getInstance());
             if (correctBase != null && correctBase instanceof WorkingCalendar) {
+                if (correctBase == calendar) {
+                    System.out.println("[CalRestore] ⚠️ Skipping setBaseCalendar: correctBase equals calendar (self-reference)");
+                    return;
+                }
                 String oldBaseName = baseWc.getName();
                 String newBaseName = ((WorkingCalendar) correctBase).getName();
                 

@@ -8,51 +8,66 @@ import { IResourceUsage } from '@/domain/sheets/entities/IResourceUsage'
 const BASE_CAPACITY = 1.0
 
 /** Тип функции перевода */
-type TranslationFn = (key: string) => string;
+type TranslationFn = (key: string) => string
+
+/** Результат расчёта нагрузки: сумма назначений и загрузка относительно мощности */
+export interface ResourceLoadResult {
+  /** Сумма units по всем назначениям (0.5 = 50%, 2.5 = 250%). Для колонки «Назначено %». */
+  totalUnits: number
+  /** Загрузка относительно maxUnits (1 = 100%, >1 = перегрузка). Для статуса и блоков. */
+  loadPercent: number
+}
 
 /**
- * Вычисляет суммарный процент загрузки ресурса из всех назначений.
- * Поддерживает обратную совместимость: resourceAssignments и устаревший resourceIds.
- * @param resource - Ресурс для которого вычисляется загрузка
- * @param tasks - Массив задач проекта
- * @returns Суммарная загрузка ресурса (0-N, где 1 = 100%)
+ * Вычисляет суммарные назначения (totalUnits) и загрузку относительно мощности (loadPercent).
+ * Один проход по задачам, одна формула — без дублирования логики.
+ *
+ * @param resource - Ресурс
+ * @param tasks - Задачи проекта
+ * @returns totalUnits для отображения «Назначено %», loadPercent для статуса/перегрузки
  */
-const calculateAssignedPercent = (resource: Resource, tasks: Task[]): number => {
+function calculateResourceLoad(
+  resource: Resource,
+  tasks: Task[],
+): ResourceLoadResult {
   let totalUnits = 0
+  const resourceIdStr = String(resource.id)
 
   for (const task of tasks) {
-    // Приоритет: новый формат resourceAssignments
-    const assignment = task.resourceAssignments?.find(a => a.resourceId === resource.id)
+    if (task.isSummary) continue
+    const assignment = task.resourceAssignments?.find(
+      (a) => String(a.resourceId) === resourceIdStr,
+    )
     if (assignment) {
       totalUnits += assignment.units
-    } else if (getTaskResourceIds(task).includes(String(resource.id))) {
-      // Fallback: старый формат resourceIds (100% по умолчанию)
+    } else if (getTaskResourceIds(task).includes(resourceIdStr)) {
       totalUnits += BASE_CAPACITY
     }
   }
 
-  return totalUnits
+  const rawMax = resource.maxUnits ?? BASE_CAPACITY
+  const effectiveMaxUnits = rawMax > 10 ? rawMax / 100 : rawMax
+  const loadPercent =
+    effectiveMaxUnits > 0 ? totalUnits / effectiveMaxUnits : 0
+
+  return { totalUnits, loadPercent }
 }
 
 /**
- * Определяет статус ресурса на основе загрузки относительно 100%
- * @param assignedPercent - Процент загрузки (0-N)
- * @param t - Функция локализации
+ * Статус по загрузке относительно мощности (согласовано со сводкой).
  */
-const getResourceStatus = (assignedPercent: number, t: TranslationFn): string => {
-  if (assignedPercent === 0) return t('sheets.status_available')
-  if (assignedPercent < BASE_CAPACITY) return t('sheets.status_partial')
-  if (assignedPercent === BASE_CAPACITY) return t('sheets.status_busy')
-  return t('sheets.status_overloaded')
+const getResourceStatus = (loadPercent: number, t: TranslationFn): string => {
+  if (loadPercent === 0) return t('sheets.status_available')
+  if (loadPercent > BASE_CAPACITY) return t('sheets.status_overloaded')
+  if (loadPercent < BASE_CAPACITY) return t('sheets.status_partial')
+  return t('sheets.status_busy')
 }
 
 /**
- * Определяет уровень нагрузки ресурса
- * @param assignedPercent - Процент загрузки (0-N)
- * @param t - Функция локализации
+ * Уровень нагрузки (перегрузка / норма).
  */
-const getWorkloadLevel = (assignedPercent: number, t: TranslationFn): string => {
-  if (assignedPercent > BASE_CAPACITY) return t('sheets.workload_overload')
+const getWorkloadLevel = (loadPercent: number, t: TranslationFn): string => {
+  if (loadPercent > BASE_CAPACITY) return t('sheets.workload_overload')
   return t('sheets.workload_normal')
 }
 
@@ -71,27 +86,34 @@ export const useResourceUsageData = (
 
   // Мемоизируем функции форматирования для стабильности
   const formatStatus = useCallback(
-    (assignedPercent: number) => getResourceStatus(assignedPercent, t),
+    (loadPercent: number) => getResourceStatus(loadPercent, t),
     [t],
   )
 
   const formatWorkload = useCallback(
-    (assignedPercent: number) => getWorkloadLevel(assignedPercent, t),
+    (loadPercent: number) => getWorkloadLevel(loadPercent, t),
     [t],
   )
 
   return useMemo(() => {
-    return resources.map(resource => {
-      const assignedPercent = calculateAssignedPercent(resource, tasks)
-      const availablePercent = Math.max(0, BASE_CAPACITY - assignedPercent)
+    return resources.map((resource) => {
+      const { totalUnits, loadPercent } = calculateResourceLoad(resource, tasks)
+      const assignedPercent = totalUnits
+      const availablePercent = Math.max(
+        0,
+        BASE_CAPACITY - Math.min(totalUnits, BASE_CAPACITY),
+      )
 
       return {
         id: resource.id,
         resourceName: resource.name,
         assignedPercent,
         availablePercent,
-        status: formatStatus(assignedPercent),
-        workload: formatWorkload(assignedPercent),
+        status: formatStatus(loadPercent),
+        workload: formatWorkload(loadPercent),
+        actualHours: 0,
+        plannedHours: 0,
+        variance: 0,
       }
     })
   }, [resources, tasks, formatStatus, formatWorkload])

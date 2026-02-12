@@ -68,8 +68,9 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
       id: 'status', field: 'status', title: t('sheets.status'),
       width: 130, type: SheetColumnType.TEXT, editable: false, visible: true, sortable: true, resizable: true,
       formatter: (val: CellValue, row: ResourceUsageRow) => {
-        const isOverloaded = (row.assignedPercent ?? 0) > 1
-        const isBusy = (row.assignedPercent ?? 0) === 1
+        const load = row.assignedPercent ?? 0
+        const isOverloaded = load > 1
+        const isBusy = load > 0 && load <= 1
         const colorClass = isOverloaded ? 'text-red-600' : isBusy ? 'text-amber-600' : 'text-green-600'
         return <span className={colorClass}>{String(val ?? '')}</span>
       },
@@ -81,6 +82,45 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
         const isOverloaded = (row.assignedPercent ?? 0) > 1
         return <span className={isOverloaded ? 'text-red-600 font-medium' : 'text-slate-600'}>{String(val ?? '')}</span>
       },
+    },
+  ], [t])
+
+  const exportOnlyColumns = useMemo<ISheetColumn<ResourceUsageRow>[]>(() => [
+    {
+      id: 'actualHours',
+      field: 'actualHours',
+      title: t('sheets.actual_hours'),
+      width: 100,
+      type: SheetColumnType.NUMBER,
+      editable: false,
+      visible: true,
+      sortable: false,
+      resizable: true,
+      formatter: (val: CellValue) => (val != null && val !== '' ? String(Number(val)) : ''),
+    },
+    {
+      id: 'plannedHours',
+      field: 'plannedHours',
+      title: t('sheets.planned_hours'),
+      width: 100,
+      type: SheetColumnType.NUMBER,
+      editable: false,
+      visible: true,
+      sortable: false,
+      resizable: true,
+      formatter: (val: CellValue) => (val != null && val !== '' ? String(Number(val)) : ''),
+    },
+    {
+      id: 'variance',
+      field: 'variance',
+      title: t('sheets.variance_hours'),
+      width: 100,
+      type: SheetColumnType.NUMBER,
+      editable: false,
+      visible: true,
+      sortable: false,
+      resizable: true,
+      formatter: (val: CellValue) => (val != null && val !== '' ? String(Number(val)) : ''),
     },
   ], [t])
 
@@ -112,6 +152,7 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
         ref={ref}
         data={sheetData}
         columns={columns}
+        exportOnlyColumns={exportOnlyColumns}
         rowIdField="id"
         onDataChange={onUpdate}
         onContextMenu={handleContextMenu}

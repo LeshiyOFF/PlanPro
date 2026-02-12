@@ -32,10 +32,13 @@ export interface ProjectUpdateRequest extends BaseRequest {
   progress?: number
   startDate?: Date
   endDate?: Date
+  /** VB.5: Жёсткий дедлайн проекта (Must Finish By), null/undefined = автоматический режим */
+  imposedFinishDate?: Date | null
   manager?: string
   department?: string
   tasks?: FrontendTaskData[]
   resources?: FrontendResourceData[]
+  projectCalendars?: CalendarSyncData[]
 }
 
 export interface ProjectOpenRequest extends BaseRequest {
@@ -265,10 +268,13 @@ export interface FrontendResourceAssignment {
  * Данные задачи для синхронизации
  * V2.0: startDate/endDate изменены с number на string (ISO-8601)
  * V3.0: Добавлен resourceAssignments вместо resourceIds
+ * V3.1: Добавлена явная передача duration (в днях) для устранения бага «1 день» в Core
  */
 export interface FrontendTaskData {
   id: string
   name: string
+  /** Длительность в календарных днях. Передаётся явно, чтобы Core не подставлял 1 день по умолчанию. */
+  duration?: number
   startDate: string    // ISO-8601 (например: "2026-01-28T18:37:19.575Z")
   endDate: string      // ISO-8601
   progress: number     // 0-100
@@ -324,9 +330,13 @@ export interface FrontendResourceData {
   available?: boolean
 }
 
-// Unified запрос синхронизации проекта (задачи + ресурсы)
+// Unified запрос синхронизации проекта (задачи + ресурсы + календари)
 export interface ProjectSyncRequest extends BaseRequest {
   projectId: number
   tasks: FrontendTaskData[]
   resources: FrontendResourceData[]
+  /** Полный список календарей проекта (кастомные; системные не входят). Совместим с CalendarSyncDto на бэкенде. */
+  projectCalendars?: CalendarSyncData[]
+  /** VB.5: Жёсткий дедлайн проекта для передачи при синхронизации */
+  imposedFinishDate?: Date | null
 }

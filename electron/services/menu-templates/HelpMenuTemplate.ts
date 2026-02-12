@@ -36,7 +36,7 @@ export class HelpMenuTemplate {
       helpMenu.submenu.push(
         { type: 'separator' },
         {
-          label: 'Привлечь ProjectLibre',
+          label: 'Привлечь ПланПро',
           click: () => this.handleMenuAction('donate')
         }
       )

@@ -62,7 +62,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -193,6 +193,17 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 		boolean elapsed = Duration.isElapsed(duration);
 		duration = Duration.millis(duration);
 
+		// ZERO-DURATION-FIX: Нулевая длительность = вернуть дату без изменений.
+		// Предотвращает снаппинг на рабочее время для:
+		// - finishSentinel/startSentinel (duration=0)
+		// - Milestones (duration=0)
+		// - Dependencies с lag=0
+		// Без этого фикса calendar.add(00:00, 0) возвращал 17:00 (конец рабочего дня),
+		// что создавало ложный slack ≈20ч и потерю критичности единственной задачи.
+		if (duration == 0) {
+			return date; // Нулевая длительность = без изменений (forward и backward pass)
+		}
+
 		if (negative) {
 			date = -date;
 			duration = -duration;
@@ -204,8 +215,11 @@ public class CalendarDefinition implements WorkCalendar, Cloneable {
 
 
 
-		if (elapsed) { // elapsed times do not use calendars, though the result must fall within working time
-			result = adjustInsideCalendar(date + duration,useSooner);
+		if (elapsed) {
+			// ELAPSED-NO-SNAP-FIX: Для календарных дней (elapsed) результат = start + duration
+			// без привязки к рабочему времени — все дни равны 24 часа.
+			// Убрали adjustInsideCalendar, который сдвигал выходные на пятницу.
+			result = date + duration;
 		} else {
 			if (duration < 0) {
 				forward = false;

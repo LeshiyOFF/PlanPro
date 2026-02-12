@@ -13,11 +13,15 @@ interface GanttRightPanelProps {
   readonly onTaskUpdate: (id: string, updates: IGanttTaskUpdate) => void;
   readonly onTaskSelect: (task: Task) => void;
   readonly onModeChange: (mode: GanttDisplayMode) => void;
+  /** Ref для синхронизации вертикального скролла */
+  readonly scrollRef?: React.RefObject<HTMLDivElement>;
+  /** Callback при прокрутке для синхронизации */
+  readonly onScroll?: () => void;
 }
 
 export const GanttRightPanel: React.FC<GanttRightPanelProps> = ({
   tasks, startDate, linkingTaskId, mode, onCurrentDateChange,
-  onTaskUpdate, onTaskSelect, onModeChange,
+  onTaskUpdate, onTaskSelect, onModeChange, scrollRef, onScroll,
 }) => {
   return (
     <div className={`flex flex-col h-full bg-white ${linkingTaskId ? 'cursor-alias' : ''}`}>
@@ -30,6 +34,8 @@ export const GanttRightPanel: React.FC<GanttRightPanelProps> = ({
         onTaskDoubleClick={undefined}
         mode={mode}
         onModeChange={onModeChange}
+        scrollRef={scrollRef}
+        onScroll={onScroll}
       />
     </div>
   )

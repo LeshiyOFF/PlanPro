@@ -37,8 +37,9 @@ export class ProjectJavaService extends BaseJavaService {
     return await this.executeApiCommand('project.list')
   }
 
-  public async recalculateProject(id: string): Promise<DataResponse<ProjectDataResponse>> {
-    return await this.executeApiCommand('project.recalculate', [id])
+  /** Возвращает payload (ProjectDataResponse) напрямую — executeApiCommand отдаёт result.data. */
+  public async recalculateProject(id: string): Promise<ProjectDataResponse | undefined> {
+    return await this.executeApiCommand<ProjectDataResponse>('project.recalculate', [id])
   }
 
   public async exportProject(id: string, format: string): Promise<DataResponse<ExportResponse>> {

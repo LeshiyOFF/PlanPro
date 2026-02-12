@@ -83,7 +83,7 @@ export const ProjectOptionsDialog: React.FC<ProjectOptionsDialogProps> = ({
     currentOptions || {
       general: {
         defaultDuration: 1,
-        defaultCalendar: 'Standard',
+        defaultCalendar: 'standard',
         autoSave: true,
         autoSaveInterval: 10,
         showSummaryTask: false,

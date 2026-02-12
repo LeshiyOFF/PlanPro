@@ -58,7 +58,7 @@ package com.projectlibre1.pm.assignment.timesheet;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.projectlibre1.datatype.Rate;
 import com.projectlibre1.field.CanBeDirty;

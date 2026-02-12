@@ -73,6 +73,16 @@ export class ResourceDataConverter {
   }
 
   /**
+   * Конвертирует список календарей стора в DTO для sync (projectCalendars).
+   * В список входят только кастомные календари (!isBase); системные не передаются.
+   */
+  static calendarsToSyncData(calendars: IWorkCalendar[]): CalendarSyncData[] {
+    return calendars
+      .filter(c => !c.isBase)
+      .map(c => ResourceDataConverter.workCalendarToSyncData(c))
+  }
+
+  /**
    * Находит календарь по ID и конвертирует в CalendarSyncData.
    * КРИТИЧЕСКОЕ: Включает только кастомные календари (custom_*).
    */
@@ -98,10 +108,14 @@ export class ResourceDataConverter {
   static workCalendarToSyncData(calendar: IWorkCalendar): CalendarSyncData {
     const workingDays = ResourceDataConverter.extractWorkingDaysBooleans(calendar)
     const workingHours = ResourceDataConverter.extractWorkingHoursRanges(calendar)
+    const name =
+      calendar.name == null || calendar.name.trim() === ''
+        ? 'Без названия'
+        : calendar.name
 
     return {
       id: calendar.id,
-      name: calendar.name,
+      name,
       description: calendar.description,
       workingDays,
       workingHours,

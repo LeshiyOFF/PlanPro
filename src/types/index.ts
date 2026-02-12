@@ -65,3 +65,6 @@ export type {
 
 // Конфигурация API-клиентов (используется хуками useProjectAPI, useTaskAPI и т.д.)
 export type { APIClientConfig } from '@/services/BaseAPIClient'
+
+// Экспорт типов справочной системы
+export * from './help'

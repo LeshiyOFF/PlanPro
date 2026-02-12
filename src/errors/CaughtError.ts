@@ -4,7 +4,7 @@
  * Следует SOLID принципам и обеспечивает полную типизацию ошибок
  */
 
-import { isError } from '@/utils/errorUtils'
+import { isError, type Throwable } from '@/utils/errorUtils'
 import { ValidationException } from './ValidationError'
 
 /**
@@ -28,7 +28,7 @@ export type CaughtError =
  * @param error - Проверяемая ошибка
  * @returns true если ошибка является CaughtError
  */
-export function isCaughtError(error: unknown): error is CaughtError {
+export function isCaughtError(error: Throwable): error is CaughtError {
   if (isError(error)) {
     return true
   }
@@ -55,7 +55,7 @@ export function isCaughtError(error: unknown): error is CaughtError {
  * @param error - Ошибка неизвестного типа
  * @returns CaughtError
  */
-export function toCaughtError(error: unknown): CaughtError {
+export function toCaughtError(error: Throwable): CaughtError {
   if (isCaughtError(error)) {
     return error
   }
@@ -65,7 +65,7 @@ export function toCaughtError(error: unknown): CaughtError {
   }
 
   if (error && typeof error === 'object' && 'message' in error) {
-    return new Error(String((error as { message: unknown }).message))
+    return new Error(String((error as { message: string }).message))
   }
 
   return new Error('Unknown error occurred')

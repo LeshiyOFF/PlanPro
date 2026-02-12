@@ -50,6 +50,9 @@ export class CalendarMathService {
 
   /**
    * Рассчитывает длительность между двумя датами.
+   *
+   * DURATION-SYNC-FIX: Для 'days' возвращает КАЛЕНДАРНЫЕ дни (24h/день).
+   * Графики работы учитываются только на уровне ресурсов.
    */
   public static calculateDuration(
     startDate: Date,
@@ -58,38 +61,56 @@ export class CalendarMathService {
     prefs: CalendarPreferences,
   ): Duration {
     const ms = endDate.getTime() - startDate.getTime()
-    const value = this.msToUnit(ms, unit, prefs)
 
-    return {
-      value,
-      unit,
+    // DURATION-SYNC-FIX: Для 'days' возвращаем КАЛЕНДАРНЫЕ дни
+    if (unit === 'days') {
+      const MS_PER_CALENDAR_DAY = 24 * 60 * 60 * 1000
+      const calendarDays = Math.max(1, Math.round(ms / MS_PER_CALENDAR_DAY))
+      return { value: calendarDays, unit: 'days' }
     }
+
+    // Для других единиц — старая логика через hoursPerDay
+    const value = this.msToUnit(ms, unit, prefs)
+    return { value, unit }
+  }
+
+  /**
+   * Определяет фактическое количество часов в дне в зависимости от режима.
+   * @param prefs Настройки календаря
+   * @returns Часов в дне (24 для calendar mode, hoursPerDay для working mode)
+   */
+  private static getEffectiveHoursPerDay(prefs: CalendarPreferences): number {
+    return prefs.durationCalculationMode === 'calendar' ? 24 : prefs.hoursPerDay
   }
 
   /**
    * Вспомогательный метод: перевод длительности в миллисекунды.
+   * Учитывает режим расчёта: calendar (24ч/сутки) или working (рабочие часы).
    */
   private static durationToMs(duration: Duration, prefs: CalendarPreferences): number {
     const { value, unit } = duration
-    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs
+    const { hoursPerWeek, daysPerMonth } = prefs
+    const effectiveHoursPerDay = this.getEffectiveHoursPerDay(prefs)
 
     switch (unit) {
       case 'milliseconds': return value
       case 'seconds': return value * 1000
       case 'minutes': return value * 60 * 1000
       case 'hours': return value * 60 * 60 * 1000
-      case 'days': return value * hoursPerDay * 60 * 60 * 1000
-      case 'weeks': return value * hoursPerWeek * 60 * 60 * 1000
-      case 'months': return value * daysPerMonth * hoursPerDay * 60 * 60 * 1000
+      case 'days': return value * effectiveHoursPerDay * 60 * 60 * 1000
+      case 'weeks': return value * (prefs.durationCalculationMode === 'calendar' ? 168 : hoursPerWeek) * 60 * 60 * 1000
+      case 'months': return value * daysPerMonth * effectiveHoursPerDay * 60 * 60 * 1000
       default: return value
     }
   }
 
   /**
    * Вспомогательный метод: перевод из миллисекунд в указанную единицу.
+   * Учитывает режим расчёта: calendar (24ч/сутки) или working (рабочие часы).
    */
   private static msToUnit(ms: number, unit: Duration['unit'], prefs: CalendarPreferences): number {
-    const { hoursPerDay, hoursPerWeek, daysPerMonth } = prefs
+    const { hoursPerWeek, daysPerMonth } = prefs
+    const effectiveHoursPerDay = this.getEffectiveHoursPerDay(prefs)
     const hourMs = 60 * 60 * 1000
 
     switch (unit) {
@@ -97,9 +118,9 @@ export class CalendarMathService {
       case 'seconds': return ms / 1000
       case 'minutes': return ms / (60 * 1000)
       case 'hours': return ms / hourMs
-      case 'days': return ms / (hoursPerDay * hourMs)
-      case 'weeks': return ms / (hoursPerWeek * hourMs)
-      case 'months': return ms / (daysPerMonth * hoursPerDay * hourMs)
+      case 'days': return ms / (effectiveHoursPerDay * hourMs)
+      case 'weeks': return ms / ((prefs.durationCalculationMode === 'calendar' ? 168 : hoursPerWeek) * hourMs)
+      case 'months': return ms / (daysPerMonth * effectiveHoursPerDay * hourMs)
       default: return ms
     }
   }

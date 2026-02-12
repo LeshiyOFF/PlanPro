@@ -62,7 +62,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.projectlibre1.datatype.Duration;
 import com.projectlibre1.grouping.core.Node;
@@ -561,7 +561,9 @@ public final class TaskSchedule implements Cloneable {
 			if (result == 0)
 				result = current;
 			else
-				result = Math.max(result,current);
+				// КРИТИЧНО: Forward pass берёт MAX (задача начинается ПОСЛЕ всех предшественников)
+				// Backward pass берёт MIN (задача кончается ДО всех преемников)
+				result = forward ? Math.max(result,current) : Math.min(result,current);
 		}
 		setDependencyDate(result);
 		return result;
@@ -582,6 +584,15 @@ public final class TaskSchedule implements Cloneable {
 		long begin = getBeginDependency();
 		Task parent = task.getWbsParentTask();
 		
+		// ДИАГНОСТИКА БАГА: Логируем детали расчёта для задач 5 и 6
+		boolean isTask5or6 = task.getName() != null && 
+			(task.getName().contains("задача 5") || task.getName().contains("задача 6"));
+		
+		if (isTask5or6 && context.forward) {
+			System.out.println("[BUG-DIAG] calcStartAndFinish for '" + task.getName() + "' pass=" + context.pass + " forward=" + context.forward
+				+ " beginDependency=" + begin + " parent=" + (parent != null ? parent.getName() : "null"));
+		}
+		
 		//boolean useSooner = (forward != task.hasDuration()); // shortcut: if forward and is milestone, use sooner, otherwise later.  And conversely, if reverse and isn't milestone, use sooner, othewise later
 		boolean useSooner = !task.hasDuration();
 		
@@ -589,6 +600,11 @@ public final class TaskSchedule implements Cloneable {
 			TaskSchedule parentSchedule = parent.getSchedule(type);
 			long parentDependency = parentSchedule.getBeginDependency();
 			long parentWindow = parentSchedule.getWindowBegin();
+			
+			if (isTask5or6 && context.forward) {
+				System.out.println("[BUG-DIAG]   parent='" + parent.getName() + "' parentDependency=" + parentDependency + " parentWindow=" + parentWindow);
+			}
+			
 			if (parentDependency == 0 || (parentWindow != 0 && parentWindow > parentDependency))
 				parentDependency = parentWindow;
 			// in case where parent determines start time, make sure that this
@@ -597,12 +613,27 @@ public final class TaskSchedule implements Cloneable {
 			if (parentDependency != 0 && (begin == 0 || parentDependency > begin)) {
 				begin = task.getEffectiveWorkCalendar().add(parentDependency, 0, useSooner);
 			}
+			// CPM-MS.6: Устаревший костыль для backward pass с summary tasks удалён.
+			// После CPM-MS.1 summary tasks не участвуют в CPM passes,
+			// их даты агрегируются в отдельном aggregateSummaryTaskDates().
 		}
+		// CPM backward pass boundary: use context.boundary (current forward pass result) instead of project.getEnd()
+		// to align with PMI/Primavera/MS Project behavior — see ROADMAP «Граница обратного прохода CPM»
 		if (task.isInSubproject())
-			begin = Math.max(begin,context.forward ? task.getOwningProject().getStartConstraint() : -task.getOwningProject().getEnd());
+			begin = Math.max(begin, context.forward ? task.getOwningProject().getStartConstraint() : context.boundary);
 
 		// Soft constraints
 		long windowBegin = getWindowBegin();
+		
+		// ДИАГНОСТИКА БАГА КРИТИЧЕСКОГО ПУТИ: Логируем windowBegin для задач 5 и 6
+		if (isTask5or6 && context.forward) {
+			long windowEarlyStart = ((com.projectlibre1.pm.criticalpath.ScheduleWindow)task).getWindowEarlyStart();
+			int constraintType = ((com.projectlibre1.pm.task.Task)task).getConstraintType();
+			System.out.println("[BUG-DIAG]   SNET_CHECK: windowBegin=" + windowBegin 
+				+ " windowEarlyStart=" + windowEarlyStart 
+				+ " constraintType=" + constraintType
+				+ " beginBeforeSNET=" + begin);
+		}
 		
 		// Make sure the task starts after its early start window date. This
 		// is a soft constraint during forward pass.
@@ -616,6 +647,11 @@ public final class TaskSchedule implements Cloneable {
 					begin = windowBegin;
 			} else
 				begin = windowBegin;
+		}
+		
+		// ДИАГНОСТИКА: Логируем результат после применения SNET
+		if (isTask5or6 && context.forward) {
+			System.out.println("[BUG-DIAG]   SNET_RESULT: beginAfterSNET=" + begin);
 		}
 		
 		// For FNET
@@ -660,7 +696,8 @@ public final class TaskSchedule implements Cloneable {
 				return;
 			if (task.getPredecessorList().size() == 0 && task.getConstraintDate() == 0)
 				return;
-			begin = Math.max(begin, context.forward ? subProj.getSubproject().getStartConstraint() : -subProj.getSubproject().getEnd());
+			// CPM backward pass: use context.boundary for subproject nodes too (single boundary for entire graph)
+			begin = Math.max(begin, context.forward ? subProj.getSubproject().getStartConstraint() : context.boundary);
 		}
 		
 		long levelingDelay = task.getLevelingDelay();
@@ -673,15 +710,26 @@ public final class TaskSchedule implements Cloneable {
 		if (forward == context.forward)
 			setRemainingDependencyDate(remainingBegin);  // the date which predecessors push the task to start at.  Actuals can override this
 		
-		if (context.forward) {
-			long actualStart = task.getActualStart();
-			if (actualStart != 0)
-				begin = actualStart;
-		}
-		setBegin(begin); 		
-		long end = ((Task)task).calcOffsetFrom(begin,remainingBegin,true, true, true);
-		setEnd(end);
-		
+	if (context.forward) {
+		long actualStart = task.getActualStart();
+		if (actualStart != 0)
+			begin = actualStart;
+	}
+	// CPM: Calendar автоматически инвертирует duration для отрицательных дат (negation trick)
+	// Поэтому ahead=true ВСЕГДА - calendar.add() сам обрабатывает negative dates
+	// См. CalendarDefinition.add(): if (negative) { duration = -duration; }
+	long end = ((Task)task).calcOffsetFrom(begin,remainingBegin,true, true, true);
+	
+	// Сохраняем даты: forward pass использует положительные, backward - отрицательные
+	// setBegin/setEnd автоматически обрабатывают знак через forward флаг
+	setBegin(begin);
+	setEnd(end);
+	
+	// ДИАГНОСТИКА БАГА: Логируем финальные значения (isTask5or6 объявлена в начале метода)
+	if (isTask5or6 && context.forward) {
+		long duration = task.getDuration();
+		System.out.println("[BUG-DIAG]   RESULT: begin=" + begin + " end=" + end + " duration=" + duration);
+	}
 	}
 	
 	public void dump() {

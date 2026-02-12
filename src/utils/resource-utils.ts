@@ -1,4 +1,5 @@
 import type { Resource } from '@/types'
+import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
 
 /**
  * Утилиты для работы с ресурсами
@@ -37,10 +38,14 @@ export class ResourceUtils {
   /**
    * Создание ресурса для тестов и разработки.
    * В production-потоке не использовать.
+   *
+   * @param data Данные ресурса без ID
+   * @param existingResources Массив существующих ресурсов для генерации уникального ID
+   * @returns Ресурс с уникальным ID
    */
-  static createMockResource(data: Omit<Resource, 'id'>): Resource {
+  static createMockResource(data: Omit<Resource, 'id'>, existingResources: Resource[] = []): Resource {
     return {
-      id: Date.now().toString(),
+      id: ResourceIdGenerator.generate(existingResources),
       ...data,
     }
   }

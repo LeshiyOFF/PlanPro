@@ -4,6 +4,8 @@ import type { Task as TaskTypesTask } from '@/types/task-types'
 import { useProjectState } from './useProjectState'
 import { useAsyncOperation } from './useAsyncOperation'
 import { TaskUtils } from '@/utils/task-utils'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
+import { useProjectStore } from '@/store/projectStore'
 import { logger } from '@/utils/logger'
 
 /**
@@ -27,9 +29,10 @@ export const useTaskActions = (execute: ReturnType<typeof useAsyncOperation>['ex
       throw new Error(validateResult)
     }
 
+    const existingTasks = useProjectStore.getState().tasks
     const newTask: Task = {
       ...taskData,
-      id: Date.now().toString(),
+      id: TaskIdGenerator.generate(existingTasks),
     }
 
     await execute(

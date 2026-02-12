@@ -1,6 +1,6 @@
 // src/services/GanttScrollService.ts
 // Assumes DOM is browser (Electron renderer). No external deps.
-import { ViewMode } from 'gantt-task-react'
+import { ViewMode } from '@wamra/gantt-task-react'
 
 export interface ScrollOptions {
   // preferred strategy: 'element' uses DOM bounding rect of taskId, 'index' uses stepIndex->pixels formula
@@ -40,7 +40,8 @@ export class GanttScrollService {
   // ---------- public API ----------
 
   // scroll-to-date by index formula
-  async scrollToIndex(stepIndex: number, columnWidth: number, preStepsCount = 1, opts?: Partial<ScrollOptions>) {
+  // GANTT-FIX: preStepsCount изменён на 0 (по умолчанию) для синхронизации с библиотекой
+  async scrollToIndex(stepIndex: number, columnWidth: number, preStepsCount = 0, opts?: Partial<ScrollOptions>) {
     const effectiveIndex = stepIndex + preStepsCount
     let targetPos = Math.round(effectiveIndex * columnWidth)
 
@@ -161,9 +162,11 @@ export class GanttScrollService {
           // perform subtle smooth scroll to exact target (if browser supports)
           if ('scrollTo' in this.container) {
             try {
-              // @ts-ignore
+              // @ts-expect-error — scrollTo с options поддерживается не во всех типах DOM
               this.container.scrollTo({ left: targetPos, behavior: 'smooth' })
-            } catch {}
+            } catch {
+              // Игнорируем, если smooth scroll не поддерживается
+            }
           }
 
           this.cancelWatchdog()

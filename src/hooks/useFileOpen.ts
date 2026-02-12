@@ -23,7 +23,8 @@ export const useFileOpen = () => {
     setTasks,
     setResources,
     reset,
-    addCalendar,
+    setCalendars,
+    setImposedFinishDate,
   } = useProjectStore()
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -84,6 +85,7 @@ export const useFileOpen = () => {
             `${LOG_TAG} Tasks: ${projectData.tasks.length}, Resources: ${projectData.resources?.length ?? 0}, Calendars: ${projectData.calendars?.length ?? 0}`,
           )
 
+          TaskDataConverter.resetDateShiftLogCount()
           const frontendTasks = projectData.tasks.map(TaskDataConverter.coreToFrontendTask)
           setTasks(frontendTasks)
 
@@ -93,21 +95,30 @@ export const useFileOpen = () => {
           }
 
           if (projectData.calendars && projectData.calendars.length > 0) {
-            const currentCalendars = useProjectStore.getState().calendars
-            const existingIds = currentCalendars.map((c) => c.id)
             const calendarsForApi: CalendarDataFromApi[] = projectData.calendars.map((cal) => ({
               ...cal,
               exceptions: cal.exceptions?.map((ex) => ({ ...ex, working: ex.working ?? true })),
             }))
-            const newCalendars = CalendarDataConverter.apiToFrontendCalendars(
-              calendarsForApi,
-              existingIds,
+            const frontendCalendars = calendarsForApi.map((cal) =>
+              CalendarDataConverter.apiToFrontendCalendar(cal),
             )
+            setCalendars(frontendCalendars)
+            console.log(`${LOG_TAG} Calendars set: ${frontendCalendars.length} (project-only)`)
+          }
 
-            if (newCalendars.length > 0) {
-              console.log(`${LOG_TAG} Importing ${newCalendars.length} custom calendars...`)
-              newCalendars.forEach((cal) => addCalendar(cal))
-            }
+          // VB.5/VB.12: Установить imposed finish date и режим планирования из бэкенда
+          if (projectData.imposedFinishDate) {
+            const imposedDate = new Date(projectData.imposedFinishDate)
+            setImposedFinishDate(imposedDate)
+            console.log(`${LOG_TAG} Imposed finish date loaded: ${imposedDate.toISOString()}`)
+          } else {
+            setImposedFinishDate(null)
+          }
+          
+          // VB.12: Установить режим планирования (по умолчанию true = Schedule from Start)
+          if (projectData.isForward !== undefined) {
+            useProjectStore.setState({ isForward: projectData.isForward })
+            console.log(`${LOG_TAG} Scheduling mode loaded: ${projectData.isForward ? 'Schedule from Start' : 'Schedule from End'}`)
           }
 
           TaskLinkService.setLoadingMode(false)
@@ -158,15 +169,15 @@ export const useFileOpen = () => {
       }
       return false
     }
-  }, [file, setProjectInfo, setTasks, setResources, reset, addCalendar])
+  }, [file, setProjectInfo, setTasks, setResources, reset, setCalendars, setImposedFinishDate])
 
-  const openProject = useCallback(async (): Promise<void> => {
-    if (isProcessing) return
+  const openProject = useCallback(async (): Promise<boolean> => {
+    if (isProcessing) return false
 
     try {
       setIsProcessing(true)
       const api = getElectronAPI()
-      if (!api?.showOpenDialog) return
+      if (!api?.showOpenDialog) return false
 
       const result = await api.showOpenDialog({
         title: 'Открыть проект ПланПро',
@@ -177,11 +188,12 @@ export const useFileOpen = () => {
         properties: ['openFile'],
       })
 
-      if (result.canceled || result.filePaths.length === 0) return
+      if (result.canceled || result.filePaths.length === 0) return false
 
-      await loadProjectFromPath(result.filePaths[0])
+      return await loadProjectFromPath(result.filePaths[0])
     } catch (error) {
       console.error(`${LOG_TAG} Error opening project:`, error)
+      return false
     } finally {
       setIsProcessing(false)
     }

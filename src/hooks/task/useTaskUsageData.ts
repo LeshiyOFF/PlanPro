@@ -4,8 +4,10 @@ import { Task, ResourceAssignment, getTaskResourceIds } from '@/store/project/in
 import { Resource } from '@/types/resource-types'
 import { ITaskUsage } from '@/domain/sheets/entities/ITaskUsage'
 import { CalendarMathService } from '@/domain/services/CalendarMathService'
-import { useAppStore } from '@/store/appStore'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
 import { CalendarPreferences } from '@/types/Master_Functionality_Catalog'
+import { resolveTimeUnitKey } from '@/utils/TimeUnitMapper'
+import type { Duration } from '@/types/Master_Functionality_Catalog'
 
 /** Дефолтные настройки календаря */
 const DEFAULT_CALENDAR_PREFS: CalendarPreferences = {
@@ -13,9 +15,6 @@ const DEFAULT_CALENDAR_PREFS: CalendarPreferences = {
   hoursPerWeek: 40,
   daysPerMonth: 20,
 }
-
-/** Допустимые единицы длительности */
-type DurationUnit = 'days' | 'hours' | 'weeks' | 'months';
 
 /**
  * Формирует строку с именами назначенных ресурсов и процентами.
@@ -69,27 +68,26 @@ const getResourceAssignments = (task: Task): ResourceAssignment[] => {
 }
 
 /**
- * Интерфейс настроек приложения с расширенными типами
+ * Интерфейс настроек приложения для календаря и единицы длительности
  */
-interface ExtendedPreferences {
-  calendar?: CalendarPreferences;
-  schedule?: { durationEnteredIn?: string };
+interface ScheduleCalendarPreferences {
+  calendar?: CalendarPreferences
+  schedule?: { durationEnteredIn?: number }
 }
 
 /**
  * Хук для преобразования задач в формат ITaskUsage.
- * Использует мемоизацию с корректными примитивными зависимостями.
+ * Настройки берутся из UserPreferencesService для немедленного отражения смены единицы длительности.
  */
 export const useTaskUsageData = (tasks: Task[], resources: Resource[]): ITaskUsage[] => {
   const { t } = useTranslation()
-  const { preferences } = useAppStore()
+  const { preferences } = useUserPreferences()
 
-  // Извлекаем примитивные значения для стабильных зависимостей
-  const extPrefs = preferences as ExtendedPreferences
+  const extPrefs = preferences as ScheduleCalendarPreferences
   const hoursPerDay = extPrefs.calendar?.hoursPerDay ?? DEFAULT_CALENDAR_PREFS.hoursPerDay
   const hoursPerWeek = extPrefs.calendar?.hoursPerWeek ?? DEFAULT_CALENDAR_PREFS.hoursPerWeek
   const daysPerMonth = extPrefs.calendar?.daysPerMonth ?? DEFAULT_CALENDAR_PREFS.daysPerMonth
-  const durationUnit = (extPrefs.schedule?.durationEnteredIn || 'days') as DurationUnit
+  const durationUnit = resolveTimeUnitKey(extPrefs.schedule?.durationEnteredIn) as Duration['unit']
 
   return useMemo(() => {
     // Собираем CalendarPreferences внутри useMemo

@@ -6,10 +6,49 @@ import { NetworkDiagramCore } from '@/components/gantt/NetworkDiagramCore'
 import { NetworkNode, NetworkNodeType, NetworkConnection } from '@/domain/network/interfaces/NetworkDiagram'
 import { Plus, ZoomIn, ZoomOut, Layout, GitBranch, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useProjectStore, createTaskFromView } from '@/store/projectStore'
+import { useProjectStore, createTaskFromView, Task } from '@/store/projectStore'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
+import { ConnectionBlockedDialog, ConnectionBlockReason } from '@/components/dialogs/network/ConnectionBlockedDialog'
 import { SafeTooltip } from '@/components/ui/tooltip'
 import { ITaskWithPosition } from '@/types/views/IViewTypes'
+
+/**
+ * Вычисляет childIds для суммарных задач на основе level-based иерархии.
+ * Для каждой суммарной задачи собирает ID всех дочерних задач,
+ * которые идут после неё и имеют level > её level (до первой задачи с level <= её level).
+ *
+ * Это нужно для случаев, когда task.children не заполнено из API,
+ * но иерархия определяется по level (как после indent/outdent).
+ */
+function buildHierarchyChildIds(tasks: Task[]): Map<string, string[]> {
+  const childIdsMap = new Map<string, string[]>()
+
+  tasks.forEach((task, idx) => {
+    const isSummary = (task as { isSummary?: boolean }).isSummary === true
+    if (!isSummary) return
+
+    const parentLevel = task.level ?? 1
+    const childIds: string[] = []
+
+    // Собираем все задачи после текущей, которые являются дочерними (level > parentLevel)
+    for (let i = idx + 1; i < tasks.length; i++) {
+      const childTask = tasks[i]
+      const childLevel = childTask.level ?? 1
+
+      // Прерываем, если встретили задачу с level <= родительского
+      if (childLevel <= parentLevel) break
+
+      // Добавляем только прямых детей (level === parentLevel + 1)
+      // и их потомков для полноты контейнера
+      childIds.push(childTask.id)
+    }
+
+    childIdsMap.set(task.id, childIds)
+  })
+
+  return childIdsMap
+}
 
 /**
  * NetworkView - Сетевой график (PERT диаграмма)
@@ -29,27 +68,60 @@ export const NetworkView: React.FC = () => {
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
+  // Состояние диалога блокировки связи
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false)
+  const [blockReason, setBlockReason] = useState<ConnectionBlockReason>('summary_task')
+  const [blockedFromName, setBlockedFromName] = useState('')
+  const [blockedToName, setBlockedToName] = useState('')
+
+  // Состояние сворачивания для суммарных задач
+  const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set())
+
+  // Вычисляем childIds из level-based иерархии (fallback если task.children не заполнено)
+  const hierarchyChildIds = useMemo(() => buildHierarchyChildIds(tasks), [tasks])
+
   // Конвертация задач из стора в узлы для диаграммы
-  const nodes: NetworkNode[] = useMemo(() => tasks.map((task): NetworkNode => {
-    const taskWithPosition = task as ITaskWithPosition
-    const isMilestone = (task as { isMilestone?: boolean }).isMilestone === true
-    const isSummary = (task as { isSummary?: boolean }).isSummary === true
-    return {
-      id: task.id,
-      name: task.name,
-      duration: `${Math.ceil((new Date(task.endDate).getTime() - new Date(task.startDate).getTime()) / (24 * 60 * 60 * 1000))}${t('sheets.days')}`,
-      startDate: new Date(task.startDate),
-      endDate: new Date(task.endDate),
-      type: isMilestone ? NetworkNodeType.MILESTONE : isSummary ? NetworkNodeType.SUMMARY : NetworkNodeType.TASK,
-      critical: !!(task.criticalPath ?? task.isCritical),
-      progress: task.progress,
-      x: taskWithPosition.x ?? 0,
-      y: taskWithPosition.y ?? 0,
-      width: 180,
-      height: 80,
-      isPinned: taskWithPosition.isPinned ?? false,
-    }
-  }), [tasks, t])
+  const nodes: NetworkNode[] = useMemo(() => {
+    // Собираем ID всех скрытых задач (дети свёрнутых суммарных)
+    const hiddenIds = new Set<string>()
+    collapsedNodes.forEach(summaryId => {
+      const childIds = hierarchyChildIds.get(summaryId) || []
+      childIds.forEach(id => hiddenIds.add(id))
+    })
+
+    return tasks
+      .filter(task => !hiddenIds.has(task.id)) // Скрываем дочерние задачи свёрнутых групп
+      .map((task): NetworkNode => {
+        const taskWithPosition = task as ITaskWithPosition
+        const isMilestone = (task as { isMilestone?: boolean }).isMilestone === true
+        const isSummary = (task as { isSummary?: boolean }).isSummary === true
+
+        // childIds: приоритет у task.children из API, fallback на вычисленные из level
+        const childIds = (task.children && task.children.length > 0)
+          ? task.children
+          : hierarchyChildIds.get(task.id)
+
+        return {
+          id: task.id,
+          name: task.name,
+          duration: `${Math.ceil((new Date(task.endDate).getTime() - new Date(task.startDate).getTime()) / (24 * 60 * 60 * 1000))}${t('sheets.days')}`,
+          startDate: new Date(task.startDate),
+          endDate: new Date(task.endDate),
+          type: isMilestone ? NetworkNodeType.MILESTONE : isSummary ? NetworkNodeType.SUMMARY : NetworkNodeType.TASK,
+          critical: !!(task.criticalPath ?? task.isCritical),
+          progress: task.progress,
+          x: taskWithPosition.x ?? 0,
+          y: taskWithPosition.y ?? 0,
+          width: 180,
+          height: 80,
+          isPinned: taskWithPosition.isPinned ?? false,
+          // Иерархия для сетевого графика
+          parentId: task.parentId ?? undefined,
+          childIds,
+          isCollapsed: collapsedNodes.has(task.id),
+        }
+      })
+  }, [tasks, t, hierarchyChildIds, collapsedNodes])
 
   // Формирование связей
   const connections: NetworkConnection[] = useMemo(() => {
@@ -85,10 +157,10 @@ export const NetworkView: React.FC = () => {
   }, [updateTask])
 
   const handleAddTask = useCallback(() => {
-    const newId = `TASK-${String(tasks.length + 1).padStart(3, '0')}`
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     const newTask = createTaskFromView({
-      id: newId,
-      name: `${t('sheets.new_task')} ${tasks.length + 1}`,
+      id: TaskIdGenerator.generate(tasks),
+      name: TaskIdGenerator.generateDefaultName(tasks, t('sheets.new_task')),
       startDate: new Date(),
       endDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
       progress: 0,
@@ -96,7 +168,7 @@ export const NetworkView: React.FC = () => {
       level: 1,
     })
     addTask(newTask)
-  }, [tasks.length, addTask, t])
+  }, [tasks, addTask, t])
 
   const handleAutoLayout = useCallback(() => {
     tasks.forEach(t => {
@@ -115,13 +187,65 @@ export const NetworkView: React.FC = () => {
     setEditingNodeId(null)
   }, [])
 
-  const handleConnectionCreate = useCallback((fromId: string, toId: string) => {
-    const targetTask = tasks.find(t => t.id === toId)
-    if (targetTask) {
-      const preds = targetTask.predecessors || []
-      if (!preds.includes(fromId)) {
-        updateTask(toId, { predecessors: [...preds, fromId] })
+  /**
+   * Обработчик сворачивания/разворачивания группы суммарной задачи.
+   * Переключает состояние isCollapsed для указанного узла.
+   */
+  const handleCollapseToggle = useCallback((nodeId: string) => {
+    setCollapsedNodes(prev => {
+      const next = new Set(prev)
+      if (next.has(nodeId)) {
+        next.delete(nodeId)
+      } else {
+        next.add(nodeId)
       }
+      return next
+    })
+  }, [])
+
+  const handleConnectionCreate = useCallback((fromId: string, toId: string) => {
+    const fromTask = tasks.find(t => t.id === fromId)
+    const targetTask = tasks.find(t => t.id === toId)
+    
+    if (!fromTask || !targetTask) return
+
+    // Валидация: запрет связи с самим собой
+    if (fromId === toId) {
+      setBlockReason('self_link')
+      setBlockedFromName(fromTask.name)
+      setBlockedToName(targetTask.name)
+      setBlockDialogOpen(true)
+      return
+    }
+
+    // Валидация: запрет связывания суммарных задач (индустриальный стандарт MS Project)
+    const fromIsSummary = (fromTask as { isSummary?: boolean }).isSummary === true
+    const toIsSummary = (targetTask as { isSummary?: boolean }).isSummary === true
+    
+    if (fromIsSummary || toIsSummary) {
+      setBlockReason('summary_task')
+      setBlockedFromName(fromTask.name)
+      setBlockedToName(targetTask.name)
+      setBlockDialogOpen(true)
+      return
+    }
+
+    // Валидация: запрет связи родитель-потомок (циклическая зависимость)
+    const fromParentId = fromTask.parentId
+    const toParentId = targetTask.parentId
+    
+    if (fromParentId === toId || toParentId === fromId) {
+      setBlockReason('parent_child')
+      setBlockedFromName(fromTask.name)
+      setBlockedToName(targetTask.name)
+      setBlockDialogOpen(true)
+      return
+    }
+
+    // Все проверки пройдены — создаём связь
+    const preds = targetTask.predecessors || []
+    if (!preds.includes(fromId)) {
+      updateTask(toId, { predecessors: [...preds, fromId] })
     }
   }, [tasks, updateTask])
 
@@ -191,6 +315,7 @@ export const NetworkView: React.FC = () => {
             onNodesChange={handleNodesChange}
             onNodeDoubleClick={handleNodeDoubleClick}
             onConnectionCreate={handleConnectionCreate}
+            onCollapseToggle={handleCollapseToggle}
           />
         </div>
 
@@ -224,6 +349,14 @@ export const NetworkView: React.FC = () => {
           onClose={handleDialogClose}
         />
       )}
+
+      <ConnectionBlockedDialog
+        open={blockDialogOpen}
+        onClose={() => setBlockDialogOpen(false)}
+        reason={blockReason}
+        fromTaskName={blockedFromName}
+        toTaskName={blockedToName}
+      />
     </div>
   )
 }

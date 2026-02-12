@@ -1,5 +1,6 @@
 import { logger } from '@/utils/logger'
 import type { JsonValue } from '@/types/json-types'
+import { getElectronAPI } from '@/utils/electronAPI'
 
 /**
  * Конфигурация настроек приложения
@@ -142,14 +143,27 @@ class SettingsImportExportService {
   }
 
   /**
-   * Сбрасывает настройки к значениям по умолчанию
+   * Сбрасывает настройки к значениям по умолчанию.
+   * Подтверждение через нативный диалог Electron; в веб-сборке не выполняется.
    */
-  resetToDefaults(): void {
-    if (confirm('Вы уверены, что хотите сбросить все настройки?')) {
-      localStorage.clear()
-      logger.dialog('Settings reset to defaults', {}, 'Settings')
-      window.location.reload()
+  async resetToDefaults(): Promise<void> {
+    const api = getElectronAPI()
+    if (!api?.showMessageBox) {
+      logger.dialog('Reset to defaults requires Electron', {}, 'Settings')
+      return
     }
+    const result = await api.showMessageBox({
+      type: 'question',
+      buttons: ['Сбросить', 'Отмена'],
+      defaultId: 1,
+      cancelId: 1,
+      title: 'Сброс настроек',
+      message: 'Вы уверены, что хотите сбросить все настройки?',
+    })
+    if (result.response !== 0) return
+    localStorage.clear()
+    logger.dialog('Settings reset to defaults', {}, 'Settings')
+    window.location.reload()
   }
 }
 

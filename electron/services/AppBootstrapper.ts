@@ -33,6 +33,9 @@ export class AppBootstrapper implements IAppBootstrapper {
       await app.whenReady();
       console.log('[Bootstrapper] Electron app is ready.');
 
+      // 1.1 Показ splash сразу, до запуска Java
+      this.windowManager.showSplash();
+
       // 2. Запуск Java Backend
       this.updateStatus(BootstrappingStatus.STARTING_JAVA);
       await this.javaBridge.initialize();

@@ -826,8 +826,22 @@ public final class AssignmentDetail implements Schedule, HasCalendar, Cloneable,
 	public long getElapsedDuration() {
 		return Math.round(getEffectiveWorkCalendar().compare(getEnd(), getStart(),true) * CalendarOption.getInstance().getFractionOfDayThatIsWorking());
 	}
+	/**
+	 * Возвращает оставшуюся длительность задачи.
+	 * 
+	 * MILLIS-PRECISION-FIX: Убрано округление closestDate() для сохранения
+	 * точности до миллисекунды. Это критично для CPM:
+	 * - Без фикса: duration 23:59:59.999 → 23:59:59.000 (потеря 999ms)
+	 * - С фиксом: duration сохраняется точно → earlyFinish = lateFinish → slack = 0
+	 * 
+	 * Ранее closestDate обнуляла миллисекунды, что приводило к slack = 999ms
+	 * и потере критичности для одиночных задач.
+	 * 
+	 * @return remaining duration в миллисекундах (точное значение)
+	 */
 	public long getRemainingDuration() {
-		return DateTime.closestDate( (getDuration() * (1.0D - percentComplete)));
+		// MILLIS-PRECISION-FIX: (long) cast вместо closestDate для точности CPM
+		return (long) (getDuration() * (1.0D - percentComplete));
 	}
 
 	public void setRemainingDuration(long remainingDuration) {

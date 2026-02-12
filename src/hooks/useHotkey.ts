@@ -161,12 +161,20 @@ export const useHotkeyToggle = () => {
  * Хук для навигационных горячих клавиш
  */
 export const useNavigationHotkeys = () => {
+  const promptApi = usePrompt()
+
   useHotkeyAction('GOTO_TASK', () => {
-    const taskId = prompt('Введите ID задачи для перехода:')
-    if (taskId) {
-      window.dispatchEvent(new CustomEvent('gantt:navigate-to-task', { detail: { taskId } }))
-      logger.dialog('Navigate to task', { taskId }, 'Navigation')
+    if (!promptApi) {
+      logger.dialog('Prompt not available (mount PromptProvider)', {}, 'Navigation')
+      return
     }
+    void (async () => {
+      const taskId = await promptApi.showPrompt('Введите ID задачи для перехода:')
+      if (taskId) {
+        window.dispatchEvent(new CustomEvent('gantt:navigate-to-task', { detail: { taskId } }))
+        logger.dialog('Navigate to task', { taskId }, 'Navigation')
+      }
+    })()
   })
 
   useHotkeyAction('ZOOM_IN', () => {

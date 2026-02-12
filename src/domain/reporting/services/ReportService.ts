@@ -14,8 +14,12 @@ type TranslationFn = (key: string, defaultValue?: string) => string;
 export interface ReportGenerationOptions {
   /** Название проекта */
   projectName: string;
-  /** Явно указанный менеджер проекта (приоритет над автоопределением) */
+  /** Явно указанный менеджер проекта (приоритет над userName и автоопределением) */
   projectManager?: string;
+  /** Имя пользователя из настроек (fallback для projectManager) */
+  userName?: string;
+  /** Название компании из настроек (добавляется в метаданные отчёта) */
+  companyName?: string;
   /** Функция локализации (i18n) */
   t: TranslationFn;
   /** Символ валюты */
@@ -65,19 +69,34 @@ export class ReportService {
     this.t = options.t
     this.currencySymbol = options.currencySymbol || '₽'
 
-    // Определяем менеджера: приоритет у явно указанного
-    const projectManager = options.projectManager?.trim()
-      ? options.projectManager
-      : this.detectProjectManager(resources)
+    // Определяем менеджера: приоритет — явно указанный, затем userName, затем автодетект
+    const projectManager = this.resolveProjectManager(options, resources)
 
     return {
       generatedAt: new Date(),
       projectName: options.projectName,
       projectManager,
+      companyName: options.companyName?.trim() || undefined,
       reportTitle: this.getReportTitle(type),
       type,
       sections: this.generateSections(type, tasks, resources),
     }
+  }
+
+  /**
+   * Определяет менеджера проекта с приоритетами:
+   * 1. Явно указанный projectManager
+   * 2. userName из настроек пользователя
+   * 3. Автоматическое определение по ресурсам
+   */
+  private resolveProjectManager(options: ReportGenerationOptions, resources: Resource[]): string {
+    if (options.projectManager?.trim()) {
+      return options.projectManager
+    }
+    if (options.userName?.trim()) {
+      return options.userName
+    }
+    return this.detectProjectManager(resources)
   }
 
   private generateSections(type: ReportType, tasks: Task[], resources: Resource[]): IReportSection[] {

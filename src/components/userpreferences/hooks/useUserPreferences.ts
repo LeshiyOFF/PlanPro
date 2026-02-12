@@ -33,10 +33,11 @@ export const useUserPreferences = () => {
 
     // Если сервис еще не инициализирован, дожидаемся
     if (!service.isReady()) {
-      service.ensureInitialized().then(() => {
+      void (async () => {
+        await service.ensureInitialized()
         setIsReady(true)
         setPreferences(service.getPreferences())
-      })
+      })()
     }
 
     const unsubscribe = service.subscribe((event: IPreferencesChangeEvent) => {

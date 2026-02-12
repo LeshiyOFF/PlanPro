@@ -40,6 +40,8 @@ export interface ElectronAPIWindow {
   getAppInfo?: () => Promise<JsonObject>;
   javaExecute?: (command: string, args?: JsonArray) => Promise<JsonObject>;
   getJavaStatus?: () => Promise<JsonObject>;
+  subscribeToJavaEvents?: () => Promise<{ success: boolean; message?: string; error?: string }>;
+  unsubscribeFromJavaEvents?: () => Promise<{ success: boolean; message?: string; error?: string }>;
   javaApiRequest?: (command: string, args?: JsonValue) => Promise<JsonObject>;
   onJavaProcessStarted?: (callback: (data: JsonObject) => void) => () => void;
   onJavaProcessStopped?: (callback: (data: JsonObject) => void) => () => void;

@@ -3,13 +3,16 @@ package com.projectlibre.api.service;
 import com.projectlibre.api.dto.PreferencesDto;
 import com.projectlibre1.util.Alert;
 
-import java.io.PrintStream;
-
 /**
  * Менеджер для интеграции настроек проекта с ядром ProjectLibre.
- * Регистрирует Callback-методы, которые вызываются из ядра при сохранении/загрузке.
+ * Регистрирует callback-методы только если в core (GraphicManager) есть
+ * соответствующие статические методы; в headless — настройки хранятся только в API.
  */
 public class ProjectPreferencesManager {
+    private static final String GRAPHIC_MANAGER_CLASS = "com.projectlibre1.pm.graphic.frames.GraphicManager";
+    private static final String METHOD_GET_PREFS = "GetProjectPreferencesJson";
+    private static final String METHOD_APPLY_PREFS = "ApplyProjectPreferencesJson";
+
     private static ProjectPreferencesManager instance;
     private final PreferenceService preferenceService = PreferenceService.getInstance();
     private final ProjectPreferencesPersistenceService persistenceService = ProjectPreferencesPersistenceService.getInstance();
@@ -24,31 +27,57 @@ public class ProjectPreferencesManager {
     }
 
     /**
-     * Регистрация методов в механизме алертов ядра.
-     * Это позволяет ядру вызывать API-слой без прямой зависимости.
-     * В headless режиме GraphicManager недоступен - тихо игнорируем ошибки.
+     * Регистрация callback'ов только при наличии методов в GraphicManager.
+     * При отсутствии методов (headless) — логируем и продолжаем без регистрации.
      */
     public void initialize() {
         System.out.println("[ProjectPreferencesManager] Initializing preferences callbacks...");
-        
+        if (!isGraphicManagerPreferencesSupported()) {
+            System.out.println("[ProjectPreferencesManager] ℹ GraphicManager preferences methods not found (headless) — storing preferences in API only");
+            return;
+        }
         int successCount = 0;
-        
-        // Регистрация метода получения JSON для сохранения
-        if (silentRegister("GetProjectPreferencesJson", new Alert.Method() {
-            @Override
-            public Object execute(Object[] args) {
+        if (registerGetPreferences()) {
+            successCount++;
+        }
+        if (registerApplyPreferences()) {
+            successCount++;
+        }
+        System.out.println("[ProjectPreferencesManager] ✅ Preferences callbacks registered (" + successCount + "/2)");
+    }
+
+    /**
+     * Проверка наличия в core статических методов GetProjectPreferencesJson(Object) и ApplyProjectPreferencesJson(Object).
+     * Без них регистрация не выполняется — не бросаем исключение.
+     */
+    private boolean isGraphicManagerPreferencesSupported() {
+        try {
+            Class<?> clazz = Class.forName(GRAPHIC_MANAGER_CLASS);
+            clazz.getMethod(METHOD_GET_PREFS, Object.class);
+            clazz.getMethod(METHOD_APPLY_PREFS, Object.class);
+            return true;
+        } catch (ClassNotFoundException | NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private boolean registerGetPreferences() {
+        try {
+            Alert.setGraphicManagerMethod(METHOD_GET_PREFS, (Alert.Method) args -> {
                 PreferencesDto dto = getCurrentPreferencesAsDto();
                 return persistenceService.serialize(dto);
-            }
-        })) {
-            successCount++;
-            System.out.println("[ProjectPreferencesManager]   ✓ GetProjectPreferencesJson callback registered");
+            });
+            System.out.println("[ProjectPreferencesManager]   ✓ GetProjectPreferencesJson registered");
+            return true;
+        } catch (Exception e) {
+            System.out.println("[ProjectPreferencesManager]   ✗ GetProjectPreferencesJson not registered: " + e.getMessage());
+            return false;
         }
+    }
 
-        // Регистрация метода применения JSON при загрузке
-        if (silentRegister("ApplyProjectPreferencesJson", new Alert.Method() {
-            @Override
-            public Object execute(Object[] args) {
+    private boolean registerApplyPreferences() {
+        try {
+            Alert.setGraphicManagerMethod(METHOD_APPLY_PREFS, (Alert.Method) args -> {
                 if (args != null && args.length > 0 && args[0] instanceof String) {
                     String json = (String) args[0];
                     PreferencesDto dto = persistenceService.deserialize(json);
@@ -57,49 +86,12 @@ public class ProjectPreferencesManager {
                     }
                 }
                 return null;
-            }
-        })) {
-            successCount++;
-            System.out.println("[ProjectPreferencesManager]   ✓ ApplyProjectPreferencesJson callback registered");
-        }
-        
-        if (successCount > 0) {
-            System.out.println("[ProjectPreferencesManager] ✅ Preferences manager initialized (" + successCount + "/2 callbacks)");
-        } else {
-            System.out.println("[ProjectPreferencesManager] ℹ Preferences manager initialized (headless mode - GUI callbacks unavailable)");
-        }
-    }
-    
-    /**
-     * Тихая регистрация callback'а с подавлением стектрейсов.
-     * В headless режиме Alert.setGraphicManagerMethod() печатает стектрейс - подавляем его.
-     */
-    private boolean silentRegister(String methodName, Alert.Method callback) {
-        // Сохраняем оригинальный System.err
-        PrintStream originalErr = System.err;
-        
-        try {
-            // Временно перенаправляем stderr в /dev/null (подавляем стектрейсы)
-            System.setErr(new PrintStream(new java.io.OutputStream() {
-                @Override
-                public void write(int b) {
-                    // Ничего не делаем - выбрасываем вывод
-                }
-            }));
-            
-            // Пытаемся зарегистрировать
-            Alert.setGraphicManagerMethod(methodName, callback);
-            
-            // Успех
+            });
+            System.out.println("[ProjectPreferencesManager]   ✓ ApplyProjectPreferencesJson registered");
             return true;
-            
         } catch (Exception e) {
-            // Неудача (это норма в headless режиме)
+            System.out.println("[ProjectPreferencesManager]   ✗ ApplyProjectPreferencesJson not registered: " + e.getMessage());
             return false;
-            
-        } finally {
-            // ОБЯЗАТЕЛЬНО восстанавливаем System.err
-            System.setErr(originalErr);
         }
     }
 

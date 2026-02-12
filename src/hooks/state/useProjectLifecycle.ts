@@ -4,6 +4,15 @@ import { logger } from '@/utils/logger'
 import { useAppStore } from '@/store/appStore'
 
 /**
+ * Генерирует уникальный ID проекта.
+ * Использует crypto.randomUUID() с fallback на Date.now().
+ */
+const generateProjectId = (): string => {
+  const uuid = crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+  return `PROJ-${uuid.slice(0, 8)}`
+}
+
+/**
  * Управление базовыми данными проекта
  * Следует принципу Single Responsibility
  */
@@ -68,7 +77,7 @@ export const useProjectLifecycle = () => {
    */
   const createProject = useCallback((initialData?: Partial<Project>): Project => {
     const newProject: Project = {
-      id: Date.now().toString(),
+      id: generateProjectId(),
       name: 'Новый проект',
       description: '',
       start: new Date(),

@@ -68,7 +68,7 @@ import java.text.Format;
 import java.text.ParseException;
 import java.text.ParsePosition;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Class used in converting outline codes to hierarchy

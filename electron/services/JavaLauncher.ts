@@ -76,7 +76,7 @@ export class JavaLauncher implements IJavaLauncher {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
       this.logFilePath = join(logDir, `java-${timestamp}.log`);
       
-      const header = `=== ProjectLibre Java Process Log ===\nStarted: ${new Date().toISOString()}\nMode: ${isDev ? 'Development' : 'Production'}\n\n`;
+      const header = `=== ПланПро Java Process Log ===\nStarted: ${new Date().toISOString()}\nMode: ${isDev ? 'Development' : 'Production'}\n\n`;
       fs.writeFileSync(this.logFilePath, header, 'utf8');
       
       console.log(`[JavaLauncher] Log file initialized: ${this.logFilePath}`);

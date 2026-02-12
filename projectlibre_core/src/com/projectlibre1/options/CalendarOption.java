@@ -56,7 +56,7 @@
 package com.projectlibre1.options;
 import java.util.GregorianCalendar;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.projectlibre1.datatype.Duration;
 import com.projectlibre1.pm.calendar.WorkCalendar;

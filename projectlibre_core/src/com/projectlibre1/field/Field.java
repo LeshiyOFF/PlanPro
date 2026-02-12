@@ -73,7 +73,7 @@ import javax.swing.JTextField;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.comparators.ComparableComparator;
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.projectlibre1.configuration.Configuration;
 import com.projectlibre1.configuration.FieldDictionary;

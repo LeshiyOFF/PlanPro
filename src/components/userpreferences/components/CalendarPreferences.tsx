@@ -1,9 +1,10 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PreferencesSection } from './PreferencesSection'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-import { ICalendarPreferences } from '../interfaces/UserPreferencesInterfaces'
+import { ICalendarPreferences, DurationCalculationMode } from '../interfaces/UserPreferencesInterfaces'
 import { useDebouncedCallback } from '@/hooks/useDebounce'
 
 /**
@@ -52,6 +53,10 @@ export const CalendarPreferences: React.FC = () => {
     }
   }, [debouncedUpdate])
 
+  const handleDurationModeChange = useCallback((value: DurationCalculationMode) => {
+    updateCalendarPreferences({ durationCalculationMode: value })
+  }, [updateCalendarPreferences])
+
   return (
     <PreferencesSection
       title="Настройки календаря"
@@ -90,6 +95,33 @@ export const CalendarPreferences: React.FC = () => {
             onChange={(e) => handleDaysPerMonthChange(e.target.value)}
           />
           <p className="text-xs text-muted-foreground">Используется при вводе "1мес"</p>
+        </div>
+      </div>
+
+      <div className="mt-6 pt-6 border-t border-slate-200">
+        <div className="space-y-2 max-w-md">
+          <Label htmlFor="durationMode">Режим расчёта длительности</Label>
+          <Select
+            value={calendarPrefs.durationCalculationMode ?? 'working'}
+            onValueChange={handleDurationModeChange}
+          >
+            <SelectTrigger id="durationMode">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="working">
+                Рабочее время ({calendarPrefs.hoursPerDay}ч/день)
+              </SelectItem>
+              <SelectItem value="calendar">
+                Календарное время (24ч/сутки)
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            {calendarPrefs.durationCalculationMode === 'calendar'
+              ? 'Длительность считается в календарных сутках (24 часа). Рабочие графики учитываются только на уровне ресурсов.'
+              : 'Длительность считается на основе рабочих часов в день. Классический режим MS Project.'}
+          </p>
         </div>
       </div>
     </PreferencesSection>

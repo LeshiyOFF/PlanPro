@@ -36,7 +36,7 @@ export class UIErrorHandler {
     console.error(`[UIErrorHandler] Load failed: ${code} (${description})`);
     
     dialog.showErrorBox(
-      'ProjectLibre - Interface Load Error',
+      'ПланПро - Ошибка загрузки интерфейса',
       'Failed to load the user interface.\n\n' +
       `Error Code: ${code}\n` +
       `Description: ${description}\n\n` +
@@ -54,7 +54,7 @@ export class UIErrorHandler {
     
     dialog.showMessageBoxSync({
       type: 'error',
-      title: 'ProjectLibre - Critical Crash',
+      title: 'ПланПро - Критический сбой',
       message: 'The interface process has crashed.',
       detail: `Reason: ${reason}\n\nThe application will now close.`,
       buttons: ['Close']
@@ -71,7 +71,7 @@ export class UIErrorHandler {
     
     const choice = dialog.showMessageBoxSync({
       type: 'warning',
-      title: 'ProjectLibre - Application Not Responding',
+      title: 'ПланПро - Приложение не отвечает',
       message: 'The interface is not responding. Would you like to wait or restart?',
       buttons: ['Wait', 'Restart']
     });

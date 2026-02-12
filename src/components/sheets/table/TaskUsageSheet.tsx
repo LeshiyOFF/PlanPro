@@ -13,7 +13,8 @@ import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPr
 import { ResourceSelectPopup } from '../popups/ResourceSelectPopup'
 import { Resource } from '@/types/resource-types'
 import { ResourceAssignment } from '@/store/project/interfaces'
-import { Lock, Diamond, FolderTree } from 'lucide-react'
+import { Lock, Diamond, FolderTree, Check, X } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { JsonValue } from '@/types/json-types'
 import type { ContextMenuTarget } from '@/domain/contextmenu/entities/ContextMenu'
 
@@ -48,6 +49,8 @@ export const TaskUsageSheet = forwardRef<ProfessionalSheetHandle, TaskUsageSheet
   const [editingAssignments, setEditingAssignments] = useState<ResourceAssignment[]>([])
 
   const handleResourceEdit = useCallback((row: TaskUsageRow, _columnId: string) => {
+    // Блокируем назначение ресурсов для суммарных задач
+    if (row.summary) return
     setEditingTaskId(row.id)
     setEditingTaskName(row.taskName)
     setEditingAssignments(row.resourceAssignments || [])
@@ -107,14 +110,25 @@ export const TaskUsageSheet = forwardRef<ProfessionalSheetHandle, TaskUsageSheet
     },
     {
       id: 'percentComplete', field: 'percentComplete', title: t('sheets.progress'), width: 120,
-      type: SheetColumnType.PERCENT, editable: (row) => !row.milestone && !row.summary,
+      type: SheetColumnType.PERCENT, editable: (row) => !row.summary && !row.milestone,
       visible: true, sortable: true, resizable: true,
       formatter: (val, row) => {
         const num = Number(val ?? 0)
         if (row.milestone) {
-          return num >= 0.5
-            ? <span className="text-green-600">✅ {t('sheets.milestone_completed')}</span>
-            : <span className="text-slate-500">⬜ {t('sheets.milestone_pending')}</span>
+          const completed = num >= 0.5
+          const Icon = completed ? Check : X
+          const label = completed ? t('sheets.milestone_completed') : t('sheets.milestone_pending')
+          return (
+            <span className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+              <Checkbox
+                checked={completed}
+                onCheckedChange={checked => onUpdate?.(row.id, 'percentComplete', checked ? 100 : 0)}
+                className={completed ? 'data-[state=checked]:bg-green-600' : ''}
+              />
+              <Icon className={`w-4 h-4 flex-shrink-0 ${completed ? 'text-green-600' : 'text-slate-500'}`} />
+              <span className={completed ? 'text-green-600' : 'text-slate-500'}>{label}</span>
+            </span>
+          )
         }
         if (row.summary) {
           return <span className="flex items-center gap-1 text-slate-600">
@@ -128,9 +142,12 @@ export const TaskUsageSheet = forwardRef<ProfessionalSheetHandle, TaskUsageSheet
       id: 'resources', field: 'resources', title: t('sheets.resources'), width: 180,
       type: SheetColumnType.TEXT, editable: false, visible: true, sortable: false, resizable: true,
       onCustomEdit: handleResourceEdit,
-      formatter: (val) => <span className="text-primary cursor-pointer hover:underline">{String(val ?? '')}</span>,
+      // Для суммарных задач показываем прочерк (назначение ресурсов недоступно)
+      formatter: (val, row) => row.summary 
+        ? <span className="text-slate-400 flex items-center gap-1"><Lock className="w-3 h-3" />—</span>
+        : <span className="text-primary cursor-pointer hover:underline">{String(val ?? t('sheets.click_to_assign', { defaultValue: 'Назначить...' }))}</span>,
     },
-  ], [t, durationUnit, handleResourceEdit])
+  ], [t, durationUnit, handleResourceEdit, onUpdate])
 
   const handleContextMenu = (event: React.MouseEvent, row: TaskUsageRow) => {
     event.preventDefault()

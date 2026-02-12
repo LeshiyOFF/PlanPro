@@ -60,4 +60,20 @@ if (!fs.existsSync(path.dirname(jarResources))) {
 }
 fs.copyFileSync(jarSource, jarResources);
 
+// Копирование API JAR в projectlibre_build/dist для electron-builder (extraResources)
+const distDir = path.join(rootDir, 'projectlibre_build', 'dist');
+const distApiJar = path.join(distDir, 'projectlibre-api-final.jar');
+if (!fs.existsSync(distDir)) {
+  fs.mkdirSync(distDir, { recursive: true });
+}
+console.log(`📦 Copying API JAR to dist: ${distApiJar}`);
+fs.copyFileSync(jarSource, distApiJar);
+
+const distLibRuntime = path.join(distDir, 'lib-runtime');
+if (fs.existsSync(distLibRuntime)) {
+  const distLibRuntimeJar = path.join(distLibRuntime, 'projectlibre-api-final.jar');
+  console.log(`📦 Copying API JAR to dist/lib-runtime: ${distLibRuntimeJar}`);
+  fs.copyFileSync(jarSource, distLibRuntimeJar);
+}
+
 console.log('✨ Java build completed successfully!');

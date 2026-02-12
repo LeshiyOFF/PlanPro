@@ -30,6 +30,8 @@ export interface ElectronAPI {
   ) => Promise<JavaApiResponseBase & { data?: JsonValue }>;
 
   getJavaStatus: () => Promise<JavaApiResponseBase & { data?: JavaStatusData }>;
+  subscribeToJavaEvents: () => Promise<JavaApiResponseBase>;
+  unsubscribeFromJavaEvents: () => Promise<JavaApiResponseBase>;
   getAppInfo: () => Promise<AppInfo>;
 
   showMessageBox: (

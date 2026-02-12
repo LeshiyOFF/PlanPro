@@ -4,7 +4,9 @@ import { ViewType, ViewSettings } from '@/types/ViewTypes'
 import { TwoTierHeader } from '@/components/layout/ViewHeader'
 import { CalendarService } from '@/domain/calendar/services/CalendarService'
 import { useProjectStore, createTaskFromView } from '@/store/projectStore'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { useHelpContent } from '@/hooks/useHelpContent'
+import { useTaskUpdateWithConflictCheck } from '@/hooks/task/useTaskUpdateWithConflictCheck'
 import { CalendarGrid } from './CalendarGrid'
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent'
@@ -30,9 +32,11 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
   const { t } = useTranslation()
   const helpContent = useHelpContent()
   const [currentDate, setCurrentDate] = useState(new Date())
-  const { tasks, addTask, deleteTask } = useProjectStore()
+  const store = useProjectStore()
+  const { tasks, addTask, deleteTask } = store
   const calendarService = useMemo(() => new CalendarService(), [])
-  const { handleDragStart, handleDragEnd, handleDrop } = useCalendarDnD()
+  const { updateTask: updateTaskWithConflictCheck, UpdateConflictDialogs } = useTaskUpdateWithConflictCheck({ store })
+  const { handleDragStart, handleDragEnd, handleDrop } = useCalendarDnD(updateTaskWithConflictCheck)
   const { showMenu } = useContextMenu()
 
   // Состояние диалога редактирования
@@ -81,9 +85,10 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
   }
 
   const handleAddEvent = () => {
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     addTask(createTaskFromView({
-      id: `TASK-${tasks.length + 1}`,
-      name: t('sheets.new_task'),
+      id: TaskIdGenerator.generate(tasks),
+      name: TaskIdGenerator.generateDefaultName(tasks, t('sheets.new_task')),
       startDate: new Date(),
       endDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
       progress: 0,
@@ -159,6 +164,8 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
           onClose={handleDialogClose}
         />
       )}
+
+      <UpdateConflictDialogs />
     </div>
   )
 }

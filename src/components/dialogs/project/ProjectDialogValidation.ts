@@ -3,6 +3,7 @@
  * Single Responsibility: определение ValidationRule[] для ProjectDialog.
  */
 
+import type { JsonValue } from '@/types/json-types'
 import type { ValidationRule } from '@/types/dialog/DialogTypes'
 
 export const projectDialogValidationRules: ValidationRule[] = [
@@ -30,7 +31,7 @@ export const projectDialogValidationRules: ValidationRule[] = [
   {
     field: 'startDate',
     required: true,
-    custom: (value: unknown) => {
+    custom: (value: JsonValue) => {
       if (!value) {
         return 'Дата начала обязательна'
       }

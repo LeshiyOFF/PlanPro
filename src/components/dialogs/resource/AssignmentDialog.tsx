@@ -47,7 +47,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
   currentAssignments = [],
   onAssign,
   onRemove,
-  onReplace,
+  onReplace: _onReplace,
   onClose,
   ...props
 }) => {

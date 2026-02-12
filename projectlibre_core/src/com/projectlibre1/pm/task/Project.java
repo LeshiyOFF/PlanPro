@@ -200,6 +200,7 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 	long start;
 	long end;
 	long duration;
+	long imposedFinishDate; // 0 = не задан (автоматический режим), иначе дата жёсткого дедлайна от пользователя (VB.1)
 	boolean forward = true;
 	int priority = 500;
 	long currentDate = 0;
@@ -1594,7 +1595,12 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 		schedulingAlgorithm.setStartConstraint(date);
 	}
 	/**
-	 * @return Returns the forward.
+	 * Проверить режим планирования проекта.
+	 * 
+	 * @return true если проект в режиме Schedule from Start (forward scheduling),
+	 *         false если проект в режиме Schedule from End (backward scheduling)
+	 * 
+	 * VB.12: Imposed deadline доступен только в режиме forward scheduling.
 	 */
 	public boolean isForward() {
 		return forward;
@@ -1842,6 +1848,86 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 
 	public boolean isReadOnlyFinishDate(FieldContext fieldContext) {
 		return getSchedulingAlgorithm() == null || getSchedulingAlgorithm().isForward();
+	}
+
+	/**
+	 * Получить imposed finish date (жёсткий дедлайн, заданный пользователем).
+	 * VB.1: Отличается от getFinishDate() — хранит только явно установленный дедлайн,
+	 * не рассчитанную дату окончания проекта.
+	 * VB.8: При загрузке старых .pod файлов (без поля imposedFinishDate) возвращает 0.
+	 * 
+	 * @return imposed deadline в миллисекундах; 0 = не задан (автоматический режим)
+	 */
+	public long getImposedFinishDate() {
+		return imposedFinishDate;
+	}
+
+	/**
+	 * Установить imposed finish date (жёсткий дедлайн).
+	 * VB.1 + VB.13: Корректирует дату по рабочему календарю проекта.
+	 * VB.8: При загрузке старых .pod файлов автоматически устанавливается 0 (автоматический режим).
+	 *       При первом сохранении старого .pod файла, значение 0 записывается явно.
+	 * VB.12: Жёсткий дедлайн доступен только при планировании от даты начала (Schedule from Start).
+	 *        При режиме Schedule from End дедлайн игнорируется с выводом предупреждения.
+	 * 
+	 * @param date дата дедлайна в миллисекундах; 0 или отрицательное значение = очистить дедлайн
+	 */
+	public void setImposedFinishDate(long date) {
+		if (date > 0) {
+			// VB.12: Валидация режима планирования
+			if (!isForward()) {
+				System.err.println("[VB.12] WARN: Imposed deadline is not supported in Schedule from End mode. "
+					+ "Deadline will be ignored. Switch to Schedule from Start to use imposed deadline.");
+				this.imposedFinishDate = 0;
+				return;
+			}
+			
+			// VB.13: Корректировка по календарю (приведение к рабочему дню)
+			WorkCalendar calendar = getEffectiveWorkCalendar();
+			if (calendar != null) {
+				long originalDate = date;
+				date = calendar.adjustInsideCalendar(date, true);
+				if (date != originalDate) {
+					System.out.println("[VB.13] Imposed deadline adjusted by calendar: " 
+						+ originalDate + " -> " + date);
+				}
+			} else {
+				System.err.println("[VB.13] WARN: Work calendar is null, imposed deadline not adjusted: " + date);
+			}
+			this.imposedFinishDate = date;
+		} else {
+			// VB.9: Очистка дедлайна (возврат к автоматическому режиму)
+			this.imposedFinishDate = 0;
+		}
+	}
+
+	/**
+	 * Проверить, задан ли imposed finish date (жёсткий дедлайн).
+	 * VB.1: Используется для выбора режима расчёта CPM (автоматический vs imposed).
+	 * 
+	 * @return true если imposed deadline задан пользователем
+	 */
+	public boolean hasImposedFinishDate() {
+		return imposedFinishDate > 0;
+	}
+
+	/**
+	 * Очистить imposed finish date (возврат к автоматическому режиму).
+	 * VB.9: Используется при отмене жёсткого дедлайна пользователем.
+	 * После очистки следующий recalculate будет использовать maxFinishDate (автоматический режим).
+	 */
+	public void clearImposedFinishDate() {
+		this.imposedFinishDate = 0;
+	}
+	
+	/**
+	 * Проверить, можно ли установить imposed finish date в текущем режиме планирования.
+	 * VB.12: Imposed deadline доступен только при планировании от даты начала (Schedule from Start).
+	 * 
+	 * @return true если можно установить imposed deadline (проект в режиме forward scheduling)
+	 */
+	public boolean canSetImposedFinishDate() {
+		return isForward();
 	}
 	public final long getCurrentDate() {
 		return currentDate;
@@ -2428,7 +2514,7 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 			return;
 		try {
 			DependencyService.getInstance().connect(NodeList.nodeListToImplList(children, NotAssignmentFilter.getInstance()),eventSource,canBeSuccessorCondition);
-		} catch (com.projectlibre1.pm.association.InvalidAssociationException e) {
+		} catch (InvalidAssociationException e) {
 			com.projectlibre1.server.access.ErrorLogger.log("Failed to link siblings", e);
 		}
 		for (Node n : children) // recursively do children
@@ -2778,6 +2864,9 @@ public class Project implements Document, BelongsToDocument, HasKey, HasPriority
 
 	public void recalculate() {
 		markAllTasksAsNeedingRecalculation(true);
+		if (getSchedulingAlgorithm() instanceof CriticalPath) {
+			((CriticalPath) getSchedulingAlgorithm()).markSentinelsForRecalculation();
+		}
 		schedulingAlgorithm.reset();
 		schedulingAlgorithm.calculate(true);
 	}

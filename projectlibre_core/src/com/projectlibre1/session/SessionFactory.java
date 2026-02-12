@@ -109,6 +109,10 @@ public class SessionFactory {
     protected Session getSession(String name){
     	initSessions();
     	Session session=sessionImpls.get(name);
+    	if (session == null) {
+    		throw new IllegalStateException(
+    			"Session not registered for: " + name + ". Ensure session is initialized before file load or deserialization (e.g. GlobalSessionManager).");
+    	}
     	if (!session.isInitialized()) session.init(credentials);
     	return session;
     }

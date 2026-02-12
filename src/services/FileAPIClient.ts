@@ -12,7 +12,7 @@ import type {
   ProjectSyncRequest,
 } from '@/types/api'
 import type { FileAPI } from '@/types/api/file-api.types'
-import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError'
+import { type CaughtError, toCaughtError } from '@/errors/CaughtError'
 
 /**
  * FileAPIClient handles native .pod file operations.

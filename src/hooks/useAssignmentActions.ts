@@ -3,6 +3,7 @@ import type { Assignment } from '@/types'
 import { useProjectState } from './useProjectState'
 import { useAsyncOperation } from './useAsyncOperation'
 import { AssignmentUtils } from '@/utils/assignment-utils'
+import { AssignmentIdGenerator } from '@/domain/assignment/services/AssignmentIdGenerator'
 import { logger } from '@/utils/logger'
 
 /**
@@ -28,7 +29,7 @@ export const useAssignmentActions = (execute: ReturnType<typeof useAsyncOperatio
 
     const newAssignment: Assignment = {
       ...assignmentData,
-      id: Date.now().toString(),
+      id: AssignmentIdGenerator.generate(assignmentData.taskId, assignmentData.resourceId),
     }
 
     await execute(

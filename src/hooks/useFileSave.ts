@@ -56,10 +56,12 @@ export const useFileSave = () => {
         projectId: currentProjectId,
         tasks: syncTasksData,
         resources: syncResourcesData,
+        projectCalendars: ResourceDataConverter.calendarsToSyncData(calendars),
       })
       return true
-    } catch (syncError: unknown) {
-      const errorMessage = syncError instanceof Error ? syncError.message : 'Unknown error'
+    } catch (syncError) {
+      const e = syncError instanceof Error ? syncError : new Error(String(syncError))
+      const errorMessage = e.message
       console.error(`${LOG_TAG} Sync failed:`, errorMessage)
       if (errorMessage.includes('календарь')) {
         const api = getElectronAPI()
@@ -72,7 +74,7 @@ export const useFileSave = () => {
         }
         return false
       }
-      throw syncError
+      throw e
     }
   }, [currentProjectId, file, tasks, resources, calendars])
 
@@ -82,15 +84,25 @@ export const useFileSave = () => {
     const isValid = await validateProjectId()
     if (!isValid) return
 
+    const api = getElectronAPI()
+    if (!api?.showSaveDialog) {
+      if (api?.showMessageBox) {
+        await api.showMessageBox({
+          type: 'warning',
+          title: 'Сохранение недоступно',
+          message: 'Диалог сохранения файла недоступен. Запустите приложение в среде Electron для сохранения проекта.',
+        })
+      }
+      return
+    }
+
     try {
       setIsProcessing(true)
-      const api = getElectronAPI()
-      if (!api?.showSaveDialog) return
       const result = await api.showSaveDialog({
         title: 'Сохранить проект как',
         defaultPath: currentFilePath ?? 'project.pod',
         filters: [
-          { name: 'ProjectLibre (.pod)', extensions: ['pod'] },
+          { name: 'ПланПро (.pod)', extensions: ['pod'] },
           { name: 'Microsoft Project XML (.xml)', extensions: ['xml'] },
         ],
       })
@@ -157,6 +169,14 @@ export const useFileSave = () => {
     if (!currentFilePath) {
       if (saveProjectAsRef.current) {
         return saveProjectAsRef.current()
+      }
+      const electronApi = getElectronAPI()
+      if (electronApi?.showMessageBox) {
+        await electronApi.showMessageBox({
+          type: 'info',
+          title: 'Сохранить как',
+          message: 'У проекта ещё нет файла. Используйте «Сохранить проект как...» для выбора пути.',
+        })
       }
       return
     }

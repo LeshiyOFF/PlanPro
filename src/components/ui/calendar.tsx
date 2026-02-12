@@ -17,6 +17,10 @@ export type CalendarProps = Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect
   mode?: 'single'
   selected?: Date
   onSelect?: (date: Date | undefined) => void
+  /** GANTT-NAV-FIX: Минимальная допустимая дата */
+  fromDate?: Date
+  /** GANTT-NAV-FIX: Максимальная допустимая дата */
+  toDate?: Date
 }
 
 function Calendar({
@@ -25,6 +29,8 @@ function Calendar({
   showOutsideDays = true,
   onSelect,
   selected,
+  fromDate,
+  toDate,
   ...props
 }: CalendarProps) {
   const { t } = useTranslation()
@@ -33,6 +39,18 @@ function Calendar({
   const [month, setMonth] = React.useState<Date>(
     (Array.isArray(selected) ? selected[0] : selected instanceof Date ? selected : null) || today,
   )
+
+  // GANTT-NAV-FIX: Создаём матчер для отключения дат вне диапазона
+  const disabledMatcher = React.useMemo(() => {
+    const matchers: Array<{ before: Date } | { after: Date }> = []
+    if (fromDate) {
+      matchers.push({ before: fromDate })
+    }
+    if (toDate) {
+      matchers.push({ after: toDate })
+    }
+    return matchers.length > 0 ? matchers : undefined
+  }, [fromDate, toDate])
 
   const handleTodayClick = () => {
     setMonth(today)
@@ -138,6 +156,17 @@ function Calendar({
           color: #e2e8f0;
           opacity: 0.5;
         }
+        
+        /* GANTT-NAV-FIX: Стили для отключённых дат */
+        .rdp-disabled .rdp-day_button {
+          color: #cbd5e1 !important;
+          opacity: 0.4 !important;
+          cursor: not-allowed !important;
+          pointer-events: none;
+        }
+        .rdp-disabled .rdp-day_button:hover {
+          background-color: transparent !important;
+        }
       `}</style>
 
       {/* Акцентная шапочка (Header) */}
@@ -212,6 +241,7 @@ function Calendar({
               className="m-0 p-0"
               selected={selected}
               onSelect={onSelect ? (selectedVal: Date | undefined) => onSelect(selectedVal) : undefined}
+              disabled={disabledMatcher}
               classNames={{
                 months: 'w-full',
                 month: 'w-full',
@@ -223,7 +253,7 @@ function Calendar({
                 day: 'rdp-day',
                 ...classNames,
               }}
-              {...(props as Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect' | 'month' | 'onMonthChange' | 'locale' | 'className' | 'classNames' | 'showOutsideDays'>)}
+              {...(props as Omit<DayPickerProps, 'mode' | 'selected' | 'onSelect' | 'month' | 'onMonthChange' | 'locale' | 'className' | 'classNames' | 'showOutsideDays' | 'disabled'>)}
             />
           </motion.div>
         </CalendarAnimatePresence>

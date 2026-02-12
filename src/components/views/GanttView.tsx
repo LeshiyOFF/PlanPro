@@ -1,17 +1,23 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TwoTierHeader } from '@/components/layout/ViewHeader'
 import { useHelpContent } from '@/hooks/useHelpContent'
 import { GanttLayout } from '@/components/gantt'
 import { useProjectStore, createTaskFromView } from '@/store/projectStore'
+import { TaskLinkService } from '@/domain/services/TaskLinkService'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { useContextMenu } from '@/presentation/contextmenu/providers/ContextMenuProvider'
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { SplitTaskDialog } from '@/components/dialogs/task/SplitTaskDialog'
+import { SummaryTaskDialog } from '@/components/dialogs/task/SummaryTaskDialog'
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion'
+import { useDependencyConflictFlow } from '@/hooks/task/useDependencyConflictFlow'
+import { useTaskUpdateWithConflictCheck } from '@/hooks/task/useTaskUpdateWithConflictCheck'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
 import { GanttLeftPanel } from './gantt/GanttLeftPanel'
 import { GanttRightPanel } from './gantt/GanttRightPanel'
 import { useGanttContextMenu } from '@/hooks/task/useGanttContextMenu'
-import { SummaryTaskDialog } from '@/components/dialogs/task/SummaryTaskDialog'
+import { useGanttScrollSync } from '@/hooks/gantt/useGanttScrollSync'
 import { Plus, BarChart, Link2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -27,19 +33,46 @@ export const GanttView: React.FC = () => {
   const { t } = useTranslation()
   const helpContent = useHelpContent()
   const store = useProjectStore()
+  const { preferences } = useUserPreferences()
+  const splitTasksEnabled = preferences.editing?.splitTasksEnabled ?? true
   const { deleteTask, isDeletionAllowed } = useTaskDeletion()
   const { showMenu } = useContextMenu()
 
   const [currentDate, setCurrentDate] = useState(new Date())
   const [mode, setMode] = useState<'standard' | 'tracking'>('standard')
+  
+  // GANTT-SCROLL-SYNC: Синхронизация вертикального скролла между таблицей задач и диаграммой
+  const { leftPanelRef, rightPanelRef, onLeftScroll, onRightScroll } = useGanttScrollSync()
+  
+  // GANTT-SYNC: Флаг для одноразовой инициализации даты при загрузке задач
+  const isInitialDateSet = useRef(false)
+  
+  // GANTT-SYNC: Синхронизация начальной даты тулбара с диапазоном проекта
+  // При первой загрузке задач устанавливаем currentDate = минимальная дата задачи
+  useEffect(() => {
+    if (!isInitialDateSet.current && store.tasks.length > 0) {
+      const minStartDate = new Date(Math.min(
+        ...store.tasks.map(task => new Date(task.startDate).getTime())
+      ))
+      setCurrentDate(minStartDate)
+      isInitialDateSet.current = true
+    }
+  }, [store.tasks])
   const [dialogState, setDialogState] = useState({
     infoId: null as string | null,
     splitId: null as string | null,
     summaryConfirmId: null as string | null,
   })
   const [linkingTaskId, setLinkingTaskId] = useState<string | null>(null)
+  const { handleTaskSelect } = useDependencyConflictFlow({
+    store,
+    linkingTaskId,
+    setLinkingTaskId,
+  })
+  const { updateTask: updateTaskWithConflictCheck, UpdateConflictDialogs } = useTaskUpdateWithConflictCheck({
+    store,
+  })
 
-  // Задачи, которые нельзя выбрать при связывании
   const disabledTaskIds = useMemo(() =>
     linkingTaskId
       ? store.tasks.filter(t => !store.isValidPredecessor(linkingTaskId, t.id)).map(t => t.id)
@@ -47,12 +80,15 @@ export const GanttView: React.FC = () => {
   [store.tasks, linkingTaskId, store.isValidPredecessor],
   )
 
-  const handleTaskSelect = useCallback((task: { id: string }) => {
-    if (linkingTaskId && linkingTaskId !== task.id) {
-      store.linkTasks(linkingTaskId, task.id)
-      setLinkingTaskId(null)
-    }
-  }, [linkingTaskId, store])
+  const disabledReasons = useMemo(() => {
+    if (!linkingTaskId) return {}
+    const reasons: Record<string, string> = {}
+    store.tasks.forEach(t => {
+      const reason = TaskLinkService.getPredecessorDisabledReason(store.tasks, linkingTaskId, t.id)
+      if (reason) reasons[t.id] = reason
+    })
+    return reasons
+  }, [store.tasks, linkingTaskId])
 
   const contextMenuActions = {
     onInfo: (id: string) => setDialogState({ ...dialogState, infoId: id }),
@@ -82,12 +118,13 @@ export const GanttView: React.FC = () => {
     onDelete: deleteTask,
   }
 
-  const onContextMenu = useGanttContextMenu(showMenu, t, contextMenuActions, isDeletionAllowed)
+  const onContextMenu = useGanttContextMenu(showMenu, t, contextMenuActions, isDeletionAllowed, splitTasksEnabled)
 
   const handleAddTask = useCallback(() => {
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     store.addTask(createTaskFromView({
-      id: `TASK-${store.tasks.length + 1}`,
-      name: `${t('sheets.new_task')} ${store.tasks.length + 1}`,
+      id: TaskIdGenerator.generate(store.tasks),
+      name: TaskIdGenerator.generateDefaultName(store.tasks, t('sheets.new_task')),
       startDate: new Date(),
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       progress: 0,
@@ -133,8 +170,8 @@ export const GanttView: React.FC = () => {
         }}
       />
 
-      {/* Основной контент: GanttLayout */}
-      <div className="flex-1 min-h-0 p-4">
+      {/* Основной контент: GanttLayout. pt-0 убирает верхний зазор, чтобы диаграмма не съезжала вниз */}
+      <div className="flex-1 min-h-0 pt-0 px-4 pb-4 overflow-hidden">
         <div className="h-full w-full bg-white rounded-xl shadow-lg border overflow-hidden transition-all soft-border">
           <GanttLayout
             leftPanel={
@@ -144,11 +181,14 @@ export const GanttView: React.FC = () => {
                 t={t}
                 onAddTask={handleAddTask}
                 onCancelLink={() => setLinkingTaskId(null)}
-                onTaskUpdate={store.updateTask}
+                onTaskUpdate={updateTaskWithConflictCheck}
                 onContextMenu={(e, task) => onContextMenu(e, task, store.tasks)}
                 onTaskSelect={handleTaskSelect}
                 onDeleteTask={deleteTask}
                 disabledTaskIds={disabledTaskIds}
+                disabledReasons={disabledReasons}
+                scrollRef={leftPanelRef}
+                onScroll={onLeftScroll}
               />
             }
             rightPanel={
@@ -158,9 +198,11 @@ export const GanttView: React.FC = () => {
                 linkingTaskId={linkingTaskId}
                 mode={mode}
                 onCurrentDateChange={setCurrentDate}
-                onTaskUpdate={store.updateTask}
+                onTaskUpdate={updateTaskWithConflictCheck}
                 onTaskSelect={handleTaskSelect}
                 onModeChange={setMode}
+                scrollRef={rightPanelRef}
+                onScroll={onRightScroll}
               />
             }
             initialLeftWidth={260}
@@ -174,6 +216,7 @@ export const GanttView: React.FC = () => {
           taskId={dialogState.infoId}
           isOpen={!!dialogState.infoId}
           onClose={() => setDialogState({ ...dialogState, infoId: null })}
+          updateTaskOverride={updateTaskWithConflictCheck}
         />
       )}
 
@@ -206,6 +249,8 @@ export const GanttView: React.FC = () => {
           subtaskName={store.tasks.find(t => t.id === dialogState.summaryConfirmId!)?.name || ''}
         />
       )}
+
+      <UpdateConflictDialogs />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { UserPreferencesService } from '../components/userpreferences/services/UserPreferencesService'
 import { PreferencesCategory, IPreferencesChangeEvent } from '../components/userpreferences/interfaces/UserPreferencesInterfaces'
 import { useProjectStore } from '../store/projectStore'
+import { TaskDataConverter } from './TaskDataConverter'
 import { javaApiService } from './JavaApiService'
 import { logger } from '../utils/logger'
 import type { ConfigurationUpdateRequest } from '@/types/api/request-types'
@@ -104,22 +105,37 @@ export class RecalculationEngine {
       }
 
       logger.info('Starting project recalculation...')
+      const projectId = useProjectStore.getState().currentProjectId
+      if (projectId == null) {
+        logger.warn('RecalculationEngine: currentProjectId is null, skipping recalculation')
+        this.isRecalculating = false
+        return
+      }
+      logger.info('[CriticalPathTrace] layer=frontend request (RecalculationEngine)', { projectId: String(projectId) }, 'CriticalPathTrace')
 
-      // Вызываем пересчет проекта в Java Core
-      // Примечание: Мы предполагаем, что текущий проект имеет ID 'current' или берем его из стора
-      // В будущем здесь будет ID активного проекта
-      const result = await javaApiService.recalculateProject('current')
-      const data = result?.data
-      // Обрабатываем результат пересчета
-      if (data && data.tasks) {
-        // 3. Обновляем фронтенд стор новыми данными от Java
-        useProjectStore.getState().setTasks(data.tasks)
+      // Вызываем пересчет проекта в Java Core (backend ожидает числовой ID проекта)
+      const payload = await javaApiService.recalculateProject(String(projectId))
+      if (payload?.tasks && payload.tasks.length > 0) {
+        const payloadCriticalCount = payload.tasks.filter(t => t.critical === true).length
+        logger.info('[CriticalPathTrace] layer=frontend api_response (RecalculationEngine)', {
+          projectId: String(projectId ?? 'current'),
+          taskCount: payload.tasks.length,
+          criticalCount: payloadCriticalCount,
+          criticalTaskIds: payload.tasks.filter(t => t.critical === true).map(t => t.id),
+        }, 'CriticalPathTrace')
+        TaskDataConverter.resetDateShiftLogCount()
+        const frontendTasks = payload.tasks.map(t => TaskDataConverter.coreToFrontendTask(t))
+        const frontendCriticalCount = frontendTasks.filter(t => t.isCritical === true || t.critical === true).length
+        useProjectStore.getState().setTasks(frontendTasks)
+        logger.info('[CriticalPathTrace] layer=frontend store_updated (RecalculationEngine)', {
+          projectId: String(projectId ?? 'current'),
+          taskCount: frontendTasks.length,
+          criticalCount: frontendCriticalCount,
+        }, 'CriticalPathTrace')
         logger.info('Project recalculated successfully and store updated')
-      } else if (data && data.projectName) {
-        // Если вернулся объект проекта, но без задач (текущая ситуация с демо-проектами)
-        logger.info(`Project '${data.projectName}' recalculated successfully (no task updates needed)`)
-      } else if (!result?.success || !data) {
-        // Java вернул успех, но данных нет - это нормально, если проект не открыт
+      } else if (payload?.projectName) {
+        logger.info(`Project '${payload.projectName}' recalculated successfully (no task updates needed)`)
+      } else if (!payload) {
         logger.info('No project loaded in Java, preferences synced without recalculation')
       } else {
         logger.info('Recalculation completed')

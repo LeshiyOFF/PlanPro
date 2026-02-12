@@ -2,12 +2,15 @@ import { useCallback } from 'react'
 import { useProjectStore } from '@/store/projectStore'
 import { ICalendarEvent } from '@/domain/calendar/interfaces/ICalendarEvent'
 
+export type UpdateTaskFn = (taskId: string, updates: { startDate: Date; endDate: Date }) => void
+
 /**
- * Хук для обработки логики Drag-and-drop в календаре
- * Инкапсулирует логику перемещения задач
+ * Хук для обработки логики Drag-and-drop в календаре.
+ * Если передан updateTaskOverride, он используется при сбросе (для проверки конфликта дат).
  */
-export const useCalendarDnD = () => {
-  const { updateTask, tasks } = useProjectStore()
+export const useCalendarDnD = (updateTaskOverride?: UpdateTaskFn) => {
+  const { updateTask: storeUpdateTask, tasks } = useProjectStore()
+  const updateTask = updateTaskOverride ?? storeUpdateTask
 
   /**
    * Начало перетаскивания

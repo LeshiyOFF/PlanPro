@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron';
-import { join } from 'path';
 import { IConfigService } from './interfaces/IConfigService';
+
+const DEFAULT_ACCENT_HEX = '#1F1F1F';
 
 /**
  * Менеджер Splash-screen (окна загрузки).
@@ -16,26 +17,39 @@ export class SplashManager {
   }
 
   /**
-   * Создание и отображение окна заставки
+   * Создание и отображение окна заставки (идемпотентно).
+   * @param accentColorHex — акцентный цвет из настроек (например #1F1F1F)
+   * @param preloadPath — путь к preload для приёма bootstrap-status-change
    */
-  public createSplash(): BrowserWindow {
+  public createSplash(accentColorHex?: string, preloadPath?: string): BrowserWindow {
+    if (this.splashWindow && !this.splashWindow.isDestroyed()) {
+      return this.splashWindow;
+    }
+
+    const accent = typeof accentColorHex === 'string' && /^#[0-9A-Fa-f]{6}$/.test(accentColorHex)
+      ? accentColorHex
+      : DEFAULT_ACCENT_HEX;
+
+    const webPrefs: Electron.WebPreferences = {
+      nodeIntegration: false,
+      contextIsolation: true
+    };
+    if (typeof preloadPath === 'string' && preloadPath.length > 0) {
+      webPrefs.preload = preloadPath;
+    }
+
     this.splashWindow = new BrowserWindow({
       width: 500,
       height: 350,
-      transparent: true,
       frame: false,
       alwaysOnTop: true,
       center: true,
-      show: false, // Покажем после загрузки контента
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true
-      }
+      show: false,
+      backgroundColor: '#ffffff',
+      webPreferences: webPrefs
     });
 
-    // Загрузка локального HTML файла заставки
-    // Если его нет, создадим минимальную строку Data URL
-    const splashHtml = this.getSplashContent();
+    const splashHtml = this.getSplashContent(accent);
     this.splashWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(splashHtml)}`);
 
     this.splashWindow.once('ready-to-show', () => {
@@ -56,37 +70,42 @@ export class SplashManager {
   }
 
   /**
-   * Генерация HTML контента для заставки (временно, пока нет файла)
+   * Генерация HTML контента заставки: светлый фон, порядок заголовок → спиннер → этап, акцент из настроек.
    */
-  private getSplashContent(): string {
+  private getSplashContent(accentHex: string): string {
+    const accentSafe = accentHex.replace(/"/g, '&quot;');
     return `
       <style>
-        body { 
+        body {
           margin: 0; padding: 0; height: 100vh; overflow: hidden;
-          background: #141414; color: white; font-family: sans-serif;
+          background: #ffffff; color: #1e293b; font-family: system-ui, sans-serif;
           display: flex; flex-direction: column; align-items: center; justify-content: center;
-          border-radius: 12px; border: 1px solid #333;
+          border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
         }
-        .loader { 
-          border: 4px solid #333; border-top: 4px solid #004d40;
-          border-radius: 50%; width: 40px; height: 40px; 
-          animation: spin 1s linear infinite; margin-bottom: 20px;
+        h2 { margin: 0 0 24px 0; font-size: 22px; font-weight: 700; color: #0f172a; }
+        .loader {
+          border: 4px solid #e2e8f0; border-top-color: ${accentSafe};
+          border-radius: 50%; width: 44px; height: 44px;
+          animation: spin 0.9s linear infinite; margin-bottom: 20px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        h2 { margin: 0; color: #004d40; }
-        p { opacity: 0.7; font-size: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        #status { margin: 0; font-size: 14px; color: #64748b; }
       </style>
       <body>
-        <div class="loader"></div>
         <h2>ПланПро</h2>
-        <p id="status">Инициализация Java Backend...</p>
+        <div class="loader"></div>
+        <p id="status">Инициализация...</p>
         <script>
-          const { ipcRenderer } = window.electron || {};
-          if(ipcRenderer) {
-            ipcRenderer.on('bootstrap-status-change', (_, status) => {
-              document.getElementById('status').innerText = 'Status: ' + status;
-            });
-          }
+          (function(){
+            var el = document.getElementById('status');
+            try {
+              if (window.electronAPI && typeof window.electronAPI.onBootstrapStatusChange === 'function') {
+                window.electronAPI.onBootstrapStatusChange(function(status) {
+                  if (el) el.textContent = status === 'STARTING_JAVA' ? 'Запуск ядра...' : status === 'WAITING_FOR_API' ? 'Подготовка системы...' : status === 'READY' ? 'Запуск...' : String(status);
+                });
+              }
+            } catch (e) {}
+          })();
         </script>
       </body>
     `;

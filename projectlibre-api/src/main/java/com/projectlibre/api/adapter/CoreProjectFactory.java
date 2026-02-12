@@ -72,7 +72,8 @@ public class CoreProjectFactory {
             
             setProjectStartDate(coreProject, apiProject);
             validateCreatedProject(coreProject);
-            
+            initializeCpmIfPresent(coreProject);
+
             System.out.println("[CoreProjectFactory] ✅ Created: " + coreProject.getName());
             return coreProject;
             
@@ -135,6 +136,19 @@ public class CoreProjectFactory {
     private void validateCreatedProject(com.projectlibre1.pm.task.Project coreProject) {
         if (coreProject.getUniqueId() == 0) {
             System.err.println("[CoreProjectFactory] ⚠ Warning: ID=0");
+        }
+    }
+
+    /**
+     * ИНИТ-CPM.4: Инициализация CPM после создания нового проекта.
+     * Гарантирует готовность списка предшественников к первому recalculate (пульс).
+     */
+    private void initializeCpmIfPresent(com.projectlibre1.pm.task.Project coreProject) {
+        if (coreProject == null) return;
+        var algo = coreProject.getSchedulingAlgorithm();
+        if (algo != null) {
+            algo.initialize(coreProject);
+            System.out.println("[CoreProjectFactory] CPM initialized for new project");
         }
     }
 }

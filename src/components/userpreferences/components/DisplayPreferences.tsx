@@ -6,7 +6,7 @@ import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PreferencesSection } from './PreferencesSection'
 import { useUserPreferences } from '../hooks/useUserPreferences'
-import { IDisplayPreferences, Theme } from '../interfaces/UserPreferencesInterfaces'
+import { IDisplayPreferences } from '../interfaces/UserPreferencesInterfaces'
 import { useDebouncedCallback } from '@/hooks/useDebounce'
 import { APP_FONTS } from '../constants/FontConstants'
 
@@ -47,10 +47,6 @@ export const DisplayPreferences: React.FC = () => {
     updateDisplayPreferences({ showTips: checked })
   }, [updateDisplayPreferences])
 
-  const handleShowWelcomeScreenChange = useCallback((checked: boolean) => {
-    updateDisplayPreferences({ showWelcomeScreen: checked })
-  }, [updateDisplayPreferences])
-
   const handleAnimationEnabledChange = useCallback((checked: boolean) => {
     updateDisplayPreferences({ animationEnabled: checked })
   }, [updateDisplayPreferences])
@@ -68,10 +64,6 @@ export const DisplayPreferences: React.FC = () => {
     updateDisplayPreferences({ fontFamily: value })
   }, [updateDisplayPreferences])
 
-  const handleThemeChange = useCallback((value: Theme) => {
-    updateDisplayPreferences({ theme: value })
-  }, [updateDisplayPreferences])
-
   return (
     <PreferencesSection
       title={t('preferences.display_title')}
@@ -85,15 +77,6 @@ export const DisplayPreferences: React.FC = () => {
             onCheckedChange={handleShowTipsChange}
           />
           <Label htmlFor="showTips">{t('preferences.show_tips')}</Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="showWelcomeScreen"
-            checked={displayPrefs.showWelcomeScreen}
-            onCheckedChange={handleShowWelcomeScreenChange}
-          />
-          <Label htmlFor="showWelcomeScreen">{t('preferences.welcome_screen')}</Label>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -146,21 +129,6 @@ export const DisplayPreferences: React.FC = () => {
                   {t(font.label)}
                 </SelectItem>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="theme">{t('preferences.theme')}</Label>
-          <Select value={displayPrefs.theme} onValueChange={(val: string) => handleThemeChange(val as Theme)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={Theme.LIGHT}>{t('preferences.theme_light')}</SelectItem>
-              <SelectItem value={Theme.DARK}>{t('preferences.theme_dark')}</SelectItem>
-              <SelectItem value={Theme.HIGH_CONTRAST}>{t('preferences.theme_hc')}</SelectItem>
-              <SelectItem value={Theme.AUTO}>{t('preferences.theme_auto')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

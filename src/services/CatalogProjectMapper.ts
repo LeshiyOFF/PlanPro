@@ -51,15 +51,36 @@ const priorityToUi: Record<ProjectPriority, UiProject['priority']> = {
   [ProjectPriority.HIGHEST]: 'High',
 }
 
+/** Вход маппера: UI-поля start/finish или Catalog-поля startDate/finishDate (Фаза 3 контракт). */
+type UiProjectPartialInput = Partial<UiProject> & { startDate?: Date; finishDate?: Date }
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000
+
+function resolveStartDate(p: UiProjectPartialInput): Date | undefined {
+  const start = p.start ?? p.startDate
+  return start instanceof Date ? start : undefined
+}
+
+function resolveFinishDate(p: UiProjectPartialInput, startDate: Date | undefined): Date | undefined {
+  const finish = p.finish ?? p.finishDate
+  if (finish instanceof Date) return finish
+  if (startDate) return new Date(startDate.getTime() + ONE_DAY_MS)
+  return undefined
+}
+
 /**
- * Преобразует частичный проект UI (project-types) в частичный Catalog.Project для API.
+ * Преобразует частичный проект UI в частичный Catalog.Project для API.
+ * Принимает start/finish и startDate/finishDate; при только start/startDate подставляет finishDate = startDate + 1 день.
  */
-export function uiProjectPartialToCatalog(p: Partial<UiProject>): Partial<CatalogProject> {
+export function uiProjectPartialToCatalog(p: UiProjectPartialInput): Partial<CatalogProject> {
   const out: Partial<CatalogProject> = {}
+  const startDate = resolveStartDate(p)
+  const finishDate = resolveFinishDate(p, startDate)
+
   if (p.id !== undefined) out.id = stringToCatalogId(p.id)
-  if (p.name !== undefined) out.name = p.name
-  if (p.start !== undefined) out.startDate = p.start
-  if (p.finish !== undefined) out.finishDate = p.finish
+  if (p.name !== undefined) out.name = p.name.trim()
+  if (startDate !== undefined) out.startDate = startDate
+  if (finishDate !== undefined) out.finishDate = finishDate
   if (p.status !== undefined) out.status = statusToCatalog[p.status] as CatalogProject['status']
   if (p.priority !== undefined) out.priority = priorityToCatalog[p.priority]
   if (p.description !== undefined) out.description = p.description

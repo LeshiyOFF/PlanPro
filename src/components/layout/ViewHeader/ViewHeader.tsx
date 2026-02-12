@@ -55,6 +55,7 @@ export const ViewHeader: React.FC<ViewHeaderProps> = ({
             <ContextHelp
               title={help.title}
               content={help.content}
+              section={help.section}
               side="bottom"
             />
           </div>

@@ -23,7 +23,6 @@ export const GeneralPreferences: React.FC = () => {
   const [localUserName, setLocalUserName] = useState(generalPrefs.userName || '')
   const [localCompanyName, setLocalCompanyName] = useState(generalPrefs.companyName || '')
   const [localStandardRate, setLocalStandardRate] = useState((generalPrefs.defaultStandardRate ?? 0).toString())
-  const [localOvertimeRate, setLocalOvertimeRate] = useState((generalPrefs.defaultOvertimeRate ?? 0).toString())
 
   // Гарантированное сохранение при размонтировании (закрытии окна настроек)
   useEffect(() => {
@@ -45,10 +44,6 @@ export const GeneralPreferences: React.FC = () => {
   useEffect(() => {
     setLocalStandardRate((generalPrefs.defaultStandardRate ?? 0).toString())
   }, [generalPrefs.defaultStandardRate])
-
-  useEffect(() => {
-    setLocalOvertimeRate((generalPrefs.defaultOvertimeRate ?? 0).toString())
-  }, [generalPrefs.defaultOvertimeRate])
 
   // Дебаунс-обработчики для сохранения (фоновое)
   const debouncedUpdateGeneral = useDebouncedCallback((updates: Partial<IGeneralPreferences>) => {
@@ -104,11 +99,6 @@ export const GeneralPreferences: React.FC = () => {
   const handleDefaultStandardRateChange = useCallback((value: string) => {
     setLocalStandardRate(value)
     debouncedUpdateGeneral({ defaultStandardRate: parseFloat(value) || 0 })
-  }, [debouncedUpdateGeneral])
-
-  const handleDefaultOvertimeRateChange = useCallback((value: string) => {
-    setLocalOvertimeRate(value)
-    debouncedUpdateGeneral({ defaultOvertimeRate: parseFloat(value) || 0 })
   }, [debouncedUpdateGeneral])
 
   const handleDefaultCalendarChange = useCallback((value: string) => {
@@ -191,9 +181,9 @@ export const GeneralPreferences: React.FC = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Standard">{t('calendars.standard')}</SelectItem>
-              <SelectItem value="Night Shift">{t('calendars.night_shift')}</SelectItem>
-              <SelectItem value="24 Hours">{t('calendars.24_hours')}</SelectItem>
+              <SelectItem value="standard">{t('calendars.standard')}</SelectItem>
+              <SelectItem value="night_shift">{t('calendars.night_shift')}</SelectItem>
+              <SelectItem value="24_7">{t('calendars.24_hours')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -279,23 +269,6 @@ export const GeneralPreferences: React.FC = () => {
               value={localStandardRate}
               onChange={(e) => handleDefaultStandardRateChange(e.target.value)}
               onBlur={(e) => handleBlur('defaultStandardRate', parseFloat(e.target.value) || 0)}
-              className="pr-10"
-            />
-            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
-              {t('preferences.per_hour')}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="defaultOvertimeRate">{t('preferences.ot_rate')}</Label>
-          <div className="relative">
-            <Input
-              id="defaultOvertimeRate"
-              type="number"
-              value={localOvertimeRate}
-              onChange={(e) => handleDefaultOvertimeRateChange(e.target.value)}
-              onBlur={(e) => handleBlur('defaultOvertimeRate', parseFloat(e.target.value) || 0)}
               className="pr-10"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">

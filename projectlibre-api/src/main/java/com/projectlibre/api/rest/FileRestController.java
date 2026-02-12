@@ -10,6 +10,7 @@ import com.projectlibre.api.adapter.CoreProjectFactory;
 import com.projectlibre.api.session.GlobalSessionManager;
 import com.projectlibre.api.concurrent.CoreAccessGuard;
 import com.projectlibre.api.converter.CoreToApiConverter;
+import com.projectlibre.api.recalculation.CpmRecalculationRunner;
 import com.projectlibre1.pm.task.Project;
 import com.projectlibre1.session.Session;
 
@@ -95,6 +96,7 @@ public class FileRestController {
                 if (project != null) {
                     projectBridge.registerProject(project);
                     logBridgeState("AFTER");
+                    coreAccessGuard.executeWithLock(() -> new CpmRecalculationRunner().run(project));
                 }
                 FileLoadResponseDto data = FileLoadResponseDto.success(
                     result.getFilePath(),

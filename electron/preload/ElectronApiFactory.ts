@@ -52,6 +52,14 @@ export function createElectronAPI(): ElectronAPI {
       return ipcRenderer.invoke(IpcChannels.JAVA_STATUS);
     },
 
+    subscribeToJavaEvents: (): Promise<JavaApiResponseBase> => {
+      return ipcRenderer.invoke(IpcChannels.JAVA_SUBSCRIBE_EVENTS);
+    },
+
+    unsubscribeFromJavaEvents: (): Promise<JavaApiResponseBase> => {
+      return ipcRenderer.invoke(IpcChannels.JAVA_UNSUBSCRIBE_EVENTS);
+    },
+
     getAppInfo: () => ipcRenderer.invoke(IpcChannels.GET_APP_INFO),
 
     showMessageBox: (options) => ipcRenderer.invoke(IpcChannels.SHOW_MESSAGE_BOX, options),

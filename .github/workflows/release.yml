@@ -1,4 +1,4 @@
-name: Build/Release
+name: Build & Release
 
 on:
   push:
@@ -6,25 +6,25 @@ on:
       - main
     tags:
       - 'v*'
+  workflow_dispatch:
 
 jobs:
-  release:
+  build:
     runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - name: Check out git repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Node.js
+      - name: Setup Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Set up JDK 17
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
@@ -39,28 +39,51 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Prepare JRE
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            node scripts/prepare-jre.js --platform win
-          else
-            node scripts/prepare-jre.js --platform linux
-          fi
-        shell: bash
+      - name: Prepare JRE (Windows)
+        if: matrix.os == 'windows-latest'
+        run: node scripts/prepare-jre.js --platform win
 
-      - name: Build Java Core & API
-        run: npm run build:java
-        shell: bash
+      - name: Prepare JRE (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: node scripts/prepare-jre.js --platform linux
 
-      - name: Build and Publish Electron App
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            npm run build
-            npx electron-builder --win --publish always --config electron/electron-builder.yml
-          else
-            npm run build
-            npx electron-builder --linux deb --publish always --config electron/electron-builder.yml
-          fi
+      - name: Build Frontend & Electron
+        run: npm run build
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        shell: bash
+          CI: true
+
+      - name: Build Java (Core & API)
+        run: npm run build:java
+
+      - name: Build Electron App (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npx electron-builder --win --config electron/electron-builder.yml
+        env:
+          CI: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Electron App (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npx electron-builder --linux deb --config electron/electron-builder.yml
+        env:
+          CI: true
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Windows Artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlanPro-Windows
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+          retention-days: 30
+
+      - name: Upload Linux Artifacts
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: PlanPro-Linux
+          path: |
+            release/*.deb
+          retention-days: 30

@@ -7,8 +7,6 @@ import { PasswordPolicySection } from './PasswordPolicySection'
 import { SessionPolicySection } from './SessionPolicySection'
 import { AccessPolicySection } from './AccessPolicySection'
 import { AuditPolicySection } from './AuditPolicySection'
-import type { JsonObject, JsonValue } from '@/types/json-types'
-
 export interface SecurityPolicy {
   passwordPolicy: {
     minLength: number;

@@ -40,7 +40,7 @@ export interface IJavaApiService {
   updateProject(projectId: string, updates: ProjectUpdateRequest): Promise<DataResponse<ProjectResponse>>;
   deleteProject(projectId: string): Promise<DataResponse<void>>;
   getAllProjects(): Promise<DataResponse<ProjectsListResponse>>;
-  recalculateProject(projectId: string): Promise<DataResponse<ProjectDataResponse>>;
+  recalculateProject(projectId: string): Promise<ProjectDataResponse | undefined>;
 
   // Task operations
   createTask(projectId: string, taskData: TaskCreateRequest): Promise<DataResponse<TaskResponse>>;

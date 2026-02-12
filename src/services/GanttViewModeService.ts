@@ -1,4 +1,4 @@
-import { ViewMode } from 'gantt-task-react'
+import { ViewMode } from '@wamra/gantt-task-react'
 
 /**
  * GanttViewModeService - Сервис для управления режимами отображения Ганта.

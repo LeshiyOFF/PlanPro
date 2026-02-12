@@ -61,7 +61,7 @@ import java.util.List;
 
 import org.apache.commons.collections.MapIterator;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 
 /**
  * This class manages a fixed list of values and their associated options, similar to an html select

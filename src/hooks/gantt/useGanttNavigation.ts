@@ -1,11 +1,9 @@
 /**
- * Хук для управления навигацией в Gantt диаграмме
- * Выделен из GanttCanvasController для соблюдения лимита 200 строк
+ * GANTT-NAV-V2: Хук для управления навигацией в Gantt диаграмме
+ * Упрощённая версия - навигация управляется через GanttCanvasController
  */
 
 import { useState, useCallback } from 'react'
-import { ViewMode } from 'gantt-task-react'
-import { GanttNavigationService } from '@/services/GanttNavigationService'
 import { Task } from '@/store/project/interfaces'
 
 /**
@@ -14,14 +12,8 @@ import { Task } from '@/store/project/interfaces'
 export interface IUseGanttNavigationResult {
   readonly forcedEndDate: Date | null;
   readonly targetNavigationDate: Date | null;
-  readonly pendingDate: Date | null;
-  readonly showEmptyDateWarning: boolean;
-  readonly showLargeJumpWarning: boolean;
-  readonly handleDateSelect: (date: Date | undefined) => void;
-  readonly confirmLargeJump: () => void;
-  readonly confirmEmptyDateNavigation: () => void;
-  readonly setShowEmptyDateWarning: (show: boolean) => void;
-  readonly setShowLargeJumpWarning: (show: boolean) => void;
+  readonly resetTargetDate: () => void;
+  readonly resetForcedEndDate: () => void;
 }
 
 /**
@@ -36,76 +28,30 @@ interface IUseGanttNavigationParams {
 }
 
 /**
- * Хук управления навигацией
+ * GANTT-NAV-V2: Упрощённый хук навигации
+ * Основная логика перенесена в GanttCanvasController (navigateTo)
  */
 export const useGanttNavigation = ({
   tasks,
-  viewMode,
   onDateChange,
-  onViewModeChange,
-  onZoomChange,
 }: IUseGanttNavigationParams): IUseGanttNavigationResult => {
   const [forcedEndDate, setForcedEndDate] = useState<Date | null>(null)
   const [targetNavigationDate, setTargetNavigationDate] = useState<Date | null>(null)
-  const [pendingDate, setPendingDate] = useState<Date | null>(null)
-  const [showEmptyDateWarning, setShowEmptyDateWarning] = useState(false)
-  const [showLargeJumpWarning, setShowLargeJumpWarning] = useState(false)
 
-  const performScroll = useCallback((date: Date) => {
-    setForcedEndDate(date)
-    setTargetNavigationDate(date)
-    onDateChange(date)
-  }, [onDateChange])
+  // Сброс targetNavigationDate после завершения навигации
+  const resetTargetDate = useCallback(() => {
+    setTargetNavigationDate(null)
+  }, [])
 
-  const viewModeEnum = viewMode === 'day' ? ViewMode.Day : viewMode === 'week' ? ViewMode.Week : ViewMode.Month
-
-  const handleDateSelect = useCallback((date: Date | undefined) => {
-    if (!date) return
-
-    const safety = GanttNavigationService.checkNavigationSafety(date, viewModeEnum)
-    if (!safety.isSafe) {
-      setPendingDate(date)
-      setShowLargeJumpWarning(true)
-      return
-    }
-
-    const hasTasks = GanttNavigationService.hasTasksAtDate(date, [...tasks])
-    if (!hasTasks) {
-      setPendingDate(date)
-      setShowEmptyDateWarning(true)
-    } else {
-      performScroll(date)
-    }
-  }, [tasks, performScroll, viewModeEnum])
-
-  const confirmLargeJump = useCallback(() => {
-    if (pendingDate) {
-      onViewModeChange('month')
-      onZoomChange(0.8)
-      performScroll(pendingDate)
-      setPendingDate(null)
-    }
-    setShowLargeJumpWarning(false)
-  }, [pendingDate, performScroll, onViewModeChange, onZoomChange])
-
-  const confirmEmptyDateNavigation = useCallback(() => {
-    if (pendingDate) {
-      performScroll(pendingDate)
-      setPendingDate(null)
-    }
-    setShowEmptyDateWarning(false)
-  }, [pendingDate, performScroll])
+  // Сброс forcedEndDate (при «Вписать в экран» или возврате в диапазон задач)
+  const resetForcedEndDate = useCallback(() => {
+    setForcedEndDate(null)
+  }, [])
 
   return {
     forcedEndDate,
     targetNavigationDate,
-    pendingDate,
-    showEmptyDateWarning,
-    showLargeJumpWarning,
-    handleDateSelect,
-    confirmLargeJump,
-    confirmEmptyDateNavigation,
-    setShowEmptyDateWarning,
-    setShowLargeJumpWarning,
+    resetTargetDate,
+    resetForcedEndDate,
   }
 }

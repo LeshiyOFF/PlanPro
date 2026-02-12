@@ -14,7 +14,8 @@ import { CalendarManager } from '@/components/calendar/CalendarManager'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useCalendarValidation } from '@/hooks/useCalendarValidation'
 import { getElectronAPI } from '@/utils/electronAPI'
-import type { JsonObject, JsonValue } from '@/types/json-types'
+import type { JsonObject } from '@/types/json-types'
+import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
 
 /**
  * Resource Sheet компонент - Лист ресурсов
@@ -104,13 +105,14 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
       })
     }
 
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     const newResource: Resource = {
-      id: `RES-${String(resources.length + 1).padStart(3, '0')}`,
-      name: `${t('sheets.new_resource') || 'Новый ресурс'} ${resources.length + 1}`,
+      id: ResourceIdGenerator.generate(resources),
+      name: ResourceIdGenerator.generateDefaultName(resources, t('sheets.new_resource') || 'Новый ресурс'),
       type: 'Work',
       maxUnits: 1,
       standardRate: general.defaultStandardRate || 0,
-      overtimeRate: general.defaultOvertimeRate || 0,
+      overtimeRate: 0,
       costPerUse: 0,
       available: true,
       calendarId: validatedCalendarId,

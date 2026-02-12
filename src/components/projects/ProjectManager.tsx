@@ -36,9 +36,8 @@ export const ProjectManager: React.FC = () => {
       loadProjectsOperation.execute(
         () => javaApi.loadProjects(),
         {
-          onSuccess: (data: unknown) => {
-            const list = data as Project[] | null | undefined
-            logger.info('Projects loaded successfully:', { count: list?.length ?? 0 })
+          onSuccess: (data: Project[]) => {
+            logger.info('Projects loaded successfully:', { count: data?.length ?? 0 })
           },
           onError: (error) => {
             logger.error('Failed to load projects:', { message: error instanceof Error ? error.message : String(error) })
@@ -79,11 +78,14 @@ export const ProjectManager: React.FC = () => {
     }
 
     projectOperation.execute(
-      () => javaApi.createProject(formData).then((p) => { if (!p) throw new Error('Create failed'); return p }),
+      async () => {
+        const project = await javaApi.createProject(formData)
+        if (!project) throw new Error('Create failed')
+        return project
+      },
       {
-        onSuccess: (data: unknown) => {
-          const project = data as Project | null | undefined
-          logger.info('Project created successfully:', { projectId: project?.id })
+        onSuccess: (data: Project) => {
+          logger.info('Project created successfully:', { projectId: data?.id })
           resetForm()
           loadProjectsOperation.execute(() => javaApi.loadProjects())
         },
@@ -105,11 +107,14 @@ export const ProjectManager: React.FC = () => {
     }
 
     projectOperation.execute(
-      () => javaApi.updateProject(editingProject.id, formData).then((p) => { if (!p) throw new Error('Update failed'); return p }),
+      async () => {
+        const project = await javaApi.updateProject(editingProject.id, formData)
+        if (!project) throw new Error('Update failed')
+        return project
+      },
       {
-        onSuccess: (data: unknown) => {
-          const updated = data as Project | null | undefined
-          logger.info('Project updated successfully:', { projectId: updated?.id })
+        onSuccess: (data: Project) => {
+          logger.info('Project updated successfully:', { projectId: data?.id })
           resetForm()
           loadProjectsOperation.execute(() => javaApi.loadProjects())
         },
@@ -134,7 +139,10 @@ export const ProjectManager: React.FC = () => {
 
     if (result.response === 0) {
       projectOperation.execute(
-        () => javaApi.deleteProject(project.id).then(() => project),
+        async () => {
+          await javaApi.deleteProject(project.id)
+          return project
+        },
         {
           onSuccess: () => {
             logger.info('Project deleted successfully:', { projectId: project.id })

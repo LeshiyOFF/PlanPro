@@ -13,14 +13,15 @@ import { I18nProvider } from '@/providers/I18nProvider'
 import { useAppInitialization } from '@/hooks/useAppInitialization'
 import { NavigationRouter } from '@/components/navigation'
 import { ContextMenuProvider } from '@/presentation/contextmenu/providers/ContextMenuProvider'
-import { DialogProvider, DialogManager, StartupDialogLauncher } from '@/components/dialogs'
+import { DialogProvider, DialogManager } from '@/components/dialogs'
+import { StartupGate } from '@/components/startup/StartupGate'
 import { TypedDialogProvider, initializeTypedDialogs } from '@/components/dialogs/typed'
 import { HotkeyProvider } from '@/components/hotkey'
+import { PromptProvider } from '@/providers/PromptProvider'
 
 // Инициализация типизированных диалогов
 initializeTypedDialogs()
 
-import { LastProjectLoader } from '@/components/startup/LastProjectLoader'
 import { UnsavedChangesGuard } from '@/components/guards/UnsavedChangesGuard'
 import { ViewType, EventType } from '@/types/Master_Functionality_Catalog'
 import { ThemeProvider } from '@/providers/ThemeProvider'
@@ -58,21 +59,23 @@ const App: React.FC = () => {
                           <ContextMenuProvider>
                             <TypedDialogProvider>
                               <DialogProvider>
-                                <StartupDialogLauncher />
-                                <HotkeyProvider enabled={true}>
-                                  <TooltipProvider>
-                                    <ProjectProvider>
-                                      <LastProjectLoader />
-                                      <UnsavedChangesGuard />
-                                      <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                        <NavigationRouter onViewChange={handleViewChange} />
-                                      </div>
-                                      <DialogManager>
-                                        <Toaster />
-                                      </DialogManager>
-                                    </ProjectProvider>
-                                  </TooltipProvider>
-                                </HotkeyProvider>
+                                <PromptProvider>
+                                  <HotkeyProvider enabled={true}>
+                                    <TooltipProvider>
+                                      <StartupGate>
+                                        <ProjectProvider>
+                                          <UnsavedChangesGuard />
+                                          <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                            <NavigationRouter onViewChange={handleViewChange} />
+                                          </div>
+                                          <DialogManager>
+                                            <Toaster />
+                                          </DialogManager>
+                                        </ProjectProvider>
+                                      </StartupGate>
+                                    </TooltipProvider>
+                                  </HotkeyProvider>
+                                </PromptProvider>
                               </DialogProvider>
                             </TypedDialogProvider>
                           </ContextMenuProvider>

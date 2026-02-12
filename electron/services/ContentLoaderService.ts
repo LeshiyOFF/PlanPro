@@ -75,7 +75,7 @@ export class ContentLoaderService {
    */
   private handleMissingContent(path: string): void {
     dialog.showErrorBox(
-      'ProjectLibre - UI Error',
+      'ПланПро - Ошибка интерфейса',
       `Critical interface files are missing.\n\nPath: ${path}\n\nPlease reinstall the application.`
     );
     app.quit();

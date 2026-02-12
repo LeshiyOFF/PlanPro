@@ -1,7 +1,8 @@
 import { Component, ReactNode, ErrorInfo } from 'react'
 import { NetworkErrorFallback } from './NetworkErrorFallback'
 import { GeneralErrorFallback } from './GeneralErrorFallback'
-import { useErrorHandler } from '@/hooks/useErrorHandler'
+import { logger } from '@/utils/logger'
+import { SentryService } from '@/services/SentryService'
 
 interface Props {
   children: ReactNode;
@@ -31,14 +32,23 @@ export class RetryErrorBoundary extends Component<Props, State> {
   }
 
   public override componentDidCatch(error: Error, _errorInfo: ErrorInfo) {
-    const { handleError } = useErrorHandler()
-
     this.setState(prev => ({
       error,
       retries: prev.retries + 1,
     }))
 
-    handleError(error, 'RetryErrorBoundary')
+    logger.error('Error in RetryErrorBoundary:', error, 'RetryErrorBoundary')
+    try {
+      const sentryService = SentryService.getInstance()
+      if (sentryService.isInitialized()) {
+        sentryService.captureException(error, {
+          context: 'RetryErrorBoundary',
+          handler: 'RetryErrorBoundary',
+        })
+      }
+    } catch (sentryError) {
+      logger.warn('Sentry not available, falling back to logger')
+    }
 
     // Auto retry если позволяет и не превышен лимит
     if (this.props.onRetry &&

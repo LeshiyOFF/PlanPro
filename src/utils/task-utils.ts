@@ -1,4 +1,5 @@
 import type { Task } from '@/types'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 
 /**
  * Утилиты для работы с задачами
@@ -41,10 +42,14 @@ export class TaskUtils {
   /**
    * Создание задачи для тестов и разработки.
    * В production-потоке не использовать.
+   *
+   * @param data Данные задачи без ID
+   * @param existingTasks Массив существующих задач для генерации уникального ID
+   * @returns Задача с уникальным ID
    */
-  static createMockTask(data: Omit<Task, 'id'>): Task {
+  static createMockTask(data: Omit<Task, 'id'>, existingTasks: Task[] = []): Task {
     return {
-      id: Date.now().toString(),
+      id: TaskIdGenerator.generate(existingTasks),
       ...data,
     }
   }
@@ -58,3 +63,35 @@ export class TaskUtils {
   }
 }
 
+/** Объект с полями критичности (задача из стора или API). */
+export type CriticalPathFlags = { critical?: boolean; isCritical?: boolean; criticalPath?: boolean }
+
+/** Единая проверка: задача на критическом пути. Устраняет расхождение critical / isCritical / criticalPath. */
+export function isTaskCritical(task: CriticalPathFlags): boolean {
+  return task.isCritical === true || task.critical === true || task.criticalPath === true
+}
+
+/**
+ * Возвращает все варианты ключа для поиска задачи при мерже критического пути.
+ * API может возвращать id в формате "TASK1", "TASK2"; фронт использует "TASK-1", "TASK-2" или "TASK-001".
+ * Регистрируем и ищем по всем вариантам, чтобы мерж не зависел от формата.
+ */
+export function getCriticalPathLookupKeys(id: string): string[] {
+  if (!id || typeof id !== 'string') return [id]
+  const trimmed = id.trim()
+  const withHyphen = /^TASK-?(\d+)$/i.exec(trimmed)
+  const onlyDigits = /^(\d+)$/.exec(trimmed)
+  const keys = new Set<string>([trimmed])
+  if (withHyphen) {
+    const num = withHyphen[1]
+    keys.add(`TASK${num}`)
+    keys.add(`TASK-${num}`)
+    keys.add(num)
+  }
+  if (onlyDigits) {
+    const n = onlyDigits[1]
+    keys.add(`TASK-${n}`)
+    keys.add(`TASK${n}`)
+  }
+  return Array.from(keys)
+}

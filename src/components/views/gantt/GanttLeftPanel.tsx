@@ -16,11 +16,18 @@ interface GanttLeftPanelProps {
   readonly onTaskSelect: (task: Task) => void;
   readonly onDeleteTask: (id: string) => void;
   readonly disabledTaskIds: ReadonlyArray<string>;
+  /** Ключи i18n причин блокировки выбора (для тултипа): taskId → gantt.link_disabled_* */
+  readonly disabledReasons?: Readonly<Record<string, string>>;
+  /** Ref для синхронизации вертикального скролла */
+  readonly scrollRef?: React.RefObject<HTMLDivElement>;
+  /** Callback при прокрутке для синхронизации */
+  readonly onScroll?: () => void;
 }
 
 export const GanttLeftPanel: React.FC<GanttLeftPanelProps> = ({
   tasks, linkingTaskId, t, onAddTask, onCancelLink, onTaskUpdate,
-  onContextMenu, onTaskSelect, onDeleteTask, disabledTaskIds,
+  onContextMenu, onTaskSelect, onDeleteTask, disabledTaskIds, disabledReasons,
+  scrollRef, onScroll,
 }) => {
   return (
     <div className={`flex flex-col h-full overflow-hidden bg-white transition-colors duration-300 ${linkingTaskId ? 'ring-2 ring-amber-400 ring-inset bg-amber-50/10' : ''}`}>
@@ -48,6 +55,9 @@ export const GanttLeftPanel: React.FC<GanttLeftPanelProps> = ({
           onContextMenu={onContextMenu} onRowSelect={onTaskSelect}
           onDeleteTasks={(ids) => ids.forEach(onDeleteTask)}
           disabledTaskIds={[...disabledTaskIds]}
+          disabledReasons={disabledReasons}
+          scrollRef={scrollRef}
+          onScroll={onScroll}
         />
       </div>
     </div>

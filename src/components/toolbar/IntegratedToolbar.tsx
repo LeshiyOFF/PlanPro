@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react'
+import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import './ToolbarStyles.css'
 import './IntegratedToolbarStyles.css'
 import {
@@ -12,9 +12,15 @@ import {
   FolderOpen,
   Save,
   FileText,
+  Calculator,
+  Loader2,
 } from 'lucide-react'
 import { useFileOperations } from '@/hooks/useFileOperations'
 import { useProjectStore } from '@/store/projectStore'
+import { ProjectDeadlineIndicator } from '@/components/project/ProjectDeadlineIndicator'
+import { useUserPreferences } from '@/components/userpreferences/hooks/useUserPreferences'
+import { useTranslation } from 'react-i18next'
+import { useToast } from '@/hooks/use-toast'
 
 /**
  * Интерфейс интегрированного тулбара (Hotbar)
@@ -32,8 +38,13 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
   className,
   onAction,
 }) => {
-  const { currentFilePath, isDirty } = useProjectStore()
+  const { t } = useTranslation()
+  const { toast } = useToast()
+  const { currentFilePath, isDirty, imposedFinishDate, recalculateAllTasks, currentProjectId } = useProjectStore()
   const { createNewProject, openProject, saveProject, saveProjectAs } = useFileOperations()
+  const { preferences } = useUserPreferences()
+  const autoCalculate = preferences.editing?.autoCalculate ?? true
+  const [isRecalculating, setIsRecalculating] = useState(false)
 
   // Извлечение имени файла из полного пути
   const projectName = useMemo(() => {
@@ -53,6 +64,38 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
 
   const lastClickTimeRef = useRef<Map<string, number>>(new Map())
   const DEBOUNCE_MS = 300
+
+  const handleRecalculate = useCallback(() => {
+    if (!currentProjectId) {
+      toast({
+        variant: 'destructive',
+        title: t('toolbar.no_project_title', { defaultValue: 'Нет открытого проекта' }),
+        description: t('toolbar.no_project_desc', { defaultValue: 'Откройте проект для пересчёта.' }),
+      })
+      return
+    }
+    setIsRecalculating(true)
+    try {
+      recalculateAllTasks()
+      toast({
+        title: t('toolbar.recalculate_success', { defaultValue: 'Пересчёт завершён' }),
+        description: t('toolbar.recalculate_success_desc', { defaultValue: 'Расписание проекта обновлено.' }),
+      })
+    } finally {
+      setIsRecalculating(false)
+    }
+  }, [currentProjectId, recalculateAllTasks, toast, t])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F9' && !autoCalculate) {
+        e.preventDefault()
+        handleRecalculate()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [autoCalculate, handleRecalculate])
 
   const handleAction = useCallback((actionId: string, actionLabel: string) => {
     const now = Date.now()
@@ -88,17 +131,21 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
   )
 
   return (
-    <div className={`integrated-toolbar-container ${className || ''}`}>
-      {/* ЛЕВАЯ ЧАСТЬ: Информация о проекте */}
-      <div className="toolbar-project-info">
-        <FileText className="project-icon h-4 w-4" />
-        <span className="project-name" title={currentFilePath || 'Проект не сохранен'}>
-          {projectName}
-        </span>
-        <span className={`project-status ${isDirty ? 'dirty' : ''}`}>
-          {isDirty ? 'Изменено •' : 'Сохранено'}
-        </span>
-      </div>
+    <>
+      <div className={`integrated-toolbar-container ${className || ''}`}>
+        {/* ЛЕВАЯ ЧАСТЬ: Информация о проекте */}
+        <div className="toolbar-project-info">
+          <FileText className="project-icon h-4 w-4" />
+          <span className="project-name" title={currentFilePath || 'Проект не сохранен'}>
+            {projectName}
+          </span>
+          <span className={`project-status ${isDirty ? 'dirty' : ''}`}>
+            {isDirty ? 'Изменено •' : 'Сохранено'}
+          </span>
+          {imposedFinishDate && (
+            <ProjectDeadlineIndicator variant="compact" className="ml-2" />
+          )}
+        </div>
 
       {/* ПРАВАЯ ЧАСТЬ: Файловые операции */}
       <div className="toolbar-actions-group">
@@ -134,8 +181,33 @@ export const IntegratedToolbar: React.FC<IIntegratedToolbarProps> = ({
           )}
           tooltip="Сохранить как... (Ctrl+Shift+S)"
         />
+
+        {!autoCalculate && (
+          <>
+            <div className="toolbar-divider" />
+            <button
+              className="toolbar-button recalculate-button"
+              onClick={handleRecalculate}
+              disabled={isRecalculating}
+              title={t('toolbar.recalculate_tooltip', { defaultValue: 'Пересчитать расписание проекта (F9)' })}
+            >
+              <span className="toolbar-button-icon">
+                {isRecalculating ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  <Calculator />
+                )}
+              </span>
+              <span className="toolbar-button-label">
+                {t('toolbar.recalculate_project', { defaultValue: 'Пересчитать' })}
+              </span>
+            </button>
+          </>
+        )}
+
       </div>
     </div>
+  </>
   )
 }
 

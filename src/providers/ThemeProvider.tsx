@@ -33,7 +33,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = Theme.LIGHT,
-  storageKey = 'projectlibre-ui-theme',
+  storageKey: _storageKey = 'projectlibre-ui-theme',
   ...props
 }) => {
   const service = UserPreferencesService.getInstance()

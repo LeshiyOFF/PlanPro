@@ -1,9 +1,14 @@
 import { Task } from '@/store/project/interfaces'
 import { CalendarDateService } from '@/services/CalendarDateService'
-import { ViewMode } from 'gantt-task-react'
+import { ViewMode } from '@wamra/gantt-task-react'
+import { startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns'
 
 /**
  * GanttRangeService - Сервис для расчета временного диапазона проекта.
+ * Используется для вычисления диапазона overlay'ев (Baseline, Pulse).
+ *
+ * GANTT-HEADER-SYNC: Для синхронизации хедера используется GanttSvgSyncService,
+ * который читает реальные данные из SVG библиотеки.
  */
 export class GanttRangeService {
 
@@ -18,9 +23,12 @@ export class GanttRangeService {
     viewMode: ViewMode,
     forcedEndDate?: Date | null,
   ) {
-    const start = tasks.length > 0
+    const rawStart = tasks.length > 0
       ? CalendarDateService.toLocalMidnight(Math.min(...tasks.map((t: Task) => new Date(t.startDate).getTime())))
       : CalendarDateService.toLocalMidnight(new Date())
+
+    // Нормализация к границе периода (для overlay'ев)
+    const start = this.normalizeStartDate(rawStart, viewMode)
 
     const maxTaskEnd = tasks.length > 0
       ? new Date(Math.max(...tasks.map((t: Task) => new Date(t.endDate).getTime())))
@@ -90,23 +98,30 @@ export class GanttRangeService {
       finalVisualEnd.setHours(0, 0, 0, 0)
     }
 
-    // 4. Расчет технического конца для задач (Tasks End)
-    const tasksEnd = new Date(finalVisualEnd)
-    switch (viewMode) {
-      case ViewMode.Year:
-      case ViewMode.Month:
-        tasksEnd.setFullYear(tasksEnd.getFullYear() - 1)
-        tasksEnd.setMonth(5, 1)
-        break
-      case ViewMode.Week: tasksEnd.setDate(tasksEnd.getDate() - 45); break
-      case ViewMode.Day: tasksEnd.setDate(tasksEnd.getDate() - 19); break
-      default: tasksEnd.setDate(tasksEnd.getDate() - 19)
-    }
-
+    // GANTT-SYNC: tasksEnd = реальная максимальная дата задач
+    // Используется для определения необходимости anchor-задачи
+    // Anchor нужен когда end > maxTaskEnd (навигация за пределы реальных задач)
     return {
       start,
       end: finalVisualEnd,
-      tasksEnd: tasksEnd > start ? tasksEnd : new Date(start.getTime() + 24 * 60 * 60 * 1000),
+      tasksEnd: maxTaskEnd,
+    }
+  }
+
+  /**
+   * Нормализует дату к границе периода (как библиотека).
+   */
+  private static normalizeStartDate(date: Date, viewMode: ViewMode): Date {
+    switch (viewMode) {
+      case ViewMode.Year:
+        return startOfYear(date)
+      case ViewMode.Month:
+        return startOfMonth(date)
+      case ViewMode.Week:
+        return startOfWeek(date, { weekStartsOn: 1 })
+      case ViewMode.Day:
+      default:
+        return startOfDay(date)
     }
   }
 }

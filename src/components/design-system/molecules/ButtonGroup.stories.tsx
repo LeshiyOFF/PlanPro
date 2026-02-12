@@ -154,27 +154,30 @@ export const WithIcons: Story = {
   },
 }
 
-export const RadioGroup: Story = {
-  render: () => {
-    const [selected, setSelected] = React.useState('option1')
+/** Демо-компонент с состоянием выбора для стори RadioGroup (хуки только в компонентах с заглавной буквы). */
+function RadioGroupDemo() {
+  const [selected, setSelected] = React.useState('option1')
 
-    return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Select Option</h3>
-        <ButtonGroup
-          variant="vertical"
-          selected={selected}
-          onSelect={setSelected}
-          equalWidth
-          buttons={[
-            { id: 'option1', children: 'First Option' },
-            { id: 'option2', children: 'Second Option' },
-            { id: 'option3', children: 'Third Option' },
-          ]}
-        />
-        <p className="text-sm text-gray-600">Selected: {selected}</p>
-      </div>
-    )
-  },
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium text-gray-900">Select Option</h3>
+      <ButtonGroup
+        variant="vertical"
+        selected={selected}
+        onSelect={setSelected}
+        equalWidth
+        buttons={[
+          { id: 'option1', children: 'First Option' },
+          { id: 'option2', children: 'Second Option' },
+          { id: 'option3', children: 'Third Option' },
+        ]}
+      />
+      <p className="text-sm text-gray-600">Selected: {selected}</p>
+    </div>
+  )
+}
+
+export const RadioGroup: Story = {
+  render: () => <RadioGroupDemo />,
 }
 

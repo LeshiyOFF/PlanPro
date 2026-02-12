@@ -60,8 +60,9 @@ import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.projectlibre1.strings.Messages;
 
@@ -79,8 +80,8 @@ public class SpecialDateFormat extends SimpleDateFormat {
 	public static DateFormat getSpecialInstance() {
 		if (instance == null) {
 			instance = new SpecialDateFormat();
-			instance.setTimeZone(DateUtils.UTC_TIME_ZONE);
-			defaultInstance.setTimeZone(DateUtils.UTC_TIME_ZONE);
+			instance.setTimeZone(TimeZone.getTimeZone("UTC"));
+			defaultInstance.setTimeZone(TimeZone.getTimeZone("UTC"));
 		}
 		return instance; 
 	}

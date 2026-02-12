@@ -28,6 +28,7 @@ export const useGanttContextMenu = (
   t: TFunction,
   actions: GanttContextMenuActions,
   isDeletionAllowed: boolean,
+  splitTasksEnabled: boolean = true,
 ) => {
   return (event: React.MouseEvent, task: Task, tasks: Task[]) => {
     event.preventDefault()
@@ -73,7 +74,9 @@ export const useGanttContextMenu = (
         {
           label: t('dialogs.split_task.title') || 'Прервать задачу',
           onClick: () => actions.onSplit(task.id),
-          icon: <Scissors size={14} className="text-amber-600" />,
+          icon: <Scissors size={14} className={splitTasksEnabled ? 'text-amber-600' : 'text-slate-400'} />,
+          disabled: !splitTasksEnabled,
+          tooltip: !splitTasksEnabled ? t('preferences.split_disabled_hint', { defaultValue: 'Отключено в настройках редактирования' }) : undefined,
         },
         {
           label: t('dialogs.split_task.merge') || 'Объединить сегменты',

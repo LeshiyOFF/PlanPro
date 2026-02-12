@@ -3,6 +3,8 @@ import { EventType } from '@/types/Master_Functionality_Catalog'
 import { logger } from '@/utils/logger'
 import { useProjectStore } from '@/store/projectStore'
 import { createTaskFromView } from '@/store/project/interfaces'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
+import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
 import type { Resource } from '@/types/resource-types'
 
 /**
@@ -35,18 +37,21 @@ export class NewTaskAction extends BaseAction {
 
     this.logAction(EventType.TASK_ACTION, { action: 'new-task' })
 
+    const store = useProjectStore.getState()
     const start = new Date()
     const end = new Date(start.getTime() + 24 * 60 * 60 * 1000)
+    
+    // FIX: Используем max(existingIds) + 1 для предотвращения дублирования ID
     const newTask = createTaskFromView({
-      id: `task_${Date.now()}`,
-      name: 'Новая задача',
+      id: TaskIdGenerator.generate(store.tasks),
+      name: TaskIdGenerator.generateDefaultName(store.tasks, 'Новая задача'),
       startDate: start,
       endDate: end,
       progress: 0,
     })
     newTask.isMilestone = false
 
-    useProjectStore.getState().addTask(newTask)
+    store.addTask(newTask)
     logger.info('New task created successfully')
   }
 }
@@ -74,9 +79,12 @@ export class NewResourceAction extends BaseAction {
 
     this.logAction(EventType.RESOURCE_ACTION, { action: 'new-resource' })
 
+    const store = useProjectStore.getState()
+    
+    // FIX: Используем max(existingIds) + 1 для предотвращения дублирования ID
     const newResource: Resource = {
-      id: `resource_${Date.now()}`,
-      name: 'Новый ресурс',
+      id: ResourceIdGenerator.generate(store.resources),
+      name: ResourceIdGenerator.generateDefaultName(store.resources, 'Новый ресурс'),
       type: 'Work',
       maxUnits: 100,
       standardRate: 0,
@@ -84,7 +92,7 @@ export class NewResourceAction extends BaseAction {
       costPerUse: 0,
     }
 
-    useProjectStore.getState().addResource(newResource)
+    store.addResource(newResource)
     logger.info('New resource created successfully')
   }
 }

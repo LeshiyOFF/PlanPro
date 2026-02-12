@@ -1,17 +1,45 @@
 import { Task } from '@/store/project/interfaces'
 import { CalendarMathService } from './CalendarMathService'
-import { CalendarPreferences, SchedulePreferences } from '@/types/Master_Functionality_Catalog'
+import { DurationSyncService } from './DurationSyncService'
+import { CalendarPreferences, SchedulePreferences, TaskType } from '@/types/Master_Functionality_Catalog'
 import { CalendarDateService } from '@/services/CalendarDateService'
 import { normalizeFraction } from '@/utils/ProgressFormatter'
+
+/** Маппинг числового schedulingRule в TaskType enum */
+const SCHEDULING_RULE_MAP: Record<number, TaskType> = {
+  0: TaskType.FIXED_UNITS,
+  1: TaskType.FIXED_DURATION,
+  2: TaskType.FIXED_WORK,
+}
+
+/** Ограничения, защищающие даты от автоматического перепланирования */
+const REQUIRED_DATE_CONSTRAINTS = ['MustStartOn', 'MustFinishOn'] as const
 
 /**
  * TaskSchedulingService - Сервис для пересчета расписания задач.
  */
 export class TaskSchedulingService {
-  public static recalculateAll(tasks: Task[], calendarPrefs: CalendarPreferences): Task[] {
+  /**
+   * Пересчитывает все задачи проекта.
+   * @param tasks - Массив задач
+   * @param calendarPrefs - Настройки календаря
+   * @param schedulePrefs - Настройки планирования (опционально)
+   */
+  public static recalculateAll(
+    tasks: Task[],
+    calendarPrefs: CalendarPreferences,
+    schedulePrefs?: Partial<SchedulePreferences>,
+  ): Task[] {
+    const honorRequiredDates = schedulePrefs?.honorRequiredDates ?? false
+    
     // 1. Сначала пересчитываем длительности обычных задач
     const updatedTasks = tasks.map(task => {
       if (task.isMilestone || task.isSummary) return task
+      
+      // Проверяем honorRequiredDates: не пересчитываем задачи с обязательными датами
+      if (honorRequiredDates && this.hasRequiredDateConstraint(task)) {
+        return task
+      }
 
       const currentDuration = CalendarMathService.calculateDuration(
         task.startDate, task.endDate, 'hours', calendarPrefs,
@@ -21,11 +49,22 @@ export class TaskSchedulingService {
         task.startDate, currentDuration, calendarPrefs,
       )
 
-      return { ...task, endDate: newEndDate }
+      const durationInDays = DurationSyncService.calculateDurationInDays(task.startDate, newEndDate)
+      
+      return { ...task, endDate: newEndDate, duration: durationInDays }
     })
 
     // 2. Затем пересчитываем суммарные задачи (снизу вверх)
     return this.recalculateSummaryTasks(updatedTasks)
+  }
+  
+  /**
+   * Проверяет, имеет ли задача ограничение обязательной даты.
+   * Такие задачи не должны перепланироваться автоматически при honorRequiredDates = true.
+   */
+  private static hasRequiredDateConstraint(task: Task): boolean {
+    if (!task.constraint) return false
+    return REQUIRED_DATE_CONSTRAINTS.includes(task.constraint as typeof REQUIRED_DATE_CONSTRAINTS[number])
   }
 
   /**
@@ -70,11 +109,15 @@ export class TaskSchedulingService {
           avgProgress = normalizeFraction(totalProgress / nonMilestones.length)
         }
 
+        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Вычисляем duration для суммарной задачи
+        const summaryDuration = DurationSyncService.calculateDurationInDays(minStart, maxEnd)
+        
         result[i] = {
           ...task,
           startDate: minStart,
           endDate: maxEnd,
           progress: avgProgress,
+          duration: summaryDuration,
         }
       }
     }
@@ -86,70 +129,48 @@ export class TaskSchedulingService {
    * Подготавливает новую задачу с нормализацией дат (Defensive Programming).
    * ВСЕГДА нормализует даты к локальной полуночи, независимо от источника данных.
    * Это защищает от UTC-сдвигов при создании задач из любых View-компонентов.
+   * 
+   * @param task - Новая задача
+   * @param schedulePrefs - Настройки планирования
+   * @param calendarPrefs - Настройки календаря
    */
   public static prepareNewTask(
     task: Task,
-    lastTask: Task | undefined,
     schedulePrefs: Partial<SchedulePreferences> | null | undefined,
     calendarPrefs: CalendarPreferences,
   ): Task {
     const newTask = { ...task }
 
+    // Устанавливаем тип задачи из настроек schedulingRule
+    if (!newTask.type && schedulePrefs?.schedulingRule !== undefined) {
+      const ruleNum = typeof schedulePrefs.schedulingRule === 'number' 
+        ? schedulePrefs.schedulingRule 
+        : 0
+      newTask.type = SCHEDULING_RULE_MAP[ruleNum] ?? TaskType.FIXED_UNITS
+    }
+
     // Defensive Programming: ВСЕГДА нормализуем startDate
     if (newTask.startDate) {
-      // Если дата уже установлена (из View), нормализуем её к полуночи
       newTask.startDate = CalendarDateService.toLocalMidnight(newTask.startDate)
     } else if (schedulePrefs?.newTasksStartToday) {
-      // Если даты нет, создаём новую с текущей датой
       newTask.startDate = CalendarDateService.toLocalMidnight(new Date())
     }
 
     // Defensive Programming: ВСЕГДА нормализуем endDate
     if (newTask.endDate) {
-      // Если дата уже установлена (из View), нормализуем её к полуночи
       newTask.endDate = CalendarDateService.toLocalMidnight(newTask.endDate)
     } else if (newTask.startDate) {
-      // Если даты нет, но есть startDate, рассчитываем endDate от startDate
       newTask.endDate = CalendarMathService.calculateFinishDate(
         newTask.startDate, { value: 1, unit: 'days' }, calendarPrefs,
       )
     }
 
-    if (schedulePrefs?.autoLinkTasks && lastTask && !newTask.predecessors) {
-      this.autoLink(newTask, lastTask, calendarPrefs)
+    // Устанавливаем duration для синхронизации с Java Core для CPM расчётов
+    if (newTask.startDate && newTask.endDate) {
+      newTask.duration = DurationSyncService.calculateDurationInDays(newTask.startDate, newTask.endDate)
     }
 
     return newTask
-  }
-
-  /**
-   * Автоматически связывает новую задачу с предыдущей (Finish-to-Start).
-   * Defensive Programming: нормализует все даты к локальной полуночи.
-   */
-  private static autoLink(newTask: Task, lastTask: Task, calendarPrefs: CalendarPreferences): void {
-    newTask.predecessors = [lastTask.id]
-
-    // Нормализуем дату окончания предыдущей задачи
-    const lastEndNormalized = CalendarDateService.toLocalMidnight(lastTask.endDate)
-
-    // Создаём новую дату начала (следующий день после окончания предыдущей задачи)
-    const newStart = new Date(lastEndNormalized)
-    newStart.setDate(newStart.getDate() + 1)
-
-    const duration = CalendarMathService.calculateDuration(
-      newTask.startDate || CalendarDateService.toLocalMidnight(new Date()),
-      newTask.endDate || CalendarDateService.toLocalMidnight(new Date()),
-      'hours',
-      calendarPrefs,
-    )
-
-    // Устанавливаем нормализованные даты
-    newTask.startDate = CalendarDateService.toLocalMidnight(newStart)
-    newTask.endDate = CalendarMathService.calculateFinishDate(
-      newTask.startDate,
-      duration.value > 0 ? duration : { value: calendarPrefs.hoursPerDay, unit: 'hours' },
-      calendarPrefs,
-    )
   }
 }
 

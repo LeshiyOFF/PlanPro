@@ -93,7 +93,16 @@ public class DataUtil {
 		} catch (IllegalAccessException e) {
 			ErrorLogger.log("Illegal access in serializeDocument", e);
 		} catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
 			ErrorLogger.log("Invocation target exception in serializeDocument", e);
+			// Проброс причины (например IOException с текстом цикла календарей) для ответа API.
+			if (cause instanceof Exception) {
+				throw (Exception) cause;
+			}
+			if (cause instanceof Error) {
+				throw (Error) cause;
+			}
+			throw new RuntimeException(cause != null ? cause : e);
 		} catch (NoSuchMethodException e) {
 			ErrorLogger.log("Method serializeDocument not found", e);
 		}

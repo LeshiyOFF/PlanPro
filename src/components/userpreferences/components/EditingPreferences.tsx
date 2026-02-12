@@ -9,7 +9,7 @@ import { IEditingPreferences } from '../interfaces/UserPreferencesInterfaces'
  * Компонент настроек редактирования
  */
 export const EditingPreferences: React.FC = () => {
-  const { preferences, updateEditingPreferences, flush } = useUserPreferences()
+  const { preferences, updateEditingPreferences, updateGanttPreferences, flush } = useUserPreferences()
   const editingPrefs = preferences.editing as IEditingPreferences
 
   // Гарантированное сохранение при закрытии окна
@@ -25,7 +25,9 @@ export const EditingPreferences: React.FC = () => {
 
   const handleShowDependenciesChange = useCallback((checked: boolean) => {
     updateEditingPreferences({ showDependencies: checked })
-  }, [updateEditingPreferences])
+    // Синхронизация: при изменении showDependencies обновляем gantt.showArrows
+    updateGanttPreferences({ showArrows: checked })
+  }, [updateEditingPreferences, updateGanttPreferences])
 
   const handleAllowTaskDeletionChange = useCallback((checked: boolean) => {
     updateEditingPreferences({ allowTaskDeletion: checked })
@@ -33,10 +35,6 @@ export const EditingPreferences: React.FC = () => {
 
   const handleConfirmDeletionsChange = useCallback((checked: boolean) => {
     updateEditingPreferences({ confirmDeletions: checked })
-  }, [updateEditingPreferences])
-
-  const handleAutoLinkTasksChange = useCallback((checked: boolean) => {
-    updateEditingPreferences({ autoLinkTasks: checked })
   }, [updateEditingPreferences])
 
   const handleSplitTasksEnabledChange = useCallback((checked: boolean) => {
@@ -56,15 +54,6 @@ export const EditingPreferences: React.FC = () => {
             onCheckedChange={handleAutoCalculateChange}
           />
           <Label htmlFor="autoCalculate">Автоматический пересчет проекта</Label>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="autoLinkTasks"
-            checked={editingPrefs.autoLinkTasks}
-            onCheckedChange={handleAutoLinkTasksChange}
-          />
-          <Label htmlFor="autoLinkTasks">Автоматически связывать вставленные задачи</Label>
         </div>
 
         <div className="flex items-center space-x-2">

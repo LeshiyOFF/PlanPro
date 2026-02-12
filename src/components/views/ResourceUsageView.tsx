@@ -15,8 +15,9 @@ import { ResourceUsageStatsCard } from './resourceusage/ResourceUsageStatsCard'
 import { useResourceUsageStats } from '@/hooks/resource/useResourceUsageStats'
 import { useResourceUsageData } from '@/hooks/resource/useResourceUsageData'
 import { getElectronAPI } from '@/utils/electronAPI'
-import type { JsonObject, JsonValue } from '@/types/json-types'
+import type { JsonObject } from '@/types/json-types'
 import type { CellValue } from '@/types/sheet/CellValueTypes'
+import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
 
 /**
  * Resource Usage View компонент - Использование ресурсов
@@ -113,8 +114,8 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
   const handleUpdate = useCallback((id: string, field: string, value: CellValue) => {
     const updates: Partial<Resource> = {}
     if (field === 'resourceName' && typeof value === 'string') updates.name = value
-    if (field === 'assignedPercent' && typeof value === 'number') updates.maxUnits = value
-    updateResource(id, updates)
+    // assignedPercent — только отображаемое значение (loadPercent), не редактируем maxUnits
+    if (Object.keys(updates).length > 0) updateResource(id, updates)
   }, [updateResource])
 
   const handleRowClick = useCallback((row: { id: string }) => {
@@ -126,12 +127,13 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
   }, [deleteResource])
 
   const handleAddResource = useCallback(() => {
-    const newId = `RES-${String(resources.length + 1).padStart(3, '0')}`
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     addResource({
-      id: newId, name: `${t('sheets.new_resource')} ${resources.length + 1}`,
+      id: ResourceIdGenerator.generate(resources),
+      name: ResourceIdGenerator.generateDefaultName(resources, t('sheets.new_resource')),
       type: 'Work', maxUnits: 1, standardRate: 0, overtimeRate: 0, costPerUse: 0, available: true,
     })
-  }, [resources.length, addResource, t])
+  }, [resources, addResource, t])
 
   const handleExport = useCallback(async () => {
     if (!sheetRef.current || isExporting) return

@@ -42,20 +42,31 @@ public class DateTimeMapper {
     /**
      * Конвертирует миллисекунды в ISO-8601 строку.
      * 
+     * TIMEZONE-FIX: Генерируем ISO string с timezone offset вместо UTC.
+     * Это критично для корректного отображения дат на Frontend:
+     * - UTC: 14.02 00:00 MSK = "2026-02-13T21:00:00Z" → Frontend видит 13.02 ✗
+     * - Offset: 14.02 00:00 MSK = "2026-02-14T00:00:00+03:00" → Frontend видит 14.02 ✓
+     * 
      * @param millis timestamp в миллисекундах
-     * @return ISO-8601 строка или null если millis <= 0
+     * @return ISO-8601 строка с timezone offset или null если millis <= 0
      */
     public String toIsoString(long millis) {
         if (millis <= 0) {
             return null;
         }
         try {
-            return ISO_FORMATTER.format(Instant.ofEpochMilli(millis));
+            // TIMEZONE-FIX: Используем системную timezone вместо UTC
+            java.time.ZonedDateTime zdt = java.time.Instant.ofEpochMilli(millis)
+                .atZone(java.time.ZoneId.systemDefault());
+            return zdt.format(java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         } catch (Exception e) {
             log.warn("[DateTimeMapper] Failed to format millis: {}", millis);
             return null;
         }
     }
+    
+    /** Счётчик вызовов для трассировки */
+    private static int callCounter = 0;
     
     /**
      * Конвертирует строку даты в миллисекунды с поддержкой множества форматов.
@@ -69,13 +80,21 @@ public class DateTimeMapper {
         }
         
         String trimmed = value.trim();
-        log.debug("[DateTimeMapper] Parsing: '{}' (format={})", trimmed, detectFormat(trimmed));
+        String format = detectFormat(trimmed);
         
+        long result;
         if (isNumericTimestamp(trimmed)) {
-            return parseNumericTimestamp(trimmed);
+            result = parseNumericTimestamp(trimmed);
+        } else {
+            result = parseDateTime(trimmed);
         }
         
-        return parseDateTime(trimmed);
+        // ДИАГНОСТИКА: Логируем каждую конвертацию даты
+        callCounter++;
+        log.info("[DATE-SYNC-DIAG] DateTimeMapper.toMillis #{}: '{}' (format={}) -> {}ms", 
+            callCounter, trimmed, format, result);
+        
+        return result;
     }
     
     /**

@@ -40,12 +40,15 @@ export interface AppStorePort {
   clipboard?: ClipboardPort;
 }
 
-/** Интерфейс для зависимостей MainWindow */
+/** Интерфейс для зависимостей MainWindow (Фаза 4: единый источник «есть ли проект для сохранения»). */
 export interface MainWindowDependencies {
   projectProvider: ProjectProviderPort;
   appStore: AppStorePort;
   navigationProvider: NavigationProviderPort;
-  fileOperations?: FileOperationsPort;
+  /** Всегда задан; возможность Save/Save As определяется hasProjectToSave. */
+  fileOperations: FileOperationsPort;
+  /** Единственный источник: есть ли проект для сохранения (например, currentProjectId != null в store). */
+  hasProjectToSave: boolean;
 }
 
 import type { IActionManager } from '../ActionManagerTypes'

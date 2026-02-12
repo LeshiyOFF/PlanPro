@@ -50,8 +50,8 @@ export class JavaIpcHandler {
       return SchemaValidatorService.validateResponse(rawResult as RawJavaResponseShape);
     });
 
-    ipcMain.handle('java-subscribe-events', () => ({ success: true, message: 'Subscribed' }));
-    ipcMain.handle('java-unsubscribe-events', () => ({ success: true, message: 'Unsubscribed' }));
+    ipcMain.handle(IpcChannels.JAVA_SUBSCRIBE_EVENTS, () => ({ success: true, message: 'Subscribed' }));
+    ipcMain.handle(IpcChannels.JAVA_UNSUBSCRIBE_EVENTS, () => ({ success: true, message: 'Unsubscribed' }));
   }
 
   private static getJavaStatus(javaBridge: JavaBridgeService) {

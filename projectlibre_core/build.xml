@@ -75,7 +75,8 @@
 			debug="off"
 			nowarn="on"
 			source="17"
-			target="17">
+			target="17"
+			encoding="UTF-8">
 				<src path="${src}" />
 				<include name="**/*" />
 				<exclude name="**/version.properties" />

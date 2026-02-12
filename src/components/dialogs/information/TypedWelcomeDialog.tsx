@@ -33,7 +33,7 @@ export const TypedWelcomeDialog: React.FC = () => {
       type="welcome"
       isOpen={isOpen}
       data={state.data}
-      title="Добро пожаловать в ProjectLibre"
+      title="Добро пожаловать в ПланПро"
       onSubmit={handleSubmit}
       onCancel={handleCancel}
       submitLabel="Начать работу"
@@ -46,7 +46,7 @@ export const TypedWelcomeDialog: React.FC = () => {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-slate-100 tracking-tight">ProjectLibre</h2>
+            <h2 className="text-2xl font-bold text-slate-100 tracking-tight">ПланПро</h2>
             <p className="text-slate-400 mt-2">
               Профессиональное управление проектами с открытым исходным кодом
             </p>

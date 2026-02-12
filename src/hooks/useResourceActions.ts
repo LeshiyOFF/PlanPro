@@ -5,6 +5,7 @@ import { useAsyncOperation } from './useAsyncOperation'
 import { ResourceUtils } from '@/utils/resource-utils'
 import { logger } from '@/utils/logger'
 import { useAppStore } from '@/store/appStore'
+import { useProjectStore } from '@/store/projectStore'
 import { ResourceFactory } from '@/domain/resources/ResourceFactory'
 
 /**
@@ -29,7 +30,8 @@ export const useResourceActions = (execute: ReturnType<typeof useAsyncOperation>
       throw new Error(validateResult)
     }
 
-    const newResource = ResourceFactory.createResource(resourceData, preferences)
+    const existingResources = useProjectStore.getState().resources
+    const newResource = ResourceFactory.createResource(resourceData, preferences, existingResources)
 
     await execute(
       async () => {

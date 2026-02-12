@@ -71,7 +71,7 @@ export interface TaskDetailsDialogProps extends Omit<BaseDialogProps, 'children'
 export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
   task,
   onEdit,
-  onDelete,
+  onDelete: _onDelete,
   onPrint,
   onClose,
   ...props

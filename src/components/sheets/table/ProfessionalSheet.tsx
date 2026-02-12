@@ -20,6 +20,7 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
   {
     data,
     columns,
+    exportOnlyColumns,
     rowIdField,
     onDataChange,
     onBatchChange,
@@ -28,6 +29,8 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
     onDeleteRows,
     disabledRowIds = [],
     className = '',
+    scrollRef,
+    onScroll,
   }: ProfessionalSheetProps<T>,
   ref: React.Ref<ProfessionalSheetHandle>,
 ) => {
@@ -37,8 +40,13 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
   const { processedData, sortRules, toggleSort, setFilter } =
     useSheetDataProcessor(data, columns)
 
+  const exportColumns = useMemo(
+    () => [...columns, ...(exportOnlyColumns ?? [])],
+    [columns, exportOnlyColumns],
+  )
+
   useImperativeHandle(ref, () => ({
-    exportToCSV: async () => ProfessionalSheetExport.exportToCSV(processedData, columns),
+    exportToCSV: async () => ProfessionalSheetExport.exportToCSV(processedData, exportColumns),
   }))
 
   const allIds = useMemo(
@@ -95,7 +103,11 @@ const ProfessionalSheetRender = <T extends Record<string, JsonValue>>(
       onKeyDown={handleKeyDown}
       tabIndex={0}
     >
-      <div className="flex-1 overflow-auto custom-scrollbar">
+      <div 
+        ref={scrollRef}
+        className="flex-1 overflow-auto custom-scrollbar"
+        onScroll={onScroll}
+      >
         <table className="w-full border-collapse table-fixed text-xs select-none min-w-max">
           <SheetHeader columns={visibleColumns} sortRules={sortRules} onSort={toggleSort} />
           <thead className="bg-gray-50">

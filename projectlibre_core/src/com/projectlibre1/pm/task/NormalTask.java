@@ -138,6 +138,8 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 
 
 	boolean estimated = true;
+	// DURATION-SYNC-FIX: Флаг elapsed для календарной (не рабочей) длительности
+	boolean elapsed = false;
 	int priority = 500;
 	public NormalTask(Project project) {
 		this(project.isLocal(),project);
@@ -202,7 +204,21 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 	}
 
 
+	/**
+	 * Определяет, является ли задача критической.
+	 * 
+	 * По стандарту MS Project:
+	 * - Summary tasks НИКОГДА не являются критическими (не участвуют в Critical Path)
+	 * - Только leaf tasks могут быть критическими (slack <= threshold)
+	 * 
+	 * @return true если leaf task с нулевым или отрицательным резервом
+	 */
 	public boolean isCritical() {
+		// CPM-MS.3: Summary tasks НЕ на критическом пути (MS Project Standard)
+		if (isWbsParent()) {
+			return false;
+		}
+		
 		long threshold = ScheduleOption.getInstance().getCriticalSlackThreshold();
 		if (currentSchedule.isForward()) {
 			long slack = getLateFinish() - getEarlyFinish();
@@ -211,6 +227,92 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 			long slack = getEarlyStart() - getLateStart();
 			return slack <= threshold;
 		}
+	}
+	
+	/**
+	 * CPM-MS.4: Проверяет, содержит ли summary task хотя бы одну критическую дочернюю задачу.
+	 * Используется для UI подсветки (визуальный индикатор, НЕ критический путь).
+	 * 
+	 * По стандарту MS Project summary tasks не на критическом пути,
+	 * но UI может показывать индикатор «содержит критические задачи».
+	 * 
+	 * Рекурсивно проверяет всех потомков (дети, внуки и т.д.).
+	 * 
+	 * @return true если хотя бы один потомок критический
+	 */
+	public boolean containsCriticalChildren() {
+		if (!isWbsParent()) {
+			return false;
+		}
+		
+		Collection childNodes = getWbsChildrenNodes();
+		if (childNodes == null || childNodes.isEmpty()) {
+			return false;
+		}
+		
+		for (Object obj : childNodes) {
+			if (!(obj instanceof Node)) {
+				continue;
+			}
+			Object impl = ((Node) obj).getImpl();
+			if (!(impl instanceof NormalTask)) {
+				continue;
+			}
+			
+			NormalTask child = (NormalTask) impl;
+			if (child.isWbsParent()) {
+				if (child.containsCriticalChildren()) {
+					return true;
+				}
+			} else {
+				if (child.isCritical()) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * CPM-MS.5: Возвращает минимальный Total Slack среди всех дочерних задач.
+	 * Используется как информационная метрика для summary tasks (workaround MS Project).
+	 * 
+	 * По стандарту MS Project: собственный slack summary бессмысленен,
+	 * но min(children.slack) "at least means something".
+	 * 
+	 * @return минимальный slack среди детей (рекурсивно), или Long.MAX_VALUE если нет детей
+	 */
+	public long getMinChildSlack() {
+		if (!isWbsParent()) {
+			return getTotalSlack();
+		}
+		
+		Collection childNodes = getWbsChildrenNodes();
+		if (childNodes == null || childNodes.isEmpty()) {
+			return Long.MAX_VALUE;
+		}
+		
+		long minSlack = Long.MAX_VALUE;
+		
+		for (Object obj : childNodes) {
+			if (!(obj instanceof Node)) {
+				continue;
+			}
+			Object impl = ((Node) obj).getImpl();
+			if (!(impl instanceof NormalTask)) {
+				continue;
+			}
+			
+			NormalTask child = (NormalTask) impl;
+			long childSlack = child.isWbsParent() ? child.getMinChildSlack() : child.getTotalSlack();
+			
+			if (childSlack < minSlack) {
+				minSlack = childSlack;
+			}
+		}
+		
+		return minSlack;
 	}
 
 	public boolean isMilestone() {
@@ -269,7 +371,11 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 				duration = getEffectiveWorkCalendar().compare(end,getStart(),false);
 			}
 		}
-		duration = Duration.setAsEstimated(duration,estimated);
+		// DURATION-SYNC-FIX: Восстанавливаем флаги estimated И elapsed
+		duration = Duration.setAsEstimated(duration, estimated);
+		if (elapsed) {
+			duration = Duration.setAsElapsed(duration);
+		}
 		return duration;
 
 //		return calcActiveAssignmentDuration(getEffectiveWorkCalendar());
@@ -305,6 +411,8 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 	public void setDuration(long duration) {
 		setRawDuration(duration); // set the schedule duration, primariy for use when reading a file
 		estimated = Duration.isEstimated(duration);
+		// DURATION-SYNC-FIX: Сохраняем флаг elapsed (календарное время)
+		elapsed = Duration.isElapsed(duration);
 		duration = Duration.millis(duration);
 		long actualDurationMillis = Duration.millis(getActualDuration());
 		if (duration < actualDurationMillis) // if reducing duration to shorter than the current actual duration
@@ -701,6 +809,34 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 				parent.updateEstimatedStatus();
 		}
 
+	}
+
+	/**
+	 * DURATION-SYNC-FIX: Проверяет, использует ли задача календарную (elapsed) длительность.
+	 * Elapsed = все календарные дни, без учёта рабочего календаря.
+	 * @return true если длительность задачи elapsed (календарная)
+	 */
+	public boolean isElapsed() {
+		return elapsed;
+	}
+
+	/**
+	 * DURATION-SYNC-FIX: Устанавливает флаг elapsed для задачи.
+	 * @param elapsed true для календарной длительности (все дни рабочие)
+	 */
+	public void setElapsed(boolean elapsed) {
+		this.elapsed = elapsed;
+	}
+
+	/**
+	 * UNIFIED-SLACK-FIX: Override для корректного расчёта slack в Task.getTotalSlack().
+	 * Для elapsed задач slack считается в календарном времени (24h/день),
+	 * для обычных задач — в рабочем времени (по календарю проекта).
+	 * @return true если задача использует elapsed (календарную) длительность
+	 */
+	@Override
+	protected boolean isElapsedTask() {
+		return elapsed;
 	}
 
 	private void updateEstimatedStatus() {
@@ -1793,9 +1929,14 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 		//		This is a task based implementation- for parents dont use their assignments
 		if (isWbsParent()) {
 			long d = remainingOnly ? Duration.millis(getRemainingDuration()) : getDurationMillis();
+			// ELAPSED-PROPAGATION: Если задача использует календарную длительность,
+			// передаём флаг ELAPSED в calendar.add() для простого сложения start+duration
+			if (elapsed) {
+				d = Duration.setAsElapsed(d);
+			}
 			if (!ahead)
 				d = -d;
-			return getEffectiveWorkCalendar().add(startDate,d,useSooner);
+			return getEffectiveWorkCalendar().add(startDate, d, useSooner);
 		}
 //
 //

@@ -1,10 +1,12 @@
 import { BaseMenuAction } from '../entities/BaseMenuAction'
 import { logger } from '@/utils/logger'
 import { getElectronAPI } from '@/utils/electronAPI'
+import { UserPreferencesService } from '@/components/userpreferences/services/UserPreferencesService'
 import type { StrictData } from '@/types/Master_Functionality_Catalog'
 
 /**
- * Действие удаления
+ * Действие удаления.
+ * Учитывает настройку confirmDeletions из пользовательских предпочтений.
  */
 export class DeleteAction extends BaseMenuAction {
   constructor(
@@ -16,8 +18,22 @@ export class DeleteAction extends BaseMenuAction {
 
   async execute(): Promise<void> {
     try {
+      const prefs = UserPreferencesService.getInstance().getPreferences()
+      const confirmDeletions = prefs.editing?.confirmDeletions ?? true
+
+      // Если подтверждение отключено — удаляем сразу
+      if (!confirmDeletions) {
+        if (this.onDelete) {
+          await this.onDelete(this.target)
+          logger.info('Item deleted (no confirmation)', { targetName: this.getTargetName() })
+        }
+        return
+      }
+
+      // Показываем диалог подтверждения
       const api = getElectronAPI()
       if (!api?.showMessageBox) return
+      
       const confirmed = await api.showMessageBox({
         type: 'question',
         buttons: ['Удалить', 'Отмена'],

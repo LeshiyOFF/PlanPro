@@ -7,6 +7,7 @@ import { ProfessionalSheetHandle } from '@/components/sheets/table/ProfessionalS
 import { TaskUsageStatsCard } from './taskusage/TaskUsageStatsCard'
 import { useProjectStore, createTaskFromView } from '@/store/projectStore'
 import { Task, ResourceAssignment } from '@/store/project/interfaces'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { useHelpContent } from '@/hooks/useHelpContent'
 import { useTaskDeletion } from '@/hooks/task/useTaskDeletion'
 import { useTaskUsageStats } from '@/hooks/task/useTaskUsageStats'
@@ -16,7 +17,7 @@ import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { getElectronAPI } from '@/utils/electronAPI'
 import { Plus, BarChart3, Download, Loader2 } from 'lucide-react'
 import type { CellValue } from '@/types/sheet/CellValueTypes'
-import type { JsonObject, JsonValue } from '@/types/json-types'
+import type { JsonObject } from '@/types/json-types'
 
 /** Допустимые значения полей при обновлении задачи из Task Usage таблицы */
 type TaskUsageFieldValue = string | number | Date | ResourceAssignment[];
@@ -45,9 +46,10 @@ export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<Vi
   const taskUsageData = useTaskUsageData(tasks, resources)
 
   const handleAddTask = () => {
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
     const newTask = createTaskFromView({
-      id: `TASK-${String(tasks.length + 1).padStart(3, '0')}`,
-      name: t('sheets.new_task') || 'Новая задача',
+      id: TaskIdGenerator.generate(tasks),
+      name: TaskIdGenerator.generateDefaultName(tasks, t('sheets.new_task') || 'Новая задача'),
       startDate: new Date(),
       endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       progress: 0,
@@ -63,8 +65,11 @@ export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<Vi
 
     if (field === 'taskName' && typeof value === 'string') {
       updates.name = value
-    } else if (field === 'percentComplete' && typeof value === 'number') {
-      updates.progress = Math.max(0, Math.min(1, value / 100))
+    } else if (field === 'percentComplete') {
+      const raw = typeof value === 'string' ? parseFloat(value) : typeof value === 'number' ? value : NaN
+      if (!Number.isNaN(raw)) {
+        updates.progress = Math.max(0, Math.min(1, raw / 100))
+      }
     } else if (field === 'startDate' && value instanceof Date) {
       updates.startDate = value
     } else if (field === 'endDate' && value instanceof Date) {

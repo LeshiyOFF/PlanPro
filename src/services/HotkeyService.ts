@@ -150,7 +150,7 @@ class HotkeyService {
     return {
       id: 'default',
       name: 'По умолчанию',
-      description: 'Стандартные горячие клавиши ProjectLibre',
+      description: 'Стандартные горячие клавиши ПланПро',
       bindings: Array.from(this.bindings.values()),
       isActive: true,
     }

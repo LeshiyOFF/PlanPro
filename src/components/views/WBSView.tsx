@@ -5,6 +5,7 @@ import { WBSCanvasCore, WBSCanvasHandle } from '@/components/gantt/WBSCanvasCore
 import { WBSNode } from '@/domain/wbs/interfaces/WBS'
 import { WBSCodeService } from '@/domain/wbs/services/WBSCodeService'
 import { useProjectStore, createTaskFromView } from '@/store/projectStore'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 import { useHelpContent } from '@/hooks/useHelpContent'
 import {
   ZoomIn,
@@ -18,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { getElectronAPI } from '@/utils/electronAPI'
-import type { JsonObject, JsonValue } from '@/types/json-types'
+import type { JsonObject } from '@/types/json-types'
 
 /**
  * Work Breakdown Structure (WBS) View - СДР (Структура декомпозиции работ)
@@ -97,11 +98,12 @@ export const WBSView: React.FC = () => {
 
   // Видимые узлы (с учетом свернутых)
   const visibleNodes = useMemo(() => {
-    return wbsNodes.filter(node => {
-      let currentParentId = node.parentId
+    return wbsNodes.filter((node) => {
+      let currentParentId: string | undefined = node.parentId
       while (currentParentId) {
         if (collapsedNodes.has(currentParentId)) return false
-        const parent = wbsNodes.find(n => n.id === currentParentId)
+        const parentIdToFind = currentParentId
+        const parent = wbsNodes.find((n) => n.id === parentIdToFind)
         currentParentId = parent?.parentId
       }
       return true
@@ -118,10 +120,11 @@ export const WBSView: React.FC = () => {
   }, [])
 
   const handleAddTask = () => {
-    const newId = `TASK-${String(tasks.length + 1).padStart(3, '0')}`
+    // FIX: Используем max(existingIds) + 1 вместо length для предотвращения дублирования ID
+    const nextNumber = TaskIdGenerator.getNextNumber(tasks)
     addTask(createTaskFromView({
-      id: newId,
-      name: t('wbs.new_task_name', { number: tasks.length + 1 }),
+      id: TaskIdGenerator.generate(tasks),
+      name: t('wbs.new_task_name', { number: nextNumber }),
       startDate: new Date(),
       endDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
       progress: 0,

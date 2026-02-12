@@ -144,16 +144,16 @@ export const useIpcService = (): UseIpcServiceReturn => {
     if (!api?.onJavaProcessStarted || !api?.onJavaProcessStopped || !api?.onJavaStatusChange || !api?.onJavaProcessError) return
 
     const unsubscribeStarted = api.onJavaProcessStarted(
-      (data: unknown) => createStartedHandler(setJavaStatus)(data as JavaProcessStartedEvent),
+      (data: JavaProcessStartedEvent) => createStartedHandler(setJavaStatus)(data),
     )
     const unsubscribeStopped = api.onJavaProcessStopped(
-      (data: unknown) => createStoppedHandler(setJavaStatus)(data as JavaProcessStoppedEvent),
+      (data: JavaProcessStoppedEvent) => createStoppedHandler(setJavaStatus)(data),
     )
     const unsubscribeStatusChange = api.onJavaStatusChange(
-      (data: unknown) => createStatusChangeHandler(setJavaStatus)(data as JavaStatusChangeEvent),
+      (data: JavaStatusChangeEvent) => createStatusChangeHandler(setJavaStatus)(data),
     )
     const unsubscribeError = api.onJavaProcessError(
-      (data: unknown) => createErrorHandler()(data as JavaProcessErrorEvent),
+      (data: JavaProcessErrorEvent) => createErrorHandler()(data),
     )
 
     return () => {

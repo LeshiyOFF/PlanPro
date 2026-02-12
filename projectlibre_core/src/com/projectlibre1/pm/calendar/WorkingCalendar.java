@@ -246,12 +246,16 @@ public class WorkingCalendar implements WorkCalendar,  Serializable, Comparable 
 		WorkCalendar base = getBaseCalendar();
 		if (base == null)
 			return false;
+		if (base == this)
+			return false;
 		return base.dependsOn(cal);
 	}
 	/**
 	 * @param baseCalendar The baseCalendar to set.
 	 */
 	public void setBaseCalendar(WorkCalendar baseCalendar) throws CircularDependencyException {
+		if (baseCalendar == this)
+			throw new CircularDependencyException(Messages.getString("Calendar.ExceptionCircular"));
 		if (baseCalendar != null && baseCalendar.dependsOn(this)) // avoid circular
 			throw new CircularDependencyException(Messages.getString("Calendar.ExceptionCircular"));
 		this.baseCalendar = baseCalendar;

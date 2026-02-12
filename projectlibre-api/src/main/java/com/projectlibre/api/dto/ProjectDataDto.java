@@ -20,6 +20,8 @@ public class ProjectDataDto {
     private List<ResourceDataDto> resources;
     private List<CalendarDataDto> calendars;
     private String loadedFrom;
+    private Long imposedFinishDate; // VB.1: Жёсткий дедлайн (миллисекунды), null = автоматический режим
+    private Boolean isForward; // VB.12: Режим планирования (true = Schedule from Start, false = Schedule from End)
     
     public ProjectDataDto() {
         this.tasks = new ArrayList<>();
@@ -71,18 +73,57 @@ public class ProjectDataDto {
         this.calendars = calendars != null ? calendars : new ArrayList<>(); 
     }
     
+    /**
+     * VB.1: Получить imposed finish date (жёсткий дедлайн, заданный пользователем).
+     */
+    public Long getImposedFinishDate() { return imposedFinishDate; }
+    
+    /**
+     * VB.1: Установить imposed finish date.
+     */
+    public void setImposedFinishDate(Long imposedFinishDate) { 
+        this.imposedFinishDate = imposedFinishDate; 
+    }
+    
+    /**
+     * VB.12: Получить режим планирования проекта.
+     * @return true если Schedule from Start (forward), false если Schedule from End (backward)
+     */
+    public Boolean getIsForward() { return isForward; }
+    
+    /**
+     * VB.12: Установить режим планирования проекта.
+     * @param isForward true для Schedule from Start, false для Schedule from End
+     */
+    public void setIsForward(Boolean isForward) { this.isForward = isForward; }
+    
     public int getTaskCount() { return tasks != null ? tasks.size() : 0; }
     public int getResourceCount() { return resources != null ? resources.size() : 0; }
     public int getCalendarCount() { return calendars != null ? calendars.size() : 0; }
     
     /**
      * DTO для задачи - соответствует frontend Task interface
+     * 
+     * V2.3.0 HYBRID-CPM: Добавлены earlyStart/earlyFinish/lateStart/lateFinish
+     * для информирования пользователя о CPM-рассчитанных датах.
      */
     public static class TaskDataDto {
         private String id;
         private String name;
         private String startDate;      // ISO-8601 string
         private String endDate;        // ISO-8601 string
+        /** CORE-AUTH.2.1: CPM-рассчитанная дата начала (ISO-8601). Core-authoritative. */
+        private String calculatedStartDate;
+        /** CORE-AUTH.2.2: CPM-рассчитанная дата окончания (ISO-8601). Core-authoritative. */
+        private String calculatedEndDate;
+        /** HYBRID-CPM: Раннее начало — когда задача МОЖЕТ начаться (ISO-8601). */
+        private String earlyStart;
+        /** HYBRID-CPM: Раннее окончание (ISO-8601). */
+        private String earlyFinish;
+        /** HYBRID-CPM: Позднее начало — крайний срок начала без сдвига проекта (ISO-8601). */
+        private String lateStart;
+        /** HYBRID-CPM: Позднее окончание (ISO-8601). */
+        private String lateFinish;
         private double progress;     // 0-100
         private String color;
         private int level;           // уровень вложенности (WBS)
@@ -97,7 +138,11 @@ public class ProjectDataDto {
         private String notes;
         private String wbs;
         private Double duration;
-        private Double totalSlack;    // запас времени в днях (для CPM)     // длительность в днях (Stage 7.19 - Task Usage Crash Fix)
+        private Double totalSlack;
+        /** CPM-MS.7: Для summary — содержит ли критические дочерние задачи (UI индикатор). */
+        private Boolean containsCriticalChildren;
+        /** CPM-MS.7: Для summary — минимальный slack среди детей (информационная метрика). */
+        private Double minChildSlack;
         
         public TaskDataDto() {
             this.children = new ArrayList<>();
@@ -119,6 +164,30 @@ public class ProjectDataDto {
         
         public String getEndDate() { return endDate; }
         public void setEndDate(String endDate) { this.endDate = endDate; }
+        
+        /** CORE-AUTH.2.1: Получить CPM-рассчитанную дату начала */
+        public String getCalculatedStartDate() { return calculatedStartDate; }
+        public void setCalculatedStartDate(String calculatedStartDate) { this.calculatedStartDate = calculatedStartDate; }
+        
+        /** CORE-AUTH.2.2: Получить CPM-рассчитанную дату окончания */
+        public String getCalculatedEndDate() { return calculatedEndDate; }
+        public void setCalculatedEndDate(String calculatedEndDate) { this.calculatedEndDate = calculatedEndDate; }
+        
+        /** HYBRID-CPM: Раннее начало — когда задача МОЖЕТ начаться */
+        public String getEarlyStart() { return earlyStart; }
+        public void setEarlyStart(String earlyStart) { this.earlyStart = earlyStart; }
+        
+        /** HYBRID-CPM: Раннее окончание */
+        public String getEarlyFinish() { return earlyFinish; }
+        public void setEarlyFinish(String earlyFinish) { this.earlyFinish = earlyFinish; }
+        
+        /** HYBRID-CPM: Позднее начало — крайний срок начала без сдвига проекта */
+        public String getLateStart() { return lateStart; }
+        public void setLateStart(String lateStart) { this.lateStart = lateStart; }
+        
+        /** HYBRID-CPM: Позднее окончание */
+        public String getLateFinish() { return lateFinish; }
+        public void setLateFinish(String lateFinish) { this.lateFinish = lateFinish; }
         
         public double getProgress() { return progress; }
         public void setProgress(double progress) { this.progress = progress; }
@@ -166,6 +235,14 @@ public class ProjectDataDto {
         // Total Slack getter/setter для Critical Path Method
         public Double getTotalSlack() { return totalSlack; }
         public void setTotalSlack(Double totalSlack) { this.totalSlack = totalSlack; }
+        
+        // CPM-MS.7: containsCriticalChildren для UI подсветки summary задач
+        public Boolean getContainsCriticalChildren() { return containsCriticalChildren; }
+        public void setContainsCriticalChildren(Boolean containsCriticalChildren) { this.containsCriticalChildren = containsCriticalChildren; }
+        
+        // CPM-MS.7: minChildSlack — минимальный slack среди детей summary задачи
+        public Double getMinChildSlack() { return minChildSlack; }
+        public void setMinChildSlack(Double minChildSlack) { this.minChildSlack = minChildSlack; }
     }
     
     /**

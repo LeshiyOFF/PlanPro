@@ -1,13 +1,15 @@
+com\projectlibre\api\converter\WorkingCalendarDtoExtractor.class
 com\projectlibre\api\converter\ResourceTypeConverter.class
 com\projectlibre\api\scheduling\RecalculationResult$Builder.class
 com\projectlibre\api\dto\ConfigUpdateRequestDto.class
-com\projectlibre\api\service\ProjectPreferencesManager$3.class
+com\projectlibre\api\converter\ProjectCalendarCollector.class
 com\projectlibre\api\dto\ResourceDtoMapper.class
 com\projectlibre\api\cache\FileStoragePort.class
 com\projectlibre\api\ProjectLibreApiApplication.class
 com\projectlibre\api\dto\CalendarDataDto$CalendarExceptionDto.class
 com\projectlibre\api\session\GlobalSessionManager$1.class
 com\projectlibre\api\session\GlobalSessionManager.class
+com\projectlibre\api\exchange\TaskDateNormalizer.class
 com\projectlibre\api\streaming\StreamingProgress.class
 com\projectlibre\api\config\JacksonConfig$1.class
 com\projectlibre\api\util\CalendarNameNormalizer.class
@@ -65,12 +67,14 @@ com\projectlibre\api\sync\WbsHierarchyEngine.class
 com\projectlibre\api\observability\ObservabilityInterceptor.class
 com\projectlibre\api\config\ObservabilityConfig.class
 com\projectlibre\api\dto\GeneralPreferencesDto.class
+com\projectlibre\api\sync\DependencyRemovalService.class
 com\projectlibre\api\rest\ConfigRestController.class
 com\projectlibre\api\streaming\DeltaUpdate.class
 com\projectlibre\api\rest\ProjectSyncRestController.class
 com\projectlibre\api\converter\RateExtractor.class
 com\projectlibre\api\scheduling\TaskScheduleInfo$Builder.class
 com\projectlibre\api\service\ProjectPreferencesManager.class
+com\projectlibre\api\exchange\TaskDateDiagnosticsLogger.class
 com\projectlibre\api\adapter\ThreadSafeProjectAdapter.class
 com\projectlibre\api\ui\ApiUIServiceHandler$UIServiceCallback.class
 com\projectlibre\api\dto\SecurityPreferencesDto.class
@@ -84,6 +88,7 @@ com\projectlibre\api\audit\CalendarAuditLog$AuditEntry.class
 com\projectlibre\api\dto\ConfigStatusResponseDto.class
 com\projectlibre\api\audit\CalendarAuditLog.class
 com\projectlibre\api\dto\ProjectSyncRequestDto.class
+com\projectlibre\api\exchange\ResourceCalendarDiagnosticsLogger.class
 com\projectlibre\api\undo\UndoRedoPort.class
 com\projectlibre\api\dto\ProjectDto.class
 com\projectlibre\api\model\Project.class
@@ -98,6 +103,7 @@ com\projectlibre\api\model\BaseEntity.class
 com\projectlibre\api\service\ResourceManagementService.class
 com\projectlibre\api\sync\ApiToCoreTaskSynchronizer.class
 com\projectlibre\api\dto\CalendarDataDto$WorkingHoursDto.class
+com\projectlibre\api\sync\ProjectCalendarSyncService.class
 com\projectlibre\api\dto\TaskSyncResponseDto.class
 com\projectlibre\api\service\PreferenceService.class
 com\projectlibre\api\dto\AssignmentRequestDto.class
@@ -117,6 +123,8 @@ com\projectlibre\api\scheduling\TaskScheduleInfo.class
 com\projectlibre\api\storage\NativeStorageAdapter.class
 com\projectlibre\api\dto\TaskUpdateRequestDto.class
 com\projectlibre\api\dto\TaskDtoMapper.class
+com\projectlibre\api\service\CriticalPathRecalculationService.class
+com\projectlibre\api\converter\TaskDateMapper.class
 com\projectlibre\api\service\NativeStorageService.class
 com\projectlibre\api\sync\DependencySynchronizer.class
 com\projectlibre\api\converter\TaskHierarchyMapper.class
@@ -155,7 +163,6 @@ com\projectlibre\api\storage\PodBackupManager.class
 com\projectlibre\api\audit\CalendarAuditLog$ActionType.class
 com\projectlibre\api\cache\H2QueryCacheAdapter.class
 com\projectlibre\api\dto\ProjectDataDto.class
-com\projectlibre\api\service\ProjectPreferencesManager$2.class
 com\projectlibre\api\service\SaveResult.class
 com\projectlibre\api\storage\NativeStoragePort.class
 com\projectlibre\api\cache\HybridRepositoryPort.class
@@ -173,7 +180,7 @@ com\projectlibre\api\sync\SyncResult.class
 com\projectlibre\api\converter\DateTimeMapper.class
 com\projectlibre\api\adapter\ThreadSafeResourceAdapter.class
 com\projectlibre\api\scheduling\RecalculationResult.class
-com\projectlibre\api\service\ProjectPreferencesManager$1.class
+com\projectlibre\api\recalculation\CpmRecalculationRunner.class
 com\projectlibre\api\validator\CalendarSafetyValidator$ValidationResult.class
 com\projectlibre\api\scheduling\SchedulingOptionsPort.class
 com\projectlibre\api\repository\BaseRepository.class
@@ -188,9 +195,11 @@ com\projectlibre\api\rest\TaskRestController.class
 com\projectlibre\api\dto\CalendarPreferencesDto.class
 com\projectlibre\api\observability\ObservabilityLogger.class
 com\projectlibre\api\streaming\ProjectItemSerializer.class
+com\projectlibre\api\exchange\CalendarRemovalService.class
 com\projectlibre\api\sync\WbsHierarchySynchronizer.class
 com\projectlibre\api\cache\QueryCachePort.class
 com\projectlibre\api\dto\CalendarSyncDto.class
+com\projectlibre\api\converter\SystemCalendarExtractor.class
 com\projectlibre\api\dto\ResourceUpdateRequestDto.class
 com\projectlibre\api\dto\UndoRedoStateDto.class
 com\projectlibre\api\converter\CalendarIdConverter.class

@@ -46,11 +46,14 @@ public class TaskSyncRequestDto {
     
     /**
      * DTO задачи из Frontend (соответствует Zustand Task interface).
+     * V3.1: duration (календарные дни) передаётся явно, чтобы Core не подставлял 1 день по умолчанию.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class FrontendTaskDto {
         private String id;
         private String name;
+        /** Длительность в календарных днях. Если null — не перезаписывать длительность в Core. */
+        private Double duration;
         private String startDate;   // ISO-8601 string
         private String endDate;     // ISO-8601 string
         private double progress;  // 0-100
@@ -65,6 +68,18 @@ public class TaskSyncRequestDto {
         private String color;
         // critical исключен - вычисляется ядром CPM, не должен приходить с frontend
         
+        /**
+         * Тип ограничения (опционально). null = автоматический выбор.
+         * Значения: "ASAP", "ALAP", "SNET", "SNLT", "FNET", "FNLT", "MSO", "MFO"
+         */
+        private String constraintType;
+        
+        /**
+         * Дата ограничения в ISO-8601 (опционально).
+         * Используется для SNET, SNLT, FNET, FNLT, MSO, MFO.
+         */
+        private String constraintDate;
+        
         public FrontendTaskDto() {
             this.predecessors = new ArrayList<>();
             this.children = new ArrayList<>();
@@ -77,6 +92,9 @@ public class TaskSyncRequestDto {
         
         public String getName() { return name; }
         public void setName(String name) { this.name = name; }
+        
+        public Double getDuration() { return duration; }
+        public void setDuration(Double duration) { this.duration = duration; }
         
         public String getStartDate() { return startDate; }
         public void setStartDate(String startDate) { this.startDate = startDate; }
@@ -119,5 +137,11 @@ public class TaskSyncRequestDto {
         
         public String getColor() { return color; }
         public void setColor(String color) { this.color = color; }
+        
+        public String getConstraintType() { return constraintType; }
+        public void setConstraintType(String constraintType) { this.constraintType = constraintType; }
+        
+        public String getConstraintDate() { return constraintDate; }
+        public void setConstraintDate(String constraintDate) { this.constraintDate = constraintDate; }
     }
 }

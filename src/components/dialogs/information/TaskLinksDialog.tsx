@@ -45,7 +45,7 @@ export const TaskLinksDialog: React.FC<TaskLinksDialogProps> = ({
   currentTaskId,
   currentTaskName = '',
   links = [],
-  availableTasks = [],
+  availableTasks: _availableTasks = [],
   onSave,
   onUpdate,
   onDelete,

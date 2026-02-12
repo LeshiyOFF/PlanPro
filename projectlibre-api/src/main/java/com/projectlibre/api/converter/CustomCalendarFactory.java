@@ -139,24 +139,20 @@ public class CustomCalendarFactory {
     
     /**
      * Поиск существующего календаря.
+     * Сначала по uniqueId (из calendarId), затем по имени — предотвращает дубликаты при загрузке.
      */
     private WorkCalendar findExisting(CalendarService calService, String name, String calendarId) {
-        WorkCalendar cal = calService.findDerivedCalendar(name);
-        if (cal != null) return cal;
-        
-        cal = CalendarService.findBaseCalendar(name);
-        if (cal != null) return cal;
-        
         long uniqueId = extractUniqueIdFromCalendarId(calendarId);
         if (uniqueId > 0) {
-            cal = calService.findDerivedCalendar(uniqueId);
+            WorkCalendar cal = calService.findDerivedCalendar(uniqueId);
             if (cal != null) return cal;
-            
             cal = calService.findBaseCalendar(uniqueId);
             if (cal != null) return cal;
         }
-        
-        return null;
+
+        WorkCalendar cal = calService.findDerivedCalendar(name);
+        if (cal != null) return cal;
+        return CalendarService.findBaseCalendar(name);
     }
     
     /**
@@ -283,8 +279,13 @@ public class CustomCalendarFactory {
     
     /**
      * Безопасная установка baseCalendar с обработкой CircularDependencyException.
+     * Не вызывает setBaseCalendar, если base равен calendar (запрет self-reference).
      */
     private void setBaseCalendarSafe(WorkingCalendar calendar, WorkCalendar base) {
+        if (base == calendar) {
+            log.warn("[CalFactory] Skipping setBaseCalendar: base equals calendar (self-reference)");
+            return;
+        }
         try {
             calendar.setBaseCalendar(base);
         } catch (CircularDependencyException e) {

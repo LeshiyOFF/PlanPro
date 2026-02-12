@@ -7,7 +7,9 @@ import com.projectlibre1.pm.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * Низкоуровневый движок для операций с иерархией WBS.
@@ -22,13 +24,17 @@ import java.util.Collections;
  * 
  * <p>Гарантирует:</p>
  * <ul>
- *   <li>Корректное обновление wbsChildrenNodes у родителя</li>
+ *   <li>Корректное обновление wbsChildrenNodes у родителя через rebuildWbsChildrenCache()</li>
  *   <li>Интеграцию в Project.Hierarchy</li>
  *   <li>Сохранение дат и прогресса задач</li>
  * </ul>
  * 
+ * <p><b>ВАЖНО (WBS-CACHE):</b> После всех операций indent/setWbsParent необходимо вызвать
+ * {@link #rebuildWbsChildrenCache(Project)} для обновления кэша wbsChildrenNodes,
+ * так как NodeModel.SILENT не триггерит события обновления.</p>
+ * 
  * @author ProjectLibre Team
- * @version 1.0.0
+ * @version 2.0.0 (WBS-CACHE)
  */
 public class WbsHierarchyEngine {
     private static final Logger log = LoggerFactory.getLogger(WbsHierarchyEngine.class);
@@ -168,5 +174,93 @@ public class WbsHierarchyEngine {
         }
         
         log.debug("Project initialization verified successfully");
+    }
+    
+    /**
+     * Перестраивает кэш wbsChildrenNodes для всех задач проекта.
+     * 
+     * <p><b>КРИТИЧНО (WBS-CACHE):</b> Вызывать ПОСЛЕ всех операций indent/setWbsParent,
+     * так как NodeModel.SILENT не триггерит события обновления кэша.</p>
+     * 
+     * <p>Без этого вызова:</p>
+     * <ul>
+     *   <li>isWbsParent() возвращает false для реальных summary tasks</li>
+     *   <li>Guard в NormalTask.isCritical() не срабатывает</li>
+     *   <li>Summary tasks некорректно помечаются как критические</li>
+     * </ul>
+     * 
+     * <p>Алгоритм: рекурсивный обход от корня NodeModel, для каждого узла
+     * получаем детей через taskModel.getChildren() (canonical источник)
+     * и устанавливаем через setWbsChildrenNodes().</p>
+     * 
+     * @param project проект для обновления кэша
+     */
+    public void rebuildWbsChildrenCache(Project project) {
+        if (project == null) {
+            log.warn("[WBS-CACHE] Cannot rebuild: project is null");
+            return;
+        }
+        
+        if (project.getTaskOutlines() == null) {
+            log.warn("[WBS-CACHE] Cannot rebuild: project.taskOutlines is null");
+            return;
+        }
+        
+        NodeModel taskModel = project.getTaskOutlines().getDefaultOutline();
+        if (taskModel == null) {
+            log.warn("[WBS-CACHE] Cannot rebuild: taskModel is null");
+            return;
+        }
+        
+        Node root = (Node) taskModel.getRoot();
+        if (root == null) {
+            log.warn("[WBS-CACHE] Cannot rebuild: root node is null");
+            return;
+        }
+        
+        int updatedCount = rebuildCacheRecursive(taskModel, root, 0);
+        log.info("[WBS-CACHE] Cache rebuilt successfully: {} tasks updated", updatedCount);
+    }
+    
+    /**
+     * Рекурсивно обновляет wbsChildrenNodes для узла и всех его потомков.
+     * 
+     * @param taskModel модель задач проекта
+     * @param parentNode текущий узел для обработки
+     * @param depth текущая глубина рекурсии (для логирования)
+     * @return количество обновлённых задач
+     */
+    @SuppressWarnings("unchecked")
+    private int rebuildCacheRecursive(NodeModel taskModel, Node parentNode, int depth) {
+        int updatedCount = 0;
+        
+        // Получаем детей из canonical источника (NodeModel)
+        List<?> children = taskModel.getChildren(parentNode);
+        Object parentImpl = parentNode.getImpl();
+        
+        // Обновляем кэш только для Task с детьми
+        if (parentImpl instanceof Task && children != null && !children.isEmpty()) {
+            Task parentTask = (Task) parentImpl;
+            
+            // Устанавливаем коллекцию детей — это обновляет wbsChildrenNodes
+            parentTask.setWbsChildrenNodes((Collection<Node>) children);
+            updatedCount++;
+            
+            if (log.isDebugEnabled()) {
+                log.debug("[WBS-CACHE] Updated task '{}' (depth={}): {} children, isWbsParent={}",
+                    parentTask.getName(), depth, children.size(), parentTask.isWbsParent());
+            }
+        }
+        
+        // Рекурсивно обрабатываем всех детей
+        if (children != null) {
+            for (Object child : children) {
+                if (child instanceof Node) {
+                    updatedCount += rebuildCacheRecursive(taskModel, (Node) child, depth + 1);
+                }
+            }
+        }
+        
+        return updatedCount;
     }
 }

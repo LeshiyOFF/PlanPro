@@ -7,6 +7,7 @@ import {
 import { Resource } from '@/types/resource-types'
 import type { TaskSegment } from '@/types/task-types'
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
+import type { LinkTasksOptions } from '@/domain/services/TaskLinkService'
 
 export type { Resource, TaskSegment }
 
@@ -52,6 +53,10 @@ export interface Task extends Omit<CatalogTask, 'id' | 'parent' | 'children' | '
   baselineEndDate?: Date;
   slack?: number;
   totalSlack?: number;
+  /** CPM-MS.8: Для summary — содержит ли критические дочерние задачи (UI индикатор). */
+  containsCriticalChildren?: boolean;
+  /** CPM-MS.8: Для summary — минимальный slack среди детей (информационная метрика). */
+  minChildSlack?: number;
   segments?: TaskSegment[];
   /** Цвет отображения (Gantt, WBS, Calendar). */
   color?: string;
@@ -67,6 +72,34 @@ export interface Task extends Omit<CatalogTask, 'id' | 'parent' | 'children' | '
   x?: number;
   y?: number;
   isPinned?: boolean;
+  
+  // ========== HYBRID-CPM: CPM-рассчитанные даты (информационные) ==========
+  /** CPM: Раннее начало (когда задача МОЖЕТ начаться по зависимостям). */
+  earlyStart?: Date;
+  /** CPM: Раннее окончание. */
+  earlyFinish?: Date;
+  /** CPM: Позднее начало (крайний срок начала без сдвига проекта). */
+  lateStart?: Date;
+  /** CPM: Позднее окончание. */
+  lateFinish?: Date;
+  /** 
+   * HYBRID-CPM: Флаг нарушения зависимости.
+   * true = текущая дата начала раньше earlyStart (задача не может начаться так рано).
+   */
+  dependencyViolation?: boolean;
+  
+  /** Тип ограничения даты задачи (упрощённое поле для UI и логики). */
+  constraint?: 
+    | 'AsSoonAsPossible' 
+    | 'AsLateAsPossible' 
+    | 'MustStartOn' 
+    | 'MustFinishOn'
+    | 'StartNoEarlierThan'
+    | 'StartNoLaterThan'
+    | 'FinishNoEarlierThan'
+    | 'FinishNoLaterThan';
+  /** Дата ограничения (для constraints, требующих дату). */
+  constraintDate?: Date;
 }
 
 /** Минимальный набор полей для создания задачи из UI (вид, форма). */
@@ -124,11 +157,17 @@ export interface ProjectStore {
   currentFilePath?: string;
   /** Имя менеджера проекта (ручное назначение) */
   projectManager?: string;
+  /** VB.5: Жёсткий дедлайн проекта (Must Finish By), null = автоматический режим */
+  imposedFinishDate?: Date | null;
+  /** VB.12: Режим планирования (true = Schedule from Start, false = Schedule from End) */
+  isForward?: boolean;
   isDirty: boolean;
   setTasks: (tasks: Task[]) => void;
   setProjectInfo: (id?: number, filePath?: string) => void;
   /** Установить менеджера проекта */
   setProjectManager: (manager: string) => void;
+  /** VB.5: Установить жёсткий дедлайн проекта */
+  setImposedFinishDate: (date: Date | null) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   addTask: (task: Task) => void;
   deleteTask: (taskId: string) => void;
@@ -146,7 +185,7 @@ export interface ProjectStore {
   // Задачи
   indentTask: (taskId: string) => void;
   outdentTask: (taskId: string) => void;
-  linkTasks: (sourceId: string, targetId: string) => void;
+  linkTasks: (sourceId: string, targetId: string, options?: LinkTasksOptions) => void;
   unlinkTasks: (taskId: string) => void;
   toggleMilestone: (taskId: string) => void;
   isValidPredecessor: (taskId: string, potentialPredId: string) => boolean;

@@ -163,7 +163,7 @@ export interface OperationResponse extends BaseResponse {
   operationId: string
   status: 'pending' | 'in-progress' | 'completed' | 'failed'
   progress?: number
-  result?: unknown
+  result?: StrictData
 }
 
 // Ответы экспорта/импорта
@@ -233,14 +233,14 @@ export interface ReportResponse extends BaseResponse {
   reportType: 'gantt' | 'resource-usage' | 'cost-summary' | 'timeline' | 'custom'
   format: 'pdf' | 'html' | 'excel' | 'xml'
   filePath?: string
-  data?: unknown
+  data?: StrictData
   generatedAt: Date
 }
 
 // Ответы RPC команд
 export interface RpcCommandResponse extends BaseResponse {
   success: boolean
-  data?: unknown
+  data?: StrictData
   error?: string
 }
 
@@ -309,12 +309,30 @@ export interface FileListResponse extends BaseResponse {
 /**
  * Задача из Core модели ProjectLibre.
  * Формат соответствует структуре CoreTaskDto на бэкенде.
+ * 
+ * V2.2.0: Добавлено поле duration для корректной синхронизации
+ * длительности задач между Java Core и Frontend.
+ * 
+ * V2.3.0 HYBRID-CPM: Добавлены earlyStart/earlyFinish/lateStart/lateFinish
+ * для информирования пользователя о CPM-рассчитанных датах.
  */
 export interface CoreTaskData {
   id: string
   name: string
   startDate: string  // ISO 8601
   endDate: string    // ISO 8601
+  /** CORE-AUTH.2.1: CPM-рассчитанная дата начала (ISO-8601). Core-authoritative. */
+  calculatedStartDate?: string
+  /** CORE-AUTH.2.2: CPM-рассчитанная дата окончания (ISO-8601). Core-authoritative. */
+  calculatedEndDate?: string
+  /** HYBRID-CPM: Раннее начало — когда задача МОЖЕТ начаться (ISO-8601). */
+  earlyStart?: string
+  /** HYBRID-CPM: Раннее окончание (ISO-8601). */
+  earlyFinish?: string
+  /** HYBRID-CPM: Позднее начало — крайний срок начала без сдвига проекта (ISO-8601). */
+  lateStart?: string
+  /** HYBRID-CPM: Позднее окончание (ISO-8601). */
+  lateFinish?: string
   progress: number   // 0-100
   color: string
   level: number
@@ -328,6 +346,12 @@ export interface CoreTaskData {
   notes?: string
   wbs?: string
   totalSlack?: number
+  /** Длительность в рабочих днях (из Core). Критично для CPM расчётов. */
+  duration?: number
+  /** CPM-MS.8: Для summary — содержит ли критические дочерние задачи (UI индикатор). */
+  containsCriticalChildren?: boolean
+  /** CPM-MS.8: Для summary — минимальный slack среди детей (информационная метрика). */
+  minChildSlack?: number
 }
 
 /**

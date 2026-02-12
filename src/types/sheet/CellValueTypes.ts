@@ -36,10 +36,13 @@ export type CellValueComplex = DurationValue | WbsValue;
  */
 export type CellValue = CellValuePrimitive | CellValueComplex;
 
+/** Произвольное значение для type guards (строгая типизация без unknown) */
+export type AnyValue = string | number | boolean | object | null | undefined;
+
 /**
  * Type guard для проверки DurationValue
  */
-export function isDurationValue(value: unknown): value is DurationValue {
+export function isDurationValue(value: AnyValue): value is DurationValue {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -53,7 +56,7 @@ export function isDurationValue(value: unknown): value is DurationValue {
 /**
  * Type guard для проверки WbsValue
  */
-export function isWbsValue(value: unknown): value is WbsValue {
+export function isWbsValue(value: AnyValue): value is WbsValue {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -67,7 +70,7 @@ export function isWbsValue(value: unknown): value is WbsValue {
 /**
  * Type guard для примитивного значения
  */
-export function isPrimitiveValue(value: unknown): value is CellValuePrimitive {
+export function isPrimitiveValue(value: AnyValue): value is CellValuePrimitive {
   return (
     value === null ||
     typeof value === 'string' ||

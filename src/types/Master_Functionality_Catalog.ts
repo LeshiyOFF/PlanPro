@@ -2,7 +2,7 @@
 // Полный каталог всех интерфейсов и типов для 100% сохранения функциональности
 
 import type { TaskSegment } from './task-types'
-import type { JsonObject, JsonValue } from './json-types'
+import type { JsonObject } from './json-types'
 
 // ============================================================================
 // БАЗОВЫЕ ТИПЫ ДАННЫХ
@@ -831,6 +831,8 @@ export interface CalendarPreferences {
   hoursPerDay: number;
   hoursPerWeek: number;
   daysPerMonth: number;
+  /** Режим расчёта длительности: 'working' (рабочие часы) или 'calendar' (24ч/сутки) */
+  durationCalculationMode?: 'working' | 'calendar';
 }
 
 export interface GeneralPreferences {
@@ -869,9 +871,7 @@ export interface EditingPreferences {
   showDependencies: boolean;
   allowTaskDeletion: boolean;
   confirmDeletions: boolean;
-  autoLinkTasks: boolean;
   splitTasksEnabled: boolean;
-  effortDriven: boolean;
 }
 
 export interface CalculationPreferences {

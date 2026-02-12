@@ -31,6 +31,7 @@ public class ProjectDtoMapper {
         dto.setProgress(project.getProgress());
         dto.setStartDate(project.getStartDate());
         dto.setEndDate(project.getEndDate());
+        dto.setImposedFinishDate(project.getImposedFinishDate()); // VB.1: Маппинг imposed finish date
         dto.setCreatedAt(project.getCreatedAt());
         dto.setUpdatedAt(project.getUpdatedAt());
         
@@ -58,6 +59,7 @@ public class ProjectDtoMapper {
         project.setProgress(dto.getProgress());
         project.setStartDate(dto.getStartDate());
         project.setEndDate(dto.getEndDate());
+        project.setImposedFinishDate(dto.getImposedFinishDate()); // VB.1: Маппинг imposed finish date
         project.setCreatedAt(dto.getCreatedAt());
         project.setUpdatedAt(dto.getUpdatedAt());
         

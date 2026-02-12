@@ -95,6 +95,19 @@ public class ProjectData extends DocumentData implements HasName,DelegatesFields
     protected Collection resources;
     protected Collection tasks;
     protected long calendarId=-1;
+    
+    /**
+     * VB.1/VB.8: Жёсткий дедлайн проекта (Must Finish By), заданный пользователем.
+     * Значение 0 означает автоматический режим (дедлайн рассчитывается по задачам).
+     * 
+     * Обратная совместимость (VB.8):
+     * - Старые .pod файлы не содержат это поле
+     * - Java Serialization автоматически использует значение по умолчанию 0
+     * - При первом сохранении старого .pod файла, поле записывается явно
+     * - НЕ используется project.finishDate (кэш прошлого расчёта) как источник
+     */
+    protected long imposedFinishDate=0;
+    
     protected long lockedById;
     protected String lockedByName;
     protected long idleTime,allowedIdleTime;
@@ -157,6 +170,27 @@ public class ProjectData extends DocumentData implements HasName,DelegatesFields
 	}
 	public void setCalendarId(long calendarId) {
 		this.calendarId = calendarId;
+	}
+
+	/**
+	 * VB.1/VB.8: Получить imposed finish date (жёсткий дедлайн, заданный пользователем).
+	 * 
+	 * @return timestamp в миллисекундах, или 0 если дедлайн не задан (автоматический режим)
+	 * 
+	 * Обратная совместимость:
+	 * Для старых .pod файлов (без поля imposedFinishDate) автоматически возвращается 0
+	 */
+	public long getImposedFinishDate() {
+		return imposedFinishDate;
+	}
+
+	/**
+	 * VB.1/VB.8: Установить imposed finish date.
+	 * 
+	 * @param imposedFinishDate timestamp в миллисекундах, или 0 для автоматического режима
+	 */
+	public void setImposedFinishDate(long imposedFinishDate) {
+		this.imposedFinishDate = imposedFinishDate;
 	}
 
     public String getLockedByName() {

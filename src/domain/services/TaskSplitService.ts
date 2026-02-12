@@ -1,4 +1,5 @@
 import { Task, TaskSegment } from '@/store/projectStore'
+import { DurationSyncService } from './DurationSyncService'
 
 /**
  * TaskSplitService - Сервис для управления логикой прерывания задач.
@@ -35,10 +36,15 @@ export class TaskSplitService {
     if (targetIdx === -1) return {}
 
     const newSegments = this.createSplitSegments(currentSegments, targetIdx, splitDate, gapDurationMs)
+    const newEndDate = newSegments[newSegments.length - 1].endDate
+    
+    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Синхронизируем duration при split
+    const duration = DurationSyncService.calculateDurationInDays(task.startDate, newEndDate)
 
     return {
       segments: newSegments,
-      endDate: newSegments[newSegments.length - 1].endDate,
+      endDate: newEndDate,
+      duration,
     }
   }
 
@@ -91,9 +97,15 @@ export class TaskSplitService {
       totalWorkMs += s.endDate.getTime() - s.startDate.getTime()
     })
 
+    const newEndDate = new Date(task.startDate.getTime() + totalWorkMs)
+    
+    // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Синхронизируем duration при merge
+    const duration = DurationSyncService.calculateDurationInDays(task.startDate, newEndDate)
+
     return {
       segments: [],
-      endDate: new Date(task.startDate.getTime() + totalWorkMs),
+      endDate: newEndDate,
+      duration,
     }
   }
 

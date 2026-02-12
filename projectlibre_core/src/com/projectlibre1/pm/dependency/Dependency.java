@@ -66,6 +66,7 @@ import com.projectlibre1.pm.task.BelongsToDocument;
 import com.projectlibre1.pm.task.HasProject;
 import com.projectlibre1.pm.task.Project;
 import com.projectlibre1.pm.task.Task;
+import com.projectlibre1.pm.task.NormalTask;
 import com.projectlibre1.server.data.DataObject;
 import com.projectlibre1.strings.Messages;
 
@@ -387,7 +388,19 @@ public class Dependency implements Association, BelongsToDocument, DataObject {
 				t = ((ScheduleWindow)successor).calcOffsetFrom(begin,begin,false,false, canStartAtDayEnd);
 			break;
 		}
-		earlyDate = getEffectiveWorkCalendar().add(t,getLeadValue(), canStartAtDayEnd);
+		
+		// ELAPSED-BACKWARD-FIX: Для elapsed задач не применять рабочий календарь к dependency date
+		// Это предотвращает ложный slack из-за снаппинга на рабочее время
+		long leadValue = getLeadValue();
+		boolean isSuccessorElapsed = successor instanceof NormalTask && ((NormalTask) successor).isElapsed();
+		boolean isLeadElapsed = Duration.isElapsed(leadValue);
+		
+		if (isSuccessorElapsed || isLeadElapsed) {
+			// Для elapsed: просто добавляем lag без календарного снаппинга
+			earlyDate = t + Duration.millis(leadValue);
+		} else {
+			earlyDate = getEffectiveWorkCalendar().add(t, leadValue, canStartAtDayEnd);
+		}
 		return earlyDate;
 	}
 	/**
@@ -415,7 +428,21 @@ public class Dependency implements Association, BelongsToDocument, DataObject {
 				t = ((ScheduleWindow)getPredecessor()).calcOffsetFrom(begin,begin,false,false, cannotFinishAtDayStart);
 			break;
 		}
-		lateDate = getEffectiveWorkCalendar().add(t, getLeadValue(), cannotFinishAtDayStart);
+		
+		// ELAPSED-BACKWARD-FIX: Для elapsed задач не применять рабочий календарь к dependency date
+		// Backward pass: проверяем predecessor (т.к. в backward pass roles инвертированы)
+		// Это критично для корректного расчёта lateFinish и предотвращения ложного slack
+		long leadValue = getLeadValue();
+		HasDependencies pred = getPredecessor();
+		boolean isPredElapsed = pred instanceof NormalTask && ((NormalTask) pred).isElapsed();
+		boolean isLeadElapsed = Duration.isElapsed(leadValue);
+		
+		if (isPredElapsed || isLeadElapsed) {
+			// Для elapsed: просто добавляем lag без календарного снаппинга
+			lateDate = t + Duration.millis(leadValue);
+		} else {
+			lateDate = getEffectiveWorkCalendar().add(t, leadValue, cannotFinishAtDayStart);
+		}
 		return lateDate;
 	}
 

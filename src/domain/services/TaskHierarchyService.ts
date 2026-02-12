@@ -57,12 +57,26 @@ export class TaskHierarchyService {
   }
 
   /**
-   * Пересчитывает флаги summary для всех задач на основе их уровней
+   * Пересчитывает флаги summary для всех задач на основе их уровней.
+   * КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Устанавливаем и summary, и isSummary.
+   * Гант, таблица задач и диалоги проверяют task.isSummary для блокировки редактирования/перетаскивания.
+   * 
+   * При превращении задачи в summary автоматически очищаются resourceAssignments,
+   * так как назначение ресурсов на summary-задачи недоступно.
    */
   public static refreshSummaryFlags(tasks: Task[]): Task[] {
     return tasks.map((task, idx) => {
       const hasSubtasks = idx < tasks.length - 1 && tasks[idx + 1].level > task.level
-      return { ...task, summary: hasSubtasks }
+      const wasSummary = task.isSummary === true
+      const becameSummary = hasSubtasks && !wasSummary
+
+      return {
+        ...task,
+        summary: hasSubtasks,
+        isSummary: hasSubtasks,
+        // Очистка назначений ресурсов при превращении в summary
+        resourceAssignments: becameSummary ? [] : task.resourceAssignments,
+      }
     })
   }
 

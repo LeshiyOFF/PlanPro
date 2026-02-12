@@ -1,4 +1,4 @@
-import { ViewMode } from 'gantt-task-react'
+import { ViewMode } from '@wamra/gantt-task-react'
 import { CalendarDateService } from './CalendarDateService'
 import { Task } from '@/store/project/interfaces'
 
@@ -67,15 +67,15 @@ export class GanttNavigationService {
 
   /**
    * Вычисляет позицию прокрутки (px) на основе индекса шага и ширины колонки.
-   * Учитывает Mirror Strategy (preStepsCount = 1) и может центрировать дату.
+   * GANTT-FIX: preStepsCount={0} — библиотека начинает с min(task.start) без смещения.
    */
   public static calculateScrollPosition(
     stepIndex: number,
     columnWidth: number,
     containerWidth: number = 0,
   ): number {
-    // ВАЖНО: Прибавляем 1 к индексу, так как библиотека всегда добавляет один пустой шаг слева (preStepsCount=1)
-    const effectiveIndex = stepIndex + 1
+    // GANTT-FIX: preStepsCount={0} → индекс используется напрямую без смещения
+    const effectiveIndex = stepIndex
     let pos = effectiveIndex * columnWidth
 
     // Мягкое центрирование: если ширина контейнера известна, ставим дату с отступом 20% от левого края,

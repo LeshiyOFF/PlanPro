@@ -42,6 +42,8 @@
     "release/**/*",
     "projectlibre_build/**/*",
     "projectlibre_contrib/**/*",
-    "projectlibre_core/**/*"
+    "projectlibre_core/**/*",
+    "electron/preload.ts",
+    "electron/preload/**"
   ]
 }

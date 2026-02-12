@@ -17,6 +17,10 @@ interface DatePickerProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  /** GANTT-NAV-FIX: Минимальная допустимая дата */
+  fromDate?: Date;
+  /** GANTT-NAV-FIX: Максимальная допустимая дата */
+  toDate?: Date;
 }
 
 export const DatePicker: React.FC<DatePickerProps> = ({
@@ -25,6 +29,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   placeholder = 'Выберите дату',
   className,
   disabled = false,
+  fromDate,
+  toDate,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -65,6 +71,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({
           mode="single"
           selected={date}
           onSelect={handleSelect}
+          fromDate={fromDate}
+          toDate={toDate}
           initialFocus
         />
       </DialogContent>

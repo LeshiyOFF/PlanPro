@@ -15,17 +15,18 @@ import { BaseAPIClient, type APIClientConfig, APIError } from './BaseAPIClient'
 import { getErrorMessage, type CaughtError, toCaughtError } from '@/errors/CaughtError'
 
 /**
- * Валидация проекта перед отправкой
- * Следует Single Responsibility Principle
+ * Валидация проекта перед отправкой (Фаза 3 контракт: name, startDate, finishDate).
+ * Следует Single Responsibility Principle. Бэкенд (Java) должен совпадать с контрактом.
  */
 class ProjectValidator {
   /**
-   * Валидация проекта
+   * Валидация проекта: непустое имя (после trim), наличие дат, finishDate > startDate.
    */
   static validateProject(project: Partial<Project>): ValidationResult {
     const errors: ValidationError[] = []
+    const name = typeof project.name === 'string' ? project.name.trim() : ''
 
-    if (!project.name || project.name.trim().length === 0) {
+    if (name.length === 0) {
       errors.push({
         field: 'name',
         message: 'Название проекта обязательно',

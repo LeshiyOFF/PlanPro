@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { ProjectBaseline } from '@/store/project/interfaces'
-import { ViewMode } from 'gantt-task-react'
+import { ViewMode } from '@wamra/gantt-task-react'
 import { GanttNavigationService } from '@/services/GanttNavigationService'
 
 /**
@@ -34,7 +34,8 @@ export const BaselineOverlay: React.FC<BaselineOverlayProps> = ({
   const overlayElements = useMemo(() => {
     return tasks.map((task, index) => {
       const baselineDates = activeBaseline.taskDates[task.id]
-      if (!baselineDates || task.originalTask?.isFiller || task.type === 'project') return null
+      // GANTT-NAV: Пропускаем filler-задачи (EmptyTask) и summary-задачи
+      if (!baselineDates || task.originalTask?.isFiller || task.type === 'empty' || task.type === 'project') return null
 
       const startIndex = GanttNavigationService.dateToStepIndex(
         new Date(baselineDates.startDate),

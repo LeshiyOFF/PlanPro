@@ -3,12 +3,15 @@
  * Следует принципу DRY и обеспечивает type safety в catch блоках
  */
 
+/** Всё, что может быть выброшено в catch (строгая типизация без unknown) */
+export type Throwable = Error | string | number | object | null | undefined
+
 /**
  * Извлекает сообщение из ошибки с type safety
- * @param error - Ошибка неизвестного типа из catch блока
+ * @param error - Ошибка из catch блока (Throwable)
  * @returns Строка с сообщением об ошибке
  */
-export function getErrorMessage(error: unknown): string {
+export function getErrorMessage(error: Throwable): string {
   if (error instanceof Error) {
     return error.message
   }
@@ -17,19 +20,23 @@ export function getErrorMessage(error: unknown): string {
     return error
   }
 
+  if (typeof error === 'number') {
+    return String(error)
+  }
+
   if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message)
+    return String((error as { message: string }).message)
   }
 
   return 'Unknown error occurred'
 }
 
 /**
- * Преобразует unknown error в объект Error
- * @param error - Ошибка неизвестного типа
+ * Преобразует Throwable в объект Error
+ * @param error - Ошибка из catch блока
  * @returns Экземпляр Error
  */
-export function toError(error: unknown): Error {
+export function toError(error: Throwable): Error {
   if (error instanceof Error) {
     return error
   }
@@ -42,7 +49,7 @@ export function toError(error: unknown): Error {
  * @param context - Контекст возникновения ошибки
  * @param error - Ошибка для логирования
  */
-export function logError(context: string, error: unknown): void {
+export function logError(context: string, error: Throwable): void {
   const errorObj = toError(error)
   console.error(`[${context}] Error:`, {
     message: errorObj.message,
@@ -55,6 +62,6 @@ export function logError(context: string, error: unknown): void {
  * Type guard для проверки что error является Error
  * @param error - Проверяемая ошибка
  */
-export function isError(error: unknown): error is Error {
+export function isError(error: Throwable): error is Error {
   return error instanceof Error
 }

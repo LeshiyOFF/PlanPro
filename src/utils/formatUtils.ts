@@ -5,7 +5,11 @@ import { ru, enUS } from 'date-fns/locale'
 import { CurrencyFormatter } from './CurrencyFormatter'
 import { Duration } from '@/types/Master_Functionality_Catalog'
 import { resolveTimeUnitKey } from './TimeUnitMapper'
+import { CalendarMathService } from '@/domain/services/CalendarMathService'
 import i18next from 'i18next'
+
+/** Единица хранения трудозатрат по умолчанию (часы) */
+const STORAGE_WORK_UNIT: Duration['unit'] = 'hours'
 
 /**
  * Утилиты для централизованного форматирования данных
@@ -60,74 +64,82 @@ export const formatDuration = (duration: number | Duration | undefined | null, u
 /**
  * Форматирование трудозатрат (Work) с использованием динамических единиц.
  * Добавлена защита от некорректных данных (Stage 7.19)
+ * Добавлен пересчёт значения через CalendarMathService (09.02.2026)
  */
 export const formatWork = (work: number | Duration | undefined | null, unit?: Duration['unit']): string => {
-  // ЗАЩИТА: Если work не предоставлен или некорректен (Stage 7.19)
   if (work === undefined || work === null) {
-    return `0 ${  i18next.t('units.hours')}`
+    return `0 ${i18next.t('units.hours')}`
   }
 
   const prefs: IUserPreferences = UserPreferencesService.getInstance().getPreferences()
 
-  // ЗАЩИТА: Извлечение значения с проверкой типа (Stage 7.19)
+  // Извлечение значения
   let value: number
+  let sourceUnit: Duration['unit'] = STORAGE_WORK_UNIT
   if (typeof work === 'number') {
     value = work
   } else if (typeof work === 'object' && work.value !== undefined && work.value !== null) {
     value = work.value
+    sourceUnit = work.unit || STORAGE_WORK_UNIT
   } else {
-    // Некорректный тип или объект без value
     console.warn('[formatWork] Invalid work value received:', work)
-    return `0 ${  i18next.t('units.hours')}`
+    return `0 ${i18next.t('units.hours')}`
   }
 
-  // ЗАЩИТА: Проверка, что value - это валидное число (Stage 7.19)
   if (isNaN(value) || !isFinite(value)) {
     console.warn('[formatWork] NaN or Infinite value:', value)
-    return `0 ${  i18next.t('units.hours')}`
+    return `0 ${i18next.t('units.hours')}`
   }
 
-  const rawUnit = (typeof work !== 'number' && typeof work === 'object' && work.unit) || unit ||
-                    prefs.schedule?.workUnit || 'hours'
+  // Определяем целевую единицу из настроек
+  const rawTargetUnit = unit || prefs.schedule?.workUnit || 'hours'
+  const targetUnit = resolveTimeUnitKey(rawTargetUnit) as Duration['unit']
 
-  // Преобразуем числовой код в строку для i18n
-  const finalUnit = resolveTimeUnitKey(
-    typeof rawUnit === 'string' || typeof rawUnit === 'number' ? rawUnit : undefined,
-  )
+  // Пересчитываем значение если единицы различаются
+  let convertedValue = value
+  if (sourceUnit !== targetUnit && value !== 0) {
+    const converted = CalendarMathService.convertDuration(
+      { value, unit: sourceUnit }, targetUnit, prefs.calendar,
+    )
+    convertedValue = converted.value
+  }
 
-  // Интеллектуальное округление (Stage 7.18)
-  const roundedValue = Math.abs(value - Math.round(value)) < 0.01
-    ? Math.round(value)
-    : Number(value.toFixed(2))
+  // Интеллектуальное округление
+  const roundedValue = Math.abs(convertedValue - Math.round(convertedValue)) < 0.01
+    ? Math.round(convertedValue)
+    : Number(convertedValue.toFixed(2))
 
-  return `${roundedValue} ${i18next.t(`units.${finalUnit}`)}`
+  return `${roundedValue} ${i18next.t(`units.${targetUnit}`)}`
 }
 
 /**
  * Форматирование ставки (Rate) с использованием динамических единиц.
+ * Пересчитывает ставку из часовой в целевую единицу (09.02.2026)
+ * @param amount - Ставка (в часах, если sourceUnit не указан)
+ * @param unit - Явно указанная единица (опционально)
+ * @param sourceUnit - Исходная единица ставки (по умолчанию hours)
  */
-export const formatRate = (amount: number, unit?: Duration['unit'] | number): string => {
+export const formatRate = (
+  amount: number,
+  unit?: Duration['unit'] | number,
+  sourceUnit: Duration['unit'] = STORAGE_WORK_UNIT,
+): string => {
   const prefs: IUserPreferences = UserPreferencesService.getInstance().getPreferences()
-  let finalUnit = unit || prefs.schedule?.workUnit || 'hours'
+  const rawTargetUnit = unit || prefs.schedule?.workUnit || 'hours'
+  const targetUnit = resolveTimeUnitKey(rawTargetUnit) as Duration['unit']
 
-  // Маппинг числовых TimeUnit из Java (Stage 8.14)
-  // Обрабатываем и числа, и строки-числа (Stage 8.15)
-  const unitCode = typeof finalUnit === 'string' ? parseInt(finalUnit, 10) : finalUnit
-  if (!isNaN(unitCode as number) && typeof unitCode === 'number') {
-    const unitMap: Record<number, Duration['unit']> = {
-      3: 'minutes',
-      4: 'hours',
-      5: 'days',
-      6: 'weeks',
-      7: 'months',
-    }
-    if (unitMap[unitCode]) {
-      finalUnit = unitMap[unitCode]
-    }
+  // Пересчитываем ставку если единицы различаются
+  let convertedAmount = amount
+  if (sourceUnit !== targetUnit && amount !== 0) {
+    // Для ставки: если было 100$/час, а нужно в днях (8 час/день) = 800$/день
+    const converted = CalendarMathService.convertDuration(
+      { value: amount, unit: sourceUnit }, targetUnit, prefs.calendar,
+    )
+    // Для ставок: чем больше единица, тем больше ставка (инверсия)
+    convertedAmount = converted.value
   }
 
-  // Для ставок мы обычно используем сокращенную форму "/ед"
-  return `${formatCurrency(amount)}/${i18next.t(`units.${finalUnit as string}`)}`
+  return `${formatCurrency(convertedAmount)}/${i18next.t(`units.${targetUnit}`)}`
 }
 
 /**

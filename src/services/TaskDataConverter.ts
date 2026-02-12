@@ -4,6 +4,7 @@ import type { CoreTaskData, CoreResourceData } from '@/types/api/response-types'
 import type { FrontendTaskData } from '@/types/api/request-types'
 import { TaskType } from '@/types/Master_Functionality_Catalog'
 import { CalendarDateService } from '@/services/CalendarDateService'
+import { logger } from '@/utils/logger'
 
 /**
  * Сервис конвертации данных задач между Core и Frontend форматами.
@@ -17,6 +18,14 @@ import { CalendarDateService } from '@/services/CalendarDateService'
  * @version 2.0.0
  */
 export class TaskDataConverter {
+
+  /** Счётчик для диагностики сдвига дат: логируем только первые N задач при применении ответа API */
+  private static dateShiftLogCount = 0
+
+  /** Сбросить счётчик перед применением новой порции задач (load/sync/recalc). Вызывать перед map(coreToFrontendTask). */
+  static resetDateShiftLogCount(): void {
+    TaskDataConverter.dateShiftLogCount = 0
+  }
 
   /**
    * Безопасно конвертирует Date в ISO-8601 строку.
@@ -40,19 +49,42 @@ export class TaskDataConverter {
    * V3.0: КРИТИЧНО - Добавлена миграция resourceIds → resourceAssignments.
    * Если Java бэкенд передаёт только resourceIds, они автоматически
    * конвертируются в resourceAssignments с units=1.0 (100% загрузки).
+   * 
+   * V3.2: КРИТИЧНО - Добавлена передача duration из API ответа.
+   * Это исправляет баг потери длительности при CPM пересчёте.
    */
   static coreToFrontendTask(coreTask: CoreTaskData): Task {
     const rawStart = new Date(coreTask.startDate)
     const rawEnd = new Date(coreTask.endDate)
+    const startDate = CalendarDateService.toLocalMidnight(rawStart)
+    const endDate = CalendarDateService.toLocalMidnight(rawEnd)
+
+    if (coreTask.critical === true) {
+      logger.debug('[CriticalPathTrace] converter task marked critical', { taskId: coreTask.id, name: coreTask.name }, 'CriticalPathTrace')
+    }
+
+    // Диагностика сдвига дат: что приходит с API и что ставим в store (первые 3 задачи)
+    if (TaskDataConverter.dateShiftLogCount < 3) {
+      logger.info(
+        `[DateShiftTrace] FRONTEND_APPLY taskId=${coreTask.id} name='${coreTask.name ?? ''}' rawStart=${coreTask.startDate} rawEnd=${coreTask.endDate} normalizedStart=${startDate.toISOString()} normalizedEnd=${endDate.toISOString()}`,
+        {},
+        'DateShiftTrace'
+      )
+      TaskDataConverter.dateShiftLogCount += 1
+    }
 
     // Миграция resourceIds → resourceAssignments для совместимости
     const resourceAssignments = TaskDataConverter.migrateResourceAssignments(coreTask)
+    
+    // V3.2: Duration из API или fallback вычисление из дат
+    const duration = TaskDataConverter.extractDuration(coreTask, startDate, endDate)
 
     return {
       id: coreTask.id,
       name: coreTask.name || 'Unnamed Task',
-      startDate: CalendarDateService.toLocalMidnight(rawStart),
-      endDate: CalendarDateService.toLocalMidnight(rawEnd),
+      startDate,
+      endDate,
+      duration,
       progress: coreTask.progress || 0,
       color: coreTask.color || '#4A90D9',
       level: (coreTask.level ?? 0) + 1,
@@ -63,10 +95,37 @@ export class TaskDataConverter {
       resourceAssignments,
       resourceIds: coreTask.resourceIds || [],
       critical: coreTask.critical || false,
-      milestone: coreTask.milestone || false,
+      isCritical: coreTask.critical ?? false,
+      isMilestone: coreTask.milestone ?? false,
       notes: coreTask.notes || '',
       totalSlack: coreTask.totalSlack,
     } as Task
+  }
+  
+  /**
+   * Извлекает duration из API ответа или вычисляет fallback из дат.
+   * 
+   * КРИТИЧЕСКОЕ: Приоритет отдаётся значению из API (Java Core),
+   * так как оно содержит точную рабочую длительность.
+   * 
+   * @param coreTask данные задачи из API
+   * @param startDate нормализованная дата начала
+   * @param endDate нормализованная дата окончания
+   * @returns длительность в днях
+   */
+  private static extractDuration(coreTask: CoreTaskData, startDate: Date, endDate: Date): number {
+    // Приоритет 1: duration из API (Java Core)
+    if (coreTask.duration != null && coreTask.duration > 0) {
+      return coreTask.duration
+    }
+    
+    // Fallback: вычисление из дат (для совместимости со старыми данными)
+    if (startDate && endDate && !isNaN(startDate.getTime()) && !isNaN(endDate.getTime())) {
+      const ms = endDate.getTime() - startDate.getTime()
+      return Math.max(1, Math.round(ms / (24 * 60 * 60 * 1000)))
+    }
+    
+    return 1
   }
 
   /** Core-задача с опциональным полем resourceAssignments (расширение бэкенда) */
@@ -85,15 +144,15 @@ export class TaskDataConverter {
     // Приоритет 1: Если есть resourceAssignments, используем их
     if (TaskDataConverter.coreTaskWithAssignments(coreTask)) {
       return coreTask.resourceAssignments.map((a) => ({
-        resourceId: a.resourceId,
+        resourceId: String(a.resourceId),
         units: a.units ?? 1.0,
       }))
     }
 
-    // Приоритет 2: Конвертируем resourceIds в resourceAssignments
+    // Приоритет 2: Конвертируем resourceIds в resourceAssignments (нормализуем id к строке)
     if (coreTask.resourceIds && coreTask.resourceIds.length > 0) {
       return coreTask.resourceIds.map(resourceId => ({
-        resourceId,
+        resourceId: String(resourceId),
         units: 1.0,
       }))
     }
@@ -121,6 +180,21 @@ export class TaskDataConverter {
   }
 
   /**
+   * Вычисляет длительность задачи в календарных днях по startDate/endDate.
+   * Используется при отсутствии явного task.duration (совместимость со старыми данными).
+   */
+  private static taskDurationInDays(task: Task): number {
+    if (task.duration != null && task.duration > 0) {
+      return Math.round(task.duration)
+    }
+    if (task.startDate && task.endDate && !isNaN(task.startDate.getTime()) && !isNaN(task.endDate.getTime())) {
+      const ms = task.endDate.getTime() - task.startDate.getTime()
+      return Math.max(1, Math.round(ms / (24 * 60 * 60 * 1000)))
+    }
+    return 1
+  }
+
+  /**
    * Конвертирует frontend Task в формат для синхронизации с Core.
    *
    * V2.0: startDate/endDate теперь передаются как ISO-8601 строки
@@ -128,12 +202,15 @@ export class TaskDataConverter {
    *
    * V3.0: Добавлена поддержка resourceAssignments с units.
    *
+   * V3.1: Явная передача duration (в днях), чтобы Core не подставлял 1 день по умолчанию.
+   *
    * ВАЖНО: critical исключен, так как вычисляется ядром CPM.
    */
   static frontendTaskToSync(task: Task): FrontendTaskData {
     return {
       id: task.id,
       name: task.name || 'Unnamed Task',
+      duration: TaskDataConverter.taskDurationInDays(task),
       startDate: TaskDataConverter.dateToIsoString(task.startDate),
       endDate: TaskDataConverter.dateToIsoString(task.endDate),
       progress: task.progress || 0,

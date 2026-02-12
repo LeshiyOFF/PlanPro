@@ -16,9 +16,7 @@ import {
 import {
   MessageBoxOptions,
   MessageBoxResult,
-  OpenDialogOptions,
   OpenDialogResult,
-  SaveDialogOptions,
   SaveDialogResult,
 } from '@/types/ipc/DialogTypes'
 import type { IIpcService } from './IIpcService'
@@ -114,8 +112,8 @@ export class IpcService implements IIpcService {
 
   public async subscribeToJavaEvents(): Promise<JavaEventSubscriptionResponse> {
     const api = getElectronAPI()
-    if (!api?.javaExecute) return DEFAULT_ERROR_RESPONSE
-    const result = (await api.javaExecute('subscribe-events')) as JavaEventSubscriptionResponse | undefined
+    if (!api?.subscribeToJavaEvents) return DEFAULT_ERROR_RESPONSE
+    const result = (await api.subscribeToJavaEvents()) as JavaEventSubscriptionResponse | undefined
     return {
       success: result?.success ?? false,
       message: typeof result?.message === 'string' ? result.message : undefined,
@@ -125,8 +123,8 @@ export class IpcService implements IIpcService {
 
   public async unsubscribeFromJavaEvents(): Promise<JavaEventSubscriptionResponse> {
     const api = getElectronAPI()
-    if (!api?.javaExecute) return DEFAULT_ERROR_RESPONSE
-    const result = (await api.javaExecute('unsubscribe-events')) as JavaEventSubscriptionResponse | undefined
+    if (!api?.unsubscribeFromJavaEvents) return DEFAULT_ERROR_RESPONSE
+    const result = (await api.unsubscribeFromJavaEvents()) as JavaEventSubscriptionResponse | undefined
     return {
       success: result?.success ?? false,
       message: typeof result?.message === 'string' ? result.message : undefined,

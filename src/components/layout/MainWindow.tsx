@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useNavigation } from '@/providers/NavigationProvider'
 import { useProject } from '@/providers/ProjectProvider'
 import { useAppStore } from '@/store/appStore'
+import { useProjectStore } from '@/store/projectStore'
 import { IntegratedMenu } from '@/components/menu/IntegratedMenu'
 import { IntegratedToolbar } from '@/components/toolbar'
 import { useFileOperations } from '@/hooks/useFileOperations'
@@ -43,6 +44,8 @@ export const MainWindow: React.FC<MainWindowProps> = ({
   const appStore = useAppStore()
   const fileOperations = useFileOperations()
   const { executeAction } = useActionManager()
+  const currentProjectId = useProjectStore((s) => s.currentProjectId)
+  const hasProjectToSave = currentProjectId != null && currentProjectId >= 0
 
   useEffect((): (() => void) | undefined => {
     logger.info('[MainWindow] Initializing action registry with live dependencies')
@@ -57,8 +60,8 @@ export const MainWindow: React.FC<MainWindowProps> = ({
     const navigationProvider: NavigationProviderPort = { navigateToView, availableViews }
 
     const fileOperationsPort: FileOperationsPort = {
-      createNewProject: () => fileOperations.createNewProject().then(() => {}),
-      openProject: fileOperations.openProject,
+      createNewProject: async () => { await fileOperations.createNewProject() },
+      openProject: async () => { await fileOperations.openProject() },
       saveProject: fileOperations.saveProject,
       saveProjectAs: fileOperations.saveProjectAs,
     }
@@ -68,6 +71,7 @@ export const MainWindow: React.FC<MainWindowProps> = ({
       appStore: appStore as AppStorePort,
       navigationProvider,
       fileOperations: fileOperationsPort,
+      hasProjectToSave,
     }
 
     try {
@@ -80,7 +84,7 @@ export const MainWindow: React.FC<MainWindowProps> = ({
       logger.error('[MainWindow] Failed to initialize action registry:', { message: errMessage })
       return undefined
     }
-  }, [fileOperations, appStore, navigateToView, availableViews, project, projectActions])
+  }, [fileOperations, appStore, navigateToView, availableViews, project, projectActions, hasProjectToSave])
 
   // Обработчик действий тулбара
   const handleToolbarAction = async (actionId: string, actionLabel: string) => {

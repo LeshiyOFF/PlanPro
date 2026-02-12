@@ -7,10 +7,12 @@ export class ProjectUtils {
   /**
    * Создание проекта для тестов и разработки.
    * В production-потоке не использовать; для создания — ProjectAPIClient.createProject.
+   *
+   * Использует префикс MOCK- для отличия от реальных проектов.
    */
   static createMockProject(name: string, additionalData?: Partial<Project>): Project {
     const mockProject: Project = {
-      id: Date.now().toString(),
+      id: `MOCK-${Date.now().toString(36)}`,
       name,
       description: '',
       start: new Date(),

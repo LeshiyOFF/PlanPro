@@ -1,4 +1,5 @@
 import type { Assignment } from '@/types'
+import { AssignmentIdGenerator } from '@/domain/assignment/services/AssignmentIdGenerator'
 
 /**
  * Утилиты для работы с назначениями
@@ -44,10 +45,13 @@ export class AssignmentUtils {
   /**
    * Создание назначения для тестов и разработки.
    * В production-потоке не использовать.
+   *
+   * @param data Данные назначения без ID
+   * @returns Назначение с детерминированным ID
    */
   static createMockAssignment(data: Omit<Assignment, 'id'>): Assignment {
     return {
-      id: Date.now().toString(),
+      id: AssignmentIdGenerator.generate(data.taskId, data.resourceId),
       ...data,
     }
   }

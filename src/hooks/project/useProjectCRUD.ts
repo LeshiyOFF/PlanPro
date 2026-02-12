@@ -47,14 +47,21 @@ export const useProjectCRUD = (execute: ReturnType<typeof useAsyncOperation>['ex
   const { loadProjectFromPath } = useFileOpen()
 
   /**
-   * Создание нового проекта через ProjectAPIClient
+   * Создание нового проекта через ProjectAPIClient.
+   * Дефолтное имя при пустом/пробельном; всегда finish > start (Фаза 3).
    */
   const createProject = useCallback(
     async (name: string): Promise<Project | null> => {
+      const trimmedName = typeof name === 'string' ? name.trim() : ''
+      const displayName =
+        trimmedName.length > 0 ? trimmedName : `Новый проект ${new Date().toLocaleString('ru-RU')}`
+      const start = new Date()
+      const finish = new Date(start.getTime() + 24 * 60 * 60 * 1000)
+
       const partial: Partial<Project> = {
-        name,
-        start: new Date(),
-        finish: new Date(),
+        name: displayName,
+        start,
+        finish,
         status: 'Planning',
         scheduleFrom: 'ProjectStart',
         priority: 'Normal',

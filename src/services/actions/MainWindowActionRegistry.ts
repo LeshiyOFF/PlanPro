@@ -4,6 +4,7 @@ import {
   ProjectProviderPort,
   NavigationProviderPort,
   AppStorePort,
+  FileOperationsPort,
 } from './registry/BaseActionRegistry'
 import { FileActionRegistry } from './registry/FileActionRegistry'
 import { EditActionRegistry } from './registry/EditActionRegistry'
@@ -115,17 +116,21 @@ export class MainWindowActionRegistryFactory {
   }
 
   /**
-   * Получение зависимостей из провайдеров
+   * Получение зависимостей из провайдеров (Фаза 4: fileOperations и hasProjectToSave обязательны).
    */
   static extractDependencies(
     projectProvider: ProjectProviderPort,
     appStore: AppStorePort,
     navigationProvider: NavigationProviderPort,
+    fileOperations: FileOperationsPort,
+    hasProjectToSave: boolean,
   ): MainWindowDependencies {
     return {
       projectProvider,
       appStore,
       navigationProvider,
+      fileOperations,
+      hasProjectToSave,
     }
   }
 }

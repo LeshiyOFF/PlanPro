@@ -1,4 +1,4 @@
-/// <reference path="./types/window.d.ts" />
+import type {} from './types/window'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router-dom'

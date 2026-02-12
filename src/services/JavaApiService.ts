@@ -64,7 +64,7 @@ export class JavaApiService implements IJavaApiService {
     return this.projectService.getAllProjects()
   }
 
-  public recalculateProject(id: string): Promise<DataResponse<ProjectDataResponse>> {
+  public recalculateProject(id: string): Promise<ProjectDataResponse | undefined> {
     return this.projectService.recalculateProject(id)
   }
 

@@ -55,7 +55,7 @@
  *******************************************************************************/
 package com.projectlibre1.field;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import com.projectlibre1.strings.Messages;
 import com.projectlibre1.util.ClassUtils;
@@ -131,6 +131,6 @@ public class SelectOption {
 	}
 	
 	public static String toConfigurationXML(String key, String value) {
-		return "<option key=\"" + StringEscapeUtils.escapeXml(key) + "\" value=\"" + StringEscapeUtils.escapeXml(value) + "\"/>";
+		return "<option key=\"" + StringEscapeUtils.escapeXml10(key) + "\" value=\"" + StringEscapeUtils.escapeXml10(value) + "\"/>";
 	}
 }

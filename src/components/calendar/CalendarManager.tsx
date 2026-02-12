@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useProjectStore } from '@/store/projectStore'
 import { CalendarEditorDialog } from '@/components/dialogs/calendar/CalendarEditorDialog'
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
@@ -6,6 +6,15 @@ import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemp
 import { Button } from '@/components/ui/button'
 import { Plus, Edit, Trash2, Calendar, Lock } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { getElectronAPI } from '@/utils/electronAPI'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
 
 interface CalendarManagerProps {
   className?: string;
@@ -23,6 +32,7 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
 
   const [editorOpen, setEditorOpen] = useState(false)
   const [editingCalendar, setEditingCalendar] = useState<IWorkCalendar | undefined>()
+  const [calendarToDelete, setCalendarToDelete] = useState<IWorkCalendar | null>(null)
 
   const handleCreate = () => {
     setEditingCalendar(undefined)
@@ -34,7 +44,16 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
     setEditorOpen(true)
   }
 
-  const handleDelete = (calendar: IWorkCalendar) => {
+  const performDelete = useCallback((calendar: IWorkCalendar) => {
+    deleteCalendar(calendar.id)
+    toast({
+      title: 'Успех',
+      description: `Календарь "${calendar.name}" удален`,
+    })
+    setCalendarToDelete(null)
+  }, [deleteCalendar, toast])
+
+  const handleDelete = useCallback(async (calendar: IWorkCalendar) => {
     if (calendar.isBase) {
       toast({
         title: 'Ошибка',
@@ -44,15 +63,22 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
       return
     }
 
-    const confirmed = window.confirm(`Удалить календарь "${calendar.name}"?`)
-    if (confirmed) {
-      deleteCalendar(calendar.id)
-      toast({
-        title: 'Успех',
-        description: `Календарь "${calendar.name}" удален`,
+    const api = getElectronAPI()
+    if (api?.showMessageBox) {
+      const result = await api.showMessageBox({
+        type: 'question',
+        buttons: ['Удалить', 'Отмена'],
+        defaultId: 1,
+        cancelId: 1,
+        title: 'Подтверждение удаления',
+        message: `Удалить календарь "${calendar.name}"?`,
       })
+      if (result.response === 0) performDelete(calendar)
+      return
     }
-  }
+
+    setCalendarToDelete(calendar)
+  }, [toast, performDelete])
 
   const handleSave = (calendar: IWorkCalendar) => {
     if (editingCalendar) {
@@ -166,6 +192,31 @@ export const CalendarManager: React.FC<CalendarManagerProps> = ({ className = ''
         onSave={handleSave}
         calendar={editingCalendar}
       />
+
+      {/* Диалог подтверждения удаления (fallback при отсутствии Electron API) */}
+      <Dialog open={!!calendarToDelete} onOpenChange={(open) => !open && setCalendarToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Подтверждение удаления</DialogTitle>
+            <DialogDescription>
+              {calendarToDelete
+                ? `Удалить календарь "${calendarToDelete.name}"?`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCalendarToDelete(null)}>
+              Отмена
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => calendarToDelete && performDelete(calendarToDelete)}
+            >
+              Удалить
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

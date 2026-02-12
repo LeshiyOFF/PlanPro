@@ -5,8 +5,9 @@ import com.projectlibre.api.dto.ProjectSyncRequestDto;
 import com.projectlibre.api.dto.TaskSyncResponseDto;
 import com.projectlibre.api.storage.CoreProjectBridge;
 import com.projectlibre.api.concurrent.CoreAccessGuard;
-import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer;
 import com.projectlibre.api.sync.ApiToCoreResourceSynchronizer;
+import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer;
+import com.projectlibre.api.sync.ProjectCalendarSyncService;
 import com.projectlibre.api.sync.SyncResult;
 import com.projectlibre1.pm.task.Project;
 
@@ -36,13 +37,15 @@ public class ProjectSyncRestController {
     private final CoreProjectBridge projectBridge;
     private final ApiToCoreTaskSynchronizer taskSynchronizer;
     private final ApiToCoreResourceSynchronizer resourceSynchronizer;
-    
+    private final ProjectCalendarSyncService projectCalendarSyncService;
+
     @Autowired
     public ProjectSyncRestController(CoreAccessGuard coreAccessGuard) {
         this.coreAccessGuard = coreAccessGuard;
         this.projectBridge = CoreProjectBridge.getInstance();
         this.taskSynchronizer = new ApiToCoreTaskSynchronizer();
         this.resourceSynchronizer = new ApiToCoreResourceSynchronizer();
+        this.projectCalendarSyncService = new ProjectCalendarSyncService();
     }
     
     @PostMapping("/sync-project")
@@ -91,7 +94,12 @@ public class ProjectSyncRestController {
                 totalSynced += resourceResult.getSyncedCount();
                 totalSkipped += resourceResult.getSkippedCount();
             }
-            
+
+            if (request.getProjectCalendars() != null) {
+                coreAccessGuard.executeWithLock(() ->
+                    projectCalendarSyncService.applyProjectCalendars(project, request.getProjectCalendars()));
+            }
+
             TaskSyncResponseDto data = TaskSyncResponseDto.success(totalSynced, totalSkipped);
             log.info("[ProjectSync] ✅ Sync completed: synced={}, skipped={}", totalSynced, totalSkipped);
             return ResponseEntity.ok(ApiResponseDto.success("Project synced", data));

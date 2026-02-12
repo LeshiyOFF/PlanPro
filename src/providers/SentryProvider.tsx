@@ -44,7 +44,7 @@ export const SentryProvider: React.FC<SentryProviderProps> = ({
       const globalTags = {
         ...tags,
         environment: EnvironmentConfig.getEnvironment(),
-        application: 'ProjectLibre',
+        application: 'PlanPro',
         version: EnvironmentConfig.getRelease(),
       }
 

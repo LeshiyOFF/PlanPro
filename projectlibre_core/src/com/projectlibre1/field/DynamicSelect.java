@@ -59,8 +59,8 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.projectlibre1.util.ClassUtils;
 

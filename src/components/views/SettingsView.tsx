@@ -2,7 +2,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { UserPreferencesContainer } from '@/components/userpreferences'
 import { TwoTierHeader } from '@/components/layout/ViewHeader'
-import { useHelpContent } from '@/hooks/useHelpContent'
 import { ViewType } from '@/types/ViewTypes'
 import { Settings, Download, Upload } from 'lucide-react'
 import { settingsImportExportService } from '@/services/SettingsImportExportService'
@@ -13,13 +12,12 @@ import { settingsImportExportService } from '@/services/SettingsImportExportServ
  * Полный интерфейс пользовательских настроек и предпочтений.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.13
+ * @version 8.14 - Убрана подсказка справки
  */
 export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({
   viewType: _viewType = ViewType.SETTINGS,
 }) => {
   const { t } = useTranslation()
-  const helpContent = useHelpContent()
 
   const handleImport = () => {
     const input = document.createElement('input')
@@ -53,7 +51,6 @@ export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({
         title={t('navigation.settings')}
         description={t('descriptions.settings')}
         icon={<Settings className="w-6 h-6" />}
-        help={helpContent.SETTINGS}
         actionBar={{
           secondaryActions: [
             {

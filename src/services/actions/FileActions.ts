@@ -74,13 +74,13 @@ export class SaveProjectAction extends BaseAction {
   }
 
   public canExecute(): boolean {
-    return !!this.dependencies.projectProvider.currentProject || !!this.dependencies.fileOperations
+    return this.dependencies.hasProjectToSave
   }
 
   public async execute(): Promise<void> {
     this.logAction(EventType.FILE_ACTION, { action: 'save' })
     const fileOps = this.dependencies.fileOperations
-    if (fileOps?.saveProject) {
+    if (fileOps.saveProject) {
       await fileOps.saveProject()
     } else if (this.dependencies.projectProvider?.currentProject && this.dependencies.projectProvider?.saveProject) {
       await this.dependencies.projectProvider.saveProject(this.dependencies.projectProvider.currentProject)
@@ -101,14 +101,12 @@ export class SaveProjectAsAction extends BaseAction {
   }
 
   public canExecute(): boolean {
-    return !!this.dependencies.projectProvider.currentProject || !!this.dependencies.fileOperations
+    return this.dependencies.hasProjectToSave
   }
 
   public async execute(): Promise<void> {
     this.logAction(EventType.FILE_ACTION, { action: 'save-as' })
-    if (this.dependencies.fileOperations) {
-      await this.dependencies.fileOperations.saveProjectAs()
-    }
+    await this.dependencies.fileOperations.saveProjectAs()
   }
 }
 

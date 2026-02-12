@@ -1,4 +1,17 @@
 import { ReactNode } from 'react'
+import { HelpSectionId } from '@/types/help'
+
+/**
+ * Интерфейс помощи для ViewHeader
+ */
+export interface ViewHeaderHelp {
+  /** Заголовок (для aria-label и tooltip при отсутствии section) */
+  title: string
+  /** Контент для tooltip (обратная совместимость) */
+  content: ReactNode
+  /** ID секции для модального окна (если указан - открывается модальное окно) */
+  section?: HelpSectionId
+}
 
 /**
  * Интерфейс для ViewHeader (Tier 1: Title Bar)
@@ -6,22 +19,19 @@ import { ReactNode } from 'react'
  */
 export interface ViewHeaderProps {
   /** Заголовок представления (обязательно) */
-  title: string;
+  title: string
 
   /** Краткое описание под заголовком (опционально) */
-  description?: string;
+  description?: string
 
   /** Иконка слева от заголовка (опционально) */
-  icon?: ReactNode;
+  icon?: ReactNode
 
   /** Контекстная помощь (опционально) */
-  help?: {
-    title: string;
-    content: ReactNode;
-  };
+  help?: ViewHeaderHelp
 
   /** Дополнительные CSS классы */
-  className?: string;
+  className?: string
 }
 
 /**

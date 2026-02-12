@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react'
 import { NetworkDiagramEngine } from '@/domain/network/services/NetworkDiagramEngine'
 import { SugiyamaLayoutStrategy } from '@/domain/network/layout/SugiyamaLayoutStrategy'
-import { NetworkNode, NetworkConnection } from '@/domain/network/interfaces/NetworkDiagram'
+import { NetworkNode, NetworkConnection, NetworkNodeType } from '@/domain/network/interfaces/NetworkDiagram'
 import { CanvasPoint } from '@/domain/canvas/interfaces/GanttCanvas'
 
 interface NetworkDiagramCoreProps {
@@ -14,6 +14,8 @@ interface NetworkDiagramCoreProps {
   onNodeSelect?: (nodeId: string | null) => void;
   onNodeDoubleClick?: (nodeId: string) => void;
   onConnectionCreate?: (fromId: string, toId: string) => void;
+  /** Колбэк для сворачивания/разворачивания суммарной задачи (клик на +/−). */
+  onCollapseToggle?: (nodeId: string) => void;
 }
 
 /**
@@ -30,6 +32,7 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
   onNodeSelect,
   onNodeDoubleClick,
   onConnectionCreate,
+  onCollapseToggle,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const engineRef = useRef<NetworkDiagramEngine | null>(null)
@@ -98,6 +101,13 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
       y: (e.clientY - rect.top) * cssScaleY,
     }
 
+    // Приоритет 1: проверяем клик по кнопке сворачивания (+/−)
+    const collapseNodeId = engineRef.current.hitTestCollapseButton(point)
+    if (collapseNodeId) {
+      onCollapseToggle?.(collapseNodeId)
+      return // Не продолжаем обработку — клик обработан
+    }
+
     const nodeId = engineRef.current.hitTestNode(point)
     if (nodeId) {
       const port = engineRef.current.hitTestPort(point, nodeId)
@@ -118,7 +128,7 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
       setPanStart(point) // Используем point в логических координатах
       onNodeSelect?.(null)
     }
-  }, [onNodeSelect, width, height])
+  }, [onNodeSelect, onCollapseToggle, width, height])
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (!canvasRef.current || !engineRef.current) return
@@ -138,17 +148,27 @@ export const NetworkDiagramCore: React.FC<NetworkDiagramCoreProps> = ({
       const dx = (currentPoint.x - dragStart.x) / viewport.scale
       const dy = (currentPoint.y - dragStart.y) / viewport.scale
 
-      setNodes((prev: NetworkNode[]) => prev.map((node: NetworkNode) => {
-        if (node.id === draggedNodeId) {
-          return {
-            ...node,
-            x: node.x + dx,
-            y: node.y + dy,
-            isPinned: true,
+      setNodes((prev: NetworkNode[]) => {
+        // Определяем, является ли перемещаемый узел суммарной задачей
+        const draggedNode = prev.find(n => n.id === draggedNodeId)
+        const isSummaryNode = draggedNode?.type === NetworkNodeType.SUMMARY
+        const childIds = isSummaryNode ? (draggedNode?.childIds || []) : []
+
+        return prev.map((node: NetworkNode) => {
+          // Перемещаем саму суммарную задачу ИЛИ все её дочерние задачи
+          const shouldMove = node.id === draggedNodeId || childIds.includes(node.id)
+          
+          if (shouldMove) {
+            return {
+              ...node,
+              x: node.x + dx,
+              y: node.y + dy,
+              isPinned: true,
+            }
           }
-        }
-        return node
-      }))
+          return node
+        })
+      })
       setDragStart(currentPoint)
     } else if (isPanning && panStart) {
       const dx = currentPoint.x - panStart.x

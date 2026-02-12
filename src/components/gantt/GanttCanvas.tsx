@@ -18,6 +18,14 @@ export interface GanttCanvasProps {
   forcedEndDate?: Date | null;
   targetDate?: Date | null;
   onNavigationComplete?: () => void;
+  /** GANTT-NAV-V3: Минимальная дата навигации */
+  minDate?: Date;
+  /** GANTT-NAV-V3: Максимальная дата навигации */
+  maxDate?: Date;
+  /** Ref для синхронизации вертикального скролла */
+  scrollRef?: React.RefObject<HTMLDivElement>;
+  /** Callback при прокрутке для синхронизации */
+  onScroll?: () => void;
 }
 
 /**
@@ -28,6 +36,7 @@ export const GanttCanvas = forwardRef<ProfessionalGanttHandle, GanttCanvasProps>
   (
     {
       tasks = [],
+      startDate,
       onTaskSelect,
       onTaskDoubleClick,
       onTaskUpdate,
@@ -36,6 +45,10 @@ export const GanttCanvas = forwardRef<ProfessionalGanttHandle, GanttCanvasProps>
       forcedEndDate,
       targetDate,
       onNavigationComplete,
+      minDate,
+      maxDate,
+      scrollRef,
+      onScroll,
     },
     ref,
   ) => {
@@ -50,7 +63,12 @@ export const GanttCanvas = forwardRef<ProfessionalGanttHandle, GanttCanvasProps>
         mode={mode}
         forcedEndDate={forcedEndDate}
         targetDate={targetDate}
+        viewDate={startDate}
         onNavigationComplete={onNavigationComplete}
+        minDate={minDate}
+        maxDate={maxDate}
+        scrollRef={scrollRef}
+        onScroll={onScroll}
       />
     )
   },

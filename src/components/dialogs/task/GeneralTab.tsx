@@ -25,14 +25,14 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
   formData, setFormData, taskType, onProgressChange, t,
 }) => (
   <>
-    <div className="space-y-3 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
-      <Label className="text-sm font-semibold text-slate-700">
+    <div className="space-y-2.5 p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+      <Label className="text-xs font-semibold text-slate-700">
         {t('task_props.name', { defaultValue: 'Название задачи' })}
       </Label>
       <Input
         value={formData.name || ''}
         onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
-        className="h-11 font-medium text-base"
+        className="h-10 font-medium text-sm"
       />
     </div>
 
@@ -43,11 +43,11 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({
       t={t}
     />
 
-    <div className="space-y-3 p-6 bg-white border border-slate-200 rounded-xl shadow-sm">
-      <Label className="text-sm font-semibold text-slate-700 mb-2 block">
+    <div className="space-y-2.5 p-5 bg-white border border-slate-200 rounded-xl shadow-sm">
+      <Label className="text-xs font-semibold text-slate-700 mb-1 block">
         {t('task_props.dates', { defaultValue: 'Сроки' })}
       </Label>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
           <Label className="text-xs font-medium text-slate-500 uppercase">
             {t('task_props.start', { defaultValue: 'Начало' })}

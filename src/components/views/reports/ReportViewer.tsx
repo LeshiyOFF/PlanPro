@@ -2,8 +2,6 @@ import React, { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IReportData, IReportSection } from '@/domain/reporting/interfaces/IReport'
 import { FileText } from 'lucide-react'
-import type { JsonObject } from '@/types/json-types'
-
 import type { JsonValue } from '@/types/json-types'
 
 interface ReportViewerProps {
@@ -41,7 +39,7 @@ const ProgressBar: React.FC<{ value: number; showLabel?: boolean }> = ({ value, 
 /**
  * Проверяет, является ли значение процентом (число или строка с %)
  */
-const isProgressValue = (key: string, value: unknown): number | null => {
+const isProgressValue = (key: string, value: JsonValue): number | null => {
   // Проверяем по ключу (колонка "Прогресс" или "Progress")
   const progressKeys = ['прогресс', 'progress', 'завершения', 'complete']
   const isProgressColumn = progressKeys.some(k => key.toLowerCase().includes(k))

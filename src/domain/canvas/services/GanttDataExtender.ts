@@ -54,14 +54,14 @@ export class GanttDataExtender {
     for (let i = 0; i < fillerCount; i++) {
       extendedTasks.push({
         id: `filler-${i}`,
-        name: '', // Пустое имя
+        name: '', // Пустое имя для EmptyTask
         startDate: defaultStart,
         endDate: defaultEnd,
         progress: 0,
-        type: 'task',
+        type: 'empty', // GANTT-NAV: Используем нативный EmptyTask из @wamra/gantt-task-react
         level: 1,
         isDisabled: true, // Отключаем взаимодействие
-        isFiller: true,    // Пометка для CSS
+        isFiller: true,   // Маркер для идентификации
       })
     }
 

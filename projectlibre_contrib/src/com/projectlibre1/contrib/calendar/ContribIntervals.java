@@ -31,9 +31,10 @@ import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TimeZone;
 import java.util.TreeSet;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.jdesktop.swing.calendar.DateSpan;
 
 /**
@@ -170,7 +171,7 @@ public class ContribIntervals extends TreeSet{
 
 	public static GregorianCalendar calendarInstance() {
 		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTimeZone(DateUtils.UTC_TIME_ZONE);
+		cal.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return cal;
 	}
 

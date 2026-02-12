@@ -101,9 +101,9 @@ const DIGEST_FREQUENCIES = [
 
 export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProps> = ({
   currentSettings,
-  availableEvents = NOTIFICATION_EVENTS.map(e => e.value),
-  availableProjects = [],
-  availableResources = [],
+  availableEvents: _availableEvents = NOTIFICATION_EVENTS.map(e => e.value),
+  availableProjects: _availableProjects = [],
+  availableResources: _availableResources = [],
   onSave,
   onTestNotification,
   onClose,

@@ -53,25 +53,23 @@ class Logger {
       this.logs = this.logs.slice(-this.maxLogs)
     }
 
-    // Console output in development
-    if (process.env.NODE_ENV === 'development') {
-      const { timestamp, level, message, data, component } = entry
-      const componentPrefix = component ? `[${component}]` : ''
+    // Вывод в консоль всегда (в т.ч. в собранном exe — видно в DevTools окна приложения)
+    const { timestamp, level, message, data, component } = entry
+    const componentPrefix = component ? `[${component}]` : ''
 
-      switch (level) {
-        case LogLevel.ERROR:
-          console.error(`${timestamp} ${componentPrefix} ERROR: ${message}`, data)
-          break
-        case LogLevel.WARNING:
-          console.warn(`${timestamp} ${componentPrefix} WARNING: ${message}`, data)
-          break
-        case LogLevel.INFO:
-          console.info(`${timestamp} ${componentPrefix} INFO: ${message}`, data)
-          break
-        case LogLevel.DEBUG:
-          console.debug(`${timestamp} ${componentPrefix} DEBUG: ${message}`, data)
-          break
-      }
+    switch (level) {
+      case LogLevel.ERROR:
+        console.error(`${timestamp} ${componentPrefix} ERROR: ${message}`, data)
+        break
+      case LogLevel.WARNING:
+        console.warn(`${timestamp} ${componentPrefix} WARNING: ${message}`, data)
+        break
+      case LogLevel.INFO:
+        console.info(`${timestamp} ${componentPrefix} INFO: ${message}`, data)
+        break
+      case LogLevel.DEBUG:
+        console.debug(`${timestamp} ${componentPrefix} DEBUG: ${message}`, data)
+        break
     }
   }
 

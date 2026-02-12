@@ -469,6 +469,13 @@ public class Serializer {
         ProjectData projectData=(ProjectData)serialize(project,ProjectData.FACTORY,projectCount);
         if (project.isForceNonIncremental()) projectData.setVersion(0);
         projectData.setMaster(project.isMaster());
+        
+        // VB.1/VB.8: Сохранение imposed finish date (жёсткий дедлайн проекта)
+        // Значение 0 означает автоматический режим (дедлайн не задан)
+        // Миграция: При первом сохранении старых .pod файлов (где поле отсутствует),
+        // автоматически записывается imposedFinishDate=0 (автоматический режим)
+        projectData.setImposedFinishDate(project.getImposedFinishDate());
+        
 //        projectData.setExternalId(project.getExternalId());
 
         //exposed attributes
@@ -487,6 +494,20 @@ public class Serializer {
 
         //tasks
         saveTasks(project,projectData,resourceMap,flatAssignments,flatLinks,incremental,options);
+
+        // derived calendars: explicit list for file so removed ones do not reappear
+        ArrayList derivedCalendars = CalendarService.getInstance().getDerivedCalendars();
+        if (derivedCalendars != null && !derivedCalendars.isEmpty()) {
+            WorkCalendar standardInstance = CalendarService.getInstance().getStandardInstance();
+            ArrayList filtered = new ArrayList();
+            for (Object obj : derivedCalendars) {
+                if (obj == standardInstance)
+                    continue;
+                filtered.add(obj);
+            }
+            Collection<CalendarData> calCollection = CalendarSerializationHelper.derivedCalendarsToCalendarDataCollection(filtered);
+            projectData.setCalendars(calCollection);
+        }
 
         //distribution
         long t=System.currentTimeMillis();
@@ -814,9 +835,27 @@ public class Serializer {
     	project.setProjectType(projectData.getProjectType());
     	project.setProjectStatus(projectData.getProjectStatus());
     	project.setAccessControlPolicy(projectData.getAccessControlPolicy());
+    	
+    	// VB.1/VB.8: Загрузка imposed finish date (жёсткий дедлайн проекта)
+    	// Обратная совместимость: Если .pod файл старый и не содержит поля imposedFinishDate,
+    	// Java Serialization автоматически использует значение по умолчанию 0 (автоматический режим)
+    	// НЕ использовать project.finishDate из старых .pod как imposed deadline - это кэш прошлого расчёта
+    	long imposedDate = projectData.getImposedFinishDate();
+    	project.setImposedFinishDate(imposedDate);
+    	
+    	// Логирование миграции старых .pod файлов (для диагностики)
+    	if (imposedDate == 0) {
+    		System.out.println("[VB.8] Loaded .pod file: imposedFinishDate = 0 (automatic mode, legacy file or user preference)");
+    	} else {
+    		System.out.println("[VB.8] Loaded .pod file: imposedFinishDate = " + new java.util.Date(imposedDate) + " (explicit deadline)");
+    	}
 
     	project.postDeserialization();
 
+    	// restore derived calendars from file before resources/tasks
+    	if (projectData.getCalendars() != null) {
+    		CalendarSerializationHelper.deserializeAndAddCalendars(projectData.getCalendars(), reindex);
+    	}
 
     	//resources
     	final Map resourceNodeMap=new HashMap();

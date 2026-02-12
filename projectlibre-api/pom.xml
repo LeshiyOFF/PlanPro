@@ -175,11 +175,18 @@
             <systemPath>${project.basedir}/../projectlibre_contrib/lib/commons-digester.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.14.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../projectlibre_contrib/lib/commons-lang.jar</systemPath>
+            <systemPath>${project.basedir}/../projectlibre_contrib/lib/commons-lang3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.11.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../projectlibre_contrib/lib/commons-text.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>

@@ -1,6 +1,5 @@
 import { SentryService } from '@/services/SentryService'
 import type { JsonValue } from '@/types/json-types'
-import type { JsonValue } from '@/types/json-types'
 
 /**
  * Интерфейс для метрик производительности
@@ -25,7 +24,7 @@ interface TransactionOptions {
 /** Объект с методами setTag/setData/finish для совместимости с Sentry span/transaction */
 interface SentryTransactionLike {
   setTag(key: string, value: string): void;
-  setData(key: string, value: unknown): void;
+  setData(key: string, value: JsonValue): void;
   finish?(status?: string): void;
 }
 

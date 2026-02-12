@@ -8,6 +8,7 @@ export const INITIAL_TASKS = [
     name: 'Проект Разработки Системы',
     startDate: new Date(),
     endDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
+    duration: 20, // Длительность в днях для корректного CPM расчёта
     baselineStartDate: new Date(),
     baselineEndDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
     progress: 0.6,
@@ -23,6 +24,7 @@ export const INITIAL_TASKS = [
     name: 'Разработка UI',
     startDate: new Date(),
     endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    duration: 7, // Длительность в днях для корректного CPM расчёта
     baselineStartDate: new Date(),
     baselineEndDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     progress: 0.8,
@@ -38,6 +40,7 @@ export const INITIAL_TASKS = [
     name: 'Настройка Tailwind',
     startDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
     endDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+    duration: 7, // Длительность в днях для корректного CPM расчёта
     baselineStartDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
     baselineEndDate: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000),
     progress: 0.65,
@@ -53,6 +56,7 @@ export const INITIAL_TASKS = [
     name: 'Интеграция Canvas',
     startDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+    duration: 10, // Длительность в днях для корректного CPM расчёта
     progress: 0.3,
     color: '#ffc107',
     level: 1,
@@ -64,6 +68,7 @@ export const INITIAL_TASKS = [
     name: 'Тестирование',
     startDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
     endDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000),
+    duration: 10, // Длительность в днях для корректного CPM расчёта
     progress: 0,
     color: '#dc3545',
     level: 1,
@@ -76,6 +81,7 @@ export const INITIAL_TASKS = [
     name: 'Запуск Продукта',
     startDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
     endDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
+    duration: 0, // Milestone имеет нулевую длительность
     progress: 0,
     color: '#ff6b6b',
     level: 1,

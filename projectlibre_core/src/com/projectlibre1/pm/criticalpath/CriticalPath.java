@@ -55,10 +55,14 @@
  *******************************************************************************/
 package com.projectlibre1.pm.criticalpath;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.projectlibre1.configuration.Configuration;
 import com.projectlibre1.document.Document;
@@ -122,7 +126,11 @@ public class CriticalPath implements SchedulingAlgorithm {
 		// update sentinels based on read in project
 		
 		if (isForward())  {
-			startSentinel.setWindowEarlyStart(project.getStartConstraint());
+			// CORE-AUTH.1.1: Нормализовать Start Sentinel до полуночи локальной timezone
+			long originalStart = project.getStartConstraint();
+			long normalizedStart = normalizeToMidnight(originalStart);
+			logSentinelNormalization(originalStart, normalizedStart);
+			startSentinel.setWindowEarlyStart(normalizedStart);
 			finishSentinel.setWindowLateFinish(0); //no end constraint
 		} else {
 			startSentinel.setWindowEarlyStart(0); // no start constraint
@@ -131,6 +139,43 @@ public class CriticalPath implements SchedulingAlgorithm {
 		predecessorTaskList.getList().add(0,new PredecessorTaskList.TaskReference(startSentinel));
 		predecessorTaskList.getList().add(new PredecessorTaskList.TaskReference(finishSentinel));
 	}
+	
+	/**
+	 * CORE-AUTH.1.1: Нормализует timestamp до полуночи (00:00:00.000) в локальной timezone.
+	 * 
+	 * Устраняет time offset (например, 01:03:59), который появляется когда дата проекта
+	 * содержит время создания вместо чистой полуночи. Это критично для CPM расчётов,
+	 * т.к. все задачи без predecessors наследуют Start Sentinel как beginDependency.
+	 * 
+	 * @param timestamp исходный timestamp в миллисекундах
+	 * @return timestamp нормализованный до 00:00:00.000 того же дня
+	 */
+	private long normalizeToMidnight(long timestamp) {
+		if (timestamp == 0) {
+			return 0;
+		}
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(timestamp);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTimeInMillis();
+	}
+	
+	/**
+	 * CORE-AUTH.1.2: Логирует нормализацию Start Sentinel для диагностики.
+	 * 
+	 * @param originalMs исходное значение timestamp
+	 * @param normalizedMs нормализованное значение timestamp
+	 */
+	private void logSentinelNormalization(long originalMs, long normalizedMs) {
+		if (originalMs != normalizedMs) {
+			System.out.println("[CORE-AUTH] Sentinel normalized: " 
+				+ new Date(originalMs) + " (" + originalMs + "ms) -> " 
+				+ new Date(normalizedMs) + " (" + normalizedMs + "ms)");
+		}
+	}
 
 	public void initialize(Object object) {
 		project = (Project) object;
@@ -138,7 +183,10 @@ public class CriticalPath implements SchedulingAlgorithm {
 		predecessorTaskList.addAll(project.getTasks());
 		initSentinelsFromTasks();
 		setProjectBoundaries(); // put back sentinels
-		
+		// Пометить все задачи и сентинелы для пересчёта; иначе в doPass они пропускаются
+		// (условие task.getCalculationStateCount() >= context.stateCount не выполняется).
+		project.markAllTasksAsNeedingRecalculation(true);
+		markSentinelsForRecalculation();
 		calculate(false);
 	}
 	
@@ -223,10 +271,16 @@ public class CriticalPath implements SchedulingAlgorithm {
 		doPass(startTask,context); // always assign in first pass.  Dates may change in third pass
 		
 		if (affectsCriticalPath) {
+			ensureFinishSentinelEarlyDatesBeforeBackwardPass(context);
 			context.stateCount = getNextCalculationStateCount(); // backward pass treats next increment
 			context.sentinel = endSentinel;
-			long secondBoundary = -endSentinel.getSchedule(context.scheduleType).getBegin(); // sent bounds of end sentinel for backward pass
-			context.boundary = secondBoundary;
+		// Граница обратного прохода: учитываем явный дедлайн (FNLT) финиш-сентинела, чтобы при параллельных ветках у некритических задач был slack > 0.
+		long earlyFinish = finishSentinel.getEarlyFinish();
+		long constraintEnd = (finishSentinel.getConstraintType() == ConstraintType.FNLT && finishSentinel.getConstraintDate() > 0)
+			? finishSentinel.getConstraintDate() : 0;
+		// VB.3: При наличии constraint используем ЕГО (даже если меньше earlyFinish — для отрицательного slack)
+		long endForBackward = (constraintEnd > 0) ? constraintEnd : earlyFinish;
+			context.boundary = -endForBackward;
 			context.sentinel = beginSentinel;
 			context.forward = !context.forward;
 			context.assign = false;
@@ -234,9 +288,19 @@ public class CriticalPath implements SchedulingAlgorithm {
 			context.pass++;
 			doPass(null,context);
 
-			//set project fields
-			project.setStart(startSentinel.getEarlyStart());
+		// CPM-MS.2: Агрегация дат для summary tasks после forward/backward passes.
+		// По стандарту MS Project summary tasks не участвуют в CPM, а получают даты от детей.
+		aggregateSummaryTaskDates();
+		
+		// ДИАГНОСТИКА БАГА: Логируем summary tasks после агрегации
+		logSummaryTasksAfterAggregation();
+
+		// Даты проекта: конец проекта обновляем по раннему финишу; граница обратного прохода уже учла FNLT выше.
+		project.setStart(startSentinel.getEarlyStart());
+		// VB.3: Не перезаписывать project.end, если установлен imposed deadline
+		if (!project.hasImposedFinishDate()) {
 			project.setEnd(finishSentinel.getEarlyFinish());
+		}
 			
 			if (hasReverseScheduledTasks) {
 				context.stateCount = getNextCalculationStateCount(); // backward pass treats next increment
@@ -254,6 +318,103 @@ public class CriticalPath implements SchedulingAlgorithm {
 		}
 		getFreshCalculationStateCount(); // For next time;
 	}
+
+	/**
+	 * C.2: Перед обратным проходом принудительно обновляет ранние даты финиш-сентинела,
+	 * чтобы secondBoundary = -finishSentinel.getEarlyFinish() гарантированно брался из текущего прогона.
+	 * Инвалидирует расписание, выставляет calculationStateCount, пересчитывает ранние даты.
+	 */
+	private void ensureFinishSentinelEarlyDatesBeforeBackwardPass(TaskSchedule.CalculationContext context) {
+		TaskSchedule earlySchedule = finishSentinel.getSchedule(TaskSchedule.EARLY);
+		earlySchedule.invalidate();
+		finishSentinel.setCalculationStateCount(context.stateCount);
+		earlySchedule.calcDates(context);
+	}
+	
+	/**
+	 * CPM-MS.2: Агрегирует даты для summary tasks после завершения forward/backward passes.
+	 * 
+	 * По стандарту MS Project summary tasks НЕ участвуют в CPM расчётах.
+	 * Их даты агрегируются от детей:
+	 * - earlyStart  = min(children.earlyStart)
+	 * - lateStart   = min(children.lateStart)
+	 * - earlyFinish = max(children.earlyFinish)
+	 * - lateFinish  = max(children.lateFinish)
+	 * 
+	 * Обход выполняется bottom-up: от самых глубоких summary к корневым,
+	 * чтобы вложенные summary уже имели корректные даты перед агрегацией родителями.
+	 */
+	private void aggregateSummaryTaskDates() {
+		List<NormalTask> summaries = collectSummaryTasks();
+		if (summaries.isEmpty()) {
+			return;
+		}
+		sortSummariesByDepthDescending(summaries);
+		aggregateDatesForSummaries(summaries);
+	}
+	
+	/**
+	 * Собирает все summary tasks (WBS parents) из проекта.
+	 */
+	private List<NormalTask> collectSummaryTasks() {
+		List<NormalTask> summaries = new ArrayList<>();
+		Iterator<Task> it = project.getTaskOutlineIterator();
+		while (it.hasNext()) {
+			Task task = it.next();
+			if (task instanceof NormalTask && task.isWbsParent()) {
+				summaries.add((NormalTask) task);
+			}
+		}
+		return summaries;
+	}
+	
+	/**
+	 * Сортирует summary tasks по глубине (outlineLevel) в порядке убывания.
+	 * Глубокие summary обрабатываются первыми (bottom-up).
+	 */
+	private void sortSummariesByDepthDescending(List<NormalTask> summaries) {
+		summaries.sort((a, b) -> Integer.compare(b.getOutlineLevel(), a.getOutlineLevel()));
+	}
+	
+	/**
+	 * Агрегирует даты для каждой summary task от её детей.
+	 * Обновляет early, late и current schedules.
+	 */
+	private void aggregateDatesForSummaries(List<NormalTask> summaries) {
+		for (NormalTask summary : summaries) {
+			summary.getEarlySchedule().assignDatesFromChildren(null);
+			summary.getLateSchedule().assignDatesFromChildren(null);
+			summary.getCurrentSchedule().assignDatesFromChildren(null);
+		}
+	}
+	
+	/**
+	 * ДИАГНОСТИКА БАГА: Логирует summary tasks после агрегации дат от детей.
+	 */
+	private void logSummaryTasksAfterAggregation() {
+		System.out.println("[BUG-DIAG] ===== SUMMARY TASKS AFTER AGGREGATION =====");
+		
+		Iterator<Task> it = project.getTaskOutlineIterator();
+		while (it.hasNext()) {
+			Task t = it.next();
+			if (t.isExternal() || !t.isWbsParent()) continue;
+			
+			if (t instanceof NormalTask) {
+				NormalTask nt = (NormalTask) t;
+				long earlyStart = nt.getEarlyStart();
+				long earlyFinish = nt.getEarlyFinish();
+				long lateStart = nt.getLateStart();
+				long lateFinish = nt.getLateFinish();
+				long currentStart = nt.getStart();
+				long currentEnd = nt.getEnd();
+				
+				System.out.println("[BUG-DIAG] SUMMARY '" + t.getName() + "' earlyStart=" + earlyStart + " earlyFinish=" + earlyFinish
+					+ " lateStart=" + lateStart + " lateFinish=" + lateFinish + " currentStart=" + currentStart + " currentEnd=" + currentEnd);
+			}
+		}
+		
+		System.out.println("[BUG-DIAG] ===== END SUMMARY TASKS AFTER AGGREGATION =====");
+	}
 	
 	private void doPass(Task startTask, TaskSchedule.CalculationContext context) {
 		if (startTask != null) {
@@ -267,34 +428,41 @@ public class CriticalPath implements SchedulingAlgorithm {
 		Task task;
 		TaskSchedule schedule;
 
-//		int count = 0;
-//		long z = System.currentTimeMillis();
 		boolean projectForward = project.isForward();
 		while (forward ? i.hasNext() : i.hasPrevious()) {
 			taskReference = (PredecessorTaskList.TaskReference)(forward ? i.next() : i.previous());
+			
+			// CPM-MS.1: Пропускаем summary tasks — по стандарту MS Project они не участвуют в CPM.
+			// Summary tasks (PARENT_BEGIN/PARENT_END) получают даты в отдельном aggregation pass.
+			int refType = taskReference.getType();
+			if (refType == PredecessorTaskList.TaskReference.PARENT_BEGIN ||
+				refType == PredecessorTaskList.TaskReference.PARENT_END) {
+				continue;
+			}
+			
 			traceTask = task = taskReference.getTask();
-			context.taskReferenceType = taskReference.getType();
+			context.taskReferenceType = refType;
 			schedule = task.getSchedule(context.scheduleType);
-			if (!forward)
-				context.taskReferenceType = -taskReference.getType();
+			if (!forward) {
+				context.taskReferenceType = -refType;
+			}
 				
-			if (task.isReverseScheduled()) {//  reverse scheduled must always be calculated
+			if (task.isReverseScheduled()) {
 				schedule.invalidate();
 				task.setCalculationStateCount(context.stateCount);
 			}
 			if (task.getCalculationStateCount() >= context.stateCount) {
 				schedule.calcDates(context);
-				if (context.assign && (projectForward || !task.isWbsParent())) { // in reverse scheduling, I see some parents have 0 or 1 as their dates. This is a workaround.
-					if (schedule.getBegin() != 0L && !isSentinel(task))
+				if (context.assign && (projectForward || !task.isWbsParent())) {
+					if (schedule.getBegin() != 0L && !isSentinel(task)) {
 						earliestStart = Math.min(earliestStart, schedule.getStart());
-					if (schedule.getEnd() != 0 && !isSentinel(task))
+					}
+					if (schedule.getEnd() != 0 && !isSentinel(task)) {
 						latestFinish = Math.max(latestFinish, schedule.getFinish());
+					}
 				}
-				
-//				schedule.dump();
 			}
 		}
-//		System.out.println("pass forward=" + forward + " tasks:" + count + " time " + (System.currentTimeMillis() -z) + " ms");
 	}
 
 	public void calculate(boolean update) {
@@ -391,8 +559,19 @@ public class CriticalPath implements SchedulingAlgorithm {
 		Task task = null;
 		if (changedObject instanceof Task) {
 			if (objectEvent.isCreate()) {
-				predecessorTaskList
-						.arrangeTask((Task) changedObject);
+				Task newTask = (Task) changedObject;
+				predecessorTaskList.arrangeTask(newTask);
+				// Подключить новую задачу к сентинелам (как в addObject), иначе конец проекта не пересчитается.
+				if (newTask.getSuccessorList().size() == 0) {
+					addEndSentinelDependency(newTask);
+				} else {
+					removeEndSentinelDependency(newTask);
+				}
+				if (newTask.getPredecessorList().size() == 0) {
+					addStartSentinelDependency(newTask);
+				} else {
+					removeStartSentinelDependency(newTask);
+				}
 				return; // let the hierarchy event that follow run the CP
 			} else if (objectEvent.isDelete()) {
 				Task removedTask = (Task) changedObject;
@@ -471,6 +650,47 @@ public class CriticalPath implements SchedulingAlgorithm {
 		needsReset = false;
 		initEarliestAndLatest();
 		predecessorTaskList.rearrangeAll();
+		// Обновить связи с сентинелами по текущему графу зависимостей (после sync/изменения связей).
+		refreshSentinelsFromTaskList();
+	}
+
+	/**
+	 * Пересобирает связи start/finish сентинелов с задачами по текущему списку предшественников.
+	 * Вызывается из reset() после rearrangeAll(), чтобы концевые/стартовые задачи всегда были
+	 * корректно подключены и расчёт критического пути давал верный Early Finish и обратный проход.
+	 */
+	private void refreshSentinelsFromTaskList() {
+		// Снять текущие связи с сентинелов (чтобы не дублировать и убрать устаревшие).
+		List<Task> endPreds = new ArrayList<>();
+		for (Iterator i = finishSentinel.getPredecessorList().iterator(); i.hasNext(); ) {
+			Dependency d = (Dependency) i.next();
+			endPreds.add((Task) d.getTask(true));
+		}
+		for (Task t : endPreds) {
+			removeEndSentinelDependency(t);
+		}
+		List<Task> startSuccs = new ArrayList<>();
+		for (Iterator i = startSentinel.getSuccessorList().iterator(); i.hasNext(); ) {
+			Dependency d = (Dependency) i.next();
+			startSuccs.add((Task) d.getTask(false));
+		}
+		for (Task t : startSuccs) {
+			removeStartSentinelDependency(t);
+		}
+		// Заново подключить задачи без предшественников/преемников к сентинелам.
+		Iterator it = predecessorTaskList.listIterator();
+		while (it.hasNext()) {
+			Task task = ((PredecessorTaskList.TaskReference) it.next()).getTask();
+			if (task == startSentinel || task == finishSentinel) {
+				continue;
+			}
+			if (task.getPredecessorList().size() == 0) {
+				addStartSentinelDependency(task);
+			}
+			if (task.getSuccessorList().size() == 0) {
+				addEndSentinelDependency(task);
+			}
+		}
 	}
 
 	public void addEndSentinelDependency(Task task) {
@@ -499,9 +719,12 @@ public class CriticalPath implements SchedulingAlgorithm {
 	 * @see com.projectlibre1.pm.criticalpath.HasSentinels#setStartConstraint(long)
 	 */
 	public void setStartConstraint(long date) {
-		startSentinel.setScheduleConstraint(ConstraintType.SNET, date);
+		// CORE-AUTH.1.1: Нормализовать до полуночи для консистентности CPM расчётов
+		long normalizedDate = normalizeToMidnight(date);
+		logSentinelNormalization(date, normalizedDate);
+		startSentinel.setScheduleConstraint(ConstraintType.SNET, normalizedDate);
 		markBoundsAsDirty();
-		}
+	}
 	/* (non-Javadoc)
 	 * @see com.projectlibre1.pm.criticalpath.HasSentinels#setEndConstraint(long)
 	 */
@@ -509,10 +732,31 @@ public class CriticalPath implements SchedulingAlgorithm {
 		finishSentinel.setScheduleConstraint(ConstraintType.FNLT, date);
 		markBoundsAsDirty();
 	}
-	public void markBoundsAsDirty() {
+	/**
+	 * Помечает только сентинелы (start/finish) как требующие пересчёта.
+	 * Вызывается после markAllTasksAsNeedingRecalculation, т.к. сентинелы не входят в список задач проекта.
+	 * Гарантирует обновление calculationStateCount у finishSentinel и корректный secondBoundary в обратном проходе.
+	 * 
+	 * КРИТИЧНО: Инвалидирует schedules sentinels, чтобы late dates пересчитывались с нуля.
+	 * Без этого late dates накапливаются от предыдущих расчётов и slack становится всё более отрицательным.
+	 */
+	public void markSentinelsForRecalculation() {
+		// ИСПРАВЛЕНИЕ: Инвалидировать schedules ПЕРЕД пометкой для пересчёта
+		// Это сбрасывает dependencyDate в NEEDS_CALCULATION, что заставляет
+		// backward pass пересчитать late dates с нуля вместо использования старых значений
+		startSentinel.invalidateSchedules();
+		finishSentinel.invalidateSchedules();
 		startSentinel.markTaskAsNeedingRecalculation();
 		finishSentinel.markTaskAsNeedingRecalculation();
-		
+	}
+
+	public void markBoundsAsDirty() {
+		// ИСПРАВЛЕНИЕ: Инвалидировать schedules sentinels для корректного пересчёта late dates
+		startSentinel.invalidateSchedules();
+		finishSentinel.invalidateSchedules();
+		startSentinel.markTaskAsNeedingRecalculation();
+		finishSentinel.markTaskAsNeedingRecalculation();
+
 		// mark all tasks without preds or without succs as dirty 
 		// the purpose of this is to handle cases where a task that determines the project bounds is deleted.
 		

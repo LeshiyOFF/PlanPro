@@ -7,7 +7,11 @@ import com.projectlibre1.pm.task.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Синхронизатор WBS иерархии (Parent/Child) из Frontend в Core Project.
@@ -20,13 +24,18 @@ import java.util.*;
  *   <li>Валидация (циклы, уровни)</li>
  *   <li>Сортировка по уровню (родители первые)</li>
  *   <li>Применение изменений через WbsHierarchyEngine</li>
+ *   <li><b>Перестройка wbsChildrenNodes кэша (WBS-CACHE)</b></li>
  *   <li>Финальная верификация</li>
  * </ol>
+ * 
+ * <p><b>ВАЖНО (WBS-CACHE):</b> После всех операций indent вызывается
+ * {@link WbsHierarchyEngine#rebuildWbsChildrenCache(Project)} для обновления
+ * wbsChildrenNodes, так как NodeModel.SILENT не триггерит события.</p>
  * 
  * <p>Принцип SRP: отвечает только за координацию синхронизации WBS иерархии.</p>
  * 
  * @author ProjectLibre Team
- * @version 2.0.0
+ * @version 3.0.0 (WBS-CACHE)
  */
 public class WbsHierarchySynchronizer {
     private static final Logger log = LoggerFactory.getLogger(WbsHierarchySynchronizer.class);
@@ -87,15 +96,25 @@ public class WbsHierarchySynchronizer {
         
         log.debug("Sorted {} entries by level", sortedEntries.size());
         
+        // WBS-CACHE: Диагностика состояния кэша ДО синхронизации
+        logWbsCacheState(taskMap, "BEFORE");
+        
         // Шаг 5: Применить изменения иерархии
         int successCount = applyHierarchyChanges(
             project, sortedEntries, taskMap, frontendTaskMap
         );
         
+        // Шаг 6 (WBS-CACHE): Перестроить кэш wbsChildrenNodes
+        // КРИТИЧНО: NodeModel.SILENT не обновляет кэш автоматически
+        engine.rebuildWbsChildrenCache(project);
+        
+        // WBS-CACHE: Диагностика состояния кэша ПОСЛЕ синхронизации
+        logWbsCacheState(taskMap, "AFTER");
+        
         log.info("=== WBS Hierarchy Synchronization Complete ===");
         log.info("Success: {}/{}", successCount, sortedEntries.size());
         
-        // Шаг 6: Финальная верификация
+        // Шаг 7: Финальная верификация
         verifyHierarchyIntegrity(taskMap);
     }
     
@@ -269,5 +288,58 @@ public class WbsHierarchySynchronizer {
         
         log.info("Verification complete: {} summary tasks found, {} mismatches",
             summaryTasksCount, mismatchCount);
+    }
+    
+    /**
+     * Диагностика состояния WBS кэша для отладки.
+     * Логирует информацию о каждой задаче: isWbsParent(), wbsChildrenNodes.size(), wbsParent.
+     * 
+     * <p>Используется для отслеживания:</p>
+     * <ul>
+     *   <li>Корректности кэша wbsChildrenNodes после синхронизации</li>
+     *   <li>Правильности работы isWbsParent() для Summary tasks</li>
+     *   <li>Проблем с isCritical() guard (CPM-MS.3)</li>
+     * </ul>
+     * 
+     * @param taskMap карта задач для диагностики
+     * @param phase фаза ("BEFORE" или "AFTER") для идентификации в логах
+     */
+    private void logWbsCacheState(Map<String, NormalTask> taskMap, String phase) {
+        if (!log.isDebugEnabled()) {
+            // В production режиме выводим только summary статистику
+            int summaryCount = 0;
+            int withChildrenCount = 0;
+            
+            for (Task task : taskMap.values()) {
+                if (task.isWbsParent()) {
+                    summaryCount++;
+                }
+                Collection<?> children = task.getWbsChildrenNodes();
+                if (children != null && !children.isEmpty()) {
+                    withChildrenCount++;
+                }
+            }
+            
+            log.info("[WBS-CACHE] {} sync: {} tasks total, {} isWbsParent()=true, {} have children",
+                phase, taskMap.size(), summaryCount, withChildrenCount);
+            return;
+        }
+        
+        // В DEBUG режиме — полная диагностика каждой задачи
+        log.debug("[WBS-CACHE] === Диагностика {} синхронизации ({} задач) ===",
+            phase, taskMap.size());
+        
+        for (Map.Entry<String, NormalTask> entry : taskMap.entrySet()) {
+            Task task = entry.getValue();
+            Collection<?> children = task.getWbsChildrenNodes();
+            Task parent = task.getWbsParentTask();
+            
+            log.debug("[WBS-CACHE] task='{}' id={} isWbsParent={} children={} parent='{}'",
+                task.getName(),
+                entry.getKey(),
+                task.isWbsParent(),
+                children != null ? children.size() : "null",
+                parent != null ? parent.getName() : "null");
+        }
     }
 }
