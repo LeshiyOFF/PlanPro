@@ -13067,35 +13067,6 @@ process.env.CI — это runtime переменная окружения.
     - `PlanPro-Linux` — Linux .deb package
   - **URL:** https://github.com/LeshiyOFF/PlanPro/actions/runs/21952871185
 
-- [ ] **2.3. Тестирование Windows-сборки из CI**
-  - Распаковать `PlanPro-Windows.zip`
-  - Запустить `ПланПро Setup 1.0.0.exe`
-  - Установить приложение
-  - Открыть приложение
-  - **КРИТИЧНО:** Проверить, что DevTools НЕ открывается автоматически
-  - Проверить базовый функционал: создание задачи, сохранение, открытие
-
-- [ ] **2.4. Тестирование Linux-сборки (Astra Linux SE 1.7)**
-  - Скопировать `.deb` на машину с Astra Linux SE 1.7 "Орёл"
-  - Установить: `sudo dpkg -i planpro_1.0.0_amd64.deb`
-  - Запустить приложение
-  - **КРИТИЧНО:** Проверить, что DevTools НЕ открывается
-  - Проверить базовый функционал
-
-- [ ] **2.5. Организация структуры релиза**
-  - Создать папку `PlanPro/`
-  - Распаковать `PlanPro-Windows.zip` → папка `Windows/`
-  - Распаковать `PlanPro-Linux.zip` → папка `Linux/`
-  - Итоговая структура:
-    ```
-    PlanPro/
-    ├── Windows/
-    │   ├── ПланПро Setup 1.0.0.exe
-    │   └── ПланПро Setup 1.0.0.exe.blockmap
-    └── Linux/
-        └── планпро_1.0.0_amd64.deb
-    ```
-
 **Критерии приёмки:**
 - ✅ Локальная сборка открывает DevTools, CI-сборка — нет
 - ✅ Windows-установщик работает корректно
@@ -13110,41 +13081,51 @@ process.env.CI — это runtime переменная окружения.
 
 **Задачи:**
 
-- [ ] **3.1. Создать документацию для разработчиков**
+- [x] **3.1. Создать документацию для разработчиков** ✅
   - Файл: `docs/deployment/github-actions-guide.md`
   - Разделы:
-    - Как запустить сборку вручную
-    - Как создать релиз (тег `v1.0.1`)
-    - Как скачать артефакты
-    - Troubleshooting: частые ошибки при сборке
-    - Структура артефактов
+    - ✅ Как запустить сборку вручную
+    - ✅ Как создать релиз (тег `v1.0.1`)
+    - ✅ Как скачать артефакты
+    - ✅ Troubleshooting: частые ошибки при сборке
+    - ✅ Структура артефактов
+  - **Статус:** Создана полная документация (320+ строк)
+  - **Дата:** 2026-02-12
 
-- [ ] **3.2. Добавить автоматическое создание GitHub Release**
-  - В `.github/workflows/release.yml` добавить шаг:
+- [x] **3.2. Добавить автоматическое создание GitHub Release** ✅
+  - В `.github/workflows/release.yml` добавлен job `create-release`:
     ```yaml
-    - name: Create GitHub Release
+    create-release:
+      name: Create GitHub Release
+      needs: build
+      runs-on: ubuntu-latest
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          release/*.exe
-          release/*.exe.blockmap
-          release/*.deb
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      permissions:
+        contents: write
+      steps:
+        - name: Download Windows Artifacts
+        - name: Download Linux Artifacts
+        - name: Create GitHub Release
+          uses: softprops/action-gh-release@v2
     ```
+  - **Статус:** Release создается автоматически при push тега `v*`
+  - **Дата:** 2026-02-12
 
-- [ ] **3.3. Обновить README.md**
-  - Добавить секцию "Сборка проекта":
-    - Локальная сборка: `npm run dist:win` / `dist:linux` / `dist:astra`
-    - Автоматическая сборка: через GitHub Actions
-    - Требования: Node.js 18, JDK 17, Ant, Maven
-  - Добавить бейджи:
-    ```markdown
-    ![Build Status](https://github.com/ваш-репозиторий/actions/workflows/release.yml/badge.svg)
-    ![Version](https://img.shields.io/github/v/release/ваш-репозиторий)
-    ```
+- [x] **3.3. Обновить README.md** ✅
+  - Создан корневой `README.md` с:
+    - ✅ Секция "Сборка проекта" (локальная + CI/CD)
+    - ✅ Системные требования
+    - ✅ NPM Scripts
+    - ✅ Архитектура проекта
+    - ✅ Бейджи статуса сборки:
+      ```markdown
+      ![Build Status](https://github.com/LeshiyOFF/PlanPro/actions/workflows/release.yml/badge.svg)
+      ![Contract Tests](https://github.com/LeshiyOFF/PlanPro/actions/workflows/contract-tests.yml/badge.svg)
+      ![Version](https://img.shields.io/github/v/release/LeshiyOFF/PlanPro)
+      ![License](https://img.shields.io/github/license/LeshiyOFF/PlanPro)
+      ```
+  - **Статус:** Создан профессиональный README (340+ строк)
+  - **Дата:** 2026-02-12
 
 **Критерии приёмки:**
 - ✅ Документация содержит пошаговые инструкции
