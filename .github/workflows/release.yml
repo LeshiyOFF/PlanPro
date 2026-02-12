@@ -37,7 +37,7 @@ jobs:
           sudo apt-get install -y ant maven fakeroot rpm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps --ignore-optional
+        run: npm install --legacy-peer-deps --force
 
       - name: Prepare JRE (Windows)
         if: matrix.os == 'windows-latest'
