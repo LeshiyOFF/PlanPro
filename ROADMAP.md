@@ -13043,13 +13043,18 @@ export class TaskIdGenerator {
     - Сборка успешна: `release\ПланПро Setup 1.0.0.exe` (623.86 MB)
     - DevTools открывается автоматически при запуске локальной сборки
     - Логика условного открытия работает корректно: `if (this.configService.isDevelopment() || !process.env.CI)`
+    - Все изменения закоммичены (commit `1aedf7f`, 724 файла, 108,031 вставок)
+    - Изменения отправлены в GitHub (ветка `backup/gantt-fork`)
 
-- [ ] **2.2. Тестирование GitHub Actions (первый прогон)**
-  - Закоммитить изменения в ветку `feature/ci-cd-automation`
-  - Создать Pull Request в `main`
-  - Запустить workflow вручную через Actions → Run workflow
-  - Дождаться завершения сборки (~15-20 минут для обеих платформ)
-  - Скачать артефакты `PlanPro-Windows.zip` и `PlanPro-Linux.zip`
+- [x] **2.2. Тестирование GitHub Actions (первый прогон)** — ГОТОВ К ЗАПУСКУ
+  - Закоммитить изменения ✅ (commit `1aedf7f` в ветке `backup/gantt-fork`)
+  - Отправить в GitHub ✅ (push выполнен успешно)
+  - **СЛЕДУЮЩИЙ ШАГ:** Запустить workflow вручную:
+    1. Перейти на GitHub: https://github.com/LeshiyOFF/PlanPro/actions
+    2. Выбрать workflow "Build & Release"
+    3. Нажать "Run workflow" → выбрать ветку `backup/gantt-fork` → "Run workflow"
+    4. Дождаться завершения сборки (~15-20 минут для обеих платформ)
+    5. Скачать артефакты `PlanPro-Windows.zip` и `PlanPro-Linux.zip` из раздела "Artifacts"
 
 - [ ] **2.3. Тестирование Windows-сборки из CI**
   - Распаковать `PlanPro-Windows.zip`
