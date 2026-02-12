@@ -33,6 +33,11 @@ extraResources:
     to: java/lib
     filter:
       - "**/*.jar"
+  # CI build marker - отключает DevTools в production (создаётся только в GitHub Actions)
+  - from: resources/.ci-build
+    to: .ci-build
+    filter:
+      - ".ci-build"
 extraMetadata:
   main: dist-app/electron/main.js
 nsis:

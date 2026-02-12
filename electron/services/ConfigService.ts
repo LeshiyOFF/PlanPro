@@ -49,10 +49,25 @@ export class ConfigService implements IConfigService {
 
   /**
    * Включить DevTools: локальная сборка (не CI).
-   * Не меняет логику Java: упакованное приложение всегда использует executable JAR.
+   * 
+   * Логика:
+   * - Локальная сборка (npm run dist:win): файла .ci-build НЕТ → DevTools ВКЛЮЧЕН
+   * - CI-сборка (GitHub Actions): файл .ci-build ЕСТЬ → DevTools ВЫКЛЮЧЕН
+   * 
+   * Файл .ci-build создаётся в release.yml перед electron-builder и
+   * включается в extraResources, поэтому он "запекается" в production сборку.
    */
   public isDevToolsEnabled(): boolean {
-    return process.env.CI !== 'true' && process.env.GITHUB_ACTIONS !== 'true';
+    const ciMarkerPath = join(this.resourcesPath, '.ci-build');
+    const isCiBuild = fs.existsSync(ciMarkerPath);
+    
+    if (isCiBuild) {
+      console.log('[ConfigService] CI build detected (.ci-build marker found) - DevTools DISABLED');
+    } else {
+      console.log('[ConfigService] Local build detected - DevTools ENABLED');
+    }
+    
+    return !isCiBuild;
   }
 
   public getJavaApiPort(): number {
