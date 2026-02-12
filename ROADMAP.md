@@ -13046,15 +13046,25 @@ export class TaskIdGenerator {
     - Все изменения закоммичены (commit `1aedf7f`, 724 файла, 108,031 вставок)
     - Изменения отправлены в GitHub (ветка `backup/gantt-fork`)
 
-- [x] **2.2. Тестирование GitHub Actions (первый прогон)** — ГОТОВ К ЗАПУСКУ
-  - Закоммитить изменения ✅ (commit `1aedf7f` в ветке `backup/gantt-fork`)
-  - Отправить в GitHub ✅ (push выполнен успешно)
-  - **СЛЕДУЮЩИЙ ШАГ:** Запустить workflow вручную:
-    1. Перейти на GitHub: https://github.com/LeshiyOFF/PlanPro/actions
-    2. Выбрать workflow "Build & Release"
-    3. Нажать "Run workflow" → выбрать ветку `backup/gantt-fork` → "Run workflow"
-    4. Дождаться завершения сборки (~15-20 минут для обеих платформ)
-    5. Скачать артефакты `PlanPro-Windows.zip` и `PlanPro-Linux.zip` из раздела "Artifacts"
+- [x] **2.2. Тестирование GitHub Actions (первый прогон)** — ✅ ЗАВЕРШЕНО (12.02.2026)
+  - **✅ УСПЕШНАЯ СБОРКА:** Run #14 — Windows и Linux успешно собраны!
+  - **Исправленные проблемы в процессе:**
+    1. **EBADPLATFORM** — `npm install --force` вместо `--ignore-optional`
+    2. **Case-sensitivity** — Переименование 5 UI файлов из PascalCase в lowercase:
+       - `Tooltip.tsx` → `tooltip.tsx`
+       - `Badge.tsx` → `badge.tsx`
+       - `Card.tsx` → `card.tsx`
+       - `Input.tsx` → `input.tsx`
+       - `Table.tsx` → `table.tsx`
+    3. **Missing CSS** — Добавлен `src/lib/gantt-task-react/dist/style.css`
+    4. **electron-builder config** — `depends` перемещён из `linux` в `deb`
+  - **Превентивные меры:**
+    - Добавлена проверка case-sensitivity в CI workflow
+    - Обновлён `.gitignore` для исключения `src/lib/gantt-task-react/dist/`
+  - **Артефакты:**
+    - `PlanPro-Windows` — Windows Setup .exe
+    - `PlanPro-Linux` — Linux .deb package
+  - **URL:** https://github.com/LeshiyOFF/PlanPro/actions/runs/21952871185
 
 - [ ] **2.3. Тестирование Windows-сборки из CI**
   - Распаковать `PlanPro-Windows.zip`
