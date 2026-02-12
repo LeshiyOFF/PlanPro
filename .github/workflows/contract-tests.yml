@@ -12,7 +12,9 @@ on:
 jobs:
   contract-tests:
     runs-on: windows-latest
-    
+    defaults:
+      run:
+        shell: cmd
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -200,9 +202,11 @@ jobs:
   # API Compatibility Check Job
   api-compatibility:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: cmd
     needs: contract-tests
     if: github.event_name == 'pull_request'
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
