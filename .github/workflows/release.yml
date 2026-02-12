@@ -6,6 +6,10 @@ on:
       - main
     tags:
       - 'v*'
+    paths-ignore:
+      - 'ROADMAP.md'
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 jobs:
