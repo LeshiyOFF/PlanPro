@@ -65,8 +65,8 @@ export class WindowManager implements IWindowManager {
       this.splashManager?.destroySplash()
       this.mainWindow?.show()
       
-      // DevTools: в разработке или при локальной сборке (не CI)
-      if (this.configService.isDevelopment() || !process.env.CI) {
+      // DevTools: только в режиме разработки (не упакованное приложение)
+      if (this.configService.isDevelopment()) {
         this.mainWindow?.webContents.openDevTools({ mode: 'detach' });
       }
     })
