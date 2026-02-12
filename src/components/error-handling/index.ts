@@ -4,4 +4,6 @@ export { NetworkErrorFallback } from './NetworkErrorFallback'
 export { GeneralErrorFallback } from './GeneralErrorFallback'
 export { RetryErrorBoundary } from './RetryErrorBoundary'
 export { SentryErrorBoundary } from './SentryErrorBoundary'
+export { ViewErrorBoundary } from './ViewErrorBoundary'
+export { withViewErrorBoundary } from './withViewErrorBoundary'
 

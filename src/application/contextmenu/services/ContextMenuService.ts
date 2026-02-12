@@ -8,6 +8,7 @@ import { ShowContextMenuUseCase } from '@/application/contextmenu/usecases/ShowC
 import { ExecuteMenuActionUseCase } from '@/application/contextmenu/usecases/ExecuteMenuActionUseCase'
 import { logger } from '@/utils/logger'
 import { getErrorMessage } from '@/utils/errorUtils'
+import { generateMenuId } from '@/utils/id-utils'
 
 /**
  * Сервис контекстных меню
@@ -16,7 +17,6 @@ import { getErrorMessage } from '@/utils/errorUtils'
 export class ContextMenuService implements IContextMenuService {
   private activeMenu: IContextMenu | null = null
   private factories: Map<ContextMenuType, IMenuFactory> = new Map()
-  private menuIdCounter = 0
 
   private readonly showMenuUseCase: ShowContextMenuUseCase
   private readonly executeActionUseCase: ExecuteMenuActionUseCase
@@ -120,7 +120,7 @@ export class ContextMenuService implements IContextMenuService {
    * Сгенерировать уникальный ID для меню
    */
   generateMenuId(): string {
-    return `context-menu-${++this.menuIdCounter}-${Date.now()}`
+    return generateMenuId()
   }
 }
 
