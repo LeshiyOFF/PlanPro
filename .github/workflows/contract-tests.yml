@@ -105,7 +105,12 @@ jobs:
     - name: Compile Provider Tests
       run: |
         cd projectlibre-api
-        javac -encoding UTF-8 -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\provider\*.java
+        REM Compile provider tests only if directory contains Java files
+        if exist src\test\java\com\projectlibre\api\provider\*.java (
+          javac -encoding UTF-8 -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\provider\*.java
+        ) else (
+          echo Provider tests directory is empty - skipping compilation
+        )
         
     - name: Run Contract Tests
       run: |
