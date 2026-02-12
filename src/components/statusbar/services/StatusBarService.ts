@@ -5,6 +5,7 @@ import {
   IStatusBarState,
   StatusBarMessageType,
 } from '../interfaces/StatusBarInterfaces'
+import { generateUniqueId } from '@/utils/id-utils'
 
 /**
  * Базовый сервис статусбара
@@ -203,7 +204,7 @@ export class StatusBarService implements IStatusBarService {
    * Сгенерировать уникальный ID
    */
   private generateId(): string {
-    return `status_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    return generateUniqueId('status')
   }
 
   /**

@@ -15,13 +15,14 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import '@/styles/reports.css'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * ReportsView - Система отчетов с полной локализацией
  * Использует TwoTierHeader + Dynamic Accent System.
- * @version 10.0 - Добавлена интернационализация и ручное назначение менеджера
+ * @version 10.1 - Добавлена интернационализация и ручное назначение менеджера
  */
-export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = () => {
+const ReportsViewInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = () => {
   const { t } = useTranslation()
   const { toast } = useToast()
   const helpContent = useHelpContent()
@@ -226,4 +227,13 @@ export const ReportsView: React.FC<{ viewType: ViewType; settings?: Partial<View
     </div>
   )
 }
+
+/**
+ * ReportsView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const ReportsView = withViewErrorBoundary(
+  ReportsViewInner,
+  'Отчёты'
+)
 

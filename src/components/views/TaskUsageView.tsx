@@ -18,12 +18,13 @@ import { getElectronAPI } from '@/utils/electronAPI'
 import { Plus, BarChart3, Download, Loader2 } from 'lucide-react'
 import type { CellValue } from '@/types/sheet/CellValueTypes'
 import type { JsonObject } from '@/types/json-types'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /** Допустимые значения полей при обновлении задачи из Task Usage таблицы */
 type TaskUsageFieldValue = string | number | Date | ResourceAssignment[];
 
-/** Task Usage View - Использование задач с статистикой, tooltips и экспортом @version 9.0 */
-export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+/** Task Usage View - Использование задач с статистикой, tooltips и экспортом @version 9.1 */
+const TaskUsageViewInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
   viewType: _viewType,
   settings: _settings,
 }) => {
@@ -206,3 +207,12 @@ export const TaskUsageView: React.FC<{ viewType: ViewType; settings?: Partial<Vi
     </div>
   )
 }
+
+/**
+ * TaskUsageView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const TaskUsageView = withViewErrorBoundary(
+  TaskUsageViewInner,
+  'Использование задач'
+)

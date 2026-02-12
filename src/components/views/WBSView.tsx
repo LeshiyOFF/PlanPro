@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { useToast } from '@/hooks/use-toast'
 import { getElectronAPI } from '@/utils/electronAPI'
 import type { JsonObject } from '@/types/json-types'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Work Breakdown Structure (WBS) View - СДР (Структура декомпозиции работ)
@@ -27,9 +28,9 @@ import type { JsonObject } from '@/types/json-types'
  * Визуализирует иерархическую структуру работ проекта в виде дерева.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.15
+ * @version 8.16
  */
-export const WBSView: React.FC = () => {
+const WBSViewInner: React.FC = () => {
   const { t } = useTranslation()
   const { tasks, addTask } = useProjectStore()
   const { toast } = useToast()
@@ -249,3 +250,12 @@ export const WBSView: React.FC = () => {
     </div>
   )
 }
+
+/**
+ * WBSView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const WBSView = withViewErrorBoundary(
+  WBSViewInner,
+  'Структура декомпозиции работ'
+)

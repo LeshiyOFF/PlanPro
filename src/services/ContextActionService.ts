@@ -1,6 +1,7 @@
 import { logger } from '@/utils/logger'
 import { useProjectStore } from '@/store/projectStore'
 import { selectionService } from './SelectionService'
+import { TaskIdGenerator } from '@/domain/tasks/services/TaskIdGenerator'
 
 /**
  * Тип контекстного действия
@@ -70,7 +71,8 @@ class ContextActionService {
         if (selection.ids.length > 0) {
           const task = store.tasks.find(t => t.id === selection.ids[0])
           if (task) {
-            store.addTask({ ...task, id: `${Date.now()}`, name: `${task.name} (копия)` })
+            const newId = TaskIdGenerator.generate(store.tasks)
+            store.addTask({ ...task, id: newId, name: `${task.name} (копия)` })
           }
         }
         break

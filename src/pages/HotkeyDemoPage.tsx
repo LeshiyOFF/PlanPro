@@ -36,11 +36,13 @@ const HotkeyDemoPage: React.FC = () => {
 
   // Динамическая загрузка моста
   useEffect(() => {
-    import('@/services/HotkeyStatusBarBridge').then(({ hotkeyStatusBarBridge: bridge }) => {
+    const loadBridge = async () => {
+      const { hotkeyStatusBarBridge: bridge } = await import('@/services/HotkeyStatusBarBridge')
       setHotkeyStatusBarBridge(bridge)
       bridge.addCustomHotkeyListener('DEMO_HELP', 'Демонстрация помощи', 'message')
       bridge.addCustomHotkeyListener('DEMO_COUNTER', 'Счетчик увеличен', 'success')
-    })
+    }
+    void loadBridge()
   }, [])
 
   // Пользовательские горячие клавиши с интеграцией статусбара

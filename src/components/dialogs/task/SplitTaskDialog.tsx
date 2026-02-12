@@ -9,6 +9,7 @@ import {
   IDialogActions,
   DialogResult,
 } from '@/types/dialog/DialogTypes'
+import { generateUniqueId } from '@/utils/id-utils'
 
 export interface SplitTaskDialogProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const SplitTaskDialog: React.FC<SplitTaskDialogProps> = ({
 }) => {
   const { t } = useTranslation()
   const [splitData, setSplitData] = useState<SplitTaskData>({
-    id: `split_${Date.now()}`,
+    id: generateUniqueId('split'),
     title: t('dialogs.split_task.title') || 'Прерывание задачи',
     taskId: data.taskId,
     taskName: data.taskName,

@@ -8,6 +8,7 @@ import {
   IDialogData,
 } from '@/types/dialog/DialogTypes'
 import { ResourceInformationData, ResourceAssignedTaskItem } from '@/types/calendar-types'
+import { generateUniqueId } from '@/utils/id-utils'
 
 /**
  * Интерфейс для ResourceInformationDialog компонента
@@ -30,7 +31,7 @@ export const ResourceInformationDialog: React.FC<ResourceInformationDialogProps>
 }) => {
   const [resourceData, setResourceData] = useState<ResourceInformationData>(() => {
     const initial: ResourceInformationData = {
-      id: `resource_${Date.now()}`,
+      id: generateUniqueId('resource'),
       title: 'Информация о ресурсе',
       description: 'Детальная информация',
       timestamp: new Date(),

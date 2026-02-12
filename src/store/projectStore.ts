@@ -204,10 +204,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   addCalendar: (calendar) => {
     set((s) => ({ calendars: [...s.calendars, calendar], isDirty: true }))
     const state = get()
-    syncWithJava(state.currentProjectId, state.tasks, state.resources, state.calendars, state.imposedFinishDate).catch((err: Error) => {
-      console.error('[addCalendar] Sync failed:', getErrorMessage(err))
-      toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err), variant: 'destructive' })
-    })
+    void (async () => {
+      try {
+        await syncWithJava(state.currentProjectId, state.tasks, state.resources, state.calendars, state.imposedFinishDate)
+      } catch (err) {
+        console.error('[addCalendar] Sync failed:', getErrorMessage(err as Error))
+        toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err as Error), variant: 'destructive' })
+      }
+    })()
   },
   updateCalendar: (id, updates) => set((s) => ({
     calendars: s.calendars.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c),
@@ -219,10 +223,14 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     if (calendar?.isBase) return
     const { newCalendars, newResources } = computeCalendarDeletionState(s.calendars, s.resources, id)
     set({ calendars: newCalendars, resources: newResources, isDirty: true })
-    syncWithJava(s.currentProjectId, s.tasks, newResources, newCalendars, s.imposedFinishDate).catch((err: Error) => {
-      console.error('[deleteCalendar] Sync failed:', getErrorMessage(err))
-      toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err), variant: 'destructive' })
-    })
+    void (async () => {
+      try {
+        await syncWithJava(s.currentProjectId, s.tasks, newResources, newCalendars, s.imposedFinishDate)
+      } catch (err) {
+        console.error('[deleteCalendar] Sync failed:', getErrorMessage(err as Error))
+        toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err as Error), variant: 'destructive' })
+      }
+    })()
   },
   getCalendar: (id) => get().calendars.find(c => c.id === id),
 

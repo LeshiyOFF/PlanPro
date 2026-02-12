@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast'
 import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { getElectronAPI } from '@/utils/electronAPI'
 import type { JsonObject } from '@/types/json-types'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Task Sheet компонент - Лист задач
@@ -29,9 +30,9 @@ import type { JsonObject } from '@/types/json-types'
  * Отображает все задачи проекта в табличном формате с возможностью редактирования.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.16
+ * @version 8.17
  */
-export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+const TaskSheetComponentInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
   viewType: _viewType,
   settings: _settings,
 }) => {
@@ -209,3 +210,12 @@ export const TaskSheetComponent: React.FC<{ viewType: ViewType; settings?: Parti
     </div>
   )
 }
+
+/**
+ * TaskSheetComponent обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const TaskSheetComponent = withViewErrorBoundary(
+  TaskSheetComponentInner,
+  'Лист задач'
+)

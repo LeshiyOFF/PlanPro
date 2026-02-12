@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { AssignmentIdGenerator } from '@/domain/assignment/services/AssignmentIdGenerator'
 
 export interface Resource {
   id: string;
@@ -101,7 +102,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
             const cost = work * (resource.rate || 0)
 
             newAssignments.push({
-              id: `${taskId}-${resourceId}-${Date.now()}`,
+              id: AssignmentIdGenerator.generate(taskId, resourceId),
               taskId,
               resourceId,
               units,

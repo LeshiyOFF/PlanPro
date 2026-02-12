@@ -14,6 +14,7 @@ import { mapDialogDataToProject } from './ProjectDialogMapper'
 import { projectDialogValidationRules } from './ProjectDialogValidation'
 import { ProjectDialogForm } from './ProjectDialogForm'
 import { getErrorMessage } from '@/utils/errorUtils'
+import { generateUniqueId } from '@/utils/id-utils'
 
 /**
  * Интерфейс для ProjectDialog компонента
@@ -36,7 +37,7 @@ export const ProjectDialog: React.FC<ProjectDialogProps> = ({
 }) => {
   const [projectData, setProjectData] = useState<ProjectDialogData>(() => {
     const initial: ProjectDialogData = {
-      id: `project_${Date.now()}`,
+      id: generateUniqueId('project'),
       title: 'Новый проект',
       description: 'Создание нового проекта',
       timestamp: new Date(),

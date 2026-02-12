@@ -17,6 +17,7 @@ import {
 import { DialogRenderFunction } from '@/components/dialogs/base/BaseDialog'
 import { Eye, EyeOff, Shield, User } from 'lucide-react'
 import { getErrorMessage } from '@/utils/errorUtils'
+import { generateUniqueId } from '@/utils/id-utils'
 
 /**
  * Интерфейс для LoginDialog компонента
@@ -39,7 +40,7 @@ export const LoginDialog: React.FC<LoginDialogProps> = ({
 }) => {
   const [loginData, setLoginData] = useState<LoginDialogData>(() => {
     const initial: LoginDialogData = {
-      id: `login_${Date.now()}`,
+      id: generateUniqueId('login'),
       title: 'Вход в систему',
       timestamp: new Date(),
       username: '',

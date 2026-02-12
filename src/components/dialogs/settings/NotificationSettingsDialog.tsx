@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDialogValidation } from '../hooks/useDialogValidation'
+import { generateRuleId } from '@/utils/id-utils'
 
 export interface NotificationRule {
   id: string;
@@ -218,7 +219,7 @@ export const NotificationSettingsDialog: React.FC<NotificationSettingsDialogProp
 
   const addNotificationRule = () => {
     const newRule: NotificationRule = {
-      id: `rule-${Date.now()}`,
+      id: generateRuleId(),
       name: `Rule ${settings.rules.length + 1}`,
       enabled: true,
       events: [],

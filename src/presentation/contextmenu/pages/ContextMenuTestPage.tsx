@@ -13,7 +13,7 @@ export const ContextMenuTestPage: React.FC = () => {
     setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`])
   }
 
-  const handleContextMenu = (
+  const handleContextMenu = async (
     event: React.MouseEvent,
     targetType: string,
     targetData: Record<string, string | number | undefined>,
@@ -29,9 +29,12 @@ export const ContextMenuTestPage: React.FC = () => {
 
     const menuType = targetType === 'task' ? ContextMenuType.TASK : ContextMenuType.RESOURCE
 
-    showMenu(menuType, context)
-      .then(() => addResult(`✅ Показано меню для ${targetType}`))
-      .catch(error => addResult(`❌ Ошибка меню: ${error.message}`))
+    try {
+      await showMenu(menuType, context)
+      addResult(`✅ Показано меню для ${targetType}`)
+    } catch (error) {
+      addResult(`❌ Ошибка меню: ${(error as Error).message}`)
+    }
   }
 
   const clearResults = () => {

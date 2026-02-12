@@ -1,4 +1,5 @@
 import { ContextMenuItem } from '@/providers/MenuProvider'
+import { generateElementId } from '@/utils/id-utils'
 
 /**
  * Фабрика контекстных меню - базовый класс
@@ -72,7 +73,7 @@ export abstract class BaseContextMenuFactory {
    */
   static createSeparator(): ContextMenuItem {
     return {
-      id: `separator-${Date.now()}`,
+      id: generateElementId('separator'),
       label: '',
       separator: true,
       handler: () => {},

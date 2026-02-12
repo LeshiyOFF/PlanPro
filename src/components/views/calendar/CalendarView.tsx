@@ -18,15 +18,16 @@ import { Button } from '@/components/ui/button'
 import { Task } from '@/store/project/interfaces'
 import { ITaskMenuTarget } from '@/types/contextmenu/IContextMenuTypes'
 import type { JsonObject } from '@/types/json-types'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * CalendarView - Календарное представление проекта
  *
  * Использует TwoTierHeader + Dynamic Accent System.
  *
- * @version 8.14
+ * @version 8.15
  */
-export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+const CalendarViewInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
   viewType: _viewType,
 }) => {
   const { t } = useTranslation()
@@ -169,3 +170,12 @@ export const CalendarView: React.FC<{ viewType: ViewType; settings?: Partial<Vie
     </div>
   )
 }
+
+/**
+ * CalendarView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const CalendarView = withViewErrorBoundary(
+  CalendarViewInner,
+  'Календарь проекта'
+)

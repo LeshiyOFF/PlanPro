@@ -9,6 +9,7 @@ import { TaskContextMenuFactory } from '@/infrastructure/contextmenu/factories/T
 import { logger } from '@/utils/logger'
 import type { Throwable } from '@/utils/errorUtils'
 import { toCaughtError, getCaughtErrorMessage } from '@/errors/CaughtError'
+import { generateMenuId } from '@/utils/id-utils'
 
 /**
  * Контекст для управления контекстными меню
@@ -91,7 +92,7 @@ export const ContextMenuProvider: React.FC<{ children: React.ReactNode }> = ({ c
         })
 
         menu = {
-          id: `menu-${Date.now()}`,
+          id: generateMenuId(),
           type,
           items,
           position: context.position,

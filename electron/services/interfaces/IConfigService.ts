@@ -6,6 +6,8 @@ export interface IConfigService {
   getJavaApiPort(): number;
   getJavaPort(): number;
   isDevelopment(): boolean;
+  /** Включить DevTools (локальная сборка без CI). Не влияет на выбор JAR/classpath. */
+  isDevToolsEnabled(): boolean;
   getResourcesPath(): string;
   getClasspath(): string;
   getMainClass(): string;

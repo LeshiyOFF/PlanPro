@@ -10,6 +10,7 @@ import {
   EventType,
   IEventDispatcher,
 } from '@/types/EventFlowTypes'
+import { generateSubscriptionId } from '@/utils/id-utils'
 
 /**
  * Синглтон диспетчер событий
@@ -67,7 +68,7 @@ export class EventDispatcher implements IEventDispatcher {
     handler: EventHandler,
     priority: number = 0,
   ): string {
-    const subscriptionId = this.generateId()
+    const subscriptionId = generateSubscriptionId()
 
     const subscription: EventSubscription = {
       id: subscriptionId,
@@ -94,7 +95,7 @@ export class EventDispatcher implements IEventDispatcher {
    * Подписка на одно выполнение события
    */
   public once(eventType: EventType, handler: EventHandler): string {
-    const subscriptionId = this.generateId()
+    const subscriptionId = generateSubscriptionId()
 
     const subscription: EventSubscription = {
       id: subscriptionId,
@@ -205,20 +206,13 @@ export class EventDispatcher implements IEventDispatcher {
   }
 
   /**
-   * Генерация уникального ID
-   */
-  private generateId(): string {
-    return `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-  }
-
-  /**
    * Настройка глобального обработчика ошибок
    */
   private setupGlobalErrorHandler(): void {
     if (typeof window !== 'undefined') {
       window.addEventListener('error', (event) => {
         this.dispatch({
-          id: this.generateId(),
+          id: generateSubscriptionId(),
           type: EventType.NOTIFICATION_ERROR,
           timestamp: new Date(),
           source: 'EventDispatcher',

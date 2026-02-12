@@ -6,6 +6,7 @@ import { useHelpContent } from '@/hooks/useHelpContent'
 import { GanttCanvasController } from '@/components/gantt'
 import { useProjectStore } from '@/store/projectStore'
 import { LineChart, RefreshCw } from 'lucide-react'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Tracking Gantt View - Гант отслеживания
@@ -13,9 +14,9 @@ import { LineChart, RefreshCw } from 'lucide-react'
  * Режим только для чтения: сравнение базового плана с текущим состоянием.
  * Редактирование задач заблокировано для предотвращения случайных изменений.
  *
- * @version 8.14 - TRACKING-READONLY
+ * @version 8.15 - TRACKING-READONLY
  */
-export const TrackingGanttView: React.FC = () => {
+const TrackingGanttViewInner: React.FC = () => {
   const { t, i18n } = useTranslation()
   const helpContent = useHelpContent()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -112,3 +113,12 @@ export const TrackingGanttView: React.FC = () => {
     </div>
   )
 }
+
+/**
+ * TrackingGanttView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const TrackingGanttView = withViewErrorBoundary(
+  TrackingGanttViewInner,
+  'Гант отслеживания'
+)

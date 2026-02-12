@@ -281,9 +281,13 @@ class HotkeyService {
 
       // Поддержка асинхронных действий
       if (result instanceof Promise) {
-        result.catch(error => {
-          logger.dialogError('Action execution failed', { actionId, error }, 'Hotkey')
-        })
+        void (async () => {
+          try {
+            await result
+          } catch (error) {
+            logger.dialogError('Action execution failed', { actionId, error }, 'Hotkey')
+          }
+        })()
       }
 
       // Предотвращение стандартного поведения

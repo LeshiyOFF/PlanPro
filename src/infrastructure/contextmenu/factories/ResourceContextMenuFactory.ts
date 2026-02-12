@@ -4,6 +4,7 @@ import { IMenuFactory } from '../../../domain/contextmenu/services/IContextMenuS
 import { DeleteAction } from '../../../domain/contextmenu/actions/DeleteAction'
 import { logger } from '@/utils/logger'
 import type { JsonObject } from '@/types/json-types'
+import { generateMenuId } from '@/utils/id-utils'
 
 /**
  * Фабрика контекстных меню для ресурсов.
@@ -24,7 +25,7 @@ export class ResourceContextMenuFactory implements IMenuFactory {
   async createMenu(context: IContextMenuContext): Promise<IContextMenu> {
     logger.info('[ResourceContextMenuFactory] Creating menu for:', context.target?.id)
 
-    const menuId = `resource-menu-${Date.now()}`
+    const menuId = generateMenuId()
     const { target } = context
 
     return {

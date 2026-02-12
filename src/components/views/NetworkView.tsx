@@ -12,6 +12,7 @@ import { TaskPropertiesDialog } from '@/components/dialogs/TaskPropertiesDialog'
 import { ConnectionBlockedDialog, ConnectionBlockReason } from '@/components/dialogs/network/ConnectionBlockedDialog'
 import { SafeTooltip } from '@/components/ui/tooltip'
 import { ITaskWithPosition } from '@/types/views/IViewTypes'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Вычисляет childIds для суммарных задач на основе level-based иерархии.
@@ -56,9 +57,9 @@ function buildHierarchyChildIds(tasks: Task[]): Map<string, string[]> {
  * Визуализирует зависимости между задачами в виде графа.
  * Использует TwoTierHeader + Dynamic Accent System.
  *
- * @version 8.14
+ * @version 8.15
  */
-export const NetworkView: React.FC = () => {
+const NetworkViewInner: React.FC = () => {
   const { t } = useTranslation()
   const helpContent = useHelpContent()
   const [zoom, setZoom] = useState(1)
@@ -360,4 +361,13 @@ export const NetworkView: React.FC = () => {
     </div>
   )
 }
+
+/**
+ * NetworkView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const NetworkView = withViewErrorBoundary(
+  NetworkViewInner,
+  'Сетевая диаграмма'
+)
 

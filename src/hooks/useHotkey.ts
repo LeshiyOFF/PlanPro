@@ -4,6 +4,7 @@ import { hotkeyService } from '@/services/HotkeyService'
 import { type Hotkey, type HotkeyAction, HotkeyCategory } from '@/types/HotkeyTypes'
 import { logger } from '@/utils/logger'
 import { getElectronAPI } from '@/utils/electronAPI'
+import { generateUniqueId } from '@/utils/id-utils'
 
 interface UseHotkeyOptions {
   enabled?: boolean;
@@ -34,7 +35,7 @@ export const useHotkey = (): UseHotkeyReturn => {
     const { enabled = true } = options
     if (!enabled) return
 
-    const actionId = `hotkey_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    const actionId = generateUniqueId('hotkey')
     actionIdRef.current = actionId
 
     const hotkeyAction: HotkeyAction = {

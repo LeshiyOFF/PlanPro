@@ -5,6 +5,7 @@ import { TwoTierHeader } from '@/components/layout/ViewHeader'
 import { ViewType } from '@/types/ViewTypes'
 import { Settings, Download, Upload } from 'lucide-react'
 import { settingsImportExportService } from '@/services/SettingsImportExportService'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * SettingsView - Настройки приложения
@@ -12,9 +13,9 @@ import { settingsImportExportService } from '@/services/SettingsImportExportServ
  * Полный интерфейс пользовательских настроек и предпочтений.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.14 - Убрана подсказка справки
+ * @version 8.15 - Убрана подсказка справки
  */
-export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({
+const SettingsViewComponentInner: React.FC<{ viewType?: ViewType }> = ({
   viewType: _viewType = ViewType.SETTINGS,
 }) => {
   const { t } = useTranslation()
@@ -78,4 +79,13 @@ export const SettingsViewComponent: React.FC<{ viewType?: ViewType }> = ({
     </div>
   )
 }
+
+/**
+ * SettingsViewComponent обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const SettingsViewComponent = withViewErrorBoundary(
+  SettingsViewComponentInner,
+  'Настройки'
+)
 

@@ -47,6 +47,14 @@ export class ConfigService implements IConfigService {
     return process.env.NODE_ENV === 'development' || !app.isPackaged;
   }
 
+  /**
+   * Включить DevTools: локальная сборка (не CI).
+   * Не меняет логику Java: упакованное приложение всегда использует executable JAR.
+   */
+  public isDevToolsEnabled(): boolean {
+    return process.env.CI !== 'true' && process.env.GITHUB_ACTIONS !== 'true';
+  }
+
   public getJavaApiPort(): number {
     return this.apiPort;
   }

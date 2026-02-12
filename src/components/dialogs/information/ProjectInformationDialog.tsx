@@ -8,6 +8,7 @@ import {
   DialogResult,
   IDialogData,
 } from '@/types/dialog/DialogTypes'
+import { generateUniqueId } from '@/utils/id-utils'
 
 /**
  * Интерфейс для данных проекта
@@ -56,7 +57,7 @@ export const ProjectInformationDialog: React.FC<ProjectInformationDialogProps> =
 }) => {
   const [projectData, setProjectData] = useState<ProjectInformationData>(() => {
     const initial: ProjectInformationData = {
-      id: `project_info_${Date.now()}`,
+      id: generateUniqueId('project_info'),
       title: 'Информация о проекте',
       description: 'Общая информация и статистика проекта',
       timestamp: new Date(),

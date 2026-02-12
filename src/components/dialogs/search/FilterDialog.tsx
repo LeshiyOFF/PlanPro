@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { generateUniqueId } from '@/utils/id-utils'
 
 export interface FilterField {
   id: string;
@@ -90,7 +91,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({
 
   const addFilter = () => {
     const newFilter: FilterCondition = {
-      id: `filter-${Date.now()}`,
+      id: generateUniqueId('filter'),
       field: availableFields[0]?.id || '',
       operator: 'equals',
       value: '',

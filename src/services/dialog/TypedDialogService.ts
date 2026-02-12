@@ -13,6 +13,7 @@ import {
 } from '../interfaces/IDialogService'
 import { DialogStateStorage, DialogRegistry, DialogConfigManager } from './DialogServiceCore'
 import { DialogPromiseManager } from './DialogPromiseManager'
+import { generateDialogId } from '@/utils/id-utils'
 
 /**
  * Типизированный сервис управления диалогами
@@ -77,7 +78,7 @@ export class TypedDialogService implements IDialogService {
     void this.configManager.mergeConfig(registration.config, config)
 
     const state: IDialogState<T> = {
-      id: this.generateId(),
+      id: generateDialogId(),
       type,
       isOpen: true,
       isSubmitting: false,
@@ -140,13 +141,6 @@ export class TypedDialogService implements IDialogService {
    */
   public subscribe(listener: () => void): () => void {
     return this.stateStorage.subscribe(listener)
-  }
-
-  /**
-   * Генерация уникального ID
-   */
-  private generateId(): string {
-    return `dialog-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 }
 

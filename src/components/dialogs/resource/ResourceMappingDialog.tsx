@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useDialogValidation } from '../hooks/useDialogValidation'
+import { generateMappingId } from '@/utils/id-utils'
 
 export interface ResourceMapping {
   id: string;
@@ -85,7 +86,7 @@ export const ResourceMappingDialog: React.FC<ResourceMappingDialogProps> = ({
   const handleAddMapping = () => {
     if (newMapping.sourceField && newMapping.targetField) {
       const mapping: ResourceMapping = {
-        id: `mapping-${Date.now()}`,
+        id: generateMappingId(),
         sourceField: newMapping.sourceField!,
         targetField: newMapping.targetField!,
         editorType: (newMapping.editorType ?? 'text') as ResourceMapping['editorType'],

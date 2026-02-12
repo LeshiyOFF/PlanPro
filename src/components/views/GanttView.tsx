@@ -20,6 +20,7 @@ import { useGanttContextMenu } from '@/hooks/task/useGanttContextMenu'
 import { useGanttScrollSync } from '@/hooks/gantt/useGanttScrollSync'
 import { Plus, BarChart, Link2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * GanttView - Диаграмма Ганта
@@ -27,9 +28,9 @@ import { Button } from '@/components/ui/button'
  * Профессиональное представление для планирования задач на временной шкале.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.13
+ * @version 8.14
  */
-export const GanttView: React.FC = () => {
+const GanttViewInner: React.FC = () => {
   const { t } = useTranslation()
   const helpContent = useHelpContent()
   const store = useProjectStore()
@@ -254,4 +255,13 @@ export const GanttView: React.FC = () => {
     </div>
   )
 }
+
+/**
+ * GanttView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const GanttView = withViewErrorBoundary(
+  GanttViewInner,
+  'Диаграмма Ганта'
+)
 

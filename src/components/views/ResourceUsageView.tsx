@@ -18,13 +18,14 @@ import { getElectronAPI } from '@/utils/electronAPI'
 import type { JsonObject } from '@/types/json-types'
 import type { CellValue } from '@/types/sheet/CellValueTypes'
 import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Resource Usage View компонент - Использование ресурсов
  * Отображает детальную загрузку ресурсов с гистограммой и статистикой.
- * @version 9.0
+ * @version 9.1
  */
-export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+const ResourceUsageViewInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
   viewType: _viewType,
   settings: _settings,
 }) => {
@@ -208,3 +209,12 @@ export const ResourceUsageView: React.FC<{ viewType: ViewType; settings?: Partia
     </div>
   )
 }
+
+/**
+ * ResourceUsageView обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const ResourceUsageView = withViewErrorBoundary(
+  ResourceUsageViewInner,
+  'Использование ресурсов'
+)

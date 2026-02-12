@@ -16,6 +16,7 @@ import { useCalendarValidation } from '@/hooks/useCalendarValidation'
 import { getElectronAPI } from '@/utils/electronAPI'
 import type { JsonObject } from '@/types/json-types'
 import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGenerator'
+import { withViewErrorBoundary } from '@/components/error-handling'
 
 /**
  * Resource Sheet компонент - Лист ресурсов
@@ -23,9 +24,9 @@ import { ResourceIdGenerator } from '@/domain/resources/services/ResourceIdGener
  * Отображает все ресурсы проекта (людей, оборудование, материалы) в табличном формате.
  * Использует TwoTierHeader для визуальной консистентности (Этап 7.23).
  *
- * @version 8.13
+ * @version 8.14
  */
-export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
+const ResourceSheetComponentInner: React.FC<{ viewType: ViewType; settings?: Partial<ViewSettings> }> = ({
   viewType: _viewType,
   settings: _settings,
 }) => {
@@ -210,3 +211,12 @@ export const ResourceSheetComponent: React.FC<{ viewType: ViewType; settings?: P
     </div>
   )
 }
+
+/**
+ * ResourceSheetComponent обёрнут в ViewErrorBoundary для изоляции ошибок.
+ * Падение этого View не ломает остальное приложение.
+ */
+export const ResourceSheetComponent = withViewErrorBoundary(
+  ResourceSheetComponentInner,
+  'Лист ресурсов'
+)
