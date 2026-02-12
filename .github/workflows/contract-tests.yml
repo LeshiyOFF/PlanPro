@@ -75,27 +75,22 @@ jobs:
           cd ..\..
         )
         
-    - name: Build Core with Ant
+    - name: Build ProjectLibre with Ant (full build including exchange)
       run: |
-        cd projectlibre_core
-        call ..\projectlibre_build\apache-ant-1.10.14\bin\ant clean dist
+        REM Full build from projectlibre_build includes core, exchange, reports - all modules
+        REM This is required because MSPDISerializer class is in projectlibre_exchange module
+        cd projectlibre_build
+        call apache-ant-1.10.14\bin\ant clean dist
         
-    - name: Copy Core artifacts for Maven dependencies
+    - name: Verify build artifacts
       run: |
-        if not exist projectlibre_build\dist mkdir projectlibre_build\dist
-        if not exist projectlibre_build\dist\lib mkdir projectlibre_build\dist\lib
+        echo Checking built artifacts...
+        dir projectlibre_build\dist\*.jar
+        dir projectlibre_build\dist\lib\*.jar 2>nul || echo No lib jars found
         
-        REM Copy Core jar
-        if exist projectlibre_core\dist\projectlibre.jar (
-          copy projectlibre_core\dist\projectlibre.jar projectlibre_build\dist\projectlibre.jar
-        ) else if exist projectlibre_core\dist\projectlibre-core.jar (
-          copy projectlibre_core\dist\projectlibre-core.jar projectlibre_build\dist\projectlibre.jar
-        )
-        
-        REM Copy contrib jars
-        if exist projectlibre_contrib\projectlibre-contrib.jar copy projectlibre_contrib\projectlibre-contrib.jar projectlibre_build\dist\lib\projectlibre-contrib.jar
-        if exist projectlibre_contrib\projectlibre-reports.jar copy projectlibre_contrib\projectlibre-reports.jar projectlibre_build\dist\lib\projectlibre-reports.jar
-        if exist projectlibre_contrib\projectlibre-script.jar copy projectlibre_contrib\projectlibre-script.jar projectlibre_build\dist\lib\projectlibre-script.jar
+        REM Verify MSPDISerializer class is in the built jar
+        cd projectlibre_build\dist
+        jar -tf projectlibre.jar | findstr /i "MSPDISerializer" && echo MSPDISerializer found in jar || echo WARNING: MSPDISerializer NOT found
         
     - name: Build API with Maven
       run: |
@@ -146,7 +141,7 @@ jobs:
       with:
         name: build-artifacts
         path: |
-          projectlibre_core/dist/projectlibre-core.jar
+          projectlibre_build/dist/projectlibre.jar
           projectlibre-api/target/projectlibre-api-1.0.0.jar
         retention-days: 30
         
@@ -236,6 +231,28 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
+        
+    - name: Download and setup build tools
+      run: |
+        if not exist projectlibre_build mkdir projectlibre_build
+        cd projectlibre_build
+        if not exist apache-ant-1.10.14 (
+          echo Downloading Apache Ant...
+          curl -L -o apache-ant-1.10.14.zip https://archive.apache.org/dist/ant/binaries/apache-ant-1.10.14-bin.zip
+          tar -xf apache-ant-1.10.14.zip
+          del apache-ant-1.10.14.zip
+        )
+        if not exist apache-maven-3.9.5 (
+          echo Downloading Apache Maven...
+          curl -L -o apache-maven-3.9.5.zip https://archive.apache.org/dist/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.zip
+          tar -xf apache-maven-3.9.5.zip
+          del apache-maven-3.9.5.zip
+        )
+        
+    - name: Build ProjectLibre with Ant (full build)
+      run: |
+        cd projectlibre_build
+        call apache-ant-1.10.14\bin\ant clean dist
         
     - name: Build API Server
       run: |
