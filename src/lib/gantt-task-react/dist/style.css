@@ -1,0 +1,563 @@
+._ganttTable_Header_7mmcq_1 {
+  display: table;
+  border-bottom: #e6e4e4 3px solid;
+  border-top: #e6e4e4 3px solid;
+  box-sizing: content-box;
+}
+
+._ganttTable_HeaderSeparator_7mmcq_8 {
+  border-right: 1px solid rgb(196, 196, 196);
+  opacity: 1;
+  margin-left: -2px;
+}
+
+
+._ganttTable_HeaderContent_7mmcq_15 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+._ganttTable_HeaderTitle_7mmcq_21 {
+
+}
+
+._ganttTable_HeaderItem_7mmcq_25 {
+  position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding-left: 5px;
+  padding-right: 5px;
+  display: table-cell;
+  vertical-align: -webkit-baseline-middle;
+  vertical-align: middle;
+}
+
+
+
+._resizer_7mmcq_38 {
+  position: absolute;
+  top: 0;
+  right: -5px;
+  height: 100%;
+  width: 10px;
+  cursor: ew-resize;
+  user-select: none;
+}
+._ganttTable_HeaderItem_7mmcq_25:last-child ._resizer_7mmcq_38 {
+  width: 5px;
+  right: 5px;
+}
+
+._resizer_7mmcq_38:hover {
+  background-color: grey;
+}
+
+._taskListHeaderAction_j1iwy_1 {
+
+}
+._taskListTableRow_w35p0_1 {
+  position: relative;
+  display: table-row;
+  text-overflow: ellipsis;
+  cursor:grab
+}
+._taskListTableRowGrabbing_w35p0_7 {
+  cursor:grabbing
+}
+
+._cut_w35p0_11 {
+  opacity: 0.3;
+}
+
+._taskListCell_w35p0_15 {
+  box-sizing: border-box;
+  display: table-cell;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 5px;
+}
+._taskListCellInner_w35p0_24 {
+  display: flex;
+  align-items: center;
+}
+
+._dropAfter_w35p0_29 {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  bottom: 0px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  color: transparent;
+}
+
+._dropAfterLighten_w35p0_41 {
+  border-radius: 6px;
+}
+
+._dropAfter_w35p0_29::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: currentColor;
+}
+
+._dropBefore_w35p0_53 {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  top:0px;
+  width: 100%;
+  height: 8px;
+  color: transparent;
+}
+
+._dropBeforeLighten_w35p0_64 {
+  border-radius: 6px;
+}
+
+._dropBefore_w35p0_53::before {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+  background-color: currentColor;
+}
+._taskListWrapper_yx1w7_1 {
+  display: table;
+}
+._tooltipDefaultContainer_juje4_1 {
+  background: #fff;
+  padding: 12px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+._tooltipDefaultContainerParagraph_juje4_7 {
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #666;
+}
+
+._tooltipDetailsContainer_juje4_13 {
+  position: absolute;
+  display: flex;
+  flex-shrink: 0;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+._tooltipDetailsContainerHidden_juje4_25 {
+  visibility: hidden;
+  position: absolute;
+  display: flex;
+  pointer-events: none;
+}
+._ganttTableRoot_v4xjz_1 {
+  display:flex;
+  position: relative;
+  border-left: #e6e4e4 1px solid;
+  overflow: hidden;
+}
+
+._ganttTableWrapper_v4xjz_8 {
+  display: grid;
+  overflow: hidden;
+  grid-template-rows: min-content;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+._ganttTableWrapper_v4xjz_8::-webkit-scrollbar {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+._ganttTableWrapper_v4xjz_8::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+._ganttTableWrapper_v4xjz_8::-webkit-scrollbar-thumb {
+  border: 6px solid transparent;
+  background: rgba(0, 0, 0, 0.2);
+  background: var(--palette-black-alpha-20, rgba(0, 0, 0, 0.2));
+  border-radius: 10px;
+  background-clip: padding-box;
+}
+
+._ganttTableWrapper_v4xjz_8::-webkit-scrollbar-thumb:hover {
+  border: 4px solid transparent;
+  background: rgba(0, 0, 0, 0.3);
+  background: var(--palette-black-alpha-30, rgba(0, 0, 0, 0.3));
+  background-clip: padding-box;
+}
+
+._taskListResizer_v4xjz_40 {
+  position: absolute;
+  top: 0;
+  right: -5px;
+  height: 100%;
+  width: 10px;
+  cursor: ew-resize;
+  user-select: none;
+}
+
+._taskListResizer_v4xjz_40:hover {
+  background-color: grey;
+}
+
+._taskListResizer_v4xjz_40::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 4px;
+  height: 100%;
+  width: 2px;
+  background-color: #e5e5e5;
+}
+
+._taskListContent_v4xjz_64 {
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  /* scrollbar-width: thin; */
+}
+._taskListContent_v4xjz_64::-webkit-scrollbar {
+  display: none;
+}
+
+._hidden_v4xjz_74 {
+  display: none;
+}
+._button_ts3e8_1 {
+  margin: 0;
+  padding: 5px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+}
+._taskListNameWrapper_x4oe5_1 {
+  display: flex;
+  align-items: center;
+}
+
+._dragging_x4oe5_6 {
+  opacity: 0.5;
+}
+
+._taskListExpander_x4oe5_10 {
+  opacity: 0.9;
+  font-size: 18px;
+  user-select: none;
+  cursor: pointer;
+  display: flex;
+}
+
+._taskListEmptyExpander_x4oe5_18 {
+  user-select: none;
+  cursor: default;
+}
+
+._taskName_x4oe5_23 {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+._button_ts3e8_1 {
+  margin: 0;
+  padding: 5px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+}
+._button_5sg45_1 {
+  margin: 0;
+  padding: 5px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+}
+._calendarMain_14og3_1{    
+  border-top: #e6e4e4 3px solid;
+  border-bottom: #e6e4e4 3px solid;
+  box-sizing: content-box;
+}
+
+._calendarBottomText_14og3_7 {
+  text-anchor: middle;
+  fill: #333;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+._calendarTopTick_14og3_18 {
+  stroke: #e6e4e4;
+}
+
+._calendarTopText_14og3_22 {
+  text-anchor: middle;
+  fill: #555;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+._calendarHeader_14og3_33 {
+  fill: #ffffff;
+  stroke: #e0e0e0;
+  stroke-width: 1.4;
+}
+._hoverVisibleWrapper_19ebs_1:hover ._wrapper_19ebs_1 {
+  display: initial;
+}
+
+._wrapper_19ebs_1 {
+  cursor: pointer;
+}
+
+._wrapper_19ebs_1:hover ._mainPath_19ebs_9 {
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, .7));
+}
+
+._mainPath_19ebs_9 {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+._clickZone_19ebs_18 {
+  fill: transparent;
+  stroke: transparent;
+}
+._arrow_clickable_16evi_1 {
+  cursor: pointer;
+}
+
+._arrow_clickable_16evi_1:hover ._mainPath_16evi_5 {
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, .7));
+}
+
+._mainPath_16evi_5 {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+._clickZone_16evi_14 {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 8px;
+}
+._relationLine_1nqzz_1 {
+  stroke: grey;
+  stroke-width: 2;
+  stroke-dasharray: 4;
+}
+._barWrapper_hr87b_1 {
+  cursor: pointer;
+  outline: none;
+}
+
+._barWrapper_hr87b_1:hover ._barHandle_hr87b_6 {
+  visibility: visible;
+  opacity: 1;
+}
+
+._barHandle_hr87b_6 {
+  fill: #ddd;
+  cursor: ew-resize;
+  opacity: 0;
+  visibility: hidden;
+}
+
+._barHandle_hr87b_6:hover {
+  fill: #a2a2a2;
+}
+
+._barBackground_hr87b_22 {
+  user-select: none;
+  stroke-width: 0;
+}
+._barRelationHandleWrapper_tmzzo_1:hover ._barRelationHandle_tmzzo_1, ._barRelationHandle_tmzzo_1._barRelationHandle_drawMode_tmzzo_1 {
+  opacity: 1;
+}
+
+._barRelationHandle_tmzzo_1 {
+  fill: #ddd;
+  stroke: #333;
+  cursor: pointer;
+  opacity: 0;
+}
+
+._barRelationHandle_tmzzo_1:hover {
+  fill: #a2a2a2;
+}
+._projectWrapper_19i2s_1 {
+  cursor: pointer;
+  outline: none;
+}
+
+._projectBackground_19i2s_6 {
+  user-select: none;
+  opacity: 0.6;
+}
+
+._projectTop_19i2s_11 {
+  user-select: none;
+}
+._milestoneWrapper_xr9to_1 {
+  cursor: pointer;
+  outline: none;
+}
+
+._milestoneBackground_xr9to_6 {
+  user-select: none;
+}
+._barLabel_pu5db_1 {
+  text-anchor: middle;
+  font-weight: lighter;
+  dominant-baseline: central;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+._barLabelOutside_pu5db_13 {
+  text-anchor: start;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
+._hoverVisibleWrapper_19ebs_1:hover ._wrapper_19ebs_1 {
+  display: initial;
+}
+
+._wrapper_19ebs_1 {
+  cursor: pointer;
+}
+
+._wrapper_19ebs_1:hover ._mainPath_19ebs_9 {
+  filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, .7));
+}
+
+._mainPath_19ebs_9 {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+._clickZone_19ebs_18 {
+  fill: transparent;
+  stroke: transparent;
+}
+._ganttTaskRoot_1sr1d_1 {
+  display:flex;
+  flex-direction: column;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+}
+/* Only chrome otherwise the firefox scrollbar has no edge*/
+@media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
+  ._ganttTaskRoot_1sr1d_1 {
+    scrollbar-width: thin;
+  }
+}
+
+/* .ganttTaskRoot::-webkit-scrollbar {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.ganttTaskRoot::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.ganttTaskRoot::-webkit-scrollbar-thumb {
+  border: 6px solid transparent;
+  background: rgba(0, 0, 0, 0.2);
+  background: var(--palette-black-alpha-20, rgba(0, 0, 0, 0.2));
+  border-radius: 10px;
+  background-clip: padding-box;
+}
+
+.ganttTaskRoot::-webkit-scrollbar-thumb:hover {
+  border: 4px solid transparent;
+  background: rgba(0, 0, 0, 0.3);
+  background: var(--palette-black-alpha-30, rgba(0, 0, 0, 0.3));
+  background-clip: padding-box;
+} */
+
+._ganttTaskContent_1sr1d_41 {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+/* Only chrome otherwise the firefox scrollbar has no edges*/
+@media screen and (-webkit-min-device-pixel-ratio:0) and (min-resolution:.001dpcm) {
+  ._ganttTaskContent_1sr1d_41 {
+    scrollbar-width: thin;
+  }
+}
+
+._wrapper_1sr1d_54 {
+  display:grid;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  outline: none;
+  position: relative;
+}
+._menuOption_1uedq_1 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: #fff;
+  cursor: pointer;
+  padding: 5px;
+}
+
+._menuOption_1uedq_1:hover {
+  background-color: #eeeeee;
+}
+
+._icon_1uedq_14 {
+  width: 30px;
+}
+
+._label_1uedq_18 {
+  flex: 1;
+}

@@ -20,6 +20,7 @@ lerna-debug.log*
 
 # === Electron ===
 dist/
+!src/lib/gantt-task-react/dist/
 build/
 out/
 release/
