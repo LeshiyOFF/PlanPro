@@ -79,6 +79,23 @@ jobs:
         cd projectlibre_core
         call ..\projectlibre_build\apache-ant-1.10.14\bin\ant clean dist
         
+    - name: Copy Core artifacts for Maven dependencies
+      run: |
+        if not exist projectlibre_build\dist mkdir projectlibre_build\dist
+        if not exist projectlibre_build\dist\lib mkdir projectlibre_build\dist\lib
+        
+        REM Copy Core jar
+        if exist projectlibre_core\dist\projectlibre.jar (
+          copy projectlibre_core\dist\projectlibre.jar projectlibre_build\dist\projectlibre.jar
+        ) else if exist projectlibre_core\dist\projectlibre-core.jar (
+          copy projectlibre_core\dist\projectlibre-core.jar projectlibre_build\dist\projectlibre.jar
+        )
+        
+        REM Copy contrib jars
+        if exist projectlibre_contrib\projectlibre-contrib.jar copy projectlibre_contrib\projectlibre-contrib.jar projectlibre_build\dist\lib\projectlibre-contrib.jar
+        if exist projectlibre_contrib\projectlibre-reports.jar copy projectlibre_contrib\projectlibre-reports.jar projectlibre_build\dist\lib\projectlibre-reports.jar
+        if exist projectlibre_contrib\projectlibre-script.jar copy projectlibre_contrib\projectlibre-script.jar projectlibre_build\dist\lib\projectlibre-script.jar
+        
     - name: Build API with Maven
       run: |
         cd projectlibre-api
