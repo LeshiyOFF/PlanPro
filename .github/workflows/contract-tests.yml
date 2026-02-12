@@ -100,17 +100,17 @@ jobs:
     - name: Compile Contract Tests
       run: |
         cd projectlibre-api
-        javac -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\contract\*.java
+        javac -encoding UTF-8 -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\contract\*.java
         
     - name: Compile Provider Tests
       run: |
         cd projectlibre-api
-        javac -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\provider\*.java
+        javac -encoding UTF-8 -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes" -d target\test-classes src\test\java\com\projectlibre\api\provider\*.java
         
     - name: Run Contract Tests
       run: |
         cd projectlibre-api
-        javac -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes;target\test-classes" -d target\classes RunAllContractTests.java
+        javac -encoding UTF-8 -cp "lib\junit-jupiter-api-5.10.0.jar;target\classes;target\test-classes" -d target\classes RunAllContractTests.java
         java -cp "target\test-classes;target\classes;lib\junit-jupiter-api-5.10.0.jar" RunAllContractTests > contract-test-results.txt 2>&1
         
     - name: Validate Contract Coverage
