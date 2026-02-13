@@ -7,6 +7,7 @@ import com.projectlibre1.pm.assignment.Assignment;
 import com.projectlibre1.pm.resource.Resource;
 import com.projectlibre1.grouping.core.Node;
 import java.util.*;
+import java.util.HashMap;
 
 /**
  * Утилита для маппинга иерархии и связей задач.
@@ -62,6 +63,39 @@ public class TaskHierarchyMapper {
             }
         } catch (Exception e) {}
         return resourceIds;
+    }
+    
+    /**
+     * Возвращает полные данные о назначениях задачи, включая units.
+     * UNITS-FIX: Критично для корректной работы EffortDriven и гистограммы ресурсов.
+     * 
+     * @param task Задача
+     * @return Список Map с resourceId и units для каждого назначения
+     */
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> getResourceAssignments(Task task) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        if (!(task instanceof NormalTask)) return result;
+        try {
+            Collection<Assignment> assignments = ((NormalTask) task).getAssignments();
+            if (assignments != null) {
+                for (Assignment assignment : assignments) {
+                    Resource resource = assignment.getResource();
+                    // Пропускаем default/unassigned ресурсы
+                    if (resource != null && resource.getName() != null && !resource.getName().isEmpty()) {
+                        Map<String, Object> assignmentData = new HashMap<>();
+                        assignmentData.put("resourceId", String.valueOf(resource.getUniqueId()));
+                        // Получаем реальные units из assignment (не из resource!)
+                        double units = assignment.getUnits(); // 1.0 = 100%, 2.0 = 200%, etc.
+                        assignmentData.put("units", units);
+                        result.add(assignmentData);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[TaskHierarchyMapper] Error getting resource assignments: " + e.getMessage());
+        }
+        return result;
     }
     
     public Task findTaskById(Project project, String taskId, Map<Long, String> taskIdMap) {

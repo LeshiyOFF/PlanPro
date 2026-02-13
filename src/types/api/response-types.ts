@@ -352,6 +352,11 @@ export interface CoreTaskData {
   containsCriticalChildren?: boolean
   /** CPM-MS.8: Для summary — минимальный slack среди детей (информационная метрика). */
   minChildSlack?: number
+  /** 
+   * PERSISTENT-CONFLICT: Осознанные конфликты дат (сериализуется как JSON в XML/POD).
+   * Map: predecessorId → true. Защищает конфликтные даты от автокоррекции при CPM.
+   */
+  acknowledgedConflicts?: Record<string, boolean>
 }
 
 /**

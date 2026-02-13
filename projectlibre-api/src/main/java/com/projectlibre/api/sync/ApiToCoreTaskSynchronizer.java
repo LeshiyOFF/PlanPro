@@ -16,6 +16,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Синхронизатор задач из Frontend (Zustand) в Core Project.
  * Обеспечивает перенос свойств задач, WBS иерархии, зависимостей и назначений.
@@ -34,6 +37,9 @@ public class ApiToCoreTaskSynchronizer {
     private final DependencySynchronizer dependencySynchronizer;
     private final ResourceAssignmentSynchronizer resourceSynchronizer;
     private final DateTimeMapper dateMapper = new DateTimeMapper();
+    
+    /** PERSISTENT-CONFLICT: ObjectMapper для сериализации acknowledgedConflicts в JSON */
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     public ApiToCoreTaskSynchronizer() {
         this.wbsSynchronizer = new WbsHierarchySynchronizer();
@@ -199,6 +205,23 @@ public class ApiToCoreTaskSynchronizer {
         coreTask.setMarkTaskAsMilestone(frontendTask.isMilestone());
         if (frontendTask.getNotes() != null) {
             coreTask.setNotes(frontendTask.getNotes());
+        }
+        
+        // PERSISTENT-CONFLICT: Сохраняем acknowledgedConflicts в customText(1) как JSON
+        Map<String, Boolean> conflicts = frontendTask.getAcknowledgedConflicts();
+        if (conflicts != null && !conflicts.isEmpty()) {
+            try {
+                String conflictsJson = objectMapper.writeValueAsString(conflicts);
+                coreTask.setCustomText(1, conflictsJson);
+                log.info("[PERSISTENT-CONFLICT] Saved acknowledgedConflicts for task '{}': {}", 
+                    taskName, conflictsJson);
+            } catch (JsonProcessingException e) {
+                log.warn("[PERSISTENT-CONFLICT] Failed to serialize acknowledgedConflicts for task '{}': {}", 
+                    taskName, e.getMessage());
+            }
+        } else {
+            // Очищаем customText(1) если конфликтов нет
+            coreTask.setCustomText(1, null);
         }
         
         // ДИАГНОСТИКА: Логируем состояние Core ПОСЛЕ синхронизации

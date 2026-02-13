@@ -2,6 +2,7 @@ package com.projectlibre.api.dto;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * DTO для передачи полных данных проекта (tasks + resources + calendars) на frontend.
@@ -143,11 +144,26 @@ public class ProjectDataDto {
         private Boolean containsCriticalChildren;
         /** CPM-MS.7: Для summary — минимальный slack среди детей (информационная метрика). */
         private Double minChildSlack;
+        /**
+         * UNITS-FIX: Полная информация о назначениях ресурсов с units.
+         * Формат: [{"resourceId": "RES-1", "units": 2.0}, ...]
+         * units: 1.0 = 100%, 2.0 = 200%, etc.
+         */
+        private List<Map<String, Object>> resourceAssignments;
+        
+        /**
+         * PERSISTENT-CONFLICT: Осознанные конфликты дат.
+         * Map: predecessorId -> true (пользователь осознанно поставил конфликтную дату).
+         * Используется для предотвращения автокоррекции дат при CPM recalculation.
+         */
+        private Map<String, Boolean> acknowledgedConflicts;
         
         public TaskDataDto() {
             this.children = new ArrayList<>();
             this.predecessors = new ArrayList<>();
             this.resourceIds = new ArrayList<>();
+            this.resourceAssignments = new ArrayList<>();
+            this.acknowledgedConflicts = new java.util.HashMap<>();
             this.color = "#4A90D9";
             this.type = "TASK";
         }
@@ -213,6 +229,11 @@ public class ProjectDataDto {
         public List<String> getResourceIds() { return resourceIds; }
         public void setResourceIds(List<String> resourceIds) { this.resourceIds = resourceIds; }
         
+        /** UNITS-FIX: Получить полные данные о назначениях с units */
+        public List<Map<String, Object>> getResourceAssignments() { return resourceAssignments; }
+        /** UNITS-FIX: Установить полные данные о назначениях с units */
+        public void setResourceAssignments(List<Map<String, Object>> resourceAssignments) { this.resourceAssignments = resourceAssignments; }
+        
         public boolean isCritical() { return critical; }
         public void setCritical(boolean critical) { this.critical = critical; }
         
@@ -243,6 +264,22 @@ public class ProjectDataDto {
         // CPM-MS.7: minChildSlack — минимальный slack среди детей summary задачи
         public Double getMinChildSlack() { return minChildSlack; }
         public void setMinChildSlack(Double minChildSlack) { this.minChildSlack = minChildSlack; }
+        
+        /**
+         * PERSISTENT-CONFLICT: Получить карту осознанных конфликтов.
+         * @return Map<predecessorId, true> для конфликтов которые пользователь подтвердил
+         */
+        public Map<String, Boolean> getAcknowledgedConflicts() { 
+            return acknowledgedConflicts != null ? acknowledgedConflicts : new java.util.HashMap<>(); 
+        }
+        
+        /**
+         * PERSISTENT-CONFLICT: Установить карту осознанных конфликтов.
+         * @param acknowledgedConflicts Map<predecessorId, true>
+         */
+        public void setAcknowledgedConflicts(Map<String, Boolean> acknowledgedConflicts) { 
+            this.acknowledgedConflicts = acknowledgedConflicts; 
+        }
     }
     
     /**

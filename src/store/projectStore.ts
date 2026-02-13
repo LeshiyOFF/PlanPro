@@ -111,6 +111,34 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       }
     }
 
+    // PERSISTENT-CONFLICT: Очищаем флаги при удалении predecessors
+    if ('predecessors' in finalUpdates && finalUpdates.predecessors !== undefined) {
+      const oldPreds = task.predecessors || []
+      const newPreds = finalUpdates.predecessors || []
+      const removedPreds = oldPreds.filter(predId => !newPreds.includes(predId))
+      
+      if (removedPreds.length > 0 && task.acknowledgedConflicts) {
+        const newAcknowledged = { ...task.acknowledgedConflicts }
+        let hasChanges = false
+        
+        removedPreds.forEach(predId => {
+          if (newAcknowledged[predId]) {
+            delete newAcknowledged[predId]
+            hasChanges = true
+          }
+        })
+        
+        if (hasChanges) {
+          finalUpdates = { ...finalUpdates, acknowledgedConflicts: newAcknowledged }
+          console.log('[PERSISTENT-CONFLICT] Flags cleared for removed predecessors:', {
+            taskId,
+            removedPreds,
+            message: 'Dependencies removed - clearing acknowledged conflict flags',
+          })
+        }
+      }
+    }
+
     const updatedTasks = state.tasks.map(t => t.id === taskId ? { ...t, ...finalUpdates } : t)
     syncWithJava(state.currentProjectId, updatedTasks, state.resources, state.calendars, state.imposedFinishDate)
     scheduleCriticalPathRecalcIfPulseActive()
@@ -204,14 +232,10 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   addCalendar: (calendar) => {
     set((s) => ({ calendars: [...s.calendars, calendar], isDirty: true }))
     const state = get()
-    void (async () => {
-      try {
-        await syncWithJava(state.currentProjectId, state.tasks, state.resources, state.calendars, state.imposedFinishDate)
-      } catch (err) {
-        console.error('[addCalendar] Sync failed:', getErrorMessage(err as Error))
-        toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err as Error), variant: 'destructive' })
-      }
-    })()
+    syncWithJava(state.currentProjectId, state.tasks, state.resources, state.calendars, state.imposedFinishDate).catch((err: Error) => {
+      console.error('[addCalendar] Sync failed:', getErrorMessage(err))
+      toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err), variant: 'destructive' })
+    })
   },
   updateCalendar: (id, updates) => set((s) => ({
     calendars: s.calendars.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c),
@@ -223,14 +247,10 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     if (calendar?.isBase) return
     const { newCalendars, newResources } = computeCalendarDeletionState(s.calendars, s.resources, id)
     set({ calendars: newCalendars, resources: newResources, isDirty: true })
-    void (async () => {
-      try {
-        await syncWithJava(s.currentProjectId, s.tasks, newResources, newCalendars, s.imposedFinishDate)
-      } catch (err) {
-        console.error('[deleteCalendar] Sync failed:', getErrorMessage(err as Error))
-        toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err as Error), variant: 'destructive' })
-      }
-    })()
+    syncWithJava(s.currentProjectId, s.tasks, newResources, newCalendars, s.imposedFinishDate).catch((err: Error) => {
+      console.error('[deleteCalendar] Sync failed:', getErrorMessage(err))
+      toast({ title: 'Ошибка синхронизации', description: getErrorMessage(err), variant: 'destructive' })
+    })
   },
   getCalendar: (id) => get().calendars.find(c => c.id === id),
 
@@ -247,17 +267,31 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     return { tasks: recalculatedTasks, isDirty: true }
   }),
 
-  linkTasks: (src, tgt, options) => set((s) => {
-    if (src === tgt || !TaskLinkService.isValidPredecessor(s.tasks, src, tgt)) return s
+  // FS-LINK-DATE-FIX v3: linkTasks теперь async — синхронно ждёт CPM recalculate
+  // чтобы получить правильные даты от CPM сразу после создания связи
+  linkTasks: async (src, tgt, options) => {
+    const state = get()
+    if (src === tgt || !TaskLinkService.isValidPredecessor(state.tasks, src, tgt)) return
+    
+    // 1. Создаём связь (БЕЗ изменения дат — это делает CPM)
     const updatedTasks = TaskLinkService.link(
-      s.tasks, src, tgt,
+      state.tasks, src, tgt,
       UserPreferencesService.getInstance().getPreferences().calendar,
       options,
     )
-    syncWithJava(s.currentProjectId, updatedTasks, s.resources, s.calendars, s.imposedFinishDate)
-    scheduleCriticalPathRecalcIfPulseActive()
-    return { tasks: updatedTasks, isDirty: true }
-  }),
+    
+    // 2. Обновляем store с новой связью
+    set({ tasks: updatedTasks, isDirty: true })
+    
+    // 3. Sync с Java Core
+    await syncWithJava(state.currentProjectId, updatedTasks, state.resources, state.calendars, state.imposedFinishDate)
+    
+    // 4. CPM recalculate (синхронно!) — это обновит даты через applyCpmResults
+    // который теперь применяет CPM-авторитетные даты для задач с predecessors
+    await get().recalculateCriticalPath()
+    
+    console.log('[linkTasks] FS-LINK-DATE-FIX v3: Link created and CPM dates applied')
+  },
 
   unlinkTasks: (id) => set((s) => {
     const updatedTasks = s.tasks.map(t => t.id === id ? { ...t, predecessors: [] } : t)

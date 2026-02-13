@@ -75,7 +75,20 @@ public class ScheduleOption implements Serializable {
 		ScheduleOption.instance = instance;
 	}
 	
-	int schedulingRule = SchedulingType.FIXED_UNITS;
+	/**
+	 * FIXED_DURATION (v4.0): Длительность задачи НЕ меняется при назначении ресурсов.
+	 * 
+	 * Причина изменения с FIXED_UNITS:
+	 * - Проект использует 7-дневный календарь (все дни рабочие)
+	 * - Ресурсы могут иметь собственные календари (5-дневная неделя и т.д.)
+	 * - При назначении ресурса длительность задачи должна оставаться неизменной
+	 * - Конфликты календарей показываются как предупреждения, решение — на пользователе
+	 * 
+	 * С FIXED_DURATION:
+	 * - Duration = фиксирована (не меняется при назначении ресурсов)
+	 * - Work = пересчитывается автоматически (Duration × Units × рабочие дни ресурса)
+	 */
+	int schedulingRule = SchedulingType.FIXED_DURATION;
 	boolean effortDriven = true;
 	int durationEnteredIn = TimeUnit.DAYS;
 	int workUnit = TimeUnit.HOURS;

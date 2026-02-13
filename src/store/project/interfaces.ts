@@ -88,6 +88,28 @@ export interface Task extends Omit<CatalogTask, 'id' | 'parent' | 'children' | '
    */
   dependencyViolation?: boolean;
   
+  /**
+   * PERSISTENT-CONFLICT: Map осознанных конфликтов дат.
+   * 
+   * Key: predecessorId
+   * Value: true (пользователь осознанно принял конфликт через модальное окно)
+   * 
+   * Используется для предотвращения автокоррекции дат при CPM recalculation.
+   * Конфликтная дата (currentStart < earlyStart) НЕ будет исправлена автоматически,
+   * если есть флаг для соответствующего predecessor.
+   * 
+   * Пример: { "task1_id": true, "task5_id": true }
+   * Означает: пользователь осознанно поставил дату раньше допустимой
+   * для связей с task1_id и task5_id.
+   * 
+   * Флаг автоматически удаляется при:
+   * - Удалении связи с predecessor (unlinkTasks или updateTask с изменением predecessors)
+   * - Исправлении даты пользователем (currentStart >= earlyStart)
+   * 
+   * Сохраняется в файл проекта → персистентный между сессиями.
+   */
+  acknowledgedConflicts?: Record<string, boolean>;
+  
   /** Тип ограничения даты задачи (упрощённое поле для UI и логики). */
   constraint?: 
     | 'AsSoonAsPossible' 
@@ -185,7 +207,8 @@ export interface ProjectStore {
   // Задачи
   indentTask: (taskId: string) => void;
   outdentTask: (taskId: string) => void;
-  linkTasks: (sourceId: string, targetId: string, options?: LinkTasksOptions) => void;
+  // FS-LINK-DATE-FIX v3: linkTasks теперь async — ждёт CPM recalculate
+  linkTasks: (sourceId: string, targetId: string, options?: LinkTasksOptions) => Promise<void>;
   unlinkTasks: (taskId: string) => void;
   toggleMilestone: (taskId: string) => void;
   isValidPredecessor: (taskId: string, potentialPredId: string) => boolean;

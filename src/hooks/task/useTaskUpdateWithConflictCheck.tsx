@@ -7,48 +7,13 @@ import { ConfirmConflictDialog } from '@/components/dialogs/task/ConfirmConflict
 import type { ProjectStore } from '@/store/project/interfaces'
 import type { Task } from '@/store/project/interfaces'
 
-/** Хранилище принятых пользователем конфликтов по связям (predecessorId → successorId) в рамках проекта. */
-const ACKNOWLEDGED_CONFLICT_LINKS = new Set<string>()
-
-function buildAcknowledgedLinkKey(
-  projectId: number | undefined,
-  predecessorId: string,
-  successorId: string,
-): string {
-  return `${projectId ?? ''}-${predecessorId}-${successorId}`
-}
-
-function hasAcknowledgedLink(
-  projectId: number | undefined,
-  predecessorId: string,
-  successorId: string,
-): boolean {
-  return ACKNOWLEDGED_CONFLICT_LINKS.has(buildAcknowledgedLinkKey(projectId, predecessorId, successorId))
-}
-
-function addAcknowledgedLink(
-  projectId: number | undefined,
-  predecessorId: string,
-  successorId: string,
-): void {
-  ACKNOWLEDGED_CONFLICT_LINKS.add(buildAcknowledgedLinkKey(projectId, predecessorId, successorId))
-}
-
-function removeAcknowledgedLink(
-  projectId: number | undefined,
-  predecessorId: string,
-  successorId: string,
-): void {
-  ACKNOWLEDGED_CONFLICT_LINKS.delete(buildAcknowledgedLinkKey(projectId, predecessorId, successorId))
-}
-
-function clearAcknowledgedLinksForSuccessor(
-  projectId: number | undefined,
-  successorId: string,
-  predecessorIds: string[],
-): void {
-  predecessorIds.forEach((predId) => removeAcknowledgedLink(projectId, predId, successorId))
-}
+/**
+ * PERSISTENT-CONFLICT: Хук для проверки конфликта дат при изменении дат задачи.
+ * 
+ * v2.0: Убран in-memory Set ACKNOWLEDGED_CONFLICT_LINKS.
+ * Теперь флаги осознанных конфликтов сохраняются в Task.acknowledgedConflicts
+ * и персистятся между сессиями (Save/Load).
+ */
 
 export interface PendingUpdate {
   taskId: string;
@@ -91,18 +56,22 @@ export function useTaskUpdateWithConflictCheck({
     }
     const detected = TaskLinkService.detectConflictForMove(store.tasks, taskId, updates.startDate)
     if (detected) {
-      if (hasAcknowledgedLink(store.currentProjectId, detected.predecessorId, taskId)) {
-        const task = store.tasks.find((t) => t.id === taskId)
-        if (task) {
-          store.updateTask(taskId, {
-            ...updates,
-            startDate: updates.startDate,
-            endDate: updates.endDate ?? task.endDate,
-          })
-        }
+      // PERSISTENT-CONFLICT: Проверяем флаг в Task вместо in-memory Set
+      const task = store.tasks.find((t) => t.id === taskId)
+      if (task?.acknowledgedConflicts?.[detected.predecessorId]) {
+        // Осознанный конфликт уже принят — не показываем диалог
+        store.updateTask(taskId, {
+          ...updates,
+          startDate: updates.startDate,
+          endDate: updates.endDate ?? task.endDate,
+        })
+        console.log('[PERSISTENT-CONFLICT] Acknowledged conflict detected - dialog skipped:', {
+          taskId,
+          predecessorId: detected.predecessorId,
+        })
         return true
       }
-      const task = store.tasks.find((t) => t.id === taskId)
+      // Конфликт не принят — показываем диалог
       setPending({
         conflict: detected.conflict,
         taskId,
@@ -114,10 +83,8 @@ export function useTaskUpdateWithConflictCheck({
       })
       return false
     }
-    const task = store.tasks.find((t) => t.id === taskId)
-    if (task?.predecessors?.length) {
-      clearAcknowledgedLinksForSuccessor(store.currentProjectId, taskId, task.predecessors)
-    }
+    // Нет конфликта — применяем обновление
+    // PERSISTENT-CONFLICT: Очистка флагов происходит в applyCpmResults при исправлении дат
     store.updateTask(taskId, updates)
     return true
   }, [store])
@@ -158,8 +125,18 @@ export function useTaskUpdateWithConflictCheck({
       })
     } else if (action === 'remove_link' && task) {
       const newPreds = (task.predecessors ?? []).filter((id) => id !== predecessorId)
-      store.updateTask(taskId, { ...updates, predecessors: newPreds })
-      removeAcknowledgedLink(store.currentProjectId, predecessorId, taskId)
+      // PERSISTENT-CONFLICT: Очищаем флаг для удаляемого predecessor
+      const newAcknowledged = { ...(task.acknowledgedConflicts || {}) }
+      delete newAcknowledged[predecessorId]
+      store.updateTask(taskId, { 
+        ...updates, 
+        predecessors: newPreds,
+        acknowledgedConflicts: newAcknowledged,
+      })
+      console.log('[PERSISTENT-CONFLICT] Predecessor removed, flag cleared:', {
+        taskId,
+        predecessorId,
+      })
     } else if (action === 'confirm_without_fix') {
       setConfirmPending({
         taskId,
@@ -174,8 +151,25 @@ export function useTaskUpdateWithConflictCheck({
 
   const handleConfirmWithoutFix = useCallback(() => {
     if (!confirmPending) return
-    addAcknowledgedLink(store.currentProjectId, confirmPending.predecessorId, confirmPending.taskId)
-    store.updateTask(confirmPending.taskId, confirmPending.updates)
+    
+    // PERSISTENT-CONFLICT: Сохраняем флаг осознанного конфликта в Task
+    const task = store.tasks.find(t => t.id === confirmPending.taskId)
+    const currentAcknowledged = task?.acknowledgedConflicts || {}
+    
+    store.updateTask(confirmPending.taskId, {
+      ...confirmPending.updates,
+      acknowledgedConflicts: {
+        ...currentAcknowledged,
+        [confirmPending.predecessorId]: true,
+      },
+    })
+    
+    console.log('[PERSISTENT-CONFLICT] Conflict acknowledged and saved to Task:', {
+      taskId: confirmPending.taskId,
+      predecessorId: confirmPending.predecessorId,
+      message: 'User confirmed intentional conflict - flag persisted',
+    })
+    
     setConfirmPending(null)
   }, [confirmPending, store])
 

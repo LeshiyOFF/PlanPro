@@ -2006,7 +2006,13 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 				assignment.moveInterval(eventSource,start,end,oldInterval, true);
 			}
 		}
-		setRawDuration(getDurationMillis()); // this fixes all sorts of pbs
+		// DURATION-FLAGS-FIX: Явно применяем флаги ELAPSED/ESTIMATED при сохранении duration
+		// getDuration() не применяет elapsed для задач с assignments (hasLaborAssignment),
+		// поэтому нужно вручную восстановить флаги из полей elapsed/estimated.
+		long rawDur = getDurationMillis();
+		if (elapsed) rawDur = Duration.setAsElapsed(rawDur);
+		if (estimated) rawDur = Duration.setAsEstimated(rawDur, true);
+		setRawDuration(rawDur); // this fixes all sorts of pbs
 
 		recalculate(eventSource); // need to recalculate
 		assignParentActualDatesFromChildren();
@@ -2081,7 +2087,13 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 				assignment.setEnd(end);
 			}
 //			System.out.println("Old End"  + new Date(oldEnd) + " input end " + new Date(end )+ " resulting End " + new Date(getEnd()) + " duration " + DurationFormat.format(getDuration()));
-			setRawDuration(getDurationMillis());
+			// DURATION-FLAGS-FIX: Явно применяем флаги ELAPSED/ESTIMATED при сохранении duration
+			// getDuration() не применяет elapsed для задач с assignments (hasLaborAssignment),
+			// поэтому нужно вручную восстановить флаги из полей elapsed/estimated.
+			long rawDur = getDurationMillis();
+			if (elapsed) rawDur = Duration.setAsElapsed(rawDur);
+			if (estimated) rawDur = Duration.setAsEstimated(rawDur, true);
+			setRawDuration(rawDur);
 		}
 		assignParentActualDatesFromChildren();
 	}

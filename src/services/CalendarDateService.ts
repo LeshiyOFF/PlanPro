@@ -7,8 +7,10 @@
  */
 export class CalendarDateService {
   /**
-   * Возвращает дату, нормализованную к полуночи в ЛОКАЛЬНОМ часовом поясе.
+   * Возвращает дату НАЧАЛА, нормализованную к полуночи в ЛОКАЛЬНОМ часовом поясе.
    * Синхронизируется с внутренней логикой библиотеки gantt-task-react (startOfDate).
+   *
+   * ⚠️ ВАЖНО: Этот метод для startDate. Для endDate используйте toLocalMidnightEndOfDay().
    *
    * Пример для MSK (UTC+3):
    * - Вход: 24.01.2026 15:58 MSK
@@ -18,6 +20,55 @@ export class CalendarDateService {
   public static toLocalMidnight(date: Date | string | number): Date {
     const d = new Date(date)
     return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
+  }
+
+  /**
+   * Нормализует дату ОКОНЧАНИЯ к локальной полуночи ТОГО ЖЕ календарного дня.
+   * 
+   * MS PROJECT SEMANTIC FIX (v4.0):
+   * Java Core хранит endDate как 23:59:59.999 последнего дня задачи.
+   * Это означает "задача заканчивается В КОНЦЕ этого дня (включительно)".
+   * 
+   * ВАЖНО: 23:59:59.999 — это ВСЁ ЕЩЁ тот же календарный день!
+   * Нормализуем к полуночи ТОГО ЖЕ дня для корректного отображения в UI.
+   * 
+   * ИСПРАВЛЕН БАГ: Ранее округляли ВВЕРХ к следующему дню, что вызывало
+   * систематический сдвиг +1 день при каждом save/load цикле.
+   * 
+   * @param date - Дата окончания (может быть 23:59:59.999 из Java Core)
+   * @returns Нормализованная дата (полночь того же календарного дня)
+   * 
+   * @example
+   * // Java Core отдаёт endDate как конец последнего дня задачи
+   * toLocalMidnightEndOfDay(new Date('2026-04-05T23:59:59.999+03:00'))
+   * // => Date('2026-04-05T00:00:00.000') — тот же день, полночь
+   * 
+   * @example
+   * // Обычная дата (не конец дня) — работает так же
+   * toLocalMidnightEndOfDay(new Date('2026-04-05T14:30:00.000Z'))
+   * // => Date('2026-04-05T00:00:00.000') в локальном часовом поясе
+   */
+  public static toLocalMidnightEndOfDay(date: Date | string | number): Date {
+    const d = new Date(date)
+    
+    // MS PROJECT SEMANTIC: 23:59:59.999 — это ВСЁ ЕЩЁ тот же календарный день
+    // Java Core использует эту конвенцию для обозначения "конца дня"
+    // Но для UI нам нужна просто ДАТА без времени
+    
+    // Нормализуем к полуночи ТОГО ЖЕ дня (НЕ следующего!)
+    const normalized = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0)
+    
+    // Логирование для диагностики (только в dev)
+    if (import.meta.env.DEV) {
+      const isEndOfDay = d.getHours() === 23 && d.getMinutes() >= 59
+      if (isEndOfDay) {
+        console.debug(
+          `[CalendarDateService] END_OF_DAY same-day normalization: ${d.toISOString()} → ${normalized.toISOString()}`
+        )
+      }
+    }
+    
+    return normalized
   }
 
   /**

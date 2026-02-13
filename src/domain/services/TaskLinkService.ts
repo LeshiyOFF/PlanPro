@@ -1,8 +1,10 @@
 import { Task } from '@/store/project/interfaces'
 import { CalendarDateService } from '@/services/CalendarDateService'
-import { CalendarMathService } from './CalendarMathService'
-import { DurationSyncService } from './DurationSyncService'
 import { CalendarPreferences } from '@/types/Master_Functionality_Catalog'
+
+// 7-DAY-CALENDAR: Все дни рабочие (суббота, воскресенье, праздники).
+// Выходные назначаются на РЕСУРСЫ, не на проектный календарь.
+// Frontend и Java Core используют единую логику: +1 календарный день для FS-связей.
 
 /** Тип конфликта дат для UI: преемник раньше предшественника или во время/в момент окончания. */
 export type DependencyConflictKind = 'before_predecessor' | 'during_or_end'
@@ -36,18 +38,32 @@ export class TaskLinkService {
   private static isLoadingFromFile = false
 
   /**
-   * Минимальная дата начала преемника по связи FS: полночь следующего календарного дня
-   * после окончания предшественника. Согласовано с Гантом (toLocalMidnight).
+   * Минимальная дата начала преемника по связи FS.
+   * 
+   * 7-DAY-CALENDAR: Все дни рабочие (суббота, воскресенье, праздники включены).
+   * Выходные назначаются на РЕСУРСЫ, не на проектный календарь.
+   * 
+   * Для FS-связи: successor может начаться ТОЛЬКО на следующий день после predecessor.
+   * Если predecessor заканчивается 20-го, минимальная дата для successor — 21-е.
+   * 
+   * @returns predecessor.endDate + 1 календарный день (нормализованный к полуночи)
    */
   private static getMinSuccessorStartDate(predecessorEndDate: Date): Date {
-    const nextDay = new Date(predecessorEndDate)
-    nextDay.setDate(nextDay.getDate() + 1)
+    // 7-DAY-CALENDAR: Добавляем +1 календарный день.
+    // Все дни рабочие — выходные на уровне ресурсов, не проекта.
+    const nextDay = new Date(predecessorEndDate.getTime() + 24 * 60 * 60 * 1000)
     return CalendarDateService.toLocalMidnight(nextDay)
   }
 
   /**
-   * Проверяет, создаёт ли связь successor→predecessor конфликт дат
-   * (преемник начинается раньше окончания предшественника).
+   * Проверяет, создаёт ли связь successor→predecessor конфликт дат.
+   * 
+   * 7-DAY-CALENDAR: Конфликт = successor.startDate < (predecessor.endDate + 1 день).
+   * Это означает что successor начинается в тот же день или раньше окончания predecessor.
+   * 
+   * Пример: predecessor заканчивается 20-го
+   * - successor на 20-е → КОНФЛИКТ (тот же день)
+   * - successor на 21-е → OK (следующий день)
    */
   public static detectDateConflict(
     tasks: Task[],
@@ -58,10 +74,13 @@ export class TaskLinkService {
     const predecessor = tasks.find(t => t.id === predecessorId)
     const successorName = successor?.name ?? successorId
     const predecessorName = predecessor?.name ?? predecessorId
+    
+    // minStart = predecessor.endDate + 1 день (7-DAY-CALENDAR: все дни рабочие)
     const minStart = predecessor
       ? TaskLinkService.getMinSuccessorStartDate(predecessor.endDate)
       : new Date(0)
 
+    // Конфликт: successor начинается РАНЬШЕ минимальной допустимой даты
     const hasConflict =
       !!successor &&
       !!predecessor &&
@@ -73,6 +92,14 @@ export class TaskLinkService {
   /**
    * Проверяет, создаёт ли сдвиг задачи (новые даты) конфликт с предшественником.
    * Используется при перетаскивании на Ганте или в календаре.
+   * 
+   * 7-DAY-CALENDAR: Конфликт возникает если newStartDate < (predecessor.endDate + 1 день).
+   * 
+   * Примеры (predecessor заканчивается 20-го, minStartDate = 21-е):
+   * - newStartDate = 19-е → КОНФЛИКТ ('before_predecessor')
+   * - newStartDate = 20-е → КОНФЛИКТ ('during_or_end')
+   * - newStartDate = 21-е → OK
+   * - newStartDate = 22-е → OK
    */
   public static detectConflictForMove(
     tasks: Task[],
@@ -101,6 +128,7 @@ export class TaskLinkService {
       }
       
       const res = TaskLinkService.detectDateConflict(tasks, successorId, predId)
+      // 7-DAY-CALENDAR: newStartDate должен быть >= minStartDate (predecessor.endDate + 1 день)
       if (newStartDate < res.minStartDate) {
         const conflictKind: DependencyConflictKind = predecessor && newStartDate < predecessor.startDate
           ? 'before_predecessor'
@@ -128,19 +156,21 @@ export class TaskLinkService {
   }
 
   /**
-   * Создаёт связь Finish-to-Start между задачами с автокоррекцией дат.
+   * Создаёт связь Finish-to-Start между задачами.
    *
+   * АРХИТЕКТУРНОЕ РЕШЕНИЕ (FS-LINK-DATE-FIX v3):
+   * Frontend НЕ корректирует даты successor! Это делает CPM в Java Core.
+   * 
    * Алгоритм:
    * 1. Проверяет корректность связи (нет циклов)
-   * 2. Если successor начинается раньше окончания predecessor — корректирует даты
-   *    (ТОЛЬКО если НЕ загружается файл и НЕ skipDateCorrection)
-   * 3. Сохраняет длительность задачи при сдвиге
+   * 2. Добавляет predecessor в список
+   * 3. НЕ меняет даты — CPM рассчитает правильные даты после sync
    *
    * @param tasks Массив всех задач
    * @param sourceId ID задачи-преемника (successor)
    * @param targetId ID задачи-предшественника (predecessor)
-   * @param calendarPrefs Календарные настройки для расчёта дат
-   * @param options Опции (skipDateCorrection — не сдвигать даты при конфликте)
+   * @param calendarPrefs Календарные настройки (не используется для дат, только для duration)
+   * @param options Опции (skipDateCorrection — устаревший параметр, игнорируется)
    * @returns Обновлённый массив задач
    */
   public static link(
@@ -153,60 +183,26 @@ export class TaskLinkService {
     const targetTask = tasks.find(t => t.id === targetId)
     if (!targetTask) return tasks
 
-    const skipCorrection = options?.skipDateCorrection ?? false
-
     return tasks.map(task => {
       if (task.id === sourceId) {
         const preds = task.predecessors || []
         if (preds.includes(targetId)) return task
 
-        // Вычисляем минимально возможную дату начала: полночь следующего календарного дня
-        const minStartDate = TaskLinkService.getMinSuccessorStartDate(targetTask.endDate)
-
-        // Рассчитываем длительность successor (сохраняем при сдвиге)
-        const duration = CalendarMathService.calculateDuration(
-          task.startDate, task.endDate, 'hours', calendarPrefs,
+        // FS-LINK-DATE-FIX v3: НЕ корректируем даты!
+        // CPM (Dependency.java) рассчитает правильную дату с учётом рабочего календаря.
+        // Frontend только добавляет связь, даты обновятся после recalculateCriticalPath().
+        console.log(
+          `[TaskLinkService] Creating FS link: "${targetTask.name}" → "${task.name}". ` +
+          `Dates will be calculated by CPM after sync.`,
         )
-
-        // ✅ АВТОКОРРЕКЦИЯ: Если successor начинается раньше минимальной даты
-        // КРИТИЧНО: Пропускаем при загрузке файла или при явном skipDateCorrection!
-        let finalStartDate: Date
-        let finalEndDate: Date
-        const shouldAutoCorrect =
-          !TaskLinkService.isLoadingFromFile && !skipCorrection && task.startDate < minStartDate
-
-        if (shouldAutoCorrect) {
-          console.warn(
-            `[TaskLinkService] Date conflict detected: task "${task.name}" starts before predecessor "${targetTask.name}" ends. Auto-fixing...`,
-          )
-          console.log(`[TaskLinkService] Old dates: ${task.startDate.toISOString()} - ${task.endDate.toISOString()}`)
-
-          finalStartDate = minStartDate
-          finalEndDate = CalendarMathService.calculateFinishDate(
-            finalStartDate, duration, calendarPrefs,
-          )
-
-          console.log(`[TaskLinkService] New dates: ${finalStartDate.toISOString()} - ${finalEndDate.toISOString()}`)
-        } else {
-          if (task.startDate < minStartDate && (TaskLinkService.isLoadingFromFile || skipCorrection)) {
-            console.log(
-              `[TaskLinkService] ⏭️ Skipping autocorrection for "${task.name}" (loading/skip mode)`,
-            )
-          }
-          finalStartDate = task.startDate
-          finalEndDate = task.endDate
-        }
-
-        // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Сохраняем duration при создании связи
-        // Это обеспечивает корректную синхронизацию с Java Core для CPM расчётов
-        const finalDuration = DurationSyncService.calculateDurationInDays(finalStartDate, finalEndDate)
         
         return {
           ...task,
           predecessors: [...preds, targetId],
-          startDate: finalStartDate,
-          endDate: finalEndDate,
-          duration: finalDuration,
+          // Даты НЕ меняем — CPM рассчитает
+          startDate: task.startDate,
+          endDate: task.endDate,
+          duration: task.duration,
         }
       }
       return task

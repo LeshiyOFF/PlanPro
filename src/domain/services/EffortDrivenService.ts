@@ -39,6 +39,14 @@ export class EffortDrivenService {
       return task
     }
     
+    // UNITS-FIX: Если originalUnits = 0, это первое назначение на задачу.
+    // В этом случае НЕ изменяем duration - первый ресурс просто берёт на себя 
+    // всю работу по исходной длительности. Это стандартное поведение MS Project.
+    if (originalTotalUnits === 0) {
+      console.debug('[EffortDrivenService] First assignment - skipping duration recalculation')
+      return task
+    }
+    
     // Соотношение: если было 2 units, стало 1 → duration * 2
     const ratio = originalTotalUnits / newTotalUnits
     

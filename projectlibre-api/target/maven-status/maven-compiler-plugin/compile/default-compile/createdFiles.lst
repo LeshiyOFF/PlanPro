@@ -158,6 +158,7 @@ com\projectlibre\api\config\ValidationConfig.class
 com\projectlibre\api\dto\TaskCreateRequestDto.class
 com\projectlibre\api\dto\ProjectUpdateRequestDto.class
 com\projectlibre\api\validator\CalendarErrorMessageBuilder.class
+com\projectlibre\api\converter\CoreTaskConverter$1.class
 com\projectlibre\api\concurrent\CoreAccessGuard.class
 com\projectlibre\api\storage\PodBackupManager.class
 com\projectlibre\api\audit\CalendarAuditLog$ActionType.class

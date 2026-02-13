@@ -18,6 +18,33 @@ export const normalizeProgress = (progress: number, isMilestone: boolean): numbe
   return isMilestone ? (clamped >= 0.5 ? 1.0 : 0.0) : Math.round(clamped * 100) / 100
 }
 
+/**
+ * PERSISTENT-CONFLICT: Находит predecessor, который определил earlyStart для задачи.
+ * Для FS-связей: predecessor с самой поздней endDate (последний в цепочке).
+ * 
+ * @param task - задача с predecessors
+ * @param allTasks - все задачи проекта
+ * @returns predecessor, определивший earlyStart, или undefined
+ */
+function findPredecessorForEarlyStart(
+  task: Task,
+  allTasks: Task[]
+): Task | undefined {
+  if (!task.predecessors || task.predecessors.length === 0) return undefined
+  
+  const predecessors = task.predecessors
+    .map(predId => allTasks.find(t => t.id === predId))
+    .filter(Boolean) as Task[]
+  
+  if (predecessors.length === 0) return undefined
+  
+  // Для FS-связей: earlyStart определяется predecessor с максимальной endDate
+  // (последний в цепочке зависимостей)
+  return predecessors.reduce((latest, pred) => {
+    return !latest || pred.endDate > latest.endDate ? pred : latest
+  })
+}
+
 /** Семафор: только одна синхронизация с Java одновременно (устраняет гонку). */
 let syncMutex: Promise<void> = Promise.resolve()
 
@@ -89,13 +116,19 @@ export type StoreSnapshotForCriticalPath = {
 };
 
 /**
- * HYBRID-CPM: Применяет CPM-рассчитанные результаты из Core к задачам Frontend.
+ * Применяет CPM-рассчитанные результаты из Core к задачам Frontend.
  * 
- * Гибридный подход:
- * - CPM рассчитывает earlyStart/earlyFinish/lateStart/lateFinish (информационные)
- * - Текущие даты (startDate/endDate) НЕ перезаписываются — это выбор пользователя
- * - Если currentStart < earlyStart — устанавливается dependencyViolation = true
- * - Пользователь имеет полную свободу размещения задач, система информирует о нарушениях
+ * FS-LINK-DATE-FIX v3.1: Гибкие даты для связанных задач
+ * 
+ * Для задач С predecessors:
+ *   → earlyStart = минимально возможная дата (следующий рабочий день после predecessor.end)
+ *   → Пользователь НЕ может поставить дату РАНЬШЕ earlyStart — система исправит
+ *   → Пользователь МОЖЕТ поставить дату ПОЗЖЕ earlyStart — это сохраняется (зазор между задачами)
+ *   → Пример: predecessor 10-20.02, earlyStart=21.02. Пользователь может поставить 21, 22, 25.02 и т.д.
+ * 
+ * Для задач БЕЗ predecessors:
+ *   → HYBRID режим: startDate/endDate полностью пользовательские
+ *   → CPM предоставляет early/late даты только информационно
  * 
  * @param currentTasks - текущий массив задач из store
  * @param cpmResponse - задачи из ответа API с CPM-рассчитанными данными
@@ -123,52 +156,137 @@ export function applyCpmResults(currentTasks: Task[], cpmResponse: CoreTaskData[
     const cpmEnd = new Date(cpmEndIso)
     const cpmCritical = apiTask.critical ?? false
 
-    // HYBRID-CPM: Парсим early/late даты для информирования
+    // Парсим early/late даты
     const earlyStart = apiTask.earlyStart ? new Date(apiTask.earlyStart) : cpmStart
     const earlyFinish = apiTask.earlyFinish ? new Date(apiTask.earlyFinish) : cpmEnd
     const lateStart = apiTask.lateStart ? new Date(apiTask.lateStart) : cpmStart
     const lateFinish = apiTask.lateFinish ? new Date(apiTask.lateFinish) : cpmEnd
 
-    // HYBRID-CPM: Текущие даты пользователя (НЕ перезаписываем!)
+    // Текущие даты пользователя
     const currentStart = task.startDate
     const currentEnd = task.endDate
 
-    // HYBRID-CPM: Проверка нарушения зависимости
-    // Если текущее начало раньше раннего начала — задача не может начаться так рано
-    const startOfDayEarlyStart = new Date(earlyStart)
-    startOfDayEarlyStart.setHours(0, 0, 0, 0)
-    const startOfDayCurrentStart = new Date(currentStart)
-    startOfDayCurrentStart.setHours(0, 0, 0, 0)
+    // FS-LINK-DATE-FIX v3.1: Определяем режим на основе наличия predecessors
+    const hasPredecessors = task.predecessors && task.predecessors.length > 0
     
-    const dependencyViolation = startOfDayCurrentStart.getTime() < startOfDayEarlyStart.getTime()
+    // Вычисляем финальные даты
+    let finalStartDate: Date
+    let finalEndDate: Date
+    let wasViolationCorrected = false
 
-    // HYBRID-CPM.LOG: Логирование для диагностики
+    if (hasPredecessors) {
+      // Для задач с predecessors: не раньше earlyStart, но можно позже
+      // earlyStart = минимальная дата (следующий рабочий день после predecessor.end)
+      
+      // Сравниваем по началу дня (без учёта часов)
+      const startOfDayCurrentStart = new Date(currentStart)
+      startOfDayCurrentStart.setHours(0, 0, 0, 0)
+      const startOfDayEarlyStart = new Date(earlyStart)
+      startOfDayEarlyStart.setHours(0, 0, 0, 0)
+      
+      const isViolation = startOfDayCurrentStart.getTime() < startOfDayEarlyStart.getTime()
+      
+      if (isViolation) {
+        // PERSISTENT-CONFLICT: Проверяем — осознанный конфликт?
+        // Находим predecessor, который определил earlyStart
+        const determinedByPredecessor = findPredecessorForEarlyStart(task, currentTasks)
+        
+        const isAcknowledged = determinedByPredecessor && 
+          task.acknowledgedConflicts?.[determinedByPredecessor.id]
+        
+        if (isAcknowledged) {
+          // Пользователь осознанно поставил конфликтную дату — НЕ ИСПРАВЛЯЕМ!
+          finalStartDate = currentStart
+          finalEndDate = currentEnd
+          
+          console.log('[PERSISTENT-CONFLICT] Acknowledged conflict preserved:', {
+            taskId: task.id,
+            taskName: task.name,
+            predecessorId: determinedByPredecessor.id,
+            predecessorName: determinedByPredecessor.name,
+            userStart: currentStart.toISOString(),
+            earlyStart: earlyStart.toISOString(),
+            message: 'User intentionally set conflicting date - skipping auto-correction',
+          })
+        } else {
+          // Автокоррекция: пользователь поставил дату РАНЬШЕ допустимой — исправляем на earlyStart
+          finalStartDate = cpmStart
+          
+          // Сохраняем длительность задачи при коррекции
+          const durationMs = currentEnd.getTime() - currentStart.getTime()
+          finalEndDate = new Date(finalStartDate.getTime() + durationMs)
+          wasViolationCorrected = true
+          
+          console.log('[CPM-CORRECTION] Task date violation corrected:', {
+            taskId: task.id,
+            taskName: task.name,
+            userStart: currentStart.toISOString(),
+            earlyStart: earlyStart.toISOString(),
+            correctedStart: finalStartDate.toISOString(),
+          })
+        }
+      } else {
+        // Пользователь поставил дату >= earlyStart — это разрешено, сохраняем
+        // (позволяет делать зазор между задачами)
+        
+        // PERSISTENT-CONFLICT: Очищаем флаги конфликтов (пользователь исправил даты!)
+        if (task.acknowledgedConflicts && Object.keys(task.acknowledgedConflicts).length > 0) {
+          // Создаём новую задачу без конфликтов
+          task = { ...task, acknowledgedConflicts: {} }
+          console.log('[PERSISTENT-CONFLICT] Conflict flags cleared (date corrected):', {
+            taskId: task.id,
+            taskName: task.name,
+            currentStart: currentStart.toISOString(),
+            earlyStart: earlyStart.toISOString(),
+            message: 'User corrected date to valid range - clearing acknowledged conflicts',
+          })
+        }
+        
+        finalStartDate = currentStart
+        finalEndDate = currentEnd
+      }
+    } else {
+      // Без predecessors: HYBRID режим — полностью пользовательские даты
+      finalStartDate = currentStart
+      finalEndDate = currentEnd
+    }
+
+    // Проверка нарушения зависимости (для отображения в UI)
+    const startOfDayFinalStart = new Date(finalStartDate)
+    startOfDayFinalStart.setHours(0, 0, 0, 0)
+    const startOfDayEarlyStartCheck = new Date(earlyStart)
+    startOfDayEarlyStartCheck.setHours(0, 0, 0, 0)
+    
+    // dependencyViolation = true если финальная дата всё ещё раньше earlyStart
+    // (не должно происходить если мы исправили нарушение выше)
+    const dependencyViolation = startOfDayFinalStart.getTime() < startOfDayEarlyStartCheck.getTime()
+
+    // Логирование изменений
     const oldCritical = isTaskCritical(task)
     const hasCriticalChange = cpmCritical !== oldCritical
-    const hasViolation = dependencyViolation && !task.dependencyViolation
+    const hasDateChange = currentStart.getTime() !== finalStartDate.getTime() ||
+                          currentEnd.getTime() !== finalEndDate.getTime()
     
-    if (hasCriticalChange || hasViolation) {
-      console.log('[HYBRID-CPM] Task analysis:', {
+    if (hasCriticalChange || hasDateChange) {
+      console.log('[CPM-APPLY] Task update:', {
         taskId: task.id,
         taskName: task.name,
-        currentStart: currentStart.toISOString(),
+        mode: hasPredecessors ? (wasViolationCorrected ? 'CORRECTED' : 'USER-LATER') : 'HYBRID',
+        userStart: currentStart.toISOString(),
         earlyStart: earlyStart.toISOString(),
-        currentEnd: currentEnd.toISOString(),
-        earlyFinish: earlyFinish.toISOString(),
+        finalStart: finalStartDate.toISOString(),
         cpmCritical,
-        dependencyViolation,
         totalSlack: apiTask.totalSlack,
       })
     }
 
-    // HYBRID-CPM: Возвращаем новый объект с CPM-информацией, но БЕЗ перезаписи дат пользователя
     return {
       ...task,
-      // Текущие даты сохраняются (выбор пользователя)
-      startDate: currentStart,
-      endDate: currentEnd,
-      start: currentStart,
-      finish: currentEnd,
+      // FS-LINK-DATE-FIX v3.1: Даты — либо исправленные (если нарушение), либо пользовательские
+      startDate: finalStartDate,
+      endDate: finalEndDate,
+      start: finalStartDate,
+      finish: finalEndDate,
       // CPM-рассчитанные даты (информационные)
       earlyStart,
       earlyFinish,
@@ -181,7 +299,7 @@ export function applyCpmResults(currentTasks: Task[], cpmResponse: CoreTaskData[
       totalSlack: apiTask.totalSlack,
       containsCriticalChildren: apiTask.containsCriticalChildren,
       minChildSlack: apiTask.minChildSlack,
-      // HYBRID-CPM: Флаг нарушения зависимости
+      // Флаг нарушения зависимости (для UI)
       dependencyViolation,
     }
   })

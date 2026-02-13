@@ -376,7 +376,52 @@ public class Dependency implements Association, BelongsToDocument, DataObject {
 		boolean canStartAtDayEnd = !hasDuration; // to handle the milestone case
 		switch (dependencyType) {
 			case DependencyType.FS:
-				t = end;
+				// 7-DAY-CALENDAR: Все 7 дней недели — рабочие для Ганта.
+				// Суббота, воскресенье, праздники — считаются как обычные дни.
+				// Выходные назначаются на РЕСУРСЫ, не на проектный календарь.
+				// 
+				// Для FS-связи: successor.earlyStart = predecessor.earlyFinish + 1 КАЛЕНДАРНЫЙ день.
+				// Пример: predecessor заканчивается Пт 20-го → successor начинается Сб 21-го.
+				// 
+				// End Sentinel (маркер конца проекта) — особый случай:
+				// Не добавляем +1 день, чтобы корректно рассчитывать slack.
+				
+				String succName = successor instanceof Task ? ((Task)successor).getName() : "";
+				boolean isEndSentinel = "<End>".equals(succName);
+				
+				long fsOriginalEnd = end;
+				
+				if (isEndSentinel) {
+					// End Sentinel: маркер конца проекта, НЕ добавляем +1 день
+					// Это критично для корректного расчёта slack (Total Float)
+					t = end;
+					System.out.println("[CPM-FIX] Forward FS→EndSentinel: pred=" + ((Task)predecessor).getName() 
+						+ " predEnd=" + new java.util.Date(fsOriginalEnd) 
+						+ " -> endSentinel=" + new java.util.Date(t) + " (unchanged)");
+			} else {
+				// 7-DAY-CALENDAR: Все дни рабочие (включая субботу, воскресенье, праздники).
+				// Выходные назначаются на РЕСУРСЫ, не на проектный календарь.
+				// 
+				// Для FS-связи: successor.earlyStart = predecessor.earlyFinish + 1 КАЛЕНДАРНЫЙ день.
+				// НЕ используем adjustInsideCalendar — все дни равноправны.
+				
+				// 1. Добавляем 1 календарный день
+				long nextCalendarDay = end + WorkCalendar.MILLIS_IN_DAY;
+				
+				// 2. Нормализуем к полуночи (00:00) — ProjectLibre хранит даты как "начало дня"
+				java.util.Calendar cal = java.util.Calendar.getInstance();
+				cal.setTimeInMillis(nextCalendarDay);
+				cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+				cal.set(java.util.Calendar.MINUTE, 0);
+				cal.set(java.util.Calendar.SECOND, 0);
+				cal.set(java.util.Calendar.MILLISECOND, 0);
+				t = cal.getTimeInMillis();
+				
+				System.out.println("[CPM-7DAY] Forward FS: pred=" + ((Task)predecessor).getName() 
+					+ " succ=" + succName
+					+ " predEnd=" + new java.util.Date(fsOriginalEnd) 
+					+ " -> succStart=" + new java.util.Date(t) + " (+1 calendar day, all days working)");
+			}
 				break;
 			case DependencyType.SS:
 				t = begin;
@@ -416,7 +461,59 @@ public class Dependency implements Association, BelongsToDocument, DataObject {
 		boolean cannotFinishAtDayStart = !hasDuration; // to handle the milestone case
 		switch (getDependencyType()) {
 			case DependencyType.FS:
-				t = end;
+				// CPM-SLACK-FIX (Backward Pass): Корректный расчёт FS-link.
+				// 
+				// АРХИТЕКТУРА BACKWARD PASS:
+				// - Даты отрицательные по конвенции ProjectLibre
+				// - end = -successor.lateStart (точка от которой вычисляем)
+				// - Результат: predecessor.lateFinish (тоже отрицательное)
+				// 
+				// ПРОБЛЕМА #1: Start Sentinel получал -1 день, искажая расчёт.
+				// ПРОБЛЕМА #2: WorkCalendar с отрицательными датами работает непредсказуемо.
+				// 
+				// РЕШЕНИЕ:
+				// 1. Start Sentinel получает end БЕЗ изменений
+				// 2. Реальные задачи: работаем с абсолютными датами, затем возвращаем знак
+				
+				String predName = predecessor instanceof Task ? ((Task)predecessor).getName() : "";
+				boolean isStartSentinel = "<Start>".equals(predName);
+				
+				// end содержит отрицательное значение (-successor.lateStart)
+				long absSuccLateStart = Math.abs(end);
+				
+				if (isStartSentinel) {
+					// Start Sentinel: маркер начала проекта, НЕ вычитаем -1 день
+					t = end;
+					System.out.println("[CPM-FIX] Backward FS→StartSentinel: succ=" + ((Task)successor).getName() 
+						+ " succLateStart=" + new java.util.Date(absSuccLateStart) 
+						+ " -> startSentinel (unchanged)");
+			} else {
+				// 7-DAY-CALENDAR: Все дни рабочие (включая субботу, воскресенье, праздники).
+				// Выходные назначаются на РЕСУРСЫ, не на проектный календарь.
+				// 
+				// Для FS-связи (backward): predecessor.lateFinish = successor.lateStart - 1 КАЛЕНДАРНЫЙ день.
+				// НЕ используем adjustInsideCalendar — все дни равноправны.
+				
+				// 1. Вычитаем 1 календарный день
+				long prevCalendarDay = absSuccLateStart - WorkCalendar.MILLIS_IN_DAY;
+				
+				// 2. Нормализуем к полуночи (00:00)
+				java.util.Calendar cal = java.util.Calendar.getInstance();
+				cal.setTimeInMillis(prevCalendarDay);
+				cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+				cal.set(java.util.Calendar.MINUTE, 0);
+				cal.set(java.util.Calendar.SECOND, 0);
+				cal.set(java.util.Calendar.MILLISECOND, 0);
+				long absPredLateFinish = cal.getTimeInMillis();
+				
+				// Возвращаем отрицательный знак для backward pass convention
+				t = -absPredLateFinish;
+				
+				System.out.println("[CPM-7DAY] Backward FS: pred=" + predName 
+					+ " succ=" + ((Task)successor).getName()
+					+ " succLateStart=" + new java.util.Date(absSuccLateStart) 
+					+ " -> predLateFinish=" + new java.util.Date(absPredLateFinish) + " (-1 calendar day, all days working)");
+			}
 				break;
 			case DependencyType.SS:
 				t = ((ScheduleWindow)getPredecessor()).calcOffsetFrom(end,end,false,false, cannotFinishAtDayStart);

@@ -288,6 +288,8 @@ export interface FrontendTaskData {
   resourceAssignments: FrontendResourceAssignment[]
   notes: string
   color: string
+  /** PERSISTENT-CONFLICT: Осознанные конфликты дат для защиты от автокоррекции. */
+  acknowledgedConflicts?: Record<string, boolean>
   // critical исключен - вычисляется ядром CPM
 }
 

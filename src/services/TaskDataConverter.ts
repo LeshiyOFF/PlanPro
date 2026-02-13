@@ -56,8 +56,11 @@ export class TaskDataConverter {
   static coreToFrontendTask(coreTask: CoreTaskData): Task {
     const rawStart = new Date(coreTask.startDate)
     const rawEnd = new Date(coreTask.endDate)
+    
+    // Нормализация с учётом семантики start vs end
+    // EDGE-CASE-FIX: endDate может быть 23:59:59.999 из CPM -> нужно округлить к следующему дню
     const startDate = CalendarDateService.toLocalMidnight(rawStart)
-    const endDate = CalendarDateService.toLocalMidnight(rawEnd)
+    const endDate = CalendarDateService.toLocalMidnightEndOfDay(rawEnd)
 
     if (coreTask.critical === true) {
       logger.debug('[CriticalPathTrace] converter task marked critical', { taskId: coreTask.id, name: coreTask.name }, 'CriticalPathTrace')
@@ -99,6 +102,8 @@ export class TaskDataConverter {
       isMilestone: coreTask.milestone ?? false,
       notes: coreTask.notes || '',
       totalSlack: coreTask.totalSlack,
+      // PERSISTENT-CONFLICT: Загрузка флагов осознанных конфликтов из файла
+      acknowledgedConflicts: coreTask.acknowledgedConflicts || {},
     } as Task
   }
   
@@ -223,6 +228,8 @@ export class TaskDataConverter {
       resourceAssignments: task.resourceAssignments || [],
       notes: task.notes || '',
       color: (task as Task & { color?: string }).color ?? '#4A90D9',
+      // PERSISTENT-CONFLICT: Сохранение флагов осознанных конфликтов в файл
+      acknowledgedConflicts: task.acknowledgedConflicts || {},
       // critical НЕ отправляется - вычисляется ядром
     }
   }

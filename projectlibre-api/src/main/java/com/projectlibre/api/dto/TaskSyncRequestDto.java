@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * DTO для запроса синхронизации задач из Frontend в Core Project.
@@ -80,10 +82,19 @@ public class TaskSyncRequestDto {
          */
         private String constraintDate;
         
+        /**
+         * PERSISTENT-CONFLICT: Осознанные конфликты дат.
+         * Map: predecessorId -> true (пользователь осознанно поставил конфликтную дату).
+         * Используется для предотвращения автокоррекции дат при CPM recalculation.
+         * Сериализуется как JSON в customText(1) задачи Core.
+         */
+        private Map<String, Boolean> acknowledgedConflicts;
+        
         public FrontendTaskDto() {
             this.predecessors = new ArrayList<>();
             this.children = new ArrayList<>();
             this.resourceIds = new ArrayList<>();
+            this.acknowledgedConflicts = new HashMap<>();
         }
         
         // Getters and Setters
@@ -143,5 +154,21 @@ public class TaskSyncRequestDto {
         
         public String getConstraintDate() { return constraintDate; }
         public void setConstraintDate(String constraintDate) { this.constraintDate = constraintDate; }
+        
+        /**
+         * PERSISTENT-CONFLICT: Возвращает карту осознанных конфликтов.
+         * @return Map<predecessorId, true> для конфликтов которые пользователь подтвердил
+         */
+        public Map<String, Boolean> getAcknowledgedConflicts() { 
+            return acknowledgedConflicts != null ? acknowledgedConflicts : new HashMap<>(); 
+        }
+        
+        /**
+         * PERSISTENT-CONFLICT: Устанавливает карту осознанных конфликтов.
+         * @param acknowledgedConflicts Map<predecessorId, true>
+         */
+        public void setAcknowledgedConflicts(Map<String, Boolean> acknowledgedConflicts) { 
+            this.acknowledgedConflicts = acknowledgedConflicts != null ? acknowledgedConflicts : new HashMap<>(); 
+        }
     }
 }

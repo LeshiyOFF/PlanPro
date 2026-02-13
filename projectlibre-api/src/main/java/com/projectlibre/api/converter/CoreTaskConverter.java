@@ -5,6 +5,8 @@ import com.projectlibre.api.validator.MilestoneProgressValidator;
 import com.projectlibre1.pm.task.Project;
 import com.projectlibre1.pm.task.Task;
 import com.projectlibre1.pm.task.NormalTask;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
@@ -25,8 +27,12 @@ public class CoreTaskConverter {
     private static final Logger dateShiftLog = LoggerFactory.getLogger("DateShiftTrace");
     /** CORE-AUTH.2.4: Логер для трассировки CPM-авторитетных данных */
     private static final Logger coreAuthLog = LoggerFactory.getLogger("CoreAuthTrace");
+    /** PERSISTENT-CONFLICT: Логер для трассировки осознанных конфликтов */
+    private static final Logger conflictLog = LoggerFactory.getLogger("PersistentConflictTrace");
     private final TaskDateMapper dateMapper = new TaskDateMapper();
     private final TaskHierarchyMapper hierarchyMapper = new TaskHierarchyMapper();
+    /** PERSISTENT-CONFLICT: Jackson ObjectMapper для сериализации/десериализации */
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     private static final String[] LEVEL_COLORS = {
         "#4A90D9", "#50C878", "#FF6B6B", "#FFB347",
@@ -82,8 +88,42 @@ public class CoreTaskConverter {
         dto.setWbs(coreTask.getWbs() != null ? coreTask.getWbs() : taskId);
         dto.setNotes(coreTask.getNotes() != null ? coreTask.getNotes() : "");
         dto.setResourceIds(hierarchyMapper.getResourceIds(coreTask));
+        // UNITS-FIX: Передаём полные данные о назначениях включая units
+        dto.setResourceAssignments(hierarchyMapper.getResourceAssignments(coreTask));
+        
+        // PERSISTENT-CONFLICT: Загружаем acknowledgedConflicts из customText(1)
+        loadAcknowledgedConflicts(coreTask, dto);
+        
         logCoreAuthData(dto);
         return dto;
+    }
+    
+    /**
+     * PERSISTENT-CONFLICT: Загружает осознанные конфликты дат из customText(1).
+     * 
+     * @param coreTask задача из Core модели
+     * @param dto DTO для заполнения
+     */
+    private void loadAcknowledgedConflicts(Task coreTask, TaskDataDto dto) {
+        String conflictsJson = coreTask.getCustomText(1);
+        if (conflictsJson == null || conflictsJson.trim().isEmpty()) {
+            dto.setAcknowledgedConflicts(new HashMap<>());
+            return;
+        }
+        
+        try {
+            Map<String, Boolean> conflicts = objectMapper.readValue(
+                conflictsJson, 
+                new TypeReference<Map<String, Boolean>>() {}
+            );
+            dto.setAcknowledgedConflicts(conflicts);
+            conflictLog.info("[PERSISTENT-CONFLICT] Loaded acknowledgedConflicts for task '{}': {}", 
+                dto.getName(), conflictsJson);
+        } catch (Exception e) {
+            conflictLog.warn("[PERSISTENT-CONFLICT] Failed to deserialize acknowledgedConflicts for task '{}': {}", 
+                dto.getName(), e.getMessage());
+            dto.setAcknowledgedConflicts(new HashMap<>());
+        }
     }
     
     /**
