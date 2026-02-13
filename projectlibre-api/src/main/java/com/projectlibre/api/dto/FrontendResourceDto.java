@@ -19,6 +19,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FrontendResourceDto {
     
     private String id;
+    
+    /**
+     * Временный ID из Frontend (например "RES-001").
+     * Используется для маппинга при синхронизации с Java Core,
+     * который генерирует собственные numeric ID.
+     */
+    private String temporaryId;
+    
     private String name;
     private String type;
     private double maxUnits;
@@ -44,6 +52,9 @@ public class FrontendResourceDto {
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
+    
+    public String getTemporaryId() { return temporaryId; }
+    public void setTemporaryId(String temporaryId) { this.temporaryId = temporaryId; }
     
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

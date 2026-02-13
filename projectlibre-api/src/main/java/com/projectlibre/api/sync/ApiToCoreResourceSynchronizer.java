@@ -60,6 +60,12 @@ public class ApiToCoreResourceSynchronizer {
     private int skippedCount;
     private String lastCalendarError;
     private String lastCalendarErrorCode;
+    
+    /**
+     * Маппинг временных Frontend ID на постоянные Core ID.
+     * Заполняется при создании новых ресурсов.
+     */
+    private final Map<String, String> idMapping = new HashMap<>();
 
     public SyncResult synchronize(Project project, List<FrontendResourceDto> frontendResources) {
         if (project == null) return SyncResult.error("Project is null");
@@ -69,6 +75,7 @@ public class ApiToCoreResourceSynchronizer {
         skippedCount = 0;
         lastCalendarError = null;
         lastCalendarErrorCode = null;
+        idMapping.clear();
         
         try {
             System.out.println("[ResSync] 🧹 Pre-sync CalendarService cleanup...");
@@ -92,6 +99,14 @@ public class ApiToCoreResourceSynchronizer {
                     if (coreResource instanceof ResourceImpl) {
                         long uniqueId = System.currentTimeMillis() + syncedCount;
                         ((ResourceImpl) coreResource).getGlobalResource().setUniqueId(uniqueId);
+                        
+                        // Сохраняем маппинг Frontend ID → Core ID
+                        String frontendId = getFrontendId(frontendResource);
+                        if (frontendId != null && !frontendId.isEmpty()) {
+                            String coreId = String.valueOf(uniqueId);
+                            idMapping.put(frontendId, coreId);
+                            log.info("[ResSync] ID Mapping: {} -> {}", frontendId, coreId);
+                        }
                     }
                     log.debug("[ResSync] Created new resource for: {}", frontendResource.getName());
                 }
@@ -105,8 +120,9 @@ public class ApiToCoreResourceSynchronizer {
                 return SyncResult.error(lastCalendarError, lastCalendarErrorCode);
             }
             
-            log.info("[ResSync] ✅ Sync completed: synced={}", syncedCount);
-            return SyncResult.success(syncedCount, skippedCount);
+            log.info("[ResSync] ✅ Sync completed: synced={}, idMappings={}", 
+                syncedCount, idMapping.size());
+            return SyncResult.successWithIdMapping(syncedCount, skippedCount, idMapping);
             
         } catch (Exception e) {
             log.error("[ResSync] ❌ Sync failed", e);
@@ -287,6 +303,34 @@ public class ApiToCoreResourceSynchronizer {
             return false;
         } catch (Throwable t) {
             log.error("[ResSync] ❌ Failed set calendar '{}': {}", calendarId, t.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Получает Frontend ID ресурса для маппинга.
+     * Приоритет: temporaryId > id (если начинается с "RES-").
+     */
+    private String getFrontendId(FrontendResourceDto dto) {
+        if (dto.getTemporaryId() != null && !dto.getTemporaryId().isEmpty()) {
+            return dto.getTemporaryId();
+        }
+        String id = dto.getId();
+        if (id != null && (id.startsWith("RES-") || !isNumericId(id))) {
+            return id;
+        }
+        return null;
+    }
+    
+    /**
+     * Проверяет, является ли ID числовым (уже существующий Core ID).
+     */
+    private boolean isNumericId(String id) {
+        if (id == null || id.isEmpty()) return false;
+        try {
+            Long.parseLong(id);
+            return true;
+        } catch (NumberFormatException e) {
             return false;
         }
     }
