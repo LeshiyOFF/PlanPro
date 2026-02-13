@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useDialogValidation } from '../hooks/useDialogValidation'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 
 export interface Resource {
   id: string;
@@ -65,20 +66,26 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
       const newResource = availableResources.find(r => r.id === selectedResourceId)
 
       if (newResource) {
+        // UNITS-FIX v4.0: Все units/maxUnits в формате коэффициента (1.0 = 100%)
+        const currentMax = ResourceUnitsConverter.toCoefficient(currentResource.maxUnits)
+        const newMax = ResourceUnitsConverter.toCoefficient(newResource.maxUnits)
+
         const updatedAssignments = assignments.map(assignment => {
-          let newUnits = assignment.units
+          const currentUnits = ResourceUnitsConverter.toCoefficient(assignment.units)
+          let newUnits = currentUnits
 
           if (keepPercentages) {
-            // Scale units based on new resource's capacity
-            const scaleFactor = newResource.maxUnits / currentResource.maxUnits
-            newUnits = Math.min(assignment.units * scaleFactor, newResource.maxUnits)
+            // Масштабируем units пропорционально ёмкости нового ресурса
+            const scaleFactor = newMax / currentMax
+            newUnits = Math.min(currentUnits * scaleFactor, newMax)
           } else {
-            // Keep same units, but cap at new resource's max
-            newUnits = Math.min(assignment.units, newResource.maxUnits)
+            // Сохраняем units, но ограничиваем максимумом нового ресурса
+            newUnits = Math.min(currentUnits, newMax)
           }
 
-          const newWork = assignment.work * (newUnits / assignment.units)
-          const newCost = newWork * (newResource.maxUnits / 100) // Assuming rate is based on max units
+          const newWork = assignment.work * (newUnits / currentUnits)
+          // Стоимость пересчитывается пропорционально работе
+          const newCost = assignment.cost * (newWork / assignment.work)
 
           return {
             ...assignment,
@@ -140,7 +147,7 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
                 <strong>Type:</strong> {currentResource.type}
               </div>
               <div>
-                <strong>Capacity:</strong> {currentResource.maxUnits}%
+                <strong>Capacity:</strong> {ResourceUnitsConverter.toPercent(currentResource.maxUnits)}%
               </div>
               <div>
                 <strong>Assignments:</strong> {currentResource.currentAssignments}
@@ -173,7 +180,7 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
                     <div>
                       <div className="font-medium">{resource.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {resource.type} • {resource.maxUnits}% capacity • {resource.currentAssignments} current assignments
+                        {resource.type} • {ResourceUnitsConverter.toPercent(resource.maxUnits)}% capacity • {resource.currentAssignments} current assignments
                       </div>
                     </div>
                   </SelectItem>
@@ -194,7 +201,7 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
                 <Label className="text-sm font-medium">Old Resource</Label>
                 <div className="text-sm space-y-1">
                   <div><strong>{currentResource.name}</strong></div>
-                  <div>Capacity: {currentResource.maxUnits}%</div>
+                  <div>Capacity: {ResourceUnitsConverter.toPercent(currentResource.maxUnits)}%</div>
                   <div>Assignments: {assignments.length}</div>
                   <div>Total Work: {totalWork.toFixed(1)}h</div>
                   <div>Total Cost: ${totalCost.toFixed(2)}</div>
@@ -205,16 +212,16 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
                 <Label className="text-sm font-medium">New Resource</Label>
                 <div className="text-sm space-y-1">
                   <div><strong>{selectedResource.name}</strong></div>
-                  <div>Capacity: {selectedResource.maxUnits}%</div>
+                  <div>Capacity: {ResourceUnitsConverter.toPercent(selectedResource.maxUnits)}%</div>
                   <div>Current Assignments: {selectedResource.currentAssignments}</div>
                   <div>Capacity Change:
                     <span className={
-                      selectedResource.maxUnits > currentResource.maxUnits
+                      ResourceUnitsConverter.isGreater(selectedResource.maxUnits, currentResource.maxUnits)
                         ? 'text-green-600'
                         : 'text-red-600'
                     }>
-                      {selectedResource.maxUnits > currentResource.maxUnits ? '+' : ''}
-                      {selectedResource.maxUnits - currentResource.maxUnits}%
+                      {ResourceUnitsConverter.isGreater(selectedResource.maxUnits, currentResource.maxUnits) ? '+' : ''}
+                      {ResourceUnitsConverter.differencePercent(selectedResource.maxUnits, currentResource.maxUnits)}%
                     </span>
                   </div>
                 </div>
@@ -260,7 +267,7 @@ export const ReplaceAssignmentDialog: React.FC<ReplaceAssignmentDialogProps> = (
                   {assignments.map(assignment => (
                     <TableRow key={assignment.id}>
                       <TableCell className="font-medium">{assignment.taskName}</TableCell>
-                      <TableCell>{assignment.units}%</TableCell>
+                      <TableCell>{ResourceUnitsConverter.toPercent(assignment.units)}%</TableCell>
                       <TableCell>{assignment.work.toFixed(1)}</TableCell>
                       <TableCell>${assignment.cost.toFixed(2)}</TableCell>
                     </TableRow>

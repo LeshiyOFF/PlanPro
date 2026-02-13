@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 
 export interface TaskDetails {
   id: string;
@@ -341,7 +342,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                               Type: {resource.type}
                             </div>
                           </div>
-                          <Badge variant="outline">{resource.units}%</Badge>
+                          <Badge variant="outline">{ResourceUnitsConverter.toPercent(resource.units)}%</Badge>
                         </div>
                         <div className="grid grid-cols-3 gap-4 text-sm">
                           <div>
@@ -359,7 +360,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                           <div>
                             <span className="text-muted-foreground">Efficiency:</span>
                             <span className="ml-2 font-medium">
-                              {((resource.work / (resource.units * task.duration * 8)) * 100).toFixed(1)}%
+                              {((resource.work / (ResourceUnitsConverter.toCoefficient(resource.units) * task.duration * 8)) * 100).toFixed(1)}%
                             </span>
                           </div>
                         </div>
@@ -389,7 +390,7 @@ export const TaskDetailsDialog: React.FC<TaskDetailsDialogProps> = ({
                     <div key={index} className="border rounded p-3">
                       <div className="flex justify-between items-center mb-2">
                         <div className="font-medium">{assignment.resourceName}</div>
-                        <Badge variant="outline">{assignment.units}%</Badge>
+                        <Badge variant="outline">{ResourceUnitsConverter.toPercent(assignment.units)}%</Badge>
                       </div>
                       <div className="grid grid-cols-4 gap-2 text-sm">
                         <div>

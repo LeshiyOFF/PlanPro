@@ -82,11 +82,12 @@ export class NewResourceAction extends BaseAction {
     const store = useProjectStore.getState()
     
     // FIX: Используем max(existingIds) + 1 для предотвращения дублирования ID
+    // UNITS-FIX v4.0: maxUnits в формате коэффициента (1.0 = 100%)
     const newResource: Resource = {
       id: ResourceIdGenerator.generate(store.resources),
       name: ResourceIdGenerator.generateDefaultName(store.resources, 'Новый ресурс'),
       type: 'Work',
-      maxUnits: 100,
+      maxUnits: 1.0,
       standardRate: 0,
       overtimeRate: 0,
       costPerUse: 0,

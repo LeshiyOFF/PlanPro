@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AssignmentIdGenerator } from '@/domain/assignment/services/AssignmentIdGenerator'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 
 export interface Resource {
   id: string;
@@ -81,9 +82,11 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
     )
   }
 
-  const handleUnitsChange = (assignmentId: string, units: number) => {
+  // UNITS-FIX v4.0: UI вводит проценты (100), но хранится коэффициент (1.0)
+  const handleUnitsChange = (assignmentId: string, percentValue: number) => {
+    const coeffValue = ResourceUnitsConverter.toCoefficient(percentValue)
     setAssignments(prev =>
-      prev.map(a => a.id === assignmentId ? { ...a, units } : a),
+      prev.map(a => a.id === assignmentId ? { ...a, units: coeffValue } : a),
     )
   }
 
@@ -97,8 +100,12 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
           const task = tasks.find(t => t.id === taskId)
 
           if (resource && task) {
-            const units = resource.maxUnits ? Math.min(100, resource.maxUnits) : 100
-            const work = task.duration * (units / 100)
+            // UNITS-FIX v4.0: units в формате коэффициента (1.0 = 100%)
+            // Назначаем 100% или максимум ресурса (что меньше)
+            const maxUnitsCoeff = ResourceUnitsConverter.toCoefficient(resource.maxUnits)
+            const units = Math.min(ResourceUnitsConverter.DEFAULT_MAX_UNITS, maxUnitsCoeff)
+            // work = duration * units (units уже коэффициент)
+            const work = task.duration * units
             const cost = work * (resource.rate || 0)
 
             newAssignments.push({
@@ -131,7 +138,11 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
 
   const totalWork = assignments.reduce((sum, a) => sum + a.work, 0)
   const totalCost = assignments.reduce((sum, a) => sum + a.cost, 0)
-  const overAllocatedResources = assignments.filter(a => a.units > 100).length
+  // UNITS-FIX v4.0: units теперь в формате коэффициента (1.0 = 100%)
+  // Используем конвертер для сравнения: > 1.0 означает перегрузку
+  const overAllocatedResources = assignments.filter(
+    a => ResourceUnitsConverter.isGreater(a.units, ResourceUnitsConverter.DEFAULT_MAX_UNITS)
+  ).length
 
   const canAssign = selectedTasks.length > 0 && selectedResources.length > 0
   const canRemove = selectedTasks.length > 0
@@ -276,7 +287,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                     <div className="font-medium text-sm">{resource.name}</div>
                     <div className="text-xs text-muted-foreground">
                       {resource.type} • ${resource.rate || 0}/h
-                      {resource.maxUnits && ` • Max: ${resource.maxUnits}%`}
+                      {resource.maxUnits != null && ` • Max: ${ResourceUnitsConverter.toPercent(resource.maxUnits)}%`}
                     </div>
                   </div>
                 </div>
@@ -314,7 +325,7 @@ export const AssignmentDialog: React.FC<AssignmentDialogProps> = ({
                             type="number"
                             min="0"
                             max="200"
-                            value={assignment.units}
+                            value={ResourceUnitsConverter.toPercent(assignment.units)}
                             onChange={(e) => handleUnitsChange(assignment.id, parseFloat(e.target.value) || 0)}
                             className="w-20 h-8"
                           />

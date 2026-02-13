@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useDialogValidation } from '../hooks/useDialogValidation'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 
 export interface ResourceData {
   [key: string]: string | number | boolean | undefined;
@@ -113,7 +114,13 @@ export const ResourceAdditionDialog: React.FC<ResourceAdditionDialogProps> = ({
 
   const handleSave = () => {
     if (isValid()) {
-      onSave?.(resourceData)
+      // UNITS-FIX v4.0: Конвертируем maxUnits из процентов (UI) в коэффициент (storage)
+      // UI показывает 100%, хранится как 1.0
+      const dataToSave = {
+        ...resourceData,
+        maxUnits: ResourceUnitsConverter.toCoefficient(resourceData.maxUnits),
+      }
+      onSave?.(dataToSave)
       onClose?.()
     }
   }

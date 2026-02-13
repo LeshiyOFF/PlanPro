@@ -4,6 +4,7 @@ import type { CoreTaskData, CoreResourceData } from '@/types/api/response-types'
 import type { FrontendTaskData } from '@/types/api/request-types'
 import { TaskType } from '@/types/Master_Functionality_Catalog'
 import { CalendarDateService } from '@/services/CalendarDateService'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 import { logger } from '@/utils/logger'
 
 /**
@@ -167,13 +168,16 @@ export class TaskDataConverter {
 
   /**
    * Конвертирует CoreResourceData из бэкенда в формат frontend Resource.
+   * 
+   * MIGRATION v4.0: maxUnits автоматически нормализуется к коэффициенту (1.0 = 100%).
+   * Поддерживает оба формата: integer (100) и coefficient (1.0).
    */
   static coreToFrontendResource(coreResource: CoreResourceData): Resource {
     return {
       id: coreResource.id,
       name: coreResource.name || 'Unnamed Resource',
       type: (coreResource.type as 'Work' | 'Material' | 'Cost') || 'Work',
-      maxUnits: coreResource.maxUnits || 1,
+      maxUnits: ResourceUnitsConverter.toCoefficient(coreResource.maxUnits),
       standardRate: coreResource.standardRate || 0,
       overtimeRate: coreResource.overtimeRate || 0,
       costPerUse: coreResource.costPerUse || 0,

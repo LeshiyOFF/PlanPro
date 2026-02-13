@@ -1,5 +1,6 @@
 import { ISheetColumn, SheetColumnType } from '@/domain/sheets/interfaces/ISheetColumn'
 import { Resource } from '@/types/resource-types'
+import { ResourceUnitsConverter } from '@/domain/resources/utils/ResourceUnitsConverter'
 import { formatCurrency, formatRate, formatCalendarName } from '@/utils/formatUtils'
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
 import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
@@ -71,10 +72,10 @@ export function createResourceColumns(
       sortable: true,
       resizable: true,
       valueGetter: (row) =>
-        row.type === 'Work' ? (Number(row.maxUnits) || 0) * 100 : row.maxUnits,
+        row.type === 'Work' ? ResourceUnitsConverter.toPercent(row.maxUnits) : row.maxUnits,
       formatter: (val, row) => {
         if (row.type === 'Cost') return <span className="text-slate-400">-</span>
-        if (row.type === 'Work') return `${Math.round(Number(val))}%`
+        if (row.type === 'Work') return `${ResourceUnitsConverter.toPercent(row.maxUnits)}%`
         return `${val || 0} ${row.materialLabel || ''}`.trim()
       },
     },

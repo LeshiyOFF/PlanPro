@@ -115,11 +115,15 @@ export class ResourceLoadingService {
    * Суммирует units всех назначений ресурса, активных в указанный день.
    * Поддерживает обратную совместимость: если resourceAssignments пуст,
    * проверяет устаревшее поле resourceIds (с units=1.0 по умолчанию).
+   * 
+   * ID-FIX v3.1: Нормализация ID к строке перед сравнением.
+   * Предотвращает баг: assignment.resourceId (number) !== resourceId (string)
    */
   private sumUnitsForDay(
     resourceId: string, tasks: Task[], dayStart: Date, dayEnd: Date,
   ): number {
     let totalUnits = 0
+    const normalizedResId = String(resourceId)
 
     for (const task of tasks) {
       const taskStart = new Date(task.startDate)
@@ -127,10 +131,13 @@ export class ResourceLoadingService {
 
       if (taskStart <= dayEnd && taskEnd >= dayStart) {
         // Приоритет: новый формат resourceAssignments
-        const assignment = task.resourceAssignments?.find(a => a.resourceId === resourceId)
+        // ID-FIX: Нормализуем оба ID к строке для корректного сравнения
+        const assignment = task.resourceAssignments?.find(
+          a => String(a.resourceId) === normalizedResId
+        )
         if (assignment) {
-          totalUnits += assignment.units
-        } else if (getTaskResourceIds(task).includes(resourceId)) {
+          totalUnits += this.normalizeUnits(assignment.units)
+        } else if (this.hasResourceById(task, normalizedResId)) {
           // Fallback: старый формат resourceIds (100% по умолчанию)
           totalUnits += ResourceLoadingService.DEFAULT_MAX_UNITS
         }
@@ -138,6 +145,25 @@ export class ResourceLoadingService {
     }
 
     return totalUnits
+  }
+
+  /**
+   * Проверяет наличие ресурса в задаче по ID (с нормализацией).
+   */
+  private hasResourceById(task: Task, resourceId: string): boolean {
+    const taskResourceIds = getTaskResourceIds(task)
+    return taskResourceIds.some(id => String(id) === resourceId)
+  }
+
+  /**
+   * Нормализует units к коэффициенту (1.0 = 100%).
+   * Поддерживает оба формата: целое (100) и коэффициент (1.0).
+   */
+  private normalizeUnits(units: number): number {
+    if (units > 10) {
+      return units / 100
+    }
+    return units
   }
 }
 

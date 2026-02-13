@@ -13,10 +13,19 @@ export type { Resource, TaskSegment }
 
 /**
  * Назначение ресурса на задачу с указанием процента загрузки.
- * units = 1.0 означает 100% загрузки ресурса на эту задачу.
+ * 
+ * СТАНДАРТ ФОРМАТА UNITS (v4.0):
+ * - Формат хранения: коэффициент (1.0 = 100%, 2.0 = 200%, 0.5 = 50%)
+ * - Формат отображения UI: проценты (100%, 200%, 50%)
+ * - Java Core API: коэффициент (1.0 = 100%)
+ * 
+ * Для конвертации используйте: ResourceUnitsConverter.toPercent() / toCoefficient()
+ * 
+ * @see ResourceUnitsConverter - централизованный конвертер для units/maxUnits
  */
 export interface ResourceAssignment {
   resourceId: string;
+  /** Процент загрузки в формате коэффициента: 1.0 = 100%, 2.0 = 200% */
   units: number;
 }
 
