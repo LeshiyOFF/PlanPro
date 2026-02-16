@@ -20,6 +20,29 @@ export const FullScreenStartupScreen: React.FC = () => {
   const [lastProjectPath, setLastProjectPath] = useState<string | null>(null)
   const [lastProjectExists, setLastProjectExists] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [platform, setPlatform] = useState<string>('unknown')
+
+  // Определение платформы для условного отображения drag-and-drop зоны
+  useEffect(() => {
+    const fetchPlatform = async () => {
+      const api = getElectronAPI()
+      if (!api?.getAppInfo) {
+        console.warn('[Startup] getAppInfo API not available')
+        return
+      }
+
+      try {
+        const appInfo = await api.getAppInfo()
+        setPlatform(appInfo.platform)
+        console.log('[Startup] Platform detected:', appInfo.platform)
+      } catch (error) {
+        console.error('[Startup] Failed to fetch platform info:', error)
+        // Оставляем 'unknown', drop-зона будет скрыта для безопасности
+      }
+    }
+
+    fetchPlatform()
+  }, [])
 
   useEffect(() => {
     const path = LastProjectService.getInstance().getLastProject()
@@ -231,18 +254,25 @@ export const FullScreenStartupScreen: React.FC = () => {
         )}
       </div>
 
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        className={
-          'rounded-2xl border-2 border-dashed border-[hsl(var(--primary)/0.3)] p-8 w-full max-w-md text-center ' +
-          'bg-slate-50 shadow-lg ' +
-          'hover:border-[hsl(var(--primary)/0.5)] hover:bg-slate-100 ' +
-          'hover:shadow-xl hover:scale-[1.01] transition-all duration-200'
-        }
-      >
-        <p className="text-sm font-medium text-slate-600">{t('welcome.dropZone')}</p>
-      </div>
+      {/* 
+        Drag-and-drop зона доступна только на Windows и macOS.
+        На Linux скрыта из-за нестабильной работы drag-and-drop в Electron/Chromium.
+        Пользователи Linux используют кнопку "Открыть проект".
+      */}
+      {platform !== 'linux' && (
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className={
+            'rounded-2xl border-2 border-dashed border-[hsl(var(--primary)/0.3)] p-8 w-full max-w-md text-center ' +
+            'bg-slate-50 shadow-lg ' +
+            'hover:border-[hsl(var(--primary)/0.5)] hover:bg-slate-100 ' +
+            'hover:shadow-xl hover:scale-[1.01] transition-all duration-200'
+          }
+        >
+          <p className="text-sm font-medium text-slate-600">{t('welcome.dropZone')}</p>
+        </div>
+      )}
     </div>
   )
 }
