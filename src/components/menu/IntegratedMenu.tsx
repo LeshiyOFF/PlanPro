@@ -68,48 +68,69 @@ export const IntegratedMenu: React.FC = () => {
       e.stopPropagation()
 
       const files = e.dataTransfer?.files
-      if (files && files.length > 0) {
-        const file = files[0]
-        const api = getElectronAPI()
-        
-        // Используем webUtils.getPathForFile() для кроссплатформенной совместимости
-        // Работает на Windows, Linux, macOS (в отличие от устаревшего file.path)
-        const filePath = api?.getFilePathFromDrop?.(file) || ''
+      const api = getElectronAPI()
 
-        console.log('[IntegratedMenu] File dropped:', {
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          path: filePath,
-        })
-
-        if (filePath) {
-          // Проверяем расширение файла
-          if (!filePath.endsWith('.pod')) {
-            if (api?.showMessageBox) {
-              await api.showMessageBox({
-                type: 'warning',
-                title: 'Неверный формат файла',
-                message: 'Можно открывать только файлы с расширением .pod',
-              })
-            }
-            return
-          }
-
-          console.log(`[IntegratedMenu] Loading project from: ${filePath}`)
-          await loadProjectFromPath(filePath)
-        } else {
-          // Fallback: если path недоступен, предлагаем использовать диалог
-          console.error('[IntegratedMenu] File path not available from drop event.')
-          if (api?.showMessageBox) {
-            await api.showMessageBox({
-              type: 'info',
-              title: 'Используйте кнопку "Открыть"',
-              message: 'Drag-and-drop временно недоступен.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
-            })
-          }
+      // ПРОВЕРКА 1: Проверяем, пришли ли файлы от системы
+      // На Linux из-за Chromium race condition files может быть пустым
+      if (!files || files.length === 0) {
+        console.warn('[IntegratedMenu] Drop event received but files list is empty (Linux Chromium limitation)')
+        if (api?.showMessageBox) {
+          await api.showMessageBox({
+            type: 'info',
+            title: 'Drag-and-drop недоступен',
+            message: 'На вашей системе функция перетаскивания файлов ограничена.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+          })
         }
+        return
       }
+
+      const file = files[0]
+
+      // Диагностическое логирование для отладки на разных платформах
+      console.log('[IntegratedMenu] File dropped:', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        hasDeprecatedPath: 'path' in file,
+      })
+
+      // ПРОВЕРКА 2: Получаем путь через webUtils.getPathForFile()
+      // Это кроссплатформенный метод, но File объект может быть сериализован некорректно через contextBridge
+      const filePath = api?.getFilePathFromDrop?.(file) || ''
+
+      console.log('[IntegratedMenu] Path resolution:', {
+        path: filePath,
+        pathAvailable: !!filePath,
+      })
+
+      if (!filePath) {
+        // Путь недоступен (типичная проблема на Linux из-за contextBridge serialization)
+        console.error('[IntegratedMenu] webUtils.getPathForFile returned empty path (contextBridge serialization issue)')
+        if (api?.showMessageBox) {
+          await api.showMessageBox({
+            type: 'info',
+            title: 'Используйте кнопку "Открыть"',
+            message: 'Не удалось получить путь к файлу из-за ограничений системы.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+          })
+        }
+        return
+      }
+
+      // ПРОВЕРКА 3: Валидация расширения файла
+      if (!filePath.endsWith('.pod')) {
+        if (api?.showMessageBox) {
+          await api.showMessageBox({
+            type: 'warning',
+            title: 'Неверный формат файла',
+            message: 'Можно открывать только файлы с расширением .pod',
+          })
+        }
+        return
+      }
+
+      // Всё хорошо - загружаем проект
+      console.log(`[IntegratedMenu] Loading project from: ${filePath}`)
+      await loadProjectFromPath(filePath)
     }
 
     window.addEventListener('dragover', handleDragOver)

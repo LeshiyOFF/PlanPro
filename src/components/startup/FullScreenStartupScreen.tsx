@@ -87,16 +87,63 @@ export const FullScreenStartupScreen: React.FC = () => {
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
-      const file = e.dataTransfer.files[0]
-      if (!file) return
-      
-      // Используем webUtils.getPathForFile() для кроссплатформенной совместимости
+      const files = e.dataTransfer.files
       const api = getElectronAPI()
+
+      // ПРОВЕРКА 1: Проверяем, пришли ли файлы от системы
+      // На Linux из-за Chromium race condition files может быть пустым
+      if (!files || files.length === 0) {
+        console.warn('[Startup] Drop event received but files list is empty (Linux Chromium limitation)')
+        api?.showMessageBox({
+          type: 'info',
+          title: 'Drag-and-drop недоступен',
+          message: 'На вашей системе функция перетаскивания файлов ограничена.\n\nИспользуйте кнопку "Открыть проект" для выбора файла.',
+        })
+        return
+      }
+
+      const file = files[0]
+
+      // Диагностическое логирование
+      console.log('[Startup] File dropped:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        hasDeprecatedPath: 'path' in file,
+      })
+
+      // ПРОВЕРКА 2: Получаем путь через webUtils.getPathForFile()
       const path = api?.getFilePathFromDrop?.(file) || ''
-      
-      if (!path) return
+
+      console.log('[Startup] Path resolution:', {
+        path,
+        pathAvailable: !!path,
+      })
+
+      if (!path) {
+        console.error('[Startup] webUtils.getPathForFile returned empty path (contextBridge serialization issue)')
+        api?.showMessageBox({
+          type: 'info',
+          title: 'Используйте кнопку "Открыть"',
+          message: 'Не удалось получить путь к файлу из-за ограничений системы.\n\nИспользуйте кнопку "Открыть проект" для выбора файла.',
+        })
+        return
+      }
+
+      // ПРОВЕРКА 3: Валидация расширения
       const ext = path.toLowerCase().slice(path.lastIndexOf('.'))
-      if (!ALLOWED_EXTENSIONS.includes(ext)) return
+      if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        console.warn('[Startup] Invalid file extension:', ext)
+        api?.showMessageBox({
+          type: 'warning',
+          title: 'Неверный формат файла',
+          message: `Можно открывать только файлы с расширениями: ${ALLOWED_EXTENSIONS.join(', ')}`,
+        })
+        return
+      }
+
+      // Всё хорошо - загружаем проект
+      console.log(`[Startup] Loading project from: ${path}`)
       runThenComplete(async () => {
         await loadProjectFromPath(path)
       })()
