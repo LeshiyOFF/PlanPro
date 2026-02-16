@@ -6,6 +6,7 @@ import com.projectlibre.api.converter.DateTimeMapper;
 import com.projectlibre.api.validator.MilestoneProgressValidator;
 import com.projectlibre1.datatype.Duration;
 import com.projectlibre1.pm.scheduling.ConstraintType;
+import com.projectlibre1.pm.scheduling.SchedulingType;
 import com.projectlibre1.pm.task.Project;
 import com.projectlibre1.pm.task.NormalTask;
 import com.projectlibre1.pm.task.Task;
@@ -107,7 +108,6 @@ public class ApiToCoreTaskSynchronizer {
             dependencySynchronizer.synchronize(frontendTasks, taskMap);
             
             // ФАЗА 2: Информационная синхронизация (Dates, Progress, Notes)
-            // Теперь ядро знает кто чей родитель, и NPE при вызове свойств не будет
             for (FrontendTaskDto frontendTask : frontendTasks) {
                 NormalTask coreTask = taskMap.get(frontendTask.getId());
                 if (coreTask != null) {
@@ -115,7 +115,10 @@ public class ApiToCoreTaskSynchronizer {
                     syncedCount++;
                 }
             }
-            
+
+            // ФАЗА 3: Назначения ресурсов (resourceIds уже подставлены контроллером по mapping)
+            resourceSynchronizer.synchronize(project, frontendTasks, taskMap);
+
             return SyncResult.success(syncedCount, skippedCount);
             
         } catch (Exception e) {
@@ -224,6 +227,12 @@ public class ApiToCoreTaskSynchronizer {
             coreTask.setCustomText(1, null);
         }
         
+        // A.2: Тип планирования (fixed_units / fixed_duration / fixed_work) из Frontend
+        int schedulingType = schedulingTypeFromString(frontendTask.getType());
+        if (schedulingType >= 0) {
+            coreTask.setSchedulingType(schedulingType);
+        }
+        
         // ДИАГНОСТИКА: Логируем состояние Core ПОСЛЕ синхронизации
         long coreStartAfter = coreTask.getStart();
         long coreEndAfter = coreTask.getEnd();
@@ -235,6 +244,24 @@ public class ApiToCoreTaskSynchronizer {
             coreStartAfter - coreStartBefore, coreEndAfter - coreEndBefore, 
             coreDurationAfter - coreDurationBefore);
         log.info("[DATE-SYNC-DIAG] === SYNC END for {} '{}' ===", taskId, taskName);
+    }
+    
+    /** A.2: Маппинг строки типа планирования из Frontend в константу SchedulingType. Возвращает -1 если не распознано. */
+    private static int schedulingTypeFromString(String typeStr) {
+        if (typeStr == null || typeStr.isEmpty()) {
+            return -1;
+        }
+        String normalized = typeStr.trim().toLowerCase();
+        switch (normalized) {
+            case "fixed_units":
+                return SchedulingType.FIXED_UNITS;
+            case "fixed_duration":
+                return SchedulingType.FIXED_DURATION;
+            case "fixed_work":
+                return SchedulingType.FIXED_WORK;
+            default:
+                return -1;
+        }
     }
     
     /** Миллисекунд в одном календарном дне (24 часа) */

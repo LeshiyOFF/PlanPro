@@ -4,6 +4,7 @@ import { useProjectLibreAPI } from './useProjectLibreAPI'
 import { LastProjectService } from '@/services/LastProjectService'
 import { TaskDataConverter } from '@/services/TaskDataConverter'
 import { ResourceDataConverter } from '@/services/ResourceDataConverter'
+import { ResourceIdRemappingService } from '@/services/ResourceIdRemappingService'
 import { getElectronAPI } from '@/utils/electronAPI'
 
 const LOG_TAG = '[useFileSave]'
@@ -23,6 +24,9 @@ export const useFileSave = () => {
     calendars,
     setProjectInfo,
     markClean,
+    setResources,
+    setTasks,
+    setDirty,
   } = useProjectStore()
   const [isProcessing, setIsProcessing] = useState(false)
   const saveProjectAsRef = useRef<() => Promise<void>>()
@@ -52,12 +56,21 @@ export const useFileSave = () => {
     const syncResourcesData = ResourceDataConverter.frontendResourcesToSync(resources, calendars)
 
     try {
-      await file.syncProjectToCore({
+      const response = await file.syncProjectToCore({
         projectId: currentProjectId,
         tasks: syncTasksData,
         resources: syncResourcesData,
         projectCalendars: ResourceDataConverter.calendarsToSyncData(calendars),
       })
+
+      const mapping = response?.resourceIdMapping
+      if (mapping && Object.keys(mapping).length > 0 && ResourceIdRemappingService.hasRelevantChanges(resources, tasks, mapping)) {
+        const { updatedResources, updatedTasks } = ResourceIdRemappingService.applyMapping(resources, tasks, mapping)
+        setResources(updatedResources)
+        setTasks(updatedTasks)
+        setDirty(true)
+      }
+
       return true
     } catch (syncError) {
       const e = syncError instanceof Error ? syncError : new Error(String(syncError))
@@ -76,7 +89,7 @@ export const useFileSave = () => {
       }
       throw e
     }
-  }, [currentProjectId, file, tasks, resources, calendars])
+  }, [currentProjectId, file, tasks, resources, calendars, setResources, setTasks, setDirty])
 
   const saveProjectAs = useCallback(async (): Promise<void> => {
     if (isProcessing) return

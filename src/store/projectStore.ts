@@ -14,6 +14,7 @@ import { DurationSyncService } from '@/domain/services/DurationSyncService'
 import { CalendarMathService } from '@/domain/services/CalendarMathService'
 import { EffortDrivenService } from '@/domain/services/EffortDrivenService'
 import { BaselineIdGenerator } from '@/domain/baseline/services/BaselineIdGenerator'
+import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
 
 import { ProjectJavaService } from '@/services/ProjectJavaService'
 import { getErrorMessage } from '@/utils/errorUtils'
@@ -326,7 +327,16 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     return { tasks: TaskSchedulingService.recalculateAll(s.tasks, prefs.calendar, prefs.schedule), isDirty: true }
   }),
   setInitialized: (initialized) => set({ initialized }),
-  reset: () => set(emptyProjectState),
+  reset: () =>
+    set(() => {
+      let calendars = emptyProjectState.calendars
+      try {
+        calendars = CalendarTemplateService.getInstance().getBaseCalendars()
+      } catch (e) {
+        logger.warn('[projectStore] reset: getBaseCalendars failed, using fallback', { error: e })
+      }
+      return { ...emptyProjectState, calendars }
+    }),
   getHoursPerDay: () => UserPreferencesService.getInstance().getPreferences().calendar.hoursPerDay,
 
   splitTask: (id, date, days) => set((s) => {

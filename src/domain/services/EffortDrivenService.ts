@@ -1,5 +1,5 @@
 import { Task } from '@/store/project/interfaces'
-import { CalendarPreferences } from '@/types/Master_Functionality_Catalog'
+import { CalendarPreferences, TaskType } from '@/types/Master_Functionality_Catalog'
 import { CalendarMathService } from './CalendarMathService'
 import { DurationSyncService } from './DurationSyncService'
 
@@ -86,16 +86,14 @@ export class EffortDrivenService {
   
   /**
    * Проверяет, нужно ли применять effort-driven логику.
-   * @param effortDrivenEnabled - Настройка из preferences.schedule.effortDriven
-   * @param task - Задача
+   * Применяем только для типов FIXED_UNITS и FIXED_WORK (длительность от объёма работ).
+   * Для FIXED_DURATION, TASK (из API) и прочих типов — не пересчитываем длительность.
    */
   public static shouldApply(effortDrivenEnabled: boolean, task: Task): boolean {
-    // Не применяем для вех и суммарных задач
     if (task.isMilestone || task.isSummary) return false
-    
-    // Не применяем если отключено в настройках
     if (!effortDrivenEnabled) return false
-    
-    return true
+    const taskType = task.type
+    const applyOnlyFor = [TaskType.FIXED_UNITS, TaskType.FIXED_WORK]
+    return typeof taskType === 'string' && applyOnlyFor.includes(taskType as TaskType)
   }
 }

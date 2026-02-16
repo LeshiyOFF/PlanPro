@@ -3,17 +3,24 @@ import { useProjectStore } from '../store/projectStore'
 import { javaApiService } from './JavaApiService'
 import { TaskDataConverter } from './TaskDataConverter'
 import { ResourceDataConverter } from './ResourceDataConverter'
+import { ResourceIdRemappingService } from './ResourceIdRemappingService'
 import { logger } from '../utils/logger'
+import type { ProjectSyncResponse } from '@/types/api/response-types'
+
+/** Функция синхронизации проекта с Core, возвращающая ответ с resourceIdMapping. */
+export type SyncProjectToCoreFn = () => Promise<ProjectSyncResponse | null>
 
 /**
  * Сервис автоматического сохранения проектов.
  * Реализует логику фонового таймера и проверки условий сохранения.
+ * V2.0: Поддержка sync с resourceIdMapping (регистрация через setSyncProjectToCoreFn).
  * Следует принципам SOLID (SRP).
  */
 export class ProjectAutoSaveService {
   private static instance: ProjectAutoSaveService
   private timer: NodeJS.Timeout | null = null
   private isRunning: boolean = false
+  private syncProjectToCoreFn: SyncProjectToCoreFn | undefined = undefined
 
   private constructor() {
     // Приватный конструктор для реализации Singleton
@@ -24,6 +31,14 @@ export class ProjectAutoSaveService {
       ProjectAutoSaveService.instance = new ProjectAutoSaveService()
     }
     return ProjectAutoSaveService.instance
+  }
+
+  /**
+   * Регистрирует функцию синхронизации с Core (возвращает resourceIdMapping).
+   * Вызывается из useFileSave при монтировании компонента с file API.
+   */
+  public setSyncProjectToCoreFn(fn: SyncProjectToCoreFn | undefined): void {
+    this.syncProjectToCoreFn = fn
   }
 
   /**
@@ -79,6 +94,7 @@ export class ProjectAutoSaveService {
 
   /**
    * Выполнение автосохранения при соблюдении всех условий.
+   * При зарегистрированном setSyncProjectToCoreFn использует его и применяет resourceIdMapping.
    */
   private async executeAutoSave(): Promise<void> {
     const state = useAppStore.getState()
@@ -93,21 +109,39 @@ export class ProjectAutoSaveService {
       const projectId = project.id
       logger.info('Performing auto-save...', { projectId })
 
-      const calendars = useProjectStore.getState().calendars ?? []
-      const updates = {
-        tasks: TaskDataConverter.frontendTasksToSync(project.tasks),
-        resources: ResourceDataConverter.frontendResourcesToSync(project.resources, calendars),
+      if (this.syncProjectToCoreFn) {
+        const response = await this.syncProjectToCoreFn()
+        const mapping = response?.resourceIdMapping
+        if (mapping && Object.keys(mapping).length > 0) {
+          const { resources: currentRes, tasks: currentTasks } = project
+          if (ResourceIdRemappingService.hasRelevantChanges(currentRes, currentTasks, mapping)) {
+            const { updatedResources, updatedTasks } = ResourceIdRemappingService.applyMapping(
+              currentRes,
+              currentTasks,
+              mapping,
+            )
+            useProjectStore.getState().setResources(updatedResources)
+            useProjectStore.getState().setTasks(updatedTasks)
+            useAppStore.getState().setCurrentProject({
+              ...project,
+              resources: updatedResources,
+              tasks: updatedTasks,
+            })
+          }
+        }
+      } else {
+        const calendars = useProjectStore.getState().calendars ?? []
+        const updates = {
+          tasks: TaskDataConverter.frontendTasksToSync(project.tasks),
+          resources: ResourceDataConverter.frontendResourcesToSync(project.resources, calendars),
+        }
+        await javaApiService.updateProject(projectId, updates)
       }
-      await javaApiService.updateProject(projectId, updates)
 
-      // Сбрасываем флаг изменений в сторе
       useAppStore.getState().setProjectState({ unsavedChanges: false })
-
       logger.info('Auto-save completed successfully')
     } catch (error) {
       logger.error('Auto-save failed', error instanceof Error ? error : String(error))
-      // Мы не показываем ошибку пользователю при автосохранении,
-      // чтобы не прерывать рабочий процесс, но фиксируем в логах.
     }
   }
 }

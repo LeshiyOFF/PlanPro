@@ -29,9 +29,23 @@ export const ResourceHistogramChart: React.FC<ResourceHistogramChartProps> = ({
 
   // Максимальное значение для масштабирования (минимум 100%)
   const maxVal = Math.max(1.5, ...data.days.map(d => Math.max(d.workloadPercent, d.maxCapacityPercent)))
+  // Фактический лимит мощности по данным (для линии и подписи)
+  const limitPercent = data.days.length > 0
+    ? Math.max(...data.days.map(d => d.maxCapacityPercent), 1)
+    : 1
 
   const getY = (percent: number) => {
     return height - padding - (percent / maxVal) * (height - padding * 2)
+  }
+
+  // Подписи оси Y: 100%, 150%, 200% и т.д. до maxVal (без дублирования подписи линии лимита)
+  const yAxisLabels: number[] = []
+  for (let p = 1; p <= Math.ceil(maxVal * 100) / 100; p += 0.5) {
+    if (p <= maxVal && Math.abs(p - limitPercent) > 0.01) yAxisLabels.push(p)
+  }
+  if (yAxisLabels.length === 0 || yAxisLabels[yAxisLabels.length - 1] < maxVal) {
+    const top = Math.ceil(maxVal * 100) / 100
+    if (Math.abs(top - limitPercent) > 0.01) yAxisLabels.push(top)
   }
 
   return (
@@ -57,12 +71,20 @@ export const ResourceHistogramChart: React.FC<ResourceHistogramChartProps> = ({
             <line x1={padding} y1={height - padding} x2={chartWidth - padding} y2={height - padding} stroke="#cbd5e1" />
             <line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#cbd5e1" />
 
-            {/* Линия 100% мощности */}
+            {/* Линия лимита мощности (по maxCapacityPercent) */}
             <line
-              x1={padding} y1={getY(1.0)} x2={chartWidth - padding} y2={getY(1.0)}
+              x1={padding} y1={getY(limitPercent)} x2={chartWidth - padding} y2={getY(limitPercent)}
               stroke="#94a3b8" strokeDasharray="4 2"
             />
-            <text x={padding - 5} y={getY(1.0)} textAnchor="end" className="text-[10px] fill-slate-400">100%</text>
+            <text x={padding - 5} y={getY(limitPercent)} textAnchor="end" className="text-[10px] fill-slate-400">
+              {Math.round(limitPercent * 100)}%
+            </text>
+            {/* Подписи оси Y (100%, 150%, 200% при перегрузке) */}
+            {yAxisLabels.map((p) => (
+              <text key={p} x={padding - 5} y={getY(p)} textAnchor="end" className="text-[10px] fill-slate-400">
+                {Math.round(p * 100)}%
+              </text>
+            ))}
 
             {/* Бары загрузки */}
             {data.days.map((day, i) => {

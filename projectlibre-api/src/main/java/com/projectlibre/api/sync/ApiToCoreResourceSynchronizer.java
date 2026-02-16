@@ -100,7 +100,6 @@ public class ApiToCoreResourceSynchronizer {
                         long uniqueId = System.currentTimeMillis() + syncedCount;
                         ((ResourceImpl) coreResource).getGlobalResource().setUniqueId(uniqueId);
                         
-                        // Сохраняем маппинг Frontend ID → Core ID
                         String frontendId = getFrontendId(frontendResource);
                         if (frontendId != null && !frontendId.isEmpty()) {
                             String coreId = String.valueOf(uniqueId);
@@ -109,6 +108,13 @@ public class ApiToCoreResourceSynchronizer {
                         }
                     }
                     log.debug("[ResSync] Created new resource for: {}", frontendResource.getName());
+                } else {
+                    String frontendId = getFrontendId(frontendResource);
+                    if (frontendId != null && !frontendId.isEmpty() && coreResource instanceof ResourceImpl) {
+                        long coreIdLong = ((ResourceImpl) coreResource).getUniqueId();
+                        idMapping.put(frontendId, String.valueOf(coreIdLong));
+                        log.debug("[ResSync] ID Mapping (existing): {} -> {}", frontendId, coreIdLong);
+                    }
                 }
                 
                 usedResources.add(coreResource);

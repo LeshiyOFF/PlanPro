@@ -48,10 +48,10 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
     {
       id: 'assignedPercent', field: 'assignedPercent', title: t('sheets.assigned'),
       width: 120, type: SheetColumnType.PERCENT, editable: false, visible: true, sortable: true, resizable: true,
-      formatter: (val: CellValue) => {
+      formatter: (val: CellValue, row: ResourceUsageRow) => {
         const num = typeof val === 'number' ? val : Number(val) || 0
         const percent = Math.round(num * 100)
-        const isOverloaded = num > 1
+        const isOverloaded = typeof row.isOverloadedInTime === 'boolean' ? row.isOverloadedInTime : num > 1
         return <span className={isOverloaded ? 'text-red-600 font-bold' : ''}>{percent}%</span>
       },
     },
@@ -69,7 +69,7 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
       width: 130, type: SheetColumnType.TEXT, editable: false, visible: true, sortable: true, resizable: true,
       formatter: (val: CellValue, row: ResourceUsageRow) => {
         const load = row.assignedPercent ?? 0
-        const isOverloaded = load > 1
+        const isOverloaded = typeof row.isOverloadedInTime === 'boolean' ? row.isOverloadedInTime : load > 1
         const isBusy = load > 0 && load <= 1
         const colorClass = isOverloaded ? 'text-red-600' : isBusy ? 'text-amber-600' : 'text-green-600'
         return <span className={colorClass}>{String(val ?? '')}</span>
@@ -79,7 +79,7 @@ export const ResourceUsageSheet = forwardRef<ProfessionalSheetHandle, ResourceUs
       id: 'workload', field: 'workload', title: t('sheets.workload'),
       width: 120, type: SheetColumnType.TEXT, editable: false, visible: true, sortable: true, resizable: true,
       formatter: (val: CellValue, row: ResourceUsageRow) => {
-        const isOverloaded = (row.assignedPercent ?? 0) > 1
+        const isOverloaded = typeof row.isOverloadedInTime === 'boolean' ? row.isOverloadedInTime : (row.assignedPercent ?? 0) > 1
         return <span className={isOverloaded ? 'text-red-600 font-medium' : 'text-slate-600'}>{String(val ?? '')}</span>
       },
     },

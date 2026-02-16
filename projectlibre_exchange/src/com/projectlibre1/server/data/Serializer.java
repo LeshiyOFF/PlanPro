@@ -255,6 +255,8 @@ public class Serializer {
             	public void execute(Assignment assignment,int s){
                     try {
 						ResourceImpl r=(ResourceImpl)assignment.getResource();
+						// Не сохраняем default-назначения в POD — при загрузке не будет «сброса» ресурса
+						if (r != null && r.isDefault()) return;
 						AssignmentData assignmentData=(AssignmentData)serialize(assignment,AssignmentData.FACTORY,null);
 						assignmentData.setStatus(SerializedDataObject.UPDATE);
 
@@ -276,7 +278,7 @@ public class Serializer {
 						assignmentData.setDuration(assignment.getDuration()); //assignments notification
 
 						assignments.add(assignmentData);
-
+						System.out.println("[ASSIGN-SAVE] taskId=" + taskData.getUniqueId() + " resourceId=" + (r.isDefault() ? "DEFAULT" : String.valueOf(r.getUniqueId())) + " snapshotId=" + s + " taskDirty=" + taskDirty);
 
 					} catch (IOException e) {
 						ErrorLogger.log(e);
@@ -284,6 +286,7 @@ public class Serializer {
             	}
             });
             if (flatAssignments==null) taskData.setAssignments(assignments);
+            if (taskDirty && flatAssignments==null) System.out.println("[ASSIGN-SAVE] taskId=" + taskData.getUniqueId() + " assignmentsCount=" + assignments.size());
 //~            taskData.setStart(new Date(task.getStart()));
 //~            taskData.setEnd(new Date(task.getEnd()));
 
@@ -1041,6 +1044,7 @@ public class Serializer {
 //    				assignments.addAll(task.getPersistedAssignments());
 //    			}
     			if (taskData.getAssignments()!=null) assignments.addAll(taskData.getAssignments());
+    			System.out.println("[ASSIGN-LOAD] taskId=" + taskData.getUniqueId() + " assignmentsFromData=" + (taskData.getAssignments()!=null ? taskData.getAssignments().size() : 0));
 
     			if (assignments.size()>0)
 				for (Iterator j=assignments.iterator();j.hasNext();){
@@ -1080,8 +1084,19 @@ public class Serializer {
     						assignmentData=(AssignmentData)obj;
     						if (loadResources==null){
     							EnterpriseResourceData r=assignmentData.getResource();
-    							if (r==null) assigned=false;
-    							resource=(r==null)?ResourceImpl.getUnassignedInstance():(Resource)((Node)resourceNodeMap.get(r)).getImpl();
+    							if (r==null) {
+    								assigned=false;
+    								resource=ResourceImpl.getUnassignedInstance();
+    							} else {
+    								Node node=(Node)resourceNodeMap.get(r);
+    								if (node==null) {
+    									assigned=false;
+    									resource=ResourceImpl.getUnassignedInstance();
+    									System.err.println("[ASSIGN-LOAD] Resource not found in map: " + r.getUniqueId());
+    								} else {
+    									resource=(Resource)node.getImpl();
+    								}
+    							}
     						}else{
     							long resId=assignmentData.getResourceId();
     							Node node=(Node)resourceNodeMap.get(resId);
@@ -1129,6 +1144,7 @@ public class Serializer {
     						assignment.setTimesheetAssignment(true);
     					}
     					//
+    					System.out.println("[ASSIGN-LOAD] taskId=" + task.getUniqueId() + " resourceId=" + (resource!=null ? resource.getUniqueId() : "null") + " snapshotId=" + snapshotId + " assigned=" + assigned);
 
     					snapshot.addAssignment(assignment);
 

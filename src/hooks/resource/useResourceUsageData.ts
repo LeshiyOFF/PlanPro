@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Resource } from '@/types/resource-types'
 import { Task, getTaskResourceIds } from '@/store/project/interfaces'
 import { IResourceUsage } from '@/domain/sheets/entities/IResourceUsage'
+import { ResourceLoadingService } from '@/domain/resources/services/ResourceLoadingService'
 
 /** Базовая загрузка: 100% = полная занятость ресурса */
 const BASE_CAPACITY = 1.0
@@ -72,19 +73,37 @@ const getWorkloadLevel = (loadPercent: number, t: TranslationFn): string => {
 }
 
 /**
+ * Вычисляет диапазон дат проекта по задачам (min start, max end).
+ * Возвращает null, если нет задач с валидными датами.
+ */
+function getProjectDateRange(tasks: Task[]): { start: Date; end: Date } | null {
+  const withDates = tasks.filter(
+    (task) => !task.isSummary && task.startDate && task.endDate,
+  )
+  if (withDates.length === 0) return null
+  let minStart = new Date(withDates[0].startDate!)
+  let maxEnd = new Date(withDates[0].endDate!)
+  for (const task of withDates) {
+    const s = new Date(task.startDate!)
+    const e = new Date(task.endDate!)
+    if (s < minStart) minStart = s
+    if (e > maxEnd) maxEnd = e
+  }
+  if (minStart > maxEnd) return null
+  return { start: minStart, end: maxEnd }
+}
+
+/**
  * Хук для преобразования ресурсов в формат IResourceUsage.
- * Использует реальные units из resourceAssignments.
- * @param resources - Массив ресурсов проекта
- * @param tasks - Массив задач проекта
- * @returns Массив данных для отображения в таблице использования
+ * Перегруз по времени (MS Project–style): статус «Перегружен» только при наличии дня с загрузкой > maxUnits.
  */
 export const useResourceUsageData = (
   resources: Resource[],
   tasks: Task[],
 ): IResourceUsage[] => {
   const { t } = useTranslation()
+  const loadingService = useMemo(() => new ResourceLoadingService(), [])
 
-  // Мемоизируем функции форматирования для стабильности
   const formatStatus = useCallback(
     (loadPercent: number) => getResourceStatus(loadPercent, t),
     [t],
@@ -95,6 +114,8 @@ export const useResourceUsageData = (
     [t],
   )
 
+  const dateRange = useMemo(() => getProjectDateRange(tasks), [tasks])
+
   return useMemo(() => {
     return resources.map((resource) => {
       const { totalUnits, loadPercent } = calculateResourceLoad(resource, tasks)
@@ -104,17 +125,41 @@ export const useResourceUsageData = (
         BASE_CAPACITY - Math.min(totalUnits, BASE_CAPACITY),
       )
 
+      const overloadedInTime =
+        dateRange !== null
+          ? loadingService.isResourceOverloadedInTime(
+              resource,
+              tasks,
+              dateRange.start,
+              dateRange.end,
+            )
+          : loadPercent > BASE_CAPACITY
+
+      let status: string
+      let workload: string
+      if (overloadedInTime) {
+        status = t('sheets.status_overloaded')
+        workload = t('sheets.workload_overload')
+      } else if (loadPercent > BASE_CAPACITY) {
+        status = t('sheets.status_distributed')
+        workload = t('sheets.workload_distributed')
+      } else {
+        status = formatStatus(loadPercent)
+        workload = formatWorkload(loadPercent)
+      }
+
       return {
         id: resource.id,
         resourceName: resource.name,
         assignedPercent,
         availablePercent,
-        status: formatStatus(loadPercent),
-        workload: formatWorkload(loadPercent),
+        status,
+        workload,
+        isOverloadedInTime: overloadedInTime,
         actualHours: 0,
         plannedHours: 0,
         variance: 0,
       }
     })
-  }, [resources, tasks, formatStatus, formatWorkload])
+  }, [resources, tasks, dateRange, loadingService, formatStatus, formatWorkload, t])
 }

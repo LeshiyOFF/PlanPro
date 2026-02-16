@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { EffortDrivenService } from '../EffortDrivenService'
 import type { Task, ResourceAssignment } from '@/store/project/interfaces'
 import type { CalendarPreferences } from '@/types/Master_Functionality_Catalog'
+import { TaskType } from '@/types/Master_Functionality_Catalog'
 
 /**
  * Тесты для EffortDrivenService.
@@ -218,15 +219,40 @@ describe('EffortDrivenService', () => {
   })
 
   describe('shouldApply', () => {
-    it('возвращает true если effortDriven включен и задача обычная', () => {
+    it('возвращает true если effortDriven включен и тип задачи FIXED_UNITS', () => {
       const task = createMockTask({
         isMilestone: false,
         isSummary: false,
+        type: TaskType.FIXED_UNITS,
       })
 
       const result = EffortDrivenService.shouldApply(true, task)
 
       expect(result).toBe(true)
+    })
+
+    it('возвращает true если effortDriven включен и тип задачи FIXED_WORK', () => {
+      const task = createMockTask({
+        isMilestone: false,
+        isSummary: false,
+        type: TaskType.FIXED_WORK,
+      })
+
+      const result = EffortDrivenService.shouldApply(true, task)
+
+      expect(result).toBe(true)
+    })
+
+    it('возвращает false для типа FIXED_DURATION (длительность не пересчитывается)', () => {
+      const task = createMockTask({
+        isMilestone: false,
+        isSummary: false,
+        type: TaskType.FIXED_DURATION,
+      })
+
+      const result = EffortDrivenService.shouldApply(true, task)
+
+      expect(result).toBe(false)
     })
 
     it('возвращает false если effortDriven отключен', () => {

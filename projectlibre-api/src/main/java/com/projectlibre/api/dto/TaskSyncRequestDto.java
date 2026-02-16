@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * DTO для запроса синхронизации задач из Frontend в Core Project.
@@ -66,6 +67,8 @@ public class TaskSyncRequestDto {
         private List<String> predecessors;
         private List<String> children;
         private List<String> resourceIds;
+        /** Назначения с resourceId и units; при десериализации используется для заполнения resourceIds при подстановке ID. */
+        private List<ResourceAssignmentItemDto> resourceAssignments;
         private String notes;
         private String color;
         // critical исключен - вычисляется ядром CPM, не должен приходить с frontend
@@ -94,7 +97,31 @@ public class TaskSyncRequestDto {
             this.predecessors = new ArrayList<>();
             this.children = new ArrayList<>();
             this.resourceIds = new ArrayList<>();
+            this.resourceAssignments = new ArrayList<>();
             this.acknowledgedConflicts = new HashMap<>();
+        }
+
+        /** Копирование полей из другой DTO (для подстановки resourceIds по mapping). */
+        public FrontendTaskDto(FrontendTaskDto other) {
+            this.id = other.id;
+            this.name = other.name;
+            this.duration = other.duration;
+            this.startDate = other.startDate;
+            this.endDate = other.endDate;
+            this.progress = other.progress;
+            this.level = other.level;
+            this.summary = other.summary;
+            this.milestone = other.milestone;
+            this.type = other.type;
+            this.predecessors = other.predecessors != null ? new ArrayList<>(other.predecessors) : new ArrayList<>();
+            this.children = other.children != null ? new ArrayList<>(other.children) : new ArrayList<>();
+            this.resourceIds = other.resourceIds != null ? new ArrayList<>(other.resourceIds) : new ArrayList<>();
+            this.resourceAssignments = other.resourceAssignments != null ? new ArrayList<>(other.resourceAssignments) : new ArrayList<>();
+            this.notes = other.notes;
+            this.color = other.color;
+            this.constraintType = other.constraintType;
+            this.constraintDate = other.constraintDate;
+            this.acknowledgedConflicts = other.acknowledgedConflicts != null ? new HashMap<>(other.acknowledgedConflicts) : new HashMap<>();
         }
         
         // Getters and Setters
@@ -139,10 +166,15 @@ public class TaskSyncRequestDto {
         }
         
         public List<String> getResourceIds() { return resourceIds; }
-        public void setResourceIds(List<String> resourceIds) { 
-            this.resourceIds = resourceIds != null ? resourceIds : new ArrayList<>(); 
+        public void setResourceIds(List<String> resourceIds) {
+            this.resourceIds = resourceIds != null ? resourceIds : new ArrayList<>();
         }
-        
+
+        public List<ResourceAssignmentItemDto> getResourceAssignments() { return resourceAssignments; }
+        public void setResourceAssignments(List<ResourceAssignmentItemDto> resourceAssignments) {
+            this.resourceAssignments = resourceAssignments != null ? resourceAssignments : new ArrayList<>();
+        }
+
         public String getNotes() { return notes; }
         public void setNotes(String notes) { this.notes = notes; }
         

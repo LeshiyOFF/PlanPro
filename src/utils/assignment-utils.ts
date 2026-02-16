@@ -36,8 +36,9 @@ export class AssignmentUtils {
     if (!assignment.resourceId) {
       return 'Resource ID обязателен'
     }
-    if (assignment.units !== undefined && (assignment.units < 0 || assignment.units > 100)) {
-      return 'Units должны быть в диапазоне 0-100'
+    // Формат коэффициента: 1.0 = 100%, допустимо до 10.0 (1000%)
+    if (assignment.units !== undefined && (assignment.units < 0 || assignment.units > 10)) {
+      return 'Units должны быть в диапазоне 0–1000% (0–10.0)'
     }
     return null
   }

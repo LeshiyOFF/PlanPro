@@ -130,6 +130,8 @@ public class ProjectDataDto {
         private int level;           // уровень вложенности (WBS)
         private boolean summary;     // является ли суммарной задачей
         private String type;         // TASK, MILESTONE
+        /** A.2: Тип планирования из Core — fixed_units, fixed_duration, fixed_work. Для вех/суммаров может быть null. */
+        private String schedulingType;
         private List<String> children;
         private List<String> predecessors;
         private List<String> resourceIds;
@@ -219,6 +221,10 @@ public class ProjectDataDto {
         
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }
+        
+        /** A.2: Тип планирования задачи (fixed_units, fixed_duration, fixed_work). */
+        public String getSchedulingType() { return schedulingType; }
+        public void setSchedulingType(String schedulingType) { this.schedulingType = schedulingType; }
         
         public List<String> getChildren() { return children; }
         public void setChildren(List<String> children) { this.children = children; }

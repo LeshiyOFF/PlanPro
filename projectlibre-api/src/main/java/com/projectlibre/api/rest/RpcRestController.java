@@ -4,7 +4,6 @@ import com.projectlibre.api.dto.RpcCommandRequestDto;
 import com.projectlibre.api.dto.RpcCommandResponseDto;
 import com.projectlibre.api.dto.UndoRedoStateDto;
 import com.projectlibre.api.dto.UndoRedoClearResponseDto;
-import com.projectlibre.api.dto.TaskSyncRequestDto;
 import com.projectlibre.api.dto.TaskSyncRequestDto.FrontendTaskDto;
 import com.projectlibre.api.service.ProjectService;
 import com.projectlibre.api.service.TaskService;
@@ -13,9 +12,8 @@ import com.projectlibre.api.service.PreferenceService;
 import com.projectlibre.api.undo.CoreUndoRedoAdapter;
 import com.projectlibre.api.concurrent.CoreAccessGuard;
 import com.projectlibre.api.storage.CoreProjectBridge;
-import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer;
-import com.projectlibre.api.sync.ApiToCoreResourceSynchronizer;
-import com.projectlibre.api.sync.SyncResult;
+import com.projectlibre.api.sync.ProjectSyncResult;
+import com.projectlibre.api.sync.ProjectSyncService;
 import com.projectlibre.api.converter.CoreToApiConverter;
 import com.projectlibre.api.service.CriticalPathRecalculationService;
 import com.projectlibre1.pm.task.Project;
@@ -45,7 +43,7 @@ public class RpcRestController {
     private final CoreUndoRedoAdapter undoRedoAdapter;
     private final CoreAccessGuard coreAccessGuard;
     private final CoreProjectBridge projectBridge;
-    private final ApiToCoreTaskSynchronizer synchronizer;
+    private final ProjectSyncService projectSyncService;
     private final CoreToApiConverter coreConverter;
     private final ObjectMapper objectMapper;
     private final CriticalPathRecalculationService criticalPathRecalculationService;
@@ -62,7 +60,7 @@ public class RpcRestController {
         this.criticalPathRecalculationService = criticalPathRecalculationService;
         this.undoRedoAdapter = CoreUndoRedoAdapter.getInstance();
         this.projectBridge = CoreProjectBridge.getInstance();
-        this.synchronizer = new ApiToCoreTaskSynchronizer();
+        this.projectSyncService = new ProjectSyncService();
         this.coreConverter = new CoreToApiConverter();
         this.objectMapper = new ObjectMapper();
     }
@@ -133,35 +131,22 @@ public class RpcRestController {
             syncRequest.setResources(resources);
         }
         
-        SyncResult taskResult = coreAccessGuard.executeWithLock(() -> 
-            synchronizer.synchronize(project, convertToTaskSyncRequest(syncRequest))
-        );
-        
-        if (!taskResult.isSuccess()) {
-            throw new RuntimeException("Sync failed: " + taskResult.getError());
+        ProjectSyncResult syncResult = coreAccessGuard.executeWithLock(() ->
+            projectSyncService.sync(project, syncRequest));
+        if (!syncResult.isSuccess()) {
+            throw new RuntimeException("Sync failed: " + syncResult.getErrorMessage());
         }
-        
-        if (syncRequest.getResources() != null && !syncRequest.getResources().isEmpty()) {
-            com.projectlibre.api.sync.ApiToCoreResourceSynchronizer resourceSync = 
-                new com.projectlibre.api.sync.ApiToCoreResourceSynchronizer();
-            SyncResult resourceResult = 
-                coreAccessGuard.executeWithLock(() -> 
-                    resourceSync.synchronize(project, syncRequest.getResources())
-                );
-            
-            if (!resourceResult.isSuccess()) {
-                System.err.println("[RpcController] Resource sync warning: " + resourceResult.getError());
-            }
+        if (syncResult.getResourceIdMapping() != null && !syncResult.getResourceIdMapping().isEmpty()) {
+            System.out.println("[RpcController] ✅ Resource ID mapping: " + syncResult.getResourceIdMapping());
         }
-        
-        return projectService.getProjectById(projectId);
-    }
-    
-    private TaskSyncRequestDto convertToTaskSyncRequest(com.projectlibre.api.dto.ProjectSyncRequestDto request) {
-        TaskSyncRequestDto taskRequest = new TaskSyncRequestDto();
-        taskRequest.setProjectId(request.getProjectId());
-        taskRequest.setTasks(request.getTasks());
-        return taskRequest;
+
+        com.projectlibre.api.model.Project updatedProject = projectService.getProjectById(projectId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("project", updatedProject);
+        if (syncResult.getResourceIdMapping() != null && !syncResult.getResourceIdMapping().isEmpty()) {
+            response.put("resourceIdMapping", syncResult.getResourceIdMapping());
+        }
+        return response;
     }
     
     private Long asLong(Object val) {

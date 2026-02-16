@@ -284,6 +284,8 @@ export interface FrontendTaskData {
   type: string
   predecessors: string[]
   children: string[]
+  /** Список ID ресурсов (дублирует resourceAssignments для бэкенда). */
+  resourceIds?: string[]
   /** Назначения ресурсов с указанием процента загрузки */
   resourceAssignments: FrontendResourceAssignment[]
   notes: string
@@ -310,9 +312,22 @@ export interface CalendarSyncData {
   templateType?: string
 }
 
-// Данные ресурса для синхронизации
+/**
+ * Данные ресурса для синхронизации.
+ * 
+ * V2.0: Добавлено temporaryId для маппинга Frontend ID → Core ID.
+ * При создании новых ресурсов Frontend генерирует временные ID (RES-XXX),
+ * а Java Core генерирует постоянные numeric ID.
+ */
 export interface FrontendResourceData {
   id: string
+  /**
+   * Временный ID из Frontend (например "RES-001").
+   * Используется для маппинга при синхронизации с Java Core,
+   * который генерирует собственные numeric ID.
+   * Устанавливается автоматически для ресурсов с non-numeric ID.
+   */
+  temporaryId?: string
   name: string
   type: string
   maxUnits: number

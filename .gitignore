@@ -69,3 +69,7 @@ logs/
 .ant/
 .m2/
 .gradle/
+
+# === Maven ===
+projectlibre-api/target/
+projectlibre-api/projectlibre-api-final.jar

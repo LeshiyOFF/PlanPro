@@ -38,6 +38,31 @@ export class ResourceLoadingService {
   }
 
   /**
+   * Проверяет, есть ли хотя бы один день в диапазоне, когда загрузка ресурса превышает maxUnits
+   * (временной конфликт, MS Project–style). Используется для согласованного статуса таблицы и гистограммы.
+   *
+   * @param resource Ресурс
+   * @param tasks Задачи проекта
+   * @param startDate Начало периода
+   * @param endDate Конец периода
+   * @returns true, если в какой-то день нагрузка > maxUnits
+   */
+  public isResourceOverloadedInTime(
+    resource: Resource,
+    tasks: Task[],
+    startDate: Date,
+    endDate: Date,
+  ): boolean {
+    const start = new Date(startDate)
+    start.setHours(0, 0, 0, 0)
+    const end = new Date(endDate)
+    end.setHours(23, 59, 59, 999)
+    if (start > end) return false
+    const days = this.buildDaysArray(resource, tasks, start, end)
+    return days.some(d => d.isOverloaded)
+  }
+
+  /**
    * Строит массив данных по дням
    */
   private buildDaysArray(

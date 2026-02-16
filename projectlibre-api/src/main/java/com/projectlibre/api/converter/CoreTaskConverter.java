@@ -5,6 +5,7 @@ import com.projectlibre.api.validator.MilestoneProgressValidator;
 import com.projectlibre1.pm.task.Project;
 import com.projectlibre1.pm.task.Task;
 import com.projectlibre1.pm.task.NormalTask;
+import com.projectlibre1.pm.scheduling.SchedulingType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -94,8 +95,28 @@ public class CoreTaskConverter {
         // PERSISTENT-CONFLICT: Загружаем acknowledgedConflicts из customText(1)
         loadAcknowledgedConflicts(coreTask, dto);
         
+        // A.2: Тип планирования из Core (только для NormalTask)
+        if (coreTask instanceof NormalTask) {
+            int st = ((NormalTask) coreTask).getSchedulingType();
+            dto.setSchedulingType(mapSchedulingTypeToString(st));
+        }
+        
         logCoreAuthData(dto);
         return dto;
+    }
+    
+    /** A.2: Маппинг int SchedulingType из Core в строку для API. */
+    private static String mapSchedulingTypeToString(int schedulingType) {
+        switch (schedulingType) {
+            case SchedulingType.FIXED_UNITS:
+                return "fixed_units";
+            case SchedulingType.FIXED_DURATION:
+                return "fixed_duration";
+            case SchedulingType.FIXED_WORK:
+                return "fixed_work";
+            default:
+                return "fixed_duration";
+        }
     }
     
     /**

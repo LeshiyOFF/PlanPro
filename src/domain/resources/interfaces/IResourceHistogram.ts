@@ -3,7 +3,7 @@
  */
 export interface IResourceWorkloadDay {
   date: Date;
-  workloadPercent: number; // 0.0 - 1.0 (1.0 = 100%)
+  workloadPercent: number; // 0.0 - 1.0 (1.0 = 100%); при перегрузке допустимы значения >1.0
   maxCapacityPercent: number; // Обычно 1.0, но может быть меньше/больше
   isOverloaded: boolean;
 }

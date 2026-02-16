@@ -83,6 +83,9 @@ export class TaskDataConverter {
     // V3.2: Duration из API или fallback вычисление из дат
     const duration = TaskDataConverter.extractDuration(coreTask, startDate, endDate)
 
+    // A.2: Тип планирования — приоритет у schedulingType из Core, иначе type/fallback
+    const taskType = TaskDataConverter.resolveTaskType(coreTask)
+
     return {
       id: coreTask.id,
       name: coreTask.name || 'Unnamed Task',
@@ -93,7 +96,7 @@ export class TaskDataConverter {
       color: coreTask.color || '#4A90D9',
       level: (coreTask.level ?? 0) + 1,
       isSummary: coreTask.summary || false,
-      type: (coreTask.type as TaskType) ?? TaskType.FIXED_DURATION,
+      type: taskType,
       children: coreTask.children || [],
       predecessors: coreTask.predecessors || [],
       resourceAssignments,
@@ -106,6 +109,15 @@ export class TaskDataConverter {
       // PERSISTENT-CONFLICT: Загрузка флагов осознанных конфликтов из файла
       acknowledgedConflicts: coreTask.acknowledgedConflicts || {},
     } as Task
+  }
+
+  /** A.2: Определяет TaskType из Core: приоритет schedulingType, иначе type или FIXED_DURATION. */
+  private static resolveTaskType(coreTask: CoreTaskData): TaskType {
+    const valid: TaskType[] = [TaskType.FIXED_UNITS, TaskType.FIXED_DURATION, TaskType.FIXED_WORK]
+    if (coreTask.schedulingType != null && valid.includes(coreTask.schedulingType as TaskType)) {
+      return coreTask.schedulingType as TaskType
+    }
+    return (coreTask.type as TaskType) ?? TaskType.FIXED_DURATION
   }
   
   /**
@@ -145,13 +157,14 @@ export class TaskDataConverter {
   /**
    * Мигрирует resourceIds в resourceAssignments.
    * Приоритет: resourceAssignments > resourceIds.
+   * UNITS: Всегда сохраняем units в формате коэффициента (1.0 = 100%) — предотвращает деградацию 100% → 50% при циклах load/save.
    */
   private static migrateResourceAssignments(coreTask: CoreTaskData): ResourceAssignment[] {
     // Приоритет 1: Если есть resourceAssignments, используем их
     if (TaskDataConverter.coreTaskWithAssignments(coreTask)) {
       return coreTask.resourceAssignments.map((a) => ({
         resourceId: String(a.resourceId),
-        units: a.units ?? 1.0,
+        units: ResourceUnitsConverter.toCoefficient(a.units ?? 1.0),
       }))
     }
 
@@ -216,6 +229,10 @@ export class TaskDataConverter {
    * ВАЖНО: critical исключен, так как вычисляется ядром CPM.
    */
   static frontendTaskToSync(task: Task): FrontendTaskData {
+    const resourceAssignments = task.resourceAssignments || []
+    const resourceIds = resourceAssignments.length > 0
+      ? resourceAssignments.map((a) => String(a.resourceId))
+      : (task.resourceIds ?? [])
     return {
       id: task.id,
       name: task.name || 'Unnamed Task',
@@ -229,12 +246,11 @@ export class TaskDataConverter {
       type: task.type ?? TaskType.FIXED_DURATION,
       predecessors: task.predecessors || [],
       children: task.children || [],
-      resourceAssignments: task.resourceAssignments || [],
+      resourceIds,
+      resourceAssignments,
       notes: task.notes || '',
       color: (task as Task & { color?: string }).color ?? '#4A90D9',
-      // PERSISTENT-CONFLICT: Сохранение флагов осознанных конфликтов в файл
       acknowledgedConflicts: task.acknowledgedConflicts || {},
-      // critical НЕ отправляется - вычисляется ядром
     }
   }
 

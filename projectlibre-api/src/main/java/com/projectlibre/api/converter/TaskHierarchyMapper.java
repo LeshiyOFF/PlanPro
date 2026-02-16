@@ -92,6 +92,9 @@ public class TaskHierarchyMapper {
                     }
                 }
             }
+            if (result.size() > 0) {
+                System.out.println("[TaskHierarchyMapper.getResourceAssignments] taskId=" + task.getUniqueId() + " count=" + result.size());
+            }
         } catch (Exception e) {
             System.err.println("[TaskHierarchyMapper] Error getting resource assignments: " + e.getMessage());
         }

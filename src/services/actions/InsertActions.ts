@@ -91,6 +91,7 @@ export class NewResourceAction extends BaseAction {
       standardRate: 0,
       overtimeRate: 0,
       costPerUse: 0,
+      calendarId: 'standard',
     }
 
     store.addResource(newResource)

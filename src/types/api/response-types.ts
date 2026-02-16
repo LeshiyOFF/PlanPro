@@ -338,6 +338,8 @@ export interface CoreTaskData {
   level: number
   summary: boolean
   type: string
+  /** A.2: Тип планирования из Core (fixed_units | fixed_duration | fixed_work). Приоритет над type при формировании Task.type. */
+  schedulingType?: string
   children?: string[]
   predecessors?: string[]
   resourceIds?: string[]
@@ -394,6 +396,10 @@ export interface CoreCalendarData {
 /**
  * Полные данные проекта (tasks + resources + calendars) из Core модели.
  * Ответ от GET /api/files/project/{id}/data
+ * 
+ * V2.0: Добавлено поле resourceIdMapping для синхронизации ID ресурсов.
+ * При создании новых ресурсов Java Core генерирует numeric ID,
+ * маппинг позволяет Frontend обновить все ссылки.
  */
 export interface ProjectDataResponse extends BaseResponse {
   success: boolean
@@ -407,6 +413,12 @@ export interface ProjectDataResponse extends BaseResponse {
   taskCount?: number
   resourceCount?: number
   error?: string
+  /**
+   * Маппинг временных Frontend ID → постоянных Core ID.
+   * Пример: { "RES-001": "1739476808000", "RES-002": "1739476808001" }
+   * Используется для обновления resourceAssignments после синхронизации.
+   */
+  resourceIdMapping?: Record<string, string>
 }
 
 // Ответ синхронизации задач
@@ -415,5 +427,20 @@ export interface TaskSyncResponse {
   syncedCount: number
   skippedCount: number
   message: string
+}
+
+/**
+ * Ответ синхронизации проекта (задачи + ресурсы).
+ * V2.0: Добавлен resourceIdMapping для маппинга временных ID → постоянных Core ID.
+ */
+export interface ProjectSyncResponse {
+  success: boolean
+  project?: CoreTaskData[]
+  /**
+   * Маппинг временных Frontend ID → постоянных Core ID.
+   * Пример: { "RES-001": "1739476808000" }
+   */
+  resourceIdMapping?: Record<string, string>
+  error?: string
 }
 

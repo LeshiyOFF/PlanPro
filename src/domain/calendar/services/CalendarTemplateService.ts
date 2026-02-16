@@ -79,13 +79,13 @@ export class CalendarTemplateService {
   }
 
   /**
-   * Стандартный офисный график: 5/2, Пн-Пт 09:00-18:00
+   * Стандартный график «Пятидневка»: 5/2, Пн-Пт 09:00-18:00 (совпадает с Core/API).
    */
   private getStandardTemplate(): ICalendarTemplate {
     return {
       type: CalendarTemplateType.STANDARD,
-      name: 'Стандартный (Офис)',
-      description: 'Классический офисный график: пятидневная рабочая неделя с выходными в субботу и воскресенье',
+      name: 'Пятидневка',
+      description: 'Пятидневная рабочая неделя с выходными в субботу и воскресенье',
       shortDescription: '8ч/дн, 5/2, Пн-Пт',
       hoursPerDay: 8,
       workingDaysPerWeek: 5,

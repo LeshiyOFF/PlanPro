@@ -13,6 +13,7 @@ export const initialResources: Resource[] = [
     overtimeRate: 75,
     costPerUse: 0,
     available: true,
+    calendarId: 'standard',
   },
 ]
 

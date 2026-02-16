@@ -8,6 +8,11 @@ export interface IResourceUsage {
   availablePercent: number;
   status: string;
   workload: string;
+  /**
+   * Перегруз по времени (временной конфликт): true, если хотя бы в один день загрузка > maxUnits.
+   * Используется для согласованной подсветки таблицы с гистограммой (MS Project–style).
+   */
+  isOverloadedInTime?: boolean;
   /** Фактические часы (заполняется при внедрении Timesheet). В CSV при экспорте. */
   actualHours?: number;
   /** Плановые часы по назначениям. В CSV при экспорте. */

@@ -146,7 +146,7 @@ public class AssignmentData extends SerializedDataObject {
 		if (!super.equals(obj)) return false;
 		if (obj instanceof AssignmentData){
 			AssignmentData data=(AssignmentData)obj;
-			return data.getTaskId()==getTaskId()&&data.getSnapshotId()==data.getSnapshotId();
+			return data.getTaskId()==getTaskId()&&data.getSnapshotId()==getSnapshotId();
 		}else return false;
 	}
 	public final Date getCachedStart() {

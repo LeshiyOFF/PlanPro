@@ -56,10 +56,10 @@ const ResourceUsageViewInner: React.FC<{ viewType: ViewType; settings?: Partial<
   const histogramDateRange = useMemo(() => {
     if (!selectedResourceId || tasks.length === 0) return null
 
-    // Находим задачи, назначенные на выбранный ресурс
+    const selectedIdStr = String(selectedResourceId)
     const resourceTasks = tasks.filter(t =>
-      t.resourceAssignments?.some(a => a.resourceId === selectedResourceId) ||
-      getTaskResourceIds(t).includes(selectedResourceId),
+      t.resourceAssignments?.some(a => String(a.resourceId) === selectedIdStr) ||
+      getTaskResourceIds(t).some(id => String(id) === selectedIdStr),
     )
 
     if (resourceTasks.length === 0) return null
@@ -86,7 +86,8 @@ const ResourceUsageViewInner: React.FC<{ viewType: ViewType; settings?: Partial<
 
   // Данные для гистограммы с динамическим диапазоном
   const histogramData = useMemo(() => {
-    const resource = resources.find(r => r.id === selectedResourceId)
+    const selectedIdStr = String(selectedResourceId)
+    const resource = resources.find(r => String(r.id) === selectedIdStr)
     if (!resource) return null
 
     // Создаём новые Date объекты для избежания мутации

@@ -175,7 +175,7 @@
     "months": "мес."
   },
   "calendars": {
-    "standard": "Стандартный",
+    "standard": "Пятидневка",
     "night_shift": "Ночная смена",
     "24_hours": "24 часа",
     "24_7": "Круглосуточный",
@@ -260,8 +260,10 @@
     "status_partial": "Частично занят",
     "status_busy": "Занят",
     "status_overloaded": "Перегружен",
+    "status_distributed": "Распределён",
     "status_unavailable": "Недоступен",
     "workload_overload": "Перегрузка",
+    "workload_distributed": "Распределена",
     "workload_normal": "Норма",
     "new_task_usage": "Новая задача (Использование)",
     "new_resource_usage": "Новый ресурс (Использование)",

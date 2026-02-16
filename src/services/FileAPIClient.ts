@@ -10,6 +10,7 @@ import type {
   TaskSyncRequest,
   TaskSyncResponse,
   ProjectSyncRequest,
+  ProjectSyncResponse,
 } from '@/types/api'
 import type { FileAPI } from '@/types/api/file-api.types'
 import { type CaughtError, toCaughtError } from '@/errors/CaughtError'
@@ -156,10 +157,12 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
    * Unified синхронизация проекта (задачи + ресурсы) в Core Project.
    * Современный метод, заменяющий syncTasksToCore.
    *
+   * V2.0: Возвращает resourceIdMapping для маппинга временных ID → постоянных Core ID.
+   *
    * @param request - Запрос с projectId, задачами и ресурсами
-   * @returns Результат синхронизации
+   * @returns Результат синхронизации с ID mapping
    */
-  async syncProjectToCore(request: ProjectSyncRequest): Promise<TaskSyncResponse> {
+  async syncProjectToCore(request: ProjectSyncRequest): Promise<ProjectSyncResponse> {
     try {
       console.log('[FileAPIClient] Syncing project to Core:', {
         projectId: request.projectId,
@@ -167,12 +170,18 @@ export class FileAPIClient extends BaseAPIClient implements FileAPI {
         resourceCount: request.resources.length,
       })
 
-      const response = await this.post<TaskSyncResponse>(
+      const response = await this.post<ProjectSyncResponse>(
         '/files/sync-project',
         request as StrictData,
       )
 
       console.log('[FileAPIClient] Sync response:', response.data)
+
+      // Логируем ID mapping если есть
+      if (response.data.resourceIdMapping) {
+        console.log('[FileAPIClient] ✅ Resource ID mapping:', response.data.resourceIdMapping)
+      }
+
       return response.data
     } catch (error) {
       console.error('[FileAPIClient] Sync error:', error)

@@ -6,6 +6,11 @@ import { logger } from '@/utils/logger'
 import { RecalculationEngine } from '@/services/RecalculationEngine'
 import { useIpcService } from '@/hooks/useIpcService'
 import { useAutoSave } from '@/hooks/useAutoSave'
+import { useProjectLibreAPI } from '@/hooks/useProjectLibreAPI'
+import { useProjectStore } from '@/store/projectStore'
+import { TaskDataConverter } from '@/services/TaskDataConverter'
+import { ResourceDataConverter } from '@/services/ResourceDataConverter'
+import { ProjectAutoSaveService } from '@/services/ProjectAutoSaveService'
 
 /**
  * Хук для инициализации системных сервисов приложения
@@ -14,9 +19,27 @@ export const useAppInitialization = () => {
   const { handleError } = useErrorHandler()
   const { captureError } = useSentry()
   const ipcService = useIpcService()
+  const { file } = useProjectLibreAPI()
 
   // Инициализация автосохранения
   useAutoSave()
+
+  // Регистрация sync с Core для автосохранения (возвращает resourceIdMapping)
+  useEffect(() => {
+    if (!file?.syncProjectToCore) return
+    const syncFn = async () => {
+      const state = useProjectStore.getState()
+      if (state.currentProjectId == null || state.currentProjectId < 0) return null
+      return file.syncProjectToCore({
+        projectId: state.currentProjectId,
+        tasks: TaskDataConverter.frontendTasksToSync(state.tasks),
+        resources: ResourceDataConverter.frontendResourcesToSync(state.resources, state.calendars),
+        projectCalendars: ResourceDataConverter.calendarsToSyncData(state.calendars),
+      })
+    }
+    ProjectAutoSaveService.getInstance().setSyncProjectToCoreFn(syncFn)
+    return () => ProjectAutoSaveService.getInstance().setSyncProjectToCoreFn(undefined)
+  }, [file])
 
   // Инициализация Profiler и Metrics Collector
   useEffect(() => {

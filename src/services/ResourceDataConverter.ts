@@ -5,6 +5,10 @@ import type { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
 /**
  * Сервис конвертации данных ресурсов между форматами.
  *
+ * V3.0 КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ:
+ * - Добавлена поддержка temporaryId для маппинга Frontend ID → Core ID
+ * - При синхронизации Java Core генерирует numeric ID для новых ресурсов
+ *
  * V2.0 КРИТИЧЕСКИЕ ИЗМЕНЕНИЯ:
  * - Добавлена поддержка calendarData для передачи полных настроек календаря
  * - Это исправляет баг с потерей настроек кастомных календарей
@@ -13,13 +17,14 @@ import type { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
  * SOLID: Single Responsibility - только конвертация ресурсов.
  *
  * @author ProjectLibre Team
- * @version 2.0.0
+ * @version 3.0.0
  */
 export class ResourceDataConverter {
 
   /**
    * Конвертирует frontend Resource в формат для синхронизации с Core.
    * Включает полные данные календаря если это кастомный календарь.
+   * Устанавливает temporaryId для ресурсов с non-numeric ID.
    *
    * @param resource ресурс для конвертации
    * @param calendars массив календарей для поиска данных
@@ -28,6 +33,7 @@ export class ResourceDataConverter {
     resource: Resource,
     calendars?: IWorkCalendar[],
   ): FrontendResourceData {
+    const effectiveCalendarId = resource.calendarId ?? 'standard'
     const result: FrontendResourceData = {
       id: resource.id,
       name: resource.name || 'Unnamed Resource',
@@ -36,16 +42,21 @@ export class ResourceDataConverter {
       standardRate: resource.standardRate || 0,
       overtimeRate: resource.overtimeRate || 0,
       costPerUse: resource.costPerUse || 0,
-      calendarId: resource.calendarId,
+      calendarId: effectiveCalendarId,
       materialLabel: resource.materialLabel,
       email: resource.email,
       group: resource.group,
       available: resource.available ?? true,
     }
 
-    if (resource.calendarId && calendars) {
+    // Устанавливаем temporaryId для ресурсов с non-numeric ID
+    if (ResourceDataConverter.isTemporaryId(resource.id)) {
+      result.temporaryId = resource.id
+    }
+
+    if (effectiveCalendarId && calendars) {
       const calendarData = ResourceDataConverter.findAndConvertCalendar(
-        resource.calendarId,
+        effectiveCalendarId,
         calendars,
       )
       if (calendarData) {
@@ -54,6 +65,16 @@ export class ResourceDataConverter {
     }
 
     return result
+  }
+
+  /**
+   * Проверяет, является ли ID временным (non-numeric).
+   * Временные ID начинаются с "RES-" или не являются числами.
+   */
+  private static isTemporaryId(id: string): boolean {
+    if (!id) return false
+    if (id.startsWith('RES-')) return true
+    return !/^\d+$/.test(id)
   }
 
   /**

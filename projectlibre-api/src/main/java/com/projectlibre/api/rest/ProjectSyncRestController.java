@@ -5,10 +5,9 @@ import com.projectlibre.api.dto.ProjectSyncRequestDto;
 import com.projectlibre.api.dto.TaskSyncResponseDto;
 import com.projectlibre.api.storage.CoreProjectBridge;
 import com.projectlibre.api.concurrent.CoreAccessGuard;
-import com.projectlibre.api.sync.ApiToCoreResourceSynchronizer;
-import com.projectlibre.api.sync.ApiToCoreTaskSynchronizer;
 import com.projectlibre.api.sync.ProjectCalendarSyncService;
-import com.projectlibre.api.sync.SyncResult;
+import com.projectlibre.api.sync.ProjectSyncResult;
+import com.projectlibre.api.sync.ProjectSyncService;
 import com.projectlibre1.pm.task.Project;
 
 import jakarta.validation.Valid;
@@ -35,16 +34,14 @@ public class ProjectSyncRestController {
     
     private final CoreAccessGuard coreAccessGuard;
     private final CoreProjectBridge projectBridge;
-    private final ApiToCoreTaskSynchronizer taskSynchronizer;
-    private final ApiToCoreResourceSynchronizer resourceSynchronizer;
+    private final ProjectSyncService projectSyncService;
     private final ProjectCalendarSyncService projectCalendarSyncService;
 
     @Autowired
     public ProjectSyncRestController(CoreAccessGuard coreAccessGuard) {
         this.coreAccessGuard = coreAccessGuard;
         this.projectBridge = CoreProjectBridge.getInstance();
-        this.taskSynchronizer = new ApiToCoreTaskSynchronizer();
-        this.resourceSynchronizer = new ApiToCoreResourceSynchronizer();
+        this.projectSyncService = new ProjectSyncService();
         this.projectCalendarSyncService = new ProjectCalendarSyncService();
     }
     
@@ -61,38 +58,13 @@ public class ProjectSyncRestController {
                 return ResponseEntity.badRequest()
                     .body(ApiResponseDto.error("Project not found: " + request.getProjectId()));
             }
-            
-            int totalSynced = 0;
-            int totalSkipped = 0;
-            
-            SyncResult taskResult = coreAccessGuard.executeWithLock(() -> 
-                taskSynchronizer.synchronize(project, createTaskSyncRequest(request))
-            );
-            
-            if (!taskResult.isSuccess()) {
-                log.error("[ProjectSync] ❌ Task sync failed: {}", taskResult.getError());
+
+            ProjectSyncResult syncResult = coreAccessGuard.executeWithLock(() ->
+                projectSyncService.sync(project, request));
+            if (!syncResult.isSuccess()) {
+                log.error("[ProjectSync] ❌ Sync failed: {}", syncResult.getErrorMessage());
                 return ResponseEntity.badRequest()
-                    .body(ApiResponseDto.error("Sync failed: " + taskResult.getError()));
-            }
-            
-            totalSynced += taskResult.getSyncedCount();
-            totalSkipped += taskResult.getSkippedCount();
-            
-            if (request.getResources() != null && !request.getResources().isEmpty()) {
-                SyncResult resourceResult = coreAccessGuard.executeWithLock(() -> 
-                    resourceSynchronizer.synchronize(project, request.getResources())
-                );
-                
-                if (!resourceResult.isSuccess()) {
-                    log.warn("[ProjectSync] ⚠️ Resource sync failed: {}", resourceResult.getError());
-                    if (resourceResult.getErrorCode() != null) {
-                        return ResponseEntity.badRequest()
-                            .body(ApiResponseDto.error(resourceResult.getErrorMessage()));
-                    }
-                }
-                
-                totalSynced += resourceResult.getSyncedCount();
-                totalSkipped += resourceResult.getSkippedCount();
+                    .body(ApiResponseDto.error(syncResult.getErrorMessage()));
             }
 
             if (request.getProjectCalendars() != null) {
@@ -100,8 +72,11 @@ public class ProjectSyncRestController {
                     projectCalendarSyncService.applyProjectCalendars(project, request.getProjectCalendars()));
             }
 
-            TaskSyncResponseDto data = TaskSyncResponseDto.success(totalSynced, totalSkipped);
-            log.info("[ProjectSync] ✅ Sync completed: synced={}, skipped={}", totalSynced, totalSkipped);
+            TaskSyncResponseDto data = TaskSyncResponseDto.success(
+                syncResult.getTotalSynced(), syncResult.getTotalSkipped(), syncResult.getResourceIdMapping());
+            log.info("[ProjectSync] ✅ Sync completed: synced={}, skipped={}, mappingSize={}",
+                syncResult.getTotalSynced(), syncResult.getTotalSkipped(),
+                syncResult.getResourceIdMapping() != null ? syncResult.getResourceIdMapping().size() : 0);
             return ResponseEntity.ok(ApiResponseDto.success("Project synced", data));
             
         } catch (Throwable t) {
@@ -125,10 +100,4 @@ public class ProjectSyncRestController {
         }
     }
     
-    private com.projectlibre.api.dto.TaskSyncRequestDto createTaskSyncRequest(ProjectSyncRequestDto request) {
-        com.projectlibre.api.dto.TaskSyncRequestDto taskRequest = new com.projectlibre.api.dto.TaskSyncRequestDto();
-        taskRequest.setProjectId(request.getProjectId());
-        taskRequest.setTasks(request.getTasks());
-        return taskRequest;
-    }
 }
