@@ -56,8 +56,13 @@ linux:
   description: ПланПро - система управления проектами для малого и среднего бизнеса
   desktop:
     Name: ПланПро
+    Name[ru]: ПланПро
+    GenericName: Project Management Software
+    GenericName[ru]: Система управления проектами
     Comment: Управление проектами
+    Comment[ru]: Управление проектами
     Categories: Office;ProjectManagement;
+    StartupNotify: true
 deb:
   depends:
     - libgtk-3-0
