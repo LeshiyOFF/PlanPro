@@ -26,10 +26,10 @@ fi
 
 # 2. Установка прав на основное приложение
 echo "[2/5] Настройка прав на приложение..."
-if [ -f "$APP_DIR/planpro" ]; then
-    chmod +x "$APP_DIR/planpro" 2>/dev/null && echo "  ✓ planpro executable permissions set" || echo "  ⚠ Failed to set planpro permissions"
+if [ -f "$APP_DIR/com.prosystems.planpro" ]; then
+    chmod +x "$APP_DIR/com.prosystems.planpro" 2>/dev/null && echo "  ✓ com.prosystems.planpro executable permissions set" || echo "  ⚠ Failed to set executable permissions"
 else
-    echo "  ⚠ Warning: planpro binary not found"
+    echo "  ⚠ Warning: com.prosystems.planpro binary not found"
 fi
 
 # 3. Создание ярлыка на рабочем столе для всех пользователей

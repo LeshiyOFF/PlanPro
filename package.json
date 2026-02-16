@@ -1,6 +1,6 @@
 {
   "name": "planpro-electron",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "ПланПро - Профессиональное ПО для управления проектами",
   "main": "dist-app/electron/main.js",
   "homepage": "./",

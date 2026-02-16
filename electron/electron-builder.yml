@@ -46,8 +46,8 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
 linux:
-  icon: assets/icon.png
-  executableName: planpro
+  icon: assets/icon.svg
+  executableName: com.prosystems.planpro
   target:
     - deb
   category: Office
@@ -61,6 +61,7 @@ linux:
     GenericName[ru]: Система управления проектами
     Comment: Управление проектами
     Comment[ru]: Управление проектами
+    Icon: com.prosystems.planpro
     Categories: Office;ProjectManagement;
     StartupNotify: true
 deb:
