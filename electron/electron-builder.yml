@@ -46,6 +46,8 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
 linux:
+  icon: assets/icon.png
+  executableName: planpro
   target:
     - deb
   category: Office
