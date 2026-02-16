@@ -133,6 +133,7 @@ export class WindowManager implements IWindowManager {
 
   /**
    * Получение пути к иконке приложения.
+   * Иконки копируются в resources/assets/ через extraResources в electron-builder.yml
    */
   private getAppIcon(): string | undefined {
     const iconFormats: Record<string, string> = {
@@ -142,7 +143,7 @@ export class WindowManager implements IWindowManager {
     }
 
     const iconFile = iconFormats[process.platform] || 'icon.png'
-    const iconPath = join(this.configService.getResourcesPath(), '../assets', iconFile)
+    const iconPath = join(this.configService.getResourcesPath(), 'assets', iconFile)
 
     return fs.existsSync(iconPath) ? iconPath : undefined
   }
