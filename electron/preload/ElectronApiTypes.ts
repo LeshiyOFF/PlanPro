@@ -90,4 +90,12 @@ export interface ElectronAPI {
   ) => Promise<JavaApiResponseBase & { preferences?: UserPreferences }>;
 
   removeAllListeners: (channel: string) => void;
+
+  /**
+   * Получить абсолютный путь к файлу из drag-and-drop события.
+   * Использует webUtils.getPathForFile() для кроссплатформенной совместимости.
+   * @param file - File объект из e.dataTransfer.files
+   * @returns Абсолютный путь к файлу или пустая строка если недоступен
+   */
+  getFilePathFromDrop: (file: File) => string;
 }

@@ -66,9 +66,11 @@ export const IntegratedMenu: React.FC = () => {
       const files = e.dataTransfer?.files
       if (files && files.length > 0) {
         const file = files[0]
-        // Electron добавляет path к File в drag-and-drop; в браузере его нет
-        const fileWithPath = file as File & { path?: string }
-        const filePath = fileWithPath.path
+        const api = getElectronAPI()
+        
+        // Используем webUtils.getPathForFile() для кроссплатформенной совместимости
+        // Работает на Windows, Linux, macOS (в отличие от устаревшего file.path)
+        const filePath = api?.getFilePathFromDrop?.(file) || ''
 
         console.log('[IntegratedMenu] File dropped:', {
           name: file.name,
@@ -80,7 +82,6 @@ export const IntegratedMenu: React.FC = () => {
         if (filePath) {
           // Проверяем расширение файла
           if (!filePath.endsWith('.pod')) {
-            const api = getElectronAPI()
             if (api?.showMessageBox) {
               await api.showMessageBox({
                 type: 'warning',
@@ -95,13 +96,12 @@ export const IntegratedMenu: React.FC = () => {
           await loadProjectFromPath(filePath)
         } else {
           // Fallback: если path недоступен, предлагаем использовать диалог
-          console.error('[IntegratedMenu] File path not available from drop event. This might be a security restriction.')
-          const api = getElectronAPI()
+          console.error('[IntegratedMenu] File path not available from drop event.')
           if (api?.showMessageBox) {
             await api.showMessageBox({
               type: 'info',
               title: 'Используйте кнопку "Открыть"',
-              message: 'Drag-and-drop временно недоступен из-за настроек безопасности.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+              message: 'Drag-and-drop временно недоступен.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
             })
           }
         }

@@ -1,10 +1,10 @@
-import { contextBridge } from 'electron';
+import { contextBridge, webUtils } from 'electron';
 import { createElectronAPI } from './preload/ElectronApiFactory';
 import { ElectronAPI } from './preload/ElectronApiTypes';
 
 export { ElectronAPI };
 
-const electronAPI = createElectronAPI();
+const electronAPI = createElectronAPI(webUtils);
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
 

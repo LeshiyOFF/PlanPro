@@ -89,7 +89,11 @@ export const FullScreenStartupScreen: React.FC = () => {
       e.preventDefault()
       const file = e.dataTransfer.files[0]
       if (!file) return
-      const path = (file as File & { path?: string }).path
+      
+      // Используем webUtils.getPathForFile() для кроссплатформенной совместимости
+      const api = getElectronAPI()
+      const path = api?.getFilePathFromDrop?.(file) || ''
+      
       if (!path) return
       const ext = path.toLowerCase().slice(path.lastIndexOf('.'))
       if (!ALLOWED_EXTENSIONS.includes(ext)) return

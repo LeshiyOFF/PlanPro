@@ -1,4 +1,4 @@
-import { ipcRenderer, IpcRendererEvent } from 'electron';
+import { ipcRenderer, IpcRendererEvent, WebUtils } from 'electron';
 import {
   IpcChannels,
   JavaProcessStartedEvent,
@@ -32,7 +32,7 @@ function createEventListener<T>(
 /**
  * Создаёт реализацию типизированного Electron API
  */
-export function createElectronAPI(): ElectronAPI {
+export function createElectronAPI(webUtils: WebUtils): ElectronAPI {
   return {
     javaExecute: (
       command: string,
@@ -124,6 +124,10 @@ export function createElectronAPI(): ElectronAPI {
 
     removeAllListeners: (channel: string): void => {
       ipcRenderer.removeAllListeners(channel);
+    },
+
+    getFilePathFromDrop: (file: File): string => {
+      return webUtils.getPathForFile(file);
     }
   };
 }
