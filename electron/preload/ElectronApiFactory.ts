@@ -127,7 +127,16 @@ export function createElectronAPI(webUtils: WebUtils): ElectronAPI {
     },
 
     getFilePathFromDrop: (file: File): string => {
-      return webUtils.getPathForFile(file);
+      if (!webUtils || typeof webUtils.getPathForFile !== 'function') {
+        console.error('[Preload] webUtils.getPathForFile is not available');
+        return '';
+      }
+      try {
+        return webUtils.getPathForFile(file);
+      } catch (error) {
+        console.error('[Preload] Error getting file path:', error);
+        return '';
+      }
     }
   };
 }
