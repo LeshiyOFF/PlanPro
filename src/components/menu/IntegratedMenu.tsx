@@ -77,10 +77,17 @@ export const IntegratedMenu: React.FC = () => {
 
   // Глобальный обработчик Drag-and-Drop
   React.useEffect(() => {
+    // На Linux не регистрируем обработчики - событие drop не срабатывает из-за XDND ограничений
+    // Пользователь уже проинформирован через startup screen
+    if (platform === 'linux') {
+      console.log('[IntegratedMenu] Drag-and-drop handlers skipped on Linux (XDND limitation)')
+      return
+    }
+
+    // Регистрация обработчиков только для Windows/macOS
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      // Явно указываем dropEffect для Linux (критично для корректного курсора)
       if (e.dataTransfer) {
         e.dataTransfer.dropEffect = 'copy'
       }
@@ -92,20 +99,7 @@ export const IntegratedMenu: React.FC = () => {
 
       const api = getElectronAPI()
 
-      // На Linux drag-and-drop полностью недоступен - показываем универсальное сообщение
-      if (platform === 'linux') {
-        console.log('[IntegratedMenu] Drag-and-drop attempted on Linux - feature not supported')
-        if (api?.showMessageBox) {
-          await api.showMessageBox({
-            type: 'info',
-            title: 'Перетаскивание не поддерживается',
-            message: 'Функция перетаскивания файлов недоступна в связи с ограничениями операционной системы.\n\nДля открытия проекта используйте кнопки в правом верхнем углу.',
-          })
-        }
-        return
-      }
-
-      // Для Windows/macOS продолжаем обычную обработку
+      // Для Windows/macOS обрабатываем drop
       const files = e.dataTransfer?.files
 
       // ПРОВЕРКА 1: Проверяем, пришли ли файлы от системы

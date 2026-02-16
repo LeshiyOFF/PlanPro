@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FilePlus, FolderOpen, History } from 'lucide-react'
+import { FilePlus, FolderOpen, History, Info } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
 import { useFileOperations } from '@/hooks/useFileOperations'
 import { LastProjectService } from '@/services/LastProjectService'
@@ -21,6 +21,16 @@ export const FullScreenStartupScreen: React.FC = () => {
   const [lastProjectExists, setLastProjectExists] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false)
   const [platform, setPlatform] = useState<string>('unknown')
+  const [showLinuxWarning, setShowLinuxWarning] = useState<boolean>(() => {
+    // Проверяем localStorage: закрывал ли пользователь предупреждение ранее
+    try {
+      const dismissed = localStorage.getItem('linuxDragWarningDismissed')
+      return dismissed !== 'true'
+    } catch (error) {
+      console.warn('[Startup] localStorage unavailable, showing warning by default')
+      return true
+    }
+  })
 
   // Определение платформы для условного отображения drag-and-drop зоны
   useEffect(() => {
@@ -106,6 +116,18 @@ export const FullScreenStartupScreen: React.FC = () => {
     }),
     [runThenComplete, loadProjectFromPath, lastProjectPath],
   )
+
+  const handleDismissWarning = useCallback(() => {
+    try {
+      localStorage.setItem('linuxDragWarningDismissed', 'true')
+      setShowLinuxWarning(false)
+      console.log('[Startup] Linux drag-drop warning dismissed by user')
+    } catch (error) {
+      console.error('[Startup] Failed to save dismissal state:', error)
+      // Всё равно скрываем, даже если localStorage недоступен
+      setShowLinuxWarning(false)
+    }
+  }, [])
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -255,11 +277,53 @@ export const FullScreenStartupScreen: React.FC = () => {
       </div>
 
       {/* 
-        Drag-and-drop зона доступна только на Windows и macOS.
-        На Linux скрыта из-за нестабильной работы drag-and-drop в Electron/Chromium.
-        Пользователи Linux используют кнопку "Открыть проект".
+        Для Linux: Информационное уведомление о недоступности drag-and-drop (XDND ограничение).
+        Для Windows/macOS: Стандартная drag-and-drop зона.
       */}
-      {platform !== 'linux' && (
+      {platform === 'linux' && showLinuxWarning ? (
+        // Сдержанное информационное уведомление для Linux (скрываемое)
+        <div className="w-full max-w-md rounded-2xl border border-slate-300 
+                        bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 
+                        shadow-md p-5 transition-all duration-200">
+          <div className="flex items-start gap-3 mb-4">
+            {/* Иконка Info (аккуратный размер, нейтральный цвет) */}
+            <div className="w-9 h-9 rounded-xl bg-slate-200/70 flex items-center justify-center shrink-0">
+              <Info className="w-5 h-5 text-slate-600" strokeWidth={2.5} aria-hidden />
+            </div>
+            
+            {/* Текстовый контент */}
+            <div className="flex-1">
+              <h4 className="text-sm font-semibold text-slate-700 mb-1.5 tracking-tight">
+                Информация о перетаскивании файлов
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Функция drag-and-drop недоступна в связи с особенностями операционной системы. 
+                Для открытия проектов используйте кнопку{' '}
+                <span className="font-semibold text-slate-700">"Открыть проект"</span> выше.
+              </p>
+            </div>
+          </div>
+          
+          {/* Кнопка в стиле приложения (primary палитра - динамический акцентный цвет) */}
+          <button 
+            type="button"
+            onClick={handleDismissWarning}
+            className="w-full h-10 
+                       bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--primary-hover))]
+                       border border-[hsl(var(--primary))]/20
+                       text-[hsl(var(--primary-foreground))] 
+                       font-medium text-sm rounded-xl
+                       shadow-md shadow-[hsl(var(--primary-shadow-light)/0.15)]
+                       hover:shadow-lg hover:scale-[1.01]
+                       active:scale-[0.99]
+                       focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-2
+                       transition-all duration-200"
+          >
+            Понятно
+          </button>
+        </div>
+      ) : platform !== 'linux' ? (
+        // Обычная дроп-зона для Windows/macOS (без изменений)
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -272,7 +336,7 @@ export const FullScreenStartupScreen: React.FC = () => {
         >
           <p className="text-sm font-medium text-slate-600">{t('welcome.dropZone')}</p>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
