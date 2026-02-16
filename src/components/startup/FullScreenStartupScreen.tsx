@@ -104,7 +104,13 @@ export const FullScreenStartupScreen: React.FC = () => {
     [runThenComplete, loadProjectFromPath],
   )
 
-  const handleDragOver = useCallback((e: React.DragEvent) => e.preventDefault(), [])
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    // Явно указываем dropEffect для Linux (критично для корректного курсора)
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy'
+    }
+  }, [])
 
   const showLastButton = lastProjectPath !== null && lastProjectExists
   const buttonBase =

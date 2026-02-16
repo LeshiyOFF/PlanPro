@@ -57,6 +57,10 @@ export const IntegratedMenu: React.FC = () => {
     const handleDragOver = (e: DragEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      // Явно указываем dropEffect для Linux (критично для корректного курсора)
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy'
+      }
     }
 
     const handleDrop = async (e: DragEvent) => {
