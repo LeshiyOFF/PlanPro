@@ -284,19 +284,19 @@ export const FullScreenStartupScreen: React.FC = () => {
         // Сдержанное информационное уведомление для Linux (скрываемое)
         <div className="w-full max-w-md rounded-2xl border border-slate-300 
                         bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 
-                        shadow-md p-5 transition-all duration-200">
-          <div className="flex items-start gap-3 mb-4">
-            {/* Иконка Info (аккуратный размер, нейтральный цвет) */}
-            <div className="w-9 h-9 rounded-xl bg-slate-200/70 flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-slate-600" strokeWidth={2.5} aria-hidden />
+                        shadow-md p-6 transition-all duration-200">
+          <div className="flex items-start gap-4 mb-5">
+            {/* Иконка Info (читаемый размер, нейтральный цвет) */}
+            <div className="w-11 h-11 rounded-xl bg-slate-200/70 flex items-center justify-center shrink-0">
+              <Info className="w-6 h-6 text-slate-600" strokeWidth={2} aria-hidden />
             </div>
             
             {/* Текстовый контент */}
             <div className="flex-1">
-              <h4 className="text-sm font-semibold text-slate-700 mb-1.5 tracking-tight">
+              <h4 className="text-base font-semibold text-slate-700 mb-2 tracking-tight leading-snug">
                 Информация о перетаскивании файлов
               </h4>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-sm text-slate-600 leading-relaxed">
                 Функция drag-and-drop недоступна в связи с особенностями операционной системы. 
                 Для открытия проектов используйте кнопку{' '}
                 <span className="font-semibold text-slate-700">"Открыть проект"</span> выше.
@@ -308,7 +308,7 @@ export const FullScreenStartupScreen: React.FC = () => {
           <button 
             type="button"
             onClick={handleDismissWarning}
-            className="w-full h-10 
+            className="w-full h-11 
                        bg-gradient-to-br from-[hsl(var(--primary))] to-[hsl(var(--primary-hover))]
                        border border-[hsl(var(--primary))]/20
                        text-[hsl(var(--primary-foreground))] 

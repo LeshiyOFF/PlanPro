@@ -38,6 +38,15 @@ extraResources:
     to: .ci-build
     filter:
       - ".ci-build"
+  # Application icons - копирование иконок для runtime доступа в WindowManager
+  # Необходимо для корректного отображения иконки окна на всех платформах
+  - from: assets
+    to: assets
+    filter:
+      - "icon.png"
+      - "icon.ico"
+      - "icon.svg"
+      - "icon.icns"
 extraMetadata:
   main: dist-app/electron/main.js
 nsis:
