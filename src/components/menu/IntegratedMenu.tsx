@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { ContextMenu } from './ContextMenu'
 import { ContextMenuType, ContextMenuItem, useMenuContext } from '@/providers/MenuProvider'
 import { useKeyboardShortcuts, DEFAULT_SHORTCUTS } from '@/hooks/useKeyboardShortcuts'
@@ -16,6 +16,7 @@ export const IntegratedMenu: React.FC = () => {
   const { contextMenu, showContextMenu, hideContextMenu } = useMenuContext()
   const { isDeletionAllowed } = useTaskDeletion()
   const { createNewProject, openProject, saveProject, saveProjectAs, loadProjectFromPath } = useFileOperations()
+  const [platform, setPlatform] = useState<string>('unknown')
 
   // Обработчики горячих клавиш
   const handleShortcutAction = useCallback((action: string) => {
@@ -52,6 +53,28 @@ export const IntegratedMenu: React.FC = () => {
     }
   }, [isDeletionAllowed, createNewProject, openProject, saveProject, saveProjectAs])
 
+  // Определение платформы для условной обработки drag-and-drop
+  useEffect(() => {
+    const fetchPlatform = async () => {
+      const api = getElectronAPI()
+      if (!api?.getAppInfo) {
+        console.warn('[IntegratedMenu] getAppInfo API not available')
+        return
+      }
+
+      try {
+        const appInfo = await api.getAppInfo()
+        setPlatform(appInfo.platform)
+        console.log('[IntegratedMenu] Platform detected:', appInfo.platform)
+      } catch (error) {
+        console.error('[IntegratedMenu] Failed to fetch platform info:', error)
+        // Оставляем 'unknown' для безопасности
+      }
+    }
+
+    fetchPlatform()
+  }, [])
+
   // Глобальный обработчик Drag-and-Drop
   React.useEffect(() => {
     const handleDragOver = (e: DragEvent) => {
@@ -67,18 +90,32 @@ export const IntegratedMenu: React.FC = () => {
       e.preventDefault()
       e.stopPropagation()
 
-      const files = e.dataTransfer?.files
       const api = getElectronAPI()
 
-      // ПРОВЕРКА 1: Проверяем, пришли ли файлы от системы
-      // На Linux из-за Chromium race condition files может быть пустым
-      if (!files || files.length === 0) {
-        console.warn('[IntegratedMenu] Drop event received but files list is empty (Linux Chromium limitation)')
+      // На Linux drag-and-drop полностью недоступен - показываем универсальное сообщение
+      if (platform === 'linux') {
+        console.log('[IntegratedMenu] Drag-and-drop attempted on Linux - feature not supported')
         if (api?.showMessageBox) {
           await api.showMessageBox({
             type: 'info',
-            title: 'Drag-and-drop недоступен',
-            message: 'На вашей системе функция перетаскивания файлов ограничена.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+            title: 'Перетаскивание не поддерживается',
+            message: 'Функция перетаскивания файлов недоступна в связи с ограничениями операционной системы.\n\nДля открытия проекта используйте кнопки в правом верхнем углу.',
+          })
+        }
+        return
+      }
+
+      // Для Windows/macOS продолжаем обычную обработку
+      const files = e.dataTransfer?.files
+
+      // ПРОВЕРКА 1: Проверяем, пришли ли файлы от системы
+      if (!files || files.length === 0) {
+        console.warn('[IntegratedMenu] Drop event received but files list is empty')
+        if (api?.showMessageBox) {
+          await api.showMessageBox({
+            type: 'info',
+            title: 'Не удалось обработать файл',
+            message: 'Не удалось получить информацию о перетаскиваемом файле.\n\nПопробуйте открыть файл через меню Файл → Открыть проект.',
           })
         }
         return
@@ -104,13 +141,13 @@ export const IntegratedMenu: React.FC = () => {
       })
 
       if (!filePath) {
-        // Путь недоступен (типичная проблема на Linux из-за contextBridge serialization)
-        console.error('[IntegratedMenu] webUtils.getPathForFile returned empty path (contextBridge serialization issue)')
+        // Путь недоступен
+        console.error('[IntegratedMenu] webUtils.getPathForFile returned empty path')
         if (api?.showMessageBox) {
           await api.showMessageBox({
             type: 'info',
-            title: 'Используйте кнопку "Открыть"',
-            message: 'Не удалось получить путь к файлу из-за ограничений системы.\n\nИспользуйте кнопку "Открыть" в меню для выбора файла проекта.',
+            title: 'Ошибка доступа к файлу',
+            message: 'Не удалось получить путь к файлу.\n\nИспользуйте кнопки в правом верхнем углу для открытия проекта.',
           })
         }
         return
