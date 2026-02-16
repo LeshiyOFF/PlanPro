@@ -177,7 +177,7 @@ export const IntegratedMenu: React.FC = () => {
       window.removeEventListener('dragover', handleDragOver)
       window.removeEventListener('drop', handleDrop)
     }
-  }, [loadProjectFromPath])
+  }, [loadProjectFromPath, platform])
 
   // Конфигурация горячих клавиш
   const shortcuts = [

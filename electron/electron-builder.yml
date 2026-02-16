@@ -61,7 +61,7 @@ linux:
     GenericName[ru]: Система управления проектами
     Comment: Управление проектами
     Comment[ru]: Управление проектами
-    Icon: com.prosystems.planpro
+    Icon: PlanPro
     Categories: Office;ProjectManagement;
     StartupNotify: true
 deb:
