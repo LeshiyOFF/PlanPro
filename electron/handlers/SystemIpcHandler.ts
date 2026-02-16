@@ -31,7 +31,8 @@ export class SystemIpcHandler {
 
     ipcMain.handle('save-binary-file', async (_, { path, data }: { path: string, data: Uint8Array | ArrayBuffer }) => {
       try {
-        fs.writeFileSync(path, Buffer.from(data));
+        const buffer = data instanceof ArrayBuffer ? Buffer.from(new Uint8Array(data)) : Buffer.from(data);
+        fs.writeFileSync(path, buffer);
         return { success: true };
       } catch (error) {
         console.error('[SystemIpcHandler] Failed to save binary file:', error);
