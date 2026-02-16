@@ -47,7 +47,7 @@ nsis:
   createStartMenuShortcut: true
 linux:
   icon: assets/icon.svg
-  executableName: com.prosystems.planpro
+  executableName: PlanPro
   target:
     - deb
   category: Office
