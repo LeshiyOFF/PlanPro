@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -65,6 +66,10 @@ public class FileRestController {
             }
             
             String filePath = determineFilePath(request, project);
+            
+            // ✅ FIX: Обновить имя проекта на основе имени файла, если текущее имя дефолтное
+            updateProjectNameFromFilePath(project, filePath);
+            
             SaveResult result = coreAccessGuard.executeWithLock(() -> 
                 storageService.saveProject(project, filePath, request.isCreateBackup())
             );
@@ -196,5 +201,44 @@ public class FileRestController {
     private void logSaveRequest(FileSaveRequestDto request) {
         System.out.println("[FileRestController] Save: projectId=" + request.getProjectId());
         logBridgeState("BEFORE");
+    }
+    
+    /**
+     * Обновляет имя проекта на основе имени файла, если текущее имя дефолтное.
+     * Дефолтные имена: "Новый проект [дата]", "New Project [дата]"
+     * 
+     * @param project Core проект
+     * @param filePath путь к файлу для сохранения
+     */
+    private void updateProjectNameFromFilePath(Project project, String filePath) {
+        if (project == null || filePath == null || filePath.isEmpty()) {
+            return;
+        }
+        
+        String currentName = project.getName();
+        boolean isDefaultName = currentName == null || 
+            currentName.trim().isEmpty() ||
+            currentName.startsWith("Новый проект") || 
+            currentName.startsWith("New Project");
+        
+        if (isDefaultName) {
+            File file = new File(filePath);
+            String fileName = file.getName();
+            // Убираем расширение файла (.pod, .xml и т.д.)
+            String projectNameFromFile = fileName.replaceFirst("[.][^.]+$", "");
+            
+            if (!projectNameFromFile.isEmpty()) {
+                project.setName(projectNameFromFile);
+                System.out.println("[FileRestController] ✅ Updated project name: \"" + 
+                    currentName + "\" → \"" + projectNameFromFile + "\"");
+                
+                // Синхронизируем имя ResourcePool с именем проекта
+                if (project.getResourcePool() != null) {
+                    project.getResourcePool().setName(projectNameFromFile);
+                }
+            }
+        } else {
+            System.out.println("[FileRestController] ℹ Project name unchanged: \"" + currentName + "\"");
+        }
     }
 }

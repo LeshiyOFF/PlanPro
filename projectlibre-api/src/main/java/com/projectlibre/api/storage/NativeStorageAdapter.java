@@ -84,9 +84,12 @@ public class NativeStorageAdapter implements NativeStoragePort {
             project.setFileName(filePath);
             System.out.println("[NativeStorage] ✅ Set fileName: " + filePath);
             
-            // ✅ FALLBACK: If project name is empty, use file name
+            // ✅ FALLBACK: If project name is empty or default, use file name
             String projectName = project.getName();
-            if (projectName == null || projectName.trim().isEmpty()) {
+            boolean isDefaultName = projectName != null && 
+                (projectName.startsWith("Новый проект") || projectName.startsWith("New Project"));
+            
+            if (projectName == null || projectName.trim().isEmpty() || isDefaultName) {
                 String fileName = file.getName();
                 String nameWithoutExt = fileName.replaceFirst("[.][^.]+$", ""); // Remove extension
                 
@@ -96,7 +99,8 @@ public class NativeStorageAdapter implements NativeStoragePort {
                 }
                 
                 project.setName(nameWithoutExt);
-                System.out.println("[NativeStorage] ✅ Set fallback project name: " + nameWithoutExt);
+                System.out.println("[NativeStorage] ✅ Set project name from file: " + nameWithoutExt + 
+                    (isDefaultName ? " (replaced default: \"" + projectName + "\")" : ""));
             } else {
                 System.out.println("[NativeStorage] ℹ Project name already set: " + projectName);
             }
