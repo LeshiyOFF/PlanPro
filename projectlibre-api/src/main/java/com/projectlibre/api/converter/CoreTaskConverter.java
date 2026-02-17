@@ -161,7 +161,12 @@ public class CoreTaskConverter {
      * 
      * UNIFIED-DURATION-FIX: Duration конвертируется в дни с учётом типа задачи:
      * - Elapsed задачи: 24 часа в сутках (календарное время)
+     * - Суммарные задачи (WBS parent): 24 часа (duration = end - start, календарное время)
      * - Обычные задачи: hoursPerDay из настроек проекта (рабочее время)
+     * 
+     * SUMMARY-DURATION-FIX: Суммарные задачи хранят duration как (end - start) в миллисекундах,
+     * что является календарным временем. Поэтому для них нужно использовать 24 часа/день,
+     * а не hoursPerDay из настроек проекта.
      * 
      * @param project проект для доступа к CalendarOption (hoursPerDay)
      * @param coreTask задача Core
@@ -181,8 +186,11 @@ public class CoreTaskConverter {
             // UNIFIED-DURATION-FIX: Выбираем делитель в зависимости от типа задачи
             double msPerHour = 1000.0 * 60.0 * 60.0;
             double hoursPerDay;
-            if (nt.isElapsed()) {
-                // Elapsed: календарные дни = 24 часа
+            
+            // SUMMARY-DURATION-FIX: Суммарные задачи используют календарное время (24 часа/день)
+            // потому что их duration вычисляется как (end - start) в CpmRecalculationRunner
+            if (nt.isElapsed() || nt.isSummary()) {
+                // Elapsed или суммарные задачи: календарные дни = 24 часа
                 hoursPerDay = 24.0;
             } else {
                 // Обычные: рабочие дни из настроек проекта
@@ -197,8 +205,8 @@ public class CoreTaskConverter {
             
             dto.setDuration(durationDays);
             
-            log.debug("[CoreTaskConverter] mapDuration taskId={} name='{}' elapsed={} durationMillis={} hoursPerDay={} durationDays={}",
-                    dto.getId(), nt.getName(), nt.isElapsed(), durationMillis, hoursPerDay, durationDays);
+            log.debug("[CoreTaskConverter] mapDuration taskId={} name='{}' elapsed={} summary={} durationMillis={} hoursPerDay={} durationDays={}",
+                    dto.getId(), nt.getName(), nt.isElapsed(), nt.isSummary(), durationMillis, hoursPerDay, durationDays);
         } catch (Exception e) {
             log.warn("[CoreTaskConverter] mapDuration failed for taskId={}: {}", dto.getId(), e.getMessage());
         }

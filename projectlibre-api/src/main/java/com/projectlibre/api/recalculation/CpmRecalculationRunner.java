@@ -79,6 +79,9 @@ public final class CpmRecalculationRunner {
         // Шаг 5: Синхронизация служебных полей с актуальными датами
         synchronizeTaskDatesAfterCpm(coreProject);
         
+        // CPM-DURATION-FIX: Пересчёт duration для суммарных задач после обновления дат
+        recalculateSummaryTaskDurations(coreProject);
+        
         // Шаг 6: Диагностика результатов
         logRecalculationResults(coreProject);
         
@@ -595,5 +598,66 @@ public final class CpmRecalculationRunner {
         }
         
         log.info("[CriticalPathTrace] Task dates synchronized after CPM: {} CustomDate(1) fields updated", syncedCount);
+    }
+    
+    /**
+     * Пересчитывает duration для суммарных задач после CPM расчёта.
+     * 
+     * <p><b>CPM-DURATION-FIX:</b> CPM обновляет только даты (start/end) через assignDatesFromChildren(),
+     * но НЕ пересчитывает поле duration. Это приводит к рассинхрону между датами
+     * и длительностью для суммарных задач.</p>
+     * 
+     * <p><b>БЕЗОПАСНОСТЬ:</b> Метод обрабатывает ТОЛЬКО суммарные задачи (isSummary()),
+     * не влияя на обычные задачи и их assignments.</p>
+     * 
+     * <p><b>СТАНДАРТ:</b> Duration вычисляется как (endDate - startDate), где endDate 
+     * содержит время 23:59:59.999 последнего дня (стандарт проекта).</p>
+     * 
+     * @param coreProject проект для обработки
+     */
+    private void recalculateSummaryTaskDurations(Project coreProject) {
+        Iterator<Task> it = coreProject.getTaskOutlineIterator();
+        int updatedCount = 0;
+        
+        while (it.hasNext()) {
+            Task task = it.next();
+            if (task.isExternal()) continue;
+            
+            // Обрабатываем ТОЛЬКО суммарные задачи
+            if (task instanceof NormalTask) {
+                NormalTask nt = (NormalTask) task;
+                if (nt.isSummary()) {
+                    long actualStart = nt.getStart();
+                    long actualEnd = nt.getEnd();
+                    
+                    // Проверка валидности дат
+                    if (actualStart > 0 && actualEnd > 0 && actualEnd >= actualStart) {
+                        long oldDuration = nt.getDurationMillis();
+                        long newDuration = actualEnd - actualStart;
+                        
+                        // Обновляем только если изменилось
+                        if (oldDuration != newDuration) {
+                            nt.setDuration(newDuration);
+                            updatedCount++;
+                            
+                            // Конвертируем в дни для читаемости логов (24 часа = 1 день)
+                            double oldDays = oldDuration / (24.0 * 60 * 60 * 1000);
+                            double newDays = newDuration / (24.0 * 60 * 60 * 1000);
+                            
+                            log.debug("[CPM-DURATION-FIX] Summary task '{}': duration {}ms -> {}ms ({} days -> {} days)", 
+                                    nt.getName(), 
+                                    oldDuration, newDuration,
+                                    Math.round(oldDays * 100.0) / 100.0,
+                                    Math.round(newDays * 100.0) / 100.0);
+                        }
+                    } else {
+                        log.warn("[CPM-DURATION-FIX] Summary task '{}' has invalid dates: start={} end={}", 
+                                nt.getName(), actualStart, actualEnd);
+                    }
+                }
+            }
+        }
+        
+        log.info("[CPM-DURATION-FIX] Updated {} summary task durations after CPM", updatedCount);
     }
 }

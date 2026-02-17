@@ -98,12 +98,21 @@ export const useTaskUsageData = (tasks: Task[], resources: Resource[]): ITaskUsa
     }
 
     return tasks.map(task => {
-      const duration = CalendarMathService.calculateDuration(
-        new Date(task.startDate),
-        new Date(task.endDate),
-        durationUnit,
-        calendarPrefs,
-      )
+      // DURATION-SYNC-FIX: Приоритет значению из API (синхронизировано с Java Core)
+      // Это обеспечивает консистентность между "Лист задач" и "Использование задач"
+      // Пересчёт из дат используется только как fallback для совместимости
+      const duration = task.duration != null && task.duration > 0
+        ? CalendarMathService.convertDuration(
+            { value: task.duration, unit: 'days' }, 
+            durationUnit, 
+            calendarPrefs
+          )
+        : CalendarMathService.calculateDuration(
+            new Date(task.startDate),
+            new Date(task.endDate),
+            durationUnit,
+            calendarPrefs,
+          )
 
       return {
         id: task.id,
