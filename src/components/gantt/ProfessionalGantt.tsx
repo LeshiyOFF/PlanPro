@@ -343,9 +343,9 @@ const ProfessionalGanttRender: ForwardRefRenderFunction<ProfessionalGanttHandle,
               // КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Вычисляем duration при изменении размера задачи на Ганте
               if (task.type === 'empty') return // Игнорируем пустые задачи
               const t = task as GanttTask
+              // SEMANTIC-FIX: startDate → 00:00:00, endDate → 23:59:59.999
               const s = CalendarDateService.toLocalMidnight(t.start)
-              const e = CalendarDateService.toLocalMidnight(t.end)
-              e.setHours(23, 59, 59, 999)
+              const e = CalendarDateService.toLocalEndOfDay(t.end)
               // Вычисляем duration в днях для синхронизации с Java Core (CPM)
               const duration = DurationSyncService.calculateDurationFromGantt(s, e)
               onTaskUpdate?.(t.id, { startDate: s, endDate: e, progress: Math.round(t.progress) / 100, duration })

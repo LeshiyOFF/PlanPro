@@ -1,6 +1,7 @@
 import { Duration, CalendarPreferences } from '@/types/Master_Functionality_Catalog'
 import { IWorkCalendar } from '@/domain/calendar/interfaces/IWorkCalendar'
 import { CalendarTemplateService } from '@/domain/calendar/services/CalendarTemplateService'
+import { CalendarDateService } from '@/services/CalendarDateService'
 
 /**
  * Сервис для выполнения расчетов, связанных с календарем и длительностью.
@@ -38,6 +39,17 @@ export class CalendarMathService {
 
   /**
    * Рассчитывает дату окончания на основе даты начала и длительности.
+   * 
+   * SEMANTIC-FIX: Возвращает endDate как 23:59:59.999 последнего дня задачи.
+   * Это критично для корректной синхронизации с Java Core:
+   * - Java Core ожидает endDate в формате 23:59:59.999
+   * - Если вернуть 00:00:00 следующего дня, Java получит start==end и сработает fallback
+   * - Fallback использует durationDays*86400000ms вместо 86399999ms, что даёт +1ms ошибку
+   * 
+   * @param startDate Дата начала (ожидается 00:00:00)
+   * @param duration Длительность в днях/часах/и т.д.
+   * @param prefs Настройки календаря
+   * @returns Дата окончания с временем 23:59:59.999
    */
   public static calculateFinishDate(
     startDate: Date,
@@ -45,7 +57,11 @@ export class CalendarMathService {
     prefs: CalendarPreferences,
   ): Date {
     const ms = this.durationToMs(duration, prefs)
-    return new Date(startDate.getTime() + ms)
+    // Вычитаем 1ms чтобы получить конец предыдущего дня (23:59:59.999)
+    // вместо начала следующего дня (00:00:00)
+    const rawEnd = new Date(startDate.getTime() + ms - 1)
+    // Нормализуем к концу дня для консистентности
+    return CalendarDateService.toLocalEndOfDay(rawEnd)
   }
 
   /**

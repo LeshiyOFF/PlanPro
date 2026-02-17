@@ -58,10 +58,13 @@ export class TaskDataConverter {
     const rawStart = new Date(coreTask.startDate)
     const rawEnd = new Date(coreTask.endDate)
     
-    // Нормализация с учётом семантики start vs end
-    // EDGE-CASE-FIX: endDate может быть 23:59:59.999 из CPM -> нужно округлить к следующему дню
+    // SEMANTIC-FIX: startDate → 00:00:00, endDate → 23:59:59.999
+    // Это критично для корректной синхронизации с Java Core:
+    // - Java Core присылает endDate как 23:59:59.999
+    // - При обратной отправке в Java, если endDate = 00:00:00, то start == end
+    // - Это вызывает fallback с +1ms ошибкой и сдвигом задачи на 1 день
     const startDate = CalendarDateService.toLocalMidnight(rawStart)
-    const endDate = CalendarDateService.toLocalMidnightEndOfDay(rawEnd)
+    const endDate = CalendarDateService.toLocalEndOfDay(rawEnd)
 
     if (coreTask.critical === true) {
       logger.debug('[CriticalPathTrace] converter task marked critical', { taskId: coreTask.id, name: coreTask.name }, 'CriticalPathTrace')

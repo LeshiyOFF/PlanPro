@@ -278,8 +278,18 @@ public class ApiToCoreTaskSynchronizer {
      *   - Java использовала durationDays → start + 9 дней = 16.02 00:00:00 ❌
      *   - Результат: дата "плавала" на +1 день при каждом Pulse
      * 
+     * EXACT-DURATION-FIX (v5.0): НЕ ОКРУГЛЯЕМ duration при синхронизации!
+     * 
+     * Frontend использует конвенцию "конец дня = 23:59:59.999".
+     * Однодневная задача: start=23.02 00:00, end=23.02 23:59:59.999, duration=86399999ms
+     * 
+     * ВАЖНО: Если округлить 86399999ms до 86400000ms, то при пересчёте:
+     * new_end = start + 86400000 = 24.02 00:00 ← однодневная задача станет двухдневной!
+     * 
      * Решение:
-     *   - ПРИОРИТЕТ 1: (end - start) — точное значение от пользователя
+     *   - Храним duration ТОЧНО как (end - start) без округления
+     *   - Округление применяется только при ОТОБРАЖЕНИИ в UI (CoreTaskConverter)
+     *   - ПРИОРИТЕТ 1: (end - start) точно, без округления
      *   - ПРИОРИТЕТ 2: durationDays — только как fallback если нет точных дат
      * 
      * @param frontendTask данные задачи из Frontend
@@ -295,26 +305,28 @@ public class ApiToCoreTaskSynchronizer {
             taskId, durationDays, start, end, (end - start), 
             (end - start) / (double) MS_PER_CALENDAR_DAY);
         
-        // DURATION-PRIORITY-FIX: ПРИОРИТЕТ точным датам над округлённым duration!
-        // Frontend присылает endMs = 15.02 23:59:59.999 (точно) и duration = 9.0 (округлено).
-        // Используем (end - start) для сохранения точности до миллисекунды.
+        // EXACT-DURATION-FIX: ПРИОРИТЕТ точным датам, БЕЗ ОКРУГЛЕНИЯ!
+        // Frontend присылает endMs = 23.02 23:59:59.999 для однодневной задачи.
+        // duration = 86399999ms — это ПРАВИЛЬНО, НЕ округляем до 86400000ms!
+        // Округление сломает end date при пересчёте (станет 24.02 00:00 вместо 23.02 23:59:59.999)
         
         if (end > start) {
-            // ПРИОРИТЕТ 1: Точный расчёт из дат (end - start)
-            // Это гарантирует что Core вычислит new_end = start + (end - start) = end (точно!)
+            // ПРИОРИТЕТ 1: Точный расчёт из дат (end - start) БЕЗ ОКРУГЛЕНИЯ
             long durationMillis = end - start;
             
-            log.info("[DATE-SYNC-DIAG] {} USING_EXACT_DATE_DIFF: (end-start)={}ms ({}days)", 
+            log.info("[DATE-SYNC-DIAG] {} USING_EXACT_DATE_DIFF: durationMillis={}ms ({}days) — NO ROUNDING!", 
                 taskId, durationMillis, durationMillis / (double) MS_PER_CALENDAR_DAY);
             
             // Устанавливаем флаг ELAPSED — Core сделает start + duration без пропуска выходных
             return Duration.setAsElapsed(durationMillis);
         } else if (durationDays != null && durationDays > 0) {
             // ПРИОРИТЕТ 2: Fallback на durationDays (только если end <= start или нет точных дат)
-            // Это может произойти для новых задач где end ещё не установлен
-            long durationMillis = (long) (durationDays * MS_PER_CALENDAR_DAY);
+            // SEMANTIC-FIX: Используем 86399999ms (23:59:59.999) вместо 86400000ms (00:00:00 следующего дня)
+            // Формула: duration = (days * 86400000) - 1ms = до конца последнего дня (23:59:59.999)
+            // Это критично для CPM расчётов — +1ms сдвигает задачу на следующий день!
+            long durationMillis = (long) (durationDays * MS_PER_CALENDAR_DAY) - 1;
             
-            log.info("[DATE-SYNC-DIAG] {} FALLBACK_DURATION_DAYS: {}days -> {}ms (end<=start, using frontend duration)", 
+            log.info("[DATE-SYNC-DIAG] {} FALLBACK_DURATION_DAYS: {}days -> {}ms (23:59:59.999 semantic, end<=start)", 
                 taskId, durationDays, durationMillis);
             
             return Duration.setAsElapsed(durationMillis);

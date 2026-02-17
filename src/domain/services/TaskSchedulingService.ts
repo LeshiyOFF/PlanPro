@@ -93,9 +93,10 @@ export class TaskSchedulingService {
         const startDates = subtasks.map(t => new Date(t.startDate).getTime())
         const endDates = subtasks.map(t => new Date(t.endDate).getTime())
 
-        // Нормализуем агрегированные даты к локальной полуночи
+        // SEMANTIC-FIX: startDate → toLocalMidnight (00:00:00), endDate → toLocalEndOfDay (23:59:59.999)
+        // Это критично для корректной синхронизации с Java Core (CPM расчёты)
         const minStart = CalendarDateService.toLocalMidnight(new Date(Math.min(...startDates)))
-        const maxEnd = CalendarDateService.toLocalMidnight(new Date(Math.max(...endDates)))
+        const maxEnd = CalendarDateService.toLocalEndOfDay(new Date(Math.max(...endDates)))
 
         // Средний прогресс: игнорируем вехи (как в MS Project)
         // Вехи - это контрольные точки, а не работа, поэтому не учитываем их в прогрессе
@@ -156,10 +157,12 @@ export class TaskSchedulingService {
       newTask.startDate = CalendarDateService.toLocalMidnight(new Date())
     }
 
-    // Defensive Programming: ВСЕГДА нормализуем endDate
+    // SEMANTIC-FIX: endDate должен быть концом дня (23:59:59.999), не полуночью!
+    // Это критично для корректной синхронизации с Java Core (CPM расчёты)
     if (newTask.endDate) {
-      newTask.endDate = CalendarDateService.toLocalMidnight(newTask.endDate)
+      newTask.endDate = CalendarDateService.toLocalEndOfDay(newTask.endDate)
     } else if (newTask.startDate) {
+      // calculateFinishDate возвращает endDate с 23:59:59.999
       newTask.endDate = CalendarMathService.calculateFinishDate(
         newTask.startDate, { value: 1, unit: 'days' }, calendarPrefs,
       )
