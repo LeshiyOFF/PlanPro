@@ -533,15 +533,29 @@ public final class TaskSchedule implements Cloneable {
 		else {
 			return;
 		}
-		if (end != Long.MIN_VALUE && end != 0)
-			setEnd(end);
-		else {
-			return;//		System.out.println("begin is " + new Date(begin) + " end " + new Date(end));
-		}
-		long duration = task.getEffectiveWorkCalendar().compare(end,begin,false);
-		duration = Duration.setAsEstimated(duration,estimated);
-		((NormalTask)task).setEstimated(estimated);
-		setRawDuration(duration);
+	if (end != Long.MIN_VALUE && end != 0)
+		setEnd(end);
+	else {
+		return;//		System.out.println("begin is " + new Date(begin) + " end " + new Date(end));
+	}
+	
+	// SUMMARY-DURATION-FIX: Для суммарных задач используем календарное время (24 часа/день)
+	// вместо рабочего времени через календарь проекта.
+	// Суммарная задача показывает календарный охват (от самой ранней до самой поздней подзадачи),
+	// а не сумму трудозатрат. Поэтому её duration = end - begin (миллисекунды),
+	// что соответствует количеству календарных дней.
+	long duration;
+	if (task instanceof NormalTask && ((NormalTask)task).isSummary()) {
+		// Календарное время для суммарных задач (end - begin в миллисекундах)
+		duration = end - begin;
+	} else {
+		// Рабочее время для обычных задач (учитывается календарь проекта)
+		duration = task.getEffectiveWorkCalendar().compare(end,begin,false);
+	}
+	
+	duration = Duration.setAsEstimated(duration,estimated);
+	((NormalTask)task).setEstimated(estimated);
+	setRawDuration(duration);
 	}	
 	
 /**
