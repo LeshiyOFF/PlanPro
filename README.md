@@ -1,475 +1,325 @@
-# ПланПро
+# ПланПро (ProjectLibre Modern)
 
-> **Профессиональное ПО для управления проектами на базе ProjectLibre**
+<div align="center">
 
-[![Version](https://img.shields.io/badge/version-1.0.22-blue.svg)](https://github.com/LeshiyOFF/PlanPro/releases)
-[![License](https://img.shields.io/badge/license-CPAL--1.0-green.svg)](LICENSE)
-[![Build Status](https://github.com/LeshiyOFF/PlanPro/actions/workflows/release.yml/badge.svg)](https://github.com/LeshiyOFF/PlanPro/actions)
-[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey.svg)](#установка)
+**Профессиональное программное обеспечение для управления проектами**
+
+*Современная архитектура на базе Electron + React с проверенным вычислительным ядром ProjectLibre*
+
+[🚀 Быстрый старт](#быстрый-старт) • [📖 Документация](#документация) • [🏗️ Архитектура](#архитектура) • [🤝 Участие](#участие-в-разработке)
+
+</div>
 
 ---
 
 ## 📋 Содержание
 
 - [О проекте](#о-проекте)
-- [Основные возможности](#основные-возможности)
+- [Ключевые возможности](#ключевые-возможности)
 - [Технологический стек](#технологический-стек)
-- [Системные требования](#системные-требования)
-- [Установка](#установка)
-- [Сборка из исходников](#сборка-из-исходников)
-- [Разработка](#разработка)
+- [Быстрый старт](#быстрый-старт)
 - [Архитектура](#архитектура)
-- [Тестирование](#тестирование)
-- [Вклад в проект](#вклад-в-проект)
+- [Документация](#документация)
+- [Разработка](#разработка)
+- [Сборка и деплой](#сборка-и-деплой)
 - [Лицензия](#лицензия)
-- [Контакты](#контакты)
 
 ---
 
-## 📖 О проекте
+## 🎯 О проекте
 
-**ПланПро** — современная система управления проектами для малого и среднего бизнеса, построенная на базе ProjectLibre с использованием передовых технологий. Система предоставляет полный набор инструментов для планирования, контроля и анализа проектов любой сложности.
+**ПланПро** — это полная модернизация open-source проекта ProjectLibre с сохранением его мощного вычислительного ядра и заменой устаревшего Swing интерфейса на современный стек React + Electron.
 
 ### Почему ПланПро?
 
-- **Полнофункциональность**: все необходимые инструменты для управления проектами в одном приложении
-- **Кросс-платформенность**: поддержка Windows и Linux
-- **Современный интерфейс**: интуитивно понятный UI на базе React с поддержкой темной темы
-- **Совместимость**: импорт и экспорт проектов в форматах .pod и MS Project
-- **Open Source**: открытый исходный код под лицензией CPAL-1.0
-- **Высокая производительность**: гибридная архитектура Electron + Java для оптимальной работы
+- ✅ **Проверенное ядро**: Используется расчетный движок ProjectLibre 1.9.8, протестированный годами
+- ⚡ **Современный интерфейс**: React 18 + TypeScript + Tailwind CSS
+- 🔒 **Безопасность**: Изолированная архитектура Electron с Content Security Policy
+- 🌐 **REST API**: Spring Boot для интеграции с другими системами
+- 🎨 **UX/UI**: Адаптивный интерфейс с поддержкой тем
+- 📊 **Расширяемость**: Модульная архитектура, готовая к добавлению новых модулей
 
 ---
 
-## ✨ Основные возможности
+## 🚀 Ключевые возможности
 
-### Управление задачами
-- ✅ Создание и редактирование задач с поддержкой иерархической структуры (WBS)
-- ✅ Автоматический расчёт суммарных задач (summary tasks)
-- ✅ Связи задач (зависимости): FS, SS, FF, SF с задержками
-- ✅ Ограничения задач (constraints): ASAP, ALAP, SNET, FNLT и другие
-- ✅ Поддержка вех (milestones)
+### Управление проектами
+- 📅 **Диаграмма Ганта** с drag & drop и критическим путём
+- 🔗 **Сетевая диаграмма** (PERT/CPM)
+- 📊 **Структура декомпозиции работ** (WBS)
+- 🗓️ **Календарное планирование** с учетом рабочих дней
+- ⚡ **Автоматический расчёт** длительностей и зависимостей
 
-### Планирование и расчёты
-- 📊 **Метод критического пути (CPM)**: автоматический расчёт критического пути проекта
-- 📅 **Календарное планирование**: учёт рабочих и нерабочих дней
-- ⏱️ **Точный расчёт длительности**: с точностью до миллисекунд
-- 🔄 **Автоматический пересчёт**: при изменении зависимостей и ограничений
+### Работа с данными
+- 💾 **Формат .pod**: Нативный формат ProjectLibre
+- 📤 **Импорт/экспорт**: MS Project (MPP, XML), Primavera XER
+- 🔄 **Автосохранение** и резервное копирование
+- 📋 **История изменений** с возможностью отката
 
-### Ресурсное управление
-- 👥 Управление человеческими ресурсами
-- 💰 Управление материальными ресурсами и затратами
-- 📈 Назначение ресурсов на задачи с контролем загрузки
-- 💵 Контроль стоимости проекта
+### Интерфейс
+- 🎨 **Темная/светлая тема**
+- 🌍 **Многоязычность**: Русский, English
+- ♿ **Accessibility**: Поддержка ARIA и клавиатурной навигации
+- 📱 **Адаптивный дизайн**: Оптимизация для разных разрешений
 
-### Визуализация
-- 📊 **Диаграмма Ганта**: интерактивная временная шкала проекта
-- 🗓️ **Календарное представление**: визуализация задач по календарю
-- 📋 **Табличное представление**: детальная информация по задачам
-- 🎯 **Сетевая диаграмма**: отображение зависимостей задач
-
-### Импорт и экспорт
-- 📥 Импорт проектов из формата .pod (ProjectLibre)
-- 📤 Экспорт в формат Microsoft Project (.mpp)
-- 💾 Автоматическое сохранение изменений
-- 🔄 Синхронизация между Frontend и Java Core
-
-### Дополнительные возможности
-- 🌍 Многоязычный интерфейс (русский, английский)
-- 🎨 Настраиваемый интерфейс с темной и светлой темой
-- ⚡ Высокая производительность при работе с большими проектами
-- 🔒 Безопасное хранение данных проекта
+### Для разработчиков
+- 🔌 **REST API** для интеграции
+- 📡 **IPC каналы** между Electron и React
+- 🧪 **Тестирование**: Unit, Integration, E2E
+- 📈 **Observability**: Логирование и мониторинг
 
 ---
 
 ## 🛠 Технологический стек
 
 ### Frontend
-- **TypeScript** 5.x — строгая типизация
-- **React** 18.x — современная библиотека для UI
-- **Vite** 5.x — быстрая сборка и HMR
-- **TailwindCSS** 3.x — utility-first CSS framework
-- **Zustand** — управление состоянием
-- **React Query (TanStack Query)** — управление серверным состоянием
-- **Lucide React** — иконки
-
-### Backend (Java Core)
-- **Java** 17 (LTS) — надёжная платформа
-- **ProjectLibre Core** — ядро системы управления проектами
-- **Maven** 3.9.x — управление зависимостями
-- **Apache Ant** 1.10.x — система сборки
+```
+├── React                 # UI-фреймворк
+├── TypeScript            # Типизация
+├── Vite                  # Сборщик
+├── Tailwind CSS          # Стили
+├── Zustand               # State Management
+├── React Router          # Маршрутизация
+├── Radix UI              # Компонентная база
+├── Framer Motion         # Анимации
+├── i18next               # Интернационализация
+└── Gantt Task React      # Диаграммы Ганта
+```
 
 ### Desktop
-- **Electron** 32.x — кросс-платформенный фреймворк
-- **electron-builder** — сборка инсталляторов
+```
+├── Electron              # Desktop wrapper
+├── Node.js 18+           # Runtime
+└── TypeScript            # Типизация
+```
 
-### Инструменты разработки
-- **ESLint** — линтинг кода
-- **Vitest** — тестирование
-- **Storybook** — разработка компонентов
-- **TypeScript** — проверка типов
+### Backend (Java)
+```
+├── Java 17               # Runtime
+├── Spring Boot           # Фреймворк
+├── ProjectLibre Core     # Вычислительное ядро
+├── Maven                 # Сборка
+└── H2 Database           # In-memory БД (для разработки)
+```
 
-### CI/CD
-- **GitHub Actions** — автоматизация сборки и релизов
-- **Contract Tests** — контрактное тестирование Java API
-
----
-
-## 💻 Системные требования
-
-### Минимальные требования
-- **ОС**: Windows 10/11 (64-bit) или Linux (Ubuntu 20.04+, Debian 11+, Astra Linux)
-- **Процессор**: Intel Core i3 или эквивалент
-- **ОЗУ**: 4 ГБ
-- **Диск**: 500 МБ свободного места
-- **Разрешение экрана**: 1366x768 или выше
-
-### Рекомендуемые требования
-- **ОС**: Windows 11 (64-bit) или Linux (последняя версия)
-- **Процессор**: Intel Core i5/i7 или эквивалент
-- **ОЗУ**: 8 ГБ и более
-- **Диск**: 1 ГБ свободного места (SSD рекомендуется)
-- **Разрешение экрана**: 1920x1080 или выше
-
----
-
-## 📦 Установка
-
-### Windows
-
-1. Перейдите на страницу [Releases](https://github.com/LeshiyOFF/PlanPro/releases)
-2. Скачайте последнюю версию установщика `PlanPro-Setup-1.0.22.exe`
-3. Запустите установщик и следуйте инструкциям мастера установки
-4. После установки запустите ПланПро через ярлык на рабочем столе или меню "Пуск"
-
-### Linux (Debian/Ubuntu)
-
-```bash
-# Скачайте .deb пакет с GitHub Releases
-wget https://github.com/LeshiyOFF/PlanPro/releases/download/v1.0.22/PlanPro-1.0.22.deb
-
-# Установите пакет
-sudo dpkg -i PlanPro-1.0.22.deb
-
-# Установите зависимости (если требуется)
-sudo apt-get install -f
-
-# Запустите приложение
-planpro
+### Инструменты сборки
+```
+├── Apache Ant            # Сборка Java legacy
+├── Maven                 # Сборка Spring Boot API
+├── npm                   # Управление зависимостями
+└── electron-builder      # Упаковка десктопного приложения
 ```
 
 ---
 
-## 🔨 Сборка из исходников
+## 🚀 Быстрый старт
 
-### Требования для сборки
+### Предварительные требования
 
-- **Node.js** 18.x или выше
-- **npm** 9.x или выше
-- **JDK** 17 (LTS) — Liberica JDK рекомендуется
-- **Maven** 3.9.x
-- **Apache Ant** 1.10.x
+- **Node.js** 18+
+- **npm** 9+
+- **Java** 17+ (OpenJDK или Oracle JDK)
+- **Maven** (опционально, включен в проект)
 - **Git**
 
-### Клонирование репозитория
+### Установка и запуск
 
 ```bash
-git clone https://github.com/LeshiyOFF/PlanPro.git
-cd PlanPro/projectlibre-master
-```
+# 1. Клонируйте репозиторий
+git clone ssh://git@gitlab.avtograf.tech:2222/aqua-minibim/libre.git
+cd libre
 
-### Установка зависимостей
+# 2. Установите зависимости
+npm install
 
-```bash
-# Установка Node.js зависимостей
-npm install --legacy-peer-deps
-
-# Подготовка JRE (Windows)
-npm run prepare-jre:win
-
-# Подготовка JRE (Linux)
-npm run prepare-jre:linux
-```
-
-### Сборка проекта
-
-#### Сборка для разработки
-
-```bash
-# Запуск в режиме разработки
-npm run dev
-```
-
-#### Производственная сборка
-
-```bash
-# 1. Сборка Frontend и Electron
-npm run build
-
-# 2. Сборка Java Core и API
+# 3. Соберите Java бэкенд
 npm run build:java
 
-# 3. Сборка установщика (Windows)
-npm run dist:win
+# 4. Запустите приложение в режиме разработки
+npm run dev
 
-# 3. Сборка установщика (Linux)
-npm run dist:linux
+# Альтернатива: Запуск через батник (Windows)
+./start-dev.bat
 ```
 
-Готовые инсталляторы будут находиться в папке `release/`.
+Приложение откроется автоматически. Frontend будет доступен на `http://localhost:5173`, Java API на динамическом порту (обычно 18080+).
 
 ---
 
-## 👨‍💻 Разработка
+## 🏗️ Архитектура
+
+ПланПро построен по принципам **Clean Architecture** и **SOLID**.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     ELECTRON MAIN PROCESS                    │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  ProjectLibreApp (main.ts)                             │ │
+│  │  - WindowManager                                       │ │
+│  │  - JavaBridgeService ──▶ Java Process Manager         │ │
+│  │  - SecurityPolicyManager                               │ │
+│  │  - IPC Handlers (Preferences, Java, File)             │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            │ IPC
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   ELECTRON RENDERER (REACT)                  │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  App.tsx (Root Component)                              │ │
+│  │  ├── Providers (Theme, I18n, Navigation, ...)         │ │
+│  │  ├── Components (GanttView, NetworkView, ...)         │ │
+│  │  ├── Services (ProjectService, TaskService, ...)      │ │
+│  │  └── Store (Zustand: Project, Tasks, Resources)       │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            │ HTTP
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  SPRING BOOT REST API (JAVA)                 │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  ProjectLibreApiApplication                            │ │
+│  │  ├── REST Controllers (Project, Task, Resource, ...)  │ │
+│  │  ├── Services (ProjectService, TaskService, ...)      │ │
+│  │  ├── Adapters (ThreadSafeProjectAdapter, ...)         │ │
+│  │  └── CoreAccessGuard (Thread safety)                  │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│               PROJECTLIBRE CORE (LEGACY JAVA)                │
+│  com.projectlibre1.pm.task.Project                          │
+│  com.projectlibre1.pm.scheduling.SchedulingAlgorithm        │
+│  com.projectlibre1.pm.resource.ResourceImpl                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Ключевые модули
+
+| Модуль | Описание |
+|--------|----------|
+| `electron/` | Electron main process, управление окнами и Java процессом |
+| `src/` | React frontend (TypeScript) |
+| `projectlibre-api/` | Spring Boot REST API для связи с ядром |
+| `projectlibre_core/` | Вычислительное ядро ProjectLibre (legacy) |
+| `docs/` | Документация проекта |
+
+---
+
+## 📖 Документация
+
+### Пользовательская документация
+- **[Руководство пользователя](docs/user-guide/USER_MANUAL.md)** — Полное руководство по работе с ПланПро
+- **[Руководство пользователя (DOCX)](docs/user-guide/РУКОВОДСТВО%20ПОЛЬЗОВАНИЯ.docx)** — Альтернативная версия в формате Word
+- **[Описание функционала](docs/user-guide/ФУНКЦИОНАЛ.md)** — Детальное описание всех возможностей
+
+### Техническая документация
+- **[План развития проекта](docs/ROADMAP.md)** — Roadmap и планируемые улучшения
+- **[План внедрения учёта времени](docs/planning/TIMESHEET_IMPLEMENTATION_PLAN.md)** — Спецификация модуля учёта времени
+- **[Руководство по GitHub Actions](docs/deployment/github-actions-guide.md)** — CI/CD pipeline
+
+---
+
+## 💻 Разработка
 
 ### Структура проекта
 
 ```
 projectlibre-master/
-├── src/                          # Frontend (React + TypeScript)
-│   ├── components/               # React компоненты
-│   ├── services/                 # Сервисы (API, Storage)
-│   ├── domain/                   # Бизнес-логика
-│   ├── hooks/                    # Custom React hooks
-│   └── stores/                   # Zustand stores
-├── electron/                     # Electron main process
-│   ├── main.ts                   # Главный процесс
-│   ├── preload.ts                # Preload скрипт
-│   ├── handlers/                 # IPC handlers
-│   └── services/                 # Electron сервисы
-├── projectlibre-api/             # Java API Layer
-│   └── src/main/java/            # Java исходники API
-├── projectlibre_core/            # Java Core (ProjectLibre)
-│   └── src/                      # Ядро системы
-├── assets/                       # Ресурсы (иконки, изображения)
-├── electron-builder.yml          # Конфигурация сборки
-└── package.json                  # Зависимости проекта
+├── electron/              # Electron main process
+│   ├── main.ts           # Точка входа
+│   ├── services/         # Сервисы (WindowManager, JavaBridge, ...)
+│   └── handlers/         # IPC обработчики
+├── src/                  # React frontend
+│   ├── components/       # UI компоненты
+│   ├── services/         # Сервисы (ProjectService, TaskService, ...)
+│   ├── store/            # Zustand store
+│   ├── hooks/            # React hooks
+│   ├── types/            # TypeScript типы
+│   └── App.tsx           # Root компонент
+├── projectlibre-api/     # Spring Boot REST API
+│   └── src/main/java/com/projectlibre/api/
+│       ├── rest/         # REST контроллеры
+│       ├── service/      # Бизнес-логика
+│       ├── adapter/      # Адаптеры к Core
+│       └── dto/          # DTO объекты
+├── projectlibre_core/    # ProjectLibre Core (legacy)
+├── build-scripts/        # Скрипты сборки
+├── docs/                 # Документация
+│   ├── user-guide/      # Руководства пользователя
+│   ├── planning/        # Планы разработки
+│   └── deployment/      # Инструкции по развёртыванию
+└── resources/            # Ресурсы (JRE, JAR файлы)
 ```
 
-### Запуск в режиме разработки
+### Команды разработки
 
 ```bash
-# Терминал 1: Frontend (Vite dev server)
-npm run dev:vite
+# Разработка
+npm run dev                  # Запуск dev-сервера (Vite + Electron)
+npm run dev:vite             # Только Vite
+npm run dev:electron         # Только Electron
 
-# Терминал 2: Electron (ожидает Vite)
-npm run dev:electron
+# Сборка
+npm run build                # Сборка frontend + Electron
+npm run build:java           # Сборка Java (Core + API)
+npm run build:java-api       # Только API
+npm run build:java-core      # Только Core
 
-# Или одной командой (с concurrently)
-npm run dev
-```
-
-### Полезные команды
-
-```bash
-# Линтинг кода
-npm run lint
-npm run lint:fix
-
-# Проверка типов TypeScript
-npm run type-check
+# Линтинг и проверки
+npm run lint                 # ESLint проверка
+npm run lint:fix             # Автофикс
+npm run type-check           # TypeScript проверка типов
 
 # Тестирование
-npm test                    # Интерактивный режим
-npm run test:run            # Однократный запуск
-npm run test:coverage       # С покрытием
+npm run test                 # Запуск тестов
+npm run test:run             # Однократный запуск
+npm run test:coverage        # Тесты с покрытием
+npm run test:java            # Тест запуска Java процесса
 
-# Storybook (разработка компонентов)
-npm run storybook
-
-# Тестирование Java
-npm run test:java
+# Упаковка
+npm run dist                 # Полная сборка дистрибутива
+npm run dist:win             # Windows
+npm run dist:linux           # Linux
+npm run dist:astra           # Astra Linux SE
 ```
 
 ---
 
-## 🏗 Архитектура
+## 📦 Сборка и деплой
 
-ПланПро построен на **гибридной архитектуре**, объединяющей преимущества современного веб-фронтенда и надёжного Java-ядра ProjectLibre.
+### Готовый дистрибутив
 
-### Архитектурная схема
+Установочные файлы находятся в папке **`release/`** после выполнения команды `npm run dist`.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      PRESENTATION LAYER                      │
-│                   (React + TypeScript + Vite)                │
-│  ┌────────────┬─────────────┬──────────────┬──────────────┐ │
-│  │  Gantt     │  Task List  │   Calendar   │   Resources  │ │
-│  │  Chart     │             │              │              │ │
-│  └────────────┴─────────────┴──────────────┴──────────────┘ │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ IPC (Electron)
-┌──────────────────────────┴──────────────────────────────────┐
-│                     INTEGRATION LAYER                        │
-│                    (Electron Main Process)                   │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  IPC Handlers  │  Java Bridge  │  File System Manager │ │
-│  └────────────────────────────────────────────────────────┘ │
-└──────────────────────────┬──────────────────────────────────┘
-                           │ JNI / Child Process
-┌──────────────────────────┴──────────────────────────────────┐
-│                      BUSINESS LOGIC LAYER                    │
-│                      (Java 17 + ProjectLibre)                │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  ProjectLibre API  │  Serialization  │  Converters    │ │
-│  └────────────────────────────────────────────────────────┘ │
-│  ┌────────────────────────────────────────────────────────┐ │
-│  │  ProjectLibre Core │  CPM Engine  │  Scheduling       │ │
-│  └────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────┘
-```
+### Системные требования
 
-### Ключевые принципы
+| Компонент | Минимум | Рекомендуется |
+|-----------|---------|---------------|
+| **ОС** | Windows 10, Ubuntu 20.04, macOS 10.15 | Windows 11, Ubuntu 22.04, macOS 12+ |
+| **CPU** | 2 ядра | 4+ ядра |
+| **RAM** | 4 GB | 8+ GB |
+| **Диск** | 500 MB | 1 GB |
+| **Java** | JRE 17 (встроена) | — |
 
-1. **Разделение ответственности (Separation of Concerns)**
-   - Frontend отвечает только за UI/UX
-   - Java Core — за бизнес-логику и расчёты
+### Платформы сборки
 
-2. **Hexagonal Architecture (Порты и Адаптеры)**
-   - `projectlibre-api` — порты (интерфейсы) для взаимодействия
-   - Адаптеры для разных форматов данных (.pod, JSON)
-
-3. **SOLID принципы**
-   - Каждый модуль выполняет одну задачу
-   - Dependency Injection через конструкторы
-   - Interfaces для абстракции
-
-4. **Event-Driven коммуникация**
-   - IPC события между Electron и Renderer
-   - Reactive state management (Zustand)
-
-### Потоки данных
-
-#### Загрузка проекта
-```
-User → File Dialog → Electron Main → Java Bridge → 
-ProjectLibre Core (parse .pod) → API Converter → JSON → 
-Frontend State → React Components → UI
-```
-
-#### Изменение задачи
-```
-User (UI) → React Handler → IPC Event → Electron Main → 
-Java API → Task Synchronizer → ProjectLibre Core → 
-CPM Recalculation → Updated Data → Frontend
-```
+- **Windows**: `.exe` установщик (NSIS)
+- **Linux**: `.deb`, `.rpm`, `.AppImage`
+- **Astra Linux SE**: специализированная `.deb` сборка
+- **macOS**: `.dmg` образ
 
 ---
 
-## 🧪 Тестирование
+## 📝 Лицензия
 
-### Frontend тесты (Vitest)
-
-```bash
-# Запуск всех тестов
-npm test
-
-# Запуск с покрытием
-npm run test:coverage
-
-# UI режим
-npm run test:ui
-```
-
-### Contract Tests (Java)
-
-Автоматически запускаются в GitHub Actions при каждом коммите в `main`.
-
-```bash
-# Запуск локально
-npm run test:java
-```
-
-### Структура тестов
-
-```
-projectlibre-master/
-├── src/
-│   └── __tests__/                # Frontend unit tests
-├── projectlibre_core/
-│   └── src/test/java/            # Java Core tests
-└── projectlibre-api/
-    └── src/test/java/            # API contract tests
-```
-
----
-
-## 🤝 Вклад в проект
-
-Мы приветствуем вклад сообщества! Если вы хотите внести свой вклад в развитие ПланПро, пожалуйста, следуйте этим рекомендациям:
-
-### Процесс контрибьюции
-
-1. **Fork** репозитория
-2. Создайте **feature branch** (`git checkout -b feature/amazing-feature`)
-3. Внесите изменения и добавьте **тесты**
-4. Убедитесь, что код проходит **линтинг** (`npm run lint`)
-5. Убедитесь, что все **тесты** проходят (`npm test`)
-6. **Commit** изменений с понятным сообщением (`git commit -m 'feat: add amazing feature'`)
-7. **Push** в branch (`git push origin feature/amazing-feature`)
-8. Откройте **Pull Request**
-
-### Code Style
-
-- **TypeScript**: строгая типизация, без `any`
-- **React**: функциональные компоненты + hooks
-- **Именование**: camelCase для переменных, PascalCase для компонентов
-- **Комментарии**: на русском языке для бизнес-логики
-- **Commit messages**: на английском, conventional commits (`feat:`, `fix:`, `refactor:` и т.д.)
-
-### Что можно улучшить
-
-- 🐛 Исправление багов
-- ✨ Новые функции
-- 📝 Улучшение документации
-- 🌍 Перевод на другие языки
-- ⚡ Оптимизация производительности
-- 🎨 Улучшение UI/UX
-
----
-
-## 📄 Лицензия
-
-Проект распространяется под лицензией **Common Public Attribution License Version 1.0 (CPAL-1.0)**.
-
-Это означает:
-- ✅ Вы можете свободно использовать, изменять и распространять код
-- ✅ Проект подходит для коммерческого использования
-- ⚠️ При распространении необходимо сохранить атрибуцию оригинального разработчика (ProjectLibre, Inc.)
-- ⚠️ Исходный код модификаций должен быть доступен
-
-Полный текст лицензии: [projectlibre_build/license/license.txt](projectlibre_build/license/license.txt)
-
-### Атрибуция
-
-Этот проект основан на **ProjectLibre** — открытой системе управления проектами.
-- Copyright © 2012-2025, ProjectLibre, Inc.
-- Официальный сайт: [http://www.projectlibre.com](http://www.projectlibre.com)
-
----
-
-## 📞 Контакты
-
-### Разработчик
-**ООО Просистемы**
-- Email: info@prosystems.ru
-
-### Поддержка и обратная связь
-- 🐛 **Issues**: [GitHub Issues](https://github.com/LeshiyOFF/PlanPro/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/LeshiyOFF/PlanPro/discussions)
-- 📧 **Email**: info@prosystems.ru
-
-### Полезные ссылки
-- 🌐 **GitHub**: [https://github.com/LeshiyOFF/PlanPro](https://github.com/LeshiyOFF/PlanPro)
-- 📦 **Releases**: [https://github.com/LeshiyOFF/PlanPro/releases](https://github.com/LeshiyOFF/PlanPro/releases)
-- 🚀 **Actions**: [https://github.com/LeshiyOFF/PlanPro/actions](https://github.com/LeshiyOFF/PlanPro/actions)
+CPAL-1.0 (Common Public Attribution License)
 
 ---
 
 <div align="center">
 
-**Сделано с ❤️ в России**
-
-⭐ Если проект вам полезен, поставьте звезду на GitHub!
+[⬆ Наверх](#планпро-projectlibre-modern)
 
 </div>

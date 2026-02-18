@@ -205,8 +205,14 @@ public class CoreTaskConverter {
             
             dto.setDuration(durationDays);
             
-            log.debug("[CoreTaskConverter] mapDuration taskId={} name='{}' elapsed={} summary={} durationMillis={} hoursPerDay={} durationDays={}",
-                    dto.getId(), nt.getName(), nt.isElapsed(), nt.isSummary(), durationMillis, hoursPerDay, durationDays);
+            // ДИАГНОСТИКА: Для суммарных задач всегда логируем на INFO уровне
+            if (nt.isSummary()) {
+                log.info("[SUMMARY-DURATION] mapDuration taskId={} name='{}' durationMillis={} hoursPerDay={} durationDays={} (before round: {})",
+                        dto.getId(), nt.getName(), durationMillis, hoursPerDay, durationDays, (durationMillis / msPerDay));
+            } else {
+                log.debug("[CoreTaskConverter] mapDuration taskId={} name='{}' elapsed={} summary={} durationMillis={} hoursPerDay={} durationDays={}",
+                        dto.getId(), nt.getName(), nt.isElapsed(), nt.isSummary(), durationMillis, hoursPerDay, durationDays);
+            }
         } catch (Exception e) {
             log.warn("[CoreTaskConverter] mapDuration failed for taskId={}: {}", dto.getId(), e.getMessage());
         }

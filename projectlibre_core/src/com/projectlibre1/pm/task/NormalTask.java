@@ -419,6 +419,11 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 			setPercentComplete(1);
 		if (!isWbsParent()) {
 			long remainingDuration = duration - actualDurationMillis;
+			// ELAPSED-PROPAGATION-FIX: Восстанавливаем флаг ELAPSED для remainingDuration
+			// Без этого assignments получат duration без флага и будут использовать рабочий календарь
+			if (elapsed) {
+				remainingDuration = Duration.setAsElapsed(remainingDuration);
+			}
 			getSchedulingRule().adjustRemainingDuration(this, remainingDuration, true);
 		}
 		updateCachedDuration();
@@ -1937,6 +1942,28 @@ public class NormalTask extends Task implements Allocation, TaskSpecificFields,
 			if (!ahead)
 				d = -d;
 			return getEffectiveWorkCalendar().add(startDate, d, useSooner);
+		}
+		
+		// CRITICAL-FIX: Если задача БЕЗ resource assignments, используем task-based calculation
+		// Иначе assignment-based возвращает неправильный результат (0 для пустого списка)
+		if (getAssignments().isEmpty() || !hasLaborAssignment()) {
+			long d = remainingOnly ? Duration.millis(getRemainingDuration()) : getDurationMillis();
+			// ELAPSED-PROPAGATION: Сохраняем флаг ELAPSED для календарных задач
+			if (elapsed) {
+				d = Duration.setAsElapsed(d);
+			}
+			if (!ahead)
+				d = -d;
+			long result = getEffectiveWorkCalendar().add(startDate, d, useSooner);
+			
+			// ДИАГНОСТИКА: Логируем task-based calculation для задач без assignments
+			System.out.println("[CALC-OFFSET-FIX] Task '" + getName() + "' NO_ASSIGNMENTS: startDate=" + startDate 
+				+ " duration=" + d + "ms elapsed=" + elapsed 
+				+ " -> result=" + result 
+				+ " (start=" + new java.util.Date(startDate < 0 ? -startDate : startDate) 
+				+ " end=" + new java.util.Date(result < 0 ? -result : result) + ")");
+			
+			return result;
 		}
 //
 //

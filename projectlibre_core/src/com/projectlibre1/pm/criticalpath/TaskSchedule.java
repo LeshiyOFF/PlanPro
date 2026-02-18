@@ -484,6 +484,49 @@ public final class TaskSchedule implements Cloneable {
 		
 	}
 	
+	/** Миллисекунд в одном календарном дне (24 часа) */
+	private static final long MS_PER_CALENDAR_DAY = 24L * 60 * 60 * 1000;
+	
+	/** Порог для округления "почти полных дней" (1 миллисекунда) */
+	private static final long ROUNDING_THRESHOLD_MS = 1L;
+	
+	/**
+	 * ROUNDING-FIX: Округляет длительность до полных дней если она "почти кратна" дню.
+	 * 
+	 * Проблема: Frontend использует конвенцию "конец дня = 23:59:59.999".
+	 * При вычислении (end - start) получается 86399999ms вместо 86400000ms.
+	 * 
+	 * @param durationMillis исходная длительность в миллисекундах (может быть отрицательной для backward pass)
+	 * @return скорректированная длительность (кратная полным дням, если была "почти кратна")
+	 */
+	private static long roundToFullDaysIfNeeded(long durationMillis) {
+		// Работаем с абсолютным значением (для backward pass)
+		long absDuration = Math.abs(durationMillis);
+		if (absDuration == 0) {
+			return 0;
+		}
+		
+		// Вычисляем остаток от деления на один день
+		long remainder = absDuration % MS_PER_CALENDAR_DAY;
+		long fullDays = absDuration / MS_PER_CALENDAR_DAY;
+		
+		// Если остаток очень близок к полному дню (например 86399999 из 86400000)
+		// то это "почти полный день" из-за конвенции 23:59:59.999
+		long missingToFullDay = MS_PER_CALENDAR_DAY - remainder;
+		
+		long result = absDuration;
+		if (remainder > 0 && missingToFullDay <= ROUNDING_THRESHOLD_MS) {
+			// Округляем ВВЕРХ: добавляем недостающую миллисекунду
+			result = (fullDays + 1) * MS_PER_CALENDAR_DAY;
+		} else if (remainder > 0 && remainder <= ROUNDING_THRESHOLD_MS) {
+			// Округляем ВНИЗ: убираем лишние миллисекунды
+			result = fullDays * MS_PER_CALENDAR_DAY;
+		}
+		
+		// Восстанавливаем знак для backward pass
+		return durationMillis < 0 ? -result : result;
+	}
+	
 	public void assignDatesFromChildren(CalculationContext context) {
 		Collection children = task.getWbsChildrenNodes();
 		if (children == null)
@@ -547,7 +590,17 @@ public final class TaskSchedule implements Cloneable {
 	long duration;
 	if (task instanceof NormalTask && ((NormalTask)task).isSummary()) {
 		// Календарное время для суммарных задач (end - begin в миллисекундах)
-		duration = end - begin;
+		long rawDuration = end - begin;
+		
+		// ROUNDING-FIX: Округление "почти полных дней" для корректной обработки 23:59:59.999
+		// Frontend использует конвенцию "конец дня = 23:59:59.999"
+		// 86399999ms (0.9999999 дней) → 86400000ms (1 день)
+		duration = roundToFullDaysIfNeeded(rawDuration);
+		
+		// ДИАГНОСТИКА: Логируем для суммарных задач
+		double durationDays = duration / (24.0 * 60 * 60 * 1000);
+		System.out.println(String.format("[SUMMARY-DURATION] assignDatesFromChildren taskName='%s' begin=%d end=%d duration=%d ms (%.4f days)",
+				task.getName(), begin, end, duration, durationDays));
 	} else {
 		// Рабочее время для обычных задач (учитывается календарь проекта)
 		duration = task.getEffectiveWorkCalendar().compare(end,begin,false);
